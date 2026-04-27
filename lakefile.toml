@@ -1,0 +1,10 @@
+name = "SKW"
+version = "0.1.0"
+defaultTargets = ["skw"]
+
+[[lean_lib]]
+name = "SKW"
+
+[[lean_exe]]
+name = "skw"
+root = "Main"
