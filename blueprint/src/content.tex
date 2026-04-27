@@ -10,10 +10,10 @@
 
 \section{The cyclotomic field $K$}
 
-Let $p$ be a prime number and $f$ a positive integer. Set $q = p^f$. 
-Let $K$ be the $(q-1)$-th cyclotomic field $\QQ(\zeta_{q-1})$ and $L$ 
+Let $p$ be a prime number and $f$ a positive integer. Set $q = p^f$.
+Let $K$ be the $(q-1)$-th cyclotomic field $\QQ(\zeta_{q-1})$ and $L$
 be an extension of $K$ containing a primitive $p$-th root of unity $\zeta_p$.
-We fix a maximal ideal $P$ of $\cO_K$ lying above $p$ and a primitive 
+We fix a maximal ideal $P$ of $\cO_K$ lying above $p$ and a primitive
 $p$-th root of unity $\zeta \in \cO_L$.
 
 \section{The Teichmüller character}
@@ -24,7 +24,7 @@ $p$-th root of unity $\zeta \in \cO_L$.
   \[
     \om : \cO_K/P \to \cO_L
   \]
-  defined as the composition of the Teichmüller lift $\cO_K/P \to \cO_K$ 
+  defined as the composition of the Teichmüller lift $\cO_K/P \to \cO_K$
   with the inclusion $\cO_K \hookrightarrow \cO_L$.
   It satisfies $\om(x) \equiv x \pmod{P}$ for all $x$.
 \end{definition}
@@ -38,8 +38,8 @@ $p$-th root of unity $\zeta \in \cO_L$.
 \begin{lemma}
   \label{lem:teichmuller_frob}
   \uses{def:teichmuller}
-  Let $\sigma$ be a ring endomorphism of $\cO_L$ such that 
-  $\sigma(\zeta) = \zeta^m$ for some $m \in \ZZ$. Then 
+  Let $\sigma$ be a ring endomorphism of $\cO_L$ such that
+  $\sigma(\zeta) = \zeta^m$ for some $m \in \ZZ$. Then
   $\sigma(\om(x)) = \om(x)^m$ for all $x \in \cO_K/P$.
 \end{lemma}
 
@@ -60,6 +60,18 @@ $p$-th root of unity $\zeta \in \cO_L$.
   The character $\psi$ is primitive.
 \end{lemma}
 
+\begin{proof}
+  Since $\cO_K/P$ is a field, any nontrivial additive character is primitive.
+  Since the trace $\tr : \cO_K/P \to \ZZ/p\ZZ$ is surjective, $\psi \neq 1$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:addchar_ne_zero}
+  \uses{def:addchar}
+  The character $\psi$ is nonzero, i.e., $\psi \neq 0$, provided that
+  $p \nmid f$.
+\end{lemma}
+
 \begin{lemma}
   \label{lem:addchar_frob}
   \uses{def:addchar}
@@ -69,9 +81,18 @@ $p$-th root of unity $\zeta \in \cO_L$.
 \begin{lemma}
   \label{lem:addchar_mod_P}
   \uses{def:addchar}
-  Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta - 1 \in \fP$. 
+  Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta - 1 \in \fP$.
   Then $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.
 \end{lemma}
+
+\begin{proof}
+  There exists $a \in \mathbb{N}$ such that $\psi(x) = \zeta^a$. By the binomial theorem,
+  \[
+    \psi(x) = (1 + (\zeta - 1))^a = \sum_{n=0}^{a} \binom{a}{n} (\zeta - 1)^n.
+  \]
+  Since $\zeta - 1 \in \fP$, all terms with $n \geq 1$ lie in $\fP$.
+  Hence $\psi(x) \equiv 1 \pmod{\fP}$.
+\end{proof}
 
 \begin{lemma}
   \label{lem:addchar_mod_P_sq}
@@ -83,14 +104,447 @@ $p$-th root of unity $\zeta \in \cO_L$.
   for all $x \in \cO_K/P$.
 \end{lemma}
 
-\section{The Gauss sum}
+\begin{proof}
+  There exists $a \in \mathbb{N}$ such that $\tr(x) = a$ and $\psi(x) = \zeta^a$.
+  By the binomial theorem,
+  \[
+    \psi(x) = \zeta^a = (1 + (\zeta - 1))^a = \sum_{n=0}^{a} \binom{a}{n} (\zeta - 1)^n.
+  \]
+  Since $\zeta - 1 \in \fP$, we have $(\zeta - 1)^n \in \fP^n \subseteq \fP^2$ for all
+  $n \geq 2$. Therefore
+  \[
+    \psi(x) \equiv 1 + a(\zeta - 1) = 1 + \tr(x) \cdot (\zeta - 1) \pmod{\fP^2}. \qedhere
+  \]
+\end{proof}
+
+\chapter{The Gauss sum}
+
+Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta - 1 \in \fP$. Let $F$ be
+the subfield of $L$ with $F = \QQ(\zeta_p)$. The Galois group $\Gal(L/F)$
+is isomorphic to $(\ZZ/(q-1)\ZZ)^\times$ via the map $\sigma \mapsto a$
+where $\sigma(\zeta_{q-1}) = \zeta_{q-1}^a$. We denote by $\fn(\sigma) \in
+\{1, \ldots, q-2\}$ the natural number corresponding to $\sigma$ under this
+isomorphism.
+
+\section{Gauss sums}
 
 \begin{definition}
   \label{def:gauss_sum_s}
   \uses{def:teichmuller, def:addchar}
   For $a \in \ZZ$, the \emph{Gauss sum} is
   \[
-    g_a = g(\om^{-a}, \psi) = \sum_{x \in \cO_K/P} \om(x)^{-a} 
+    g_a = g(\om^{-a}, \psi) = \sum_{x \in \cO_K/P} \om(x)^{-a}
     \cdot \psi(x) \in \cO_L.
   \]
 \end{definition}
+
+\begin{lemma}
+  \label{lem:gauss_sum_ne_zero}
+  \uses{def:gauss_sum_s, lem:addchar_primitive, lem:teichmuller_order}
+  Assume $\mathrm{char}(L) = 0$. If $(q-1) \nmid a$, then $g_a \neq 0$.
+\end{lemma}
+
+\begin{proof}
+  Since $(q-1) \nmid a$, $\omega^{-a} \neq 1$. Since $\psi$ is primitive
+  and $\#(\cO_K/P) \neq 0$ in $L$, the result follows from the
+  non-vanishing of Gauss sums for nontrivial characters.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_mul}
+  \uses{def:gauss_sum_s}
+  If $(q-1) \nmid (a+b)$, then
+  \[
+    g_a \cdot g_b = g_{a+b} \cdot J(\omega^{-a}, \omega^{-b}).
+  \]
+\end{lemma}
+
+\begin{proof}
+  This follows from \texttt{jacobiSum\_mul\_nontrivial} applied to
+  $\chi = \omega^{-a}$ and $\phi = \omega^{-b}$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_mem}
+  \uses{def:gauss_sum_s, lem:addchar_mod_P, lem:teichmuller_order}
+  Assume $p$ is odd. If $(q-1) \nmid a$, then $g_a \in \fP$.
+
+  \emph{The case $p = 2$ is not yet handled.}
+\end{lemma}
+
+\begin{proof}
+  Since $\zeta - 1 \in \fP$, we have $\psi \equiv 1 \pmod{\fP}$
+  by \ref{lem:addchar_mod_P}. Hence
+  \[
+    g_a \equiv \sum_{x \in \cO_K/P} \omega(x)^{-a} = 0 \pmod{\fP}
+  \]
+  since $\omega^{-a} \neq 1$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_one_mod_sq}
+  \uses{lem:addchar_mod_P_sq, lem:teichmuller_order}
+  Assume $q \neq 2$ and $\zeta - 1 \in \fP$. Then
+  \[
+    g_1 \equiv -(\zeta - 1) \pmod{\fP^2}.
+  \]
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta - 1) \pmod{\fP^2}$
+  for all $x \in \cO_K/P$. Therefore
+  \[
+    g_1 = \sum_{x \in \cO_K/P} \omega(x)^{-1} \psi(x)
+    \equiv \sum_{x} \omega(x)^{-1} + (\zeta-1) \sum_{x} \omega(x)^{-1} \tr(x) \pmod{\fP^2}.
+  \]
+  Since $q \neq 2$, we have $\omega^{-1} \neq 1$, so $\sum_x \omega(x)^{-1} = 0$
+  by \ref{lem:teichmuller_order}. Moreover,
+  $\sum_{x \in \cO_K/P} \omega(x)^{-1} \cdot \tr(x) = -1$
+  (see \texttt{GaussSum\_one\_mk\_sq\_eq\_aux3}).
+  Hence $g_1 \equiv -(\zeta - 1) \pmod{\fP^2}$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:galois_gauss_sum}
+  \uses{def:gauss_sum_s, def:teichmuller, lem:teichmuller_frob}
+  For all $\sigma \in \Gal(L/F)$,
+  \[
+    \sigma(g_1) = g_{\fn(\sigma)}.
+  \]
+  (see \texttt{map\_GaussSum})
+\end{lemma}
+
+\begin{proof}
+  Since $\sigma \in \Gal(L/F)$ and $F = \QQ(\zeta_p)$, $\sigma$ fixes $\zeta_p$,
+  hence $\sigma(\psi(x)) = \psi(x)$ for all $x$. By definition of $\fn(\sigma)$,
+  $\sigma(\zeta_{q-1}) = \zeta_{q-1}^{\fn(\sigma)}$, so by \ref{lem:teichmuller_frob},
+  $\sigma(\om(x)) = \om(x)^{\fn(\sigma)}$ for all $x$. Therefore
+  \[
+    \sigma(g_1) = \sum_{x \in \cO_K/P} \sigma(\om(x)^{-1}) \cdot \sigma(\psi(x))
+    = \sum_{x \in \cO_K/P} \om(x)^{-\fn(\sigma)} \cdot \psi(x) = g_{\fn(\sigma)}.
+  \]
+\end{proof}
+
+\begin{lemma}
+  \label{lem:val_galois_gauss_sum}
+  \uses{lem:galois_gauss_sum, def:s}
+  For all $\sigma \in \Gal(L/F)$,
+  \[
+    v_{\sigma(\fP)}(g_1) = s(\fn(\sigma^{-1})).
+  \]
+  (see \texttt{Val\_smul\_GaussSum})
+\end{lemma}
+
+\begin{proof}
+  By definition of the pushforward valuation,
+  $v_{\sigma(\fP)}(g_1) = v_{\fP}(\sigma^{-1}(g_1))$.
+  By \ref{lem:galois_gauss_sum} applied to $\sigma^{-1}$,
+  $\sigma^{-1}(g_1) = g_{\fn(\sigma^{-1})}$.
+  Hence $v_{\sigma(\fP)}(g_1) = v_{\fP}(g_{\fn(\sigma^{-1})}) = s(\fn(\sigma^{-1}))$.
+\end{proof}
+
+\section{Jacobi sums}
+
+\begin{lemma}
+  \label{lem:jac_in_OK}
+  \uses{def:gauss_sum_s}
+  For all $a, b \in \ZZ$, $J(\omega^{-a}, \omega^{-b}) \in \cO_K$.
+\end{lemma}
+
+\begin{lemma}
+  \label{lem:val_jac_pow}
+  \uses{lem:jac_in_OK, lem:ramification_idx}
+  We have
+  \[
+    v_{\fP}(J(\omega^{-a}, \omega^{-b})) = (p-1) \cdot v_P(J(\omega^{-a}, \omega^{-b})).
+  \]
+  In particular, $v_{\fP}(J(\omega^{-a}, \omega^{-b})) \equiv 0 \pmod{p-1}$
+  (see Lemma~\ref{lem:ramification_idx} in the Appendix).
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:jac_in_OK}, $J(\omega^{-a}, \omega^{-b}) \in \cO_K$. For any
+  $\alpha \in \cO_K$, the relation between the valuations $v_{\fP}$ and $v_P$
+  is given by the ramification index:
+  \[
+    v_{\fP}(\alpha) = e(\fP \mid P) \cdot v_P(\alpha).
+  \]
+  By \ref{lem:ramification_idx}, $e(\fP \mid P) = p - 1$, hence
+  \[
+    v_{\fP}(J(\omega^{-a}, \omega^{-b})) = (p-1) \cdot v_P(J(\omega^{-a}, \omega^{-b})). \qedhere
+  \]
+\end{proof}
+
+\chapter{The valuation function $s$}
+
+\begin{definition}
+  \label{def:s}
+  For $a \in \ZZ$, we define
+  \[
+    s(a) = \begin{cases} 0 & \text{if } (q-1) \mid a \\
+    v_{\fP}(g_a) & \text{otherwise.} \end{cases}
+  \]
+\end{definition}
+
+\begin{lemma}
+  \label{lem:s_eq_val}
+  \uses{def:s, def:gauss_sum_s, lem:addchar_ne_zero}
+  Assume $p \nmid f$. Then $s(a) = v_{\fP}(g_a)$ for all $a \in \ZZ$.
+\end{lemma}
+
+\begin{proof}
+  If $(q-1) \mid a$, then $\omega^{-a} = 1$, so $g_a = g(1, \psi) = -1$
+  since $\psi \neq 0$ by \ref{lem:addchar_ne_zero}. As $-1$ is a unit,
+  $v_{\fP}(-1) = 0 = s(a)$.
+  If $(q-1) \nmid a$, the result follows directly from the definition.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:s_subadditive}
+  \uses{def:s, lem:gauss_sum_mul, lem:val_jac_pow}
+  For all $a, b \in \ZZ$, $s(a + b) \leq s(a) + s(b)$.
+\end{lemma}
+
+\begin{proof}
+  If $(q-1) \mid (a+b)$ then $s(a+b) = 0$ and the result is trivial.
+  Otherwise, by \ref{lem:gauss_sum_mul},
+  \[
+    g_a \cdot g_b = g_{a+b} \cdot J(\omega^{-a}, \omega^{-b}).
+  \]
+  Taking valuations and using the fact that $J(\omega^{-a}, \omega^{-b}) \in \cO_L$,
+  hence $v_{\fP}(J) \geq 0$, we obtain $s(a) + s(b) \geq s(a+b)$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:s_sum_dvd}
+  \uses{def:s, def:gauss_sum_s, lem:teichmuller_order, lem:ramification_idx}
+  Assume $(q-1) \mid k$. Then
+  \[
+    s(a) + s(k - a) = \begin{cases} 0 & \text{if } (q-1) \mid a \\
+    (p-1) \cdot f & \text{otherwise.} \end{cases}
+  \]
+\end{lemma}
+
+\begin{proof}
+  Since $(q-1) \mid k$, we have $s(k-a) = s(-a)$ by periodicity of $s$:
+  indeed $\omega^{q-1} = 1$ by \ref{lem:teichmuller_order}, so $g_{a+(q-1)} = g_a$
+  and $s$ has period $q-1$.
+
+  If $(q-1) \mid a$, then $(q-1) \mid (-a)$, so $s(a) = s(-a) = 0$ and the result is clear.
+
+  If $(q-1) \nmid a$, then $g_a \cdot g_{-a} = \omega^{-a}(-1) \cdot p^f$. Since
+  $\omega^{-a}(-1)$ is a root of unity, it is a unit in $\cO_L$, hence
+  $v_{\fP}(\omega^{-a}(-1)) = 0$. By \ref{lem:ramification_idx},
+  $v_{\fP}(p^f) = f \cdot e(\fP \mid p) = f(p-1)$.
+  Therefore
+  \[
+    s(a) + s(-a) = v_{\fP}(g_a) + v_{\fP}(g_{-a}) = v_{\fP}(g_a \cdot g_{-a})
+    = v_{\fP}(p^f) = (p-1) \cdot f. \qedhere
+  \]
+\end{proof}
+
+\begin{lemma}
+  \label{lem:s_congr}
+  \uses{def:s, lem:gauss_sum_mul, lem:val_jac_pow, lem:s_sum_dvd}
+  For all $a, b \in \ZZ$,
+  \[
+    s(a + b) \equiv s(a) + s(b) \pmod{p-1}.
+  \]
+\end{lemma}
+
+\begin{proof}
+  If $(q-1) \nmid (a+b)$, by \ref{lem:gauss_sum_mul} and taking valuations,
+  \[
+    s(a) + s(b) = s(a+b) + v_{\fP}(J(\omega^{-a}, \omega^{-b})).
+  \]
+  By \ref{lem:val_jac_pow}, $v_{\fP}(J) \equiv 0 \pmod{p-1}$, hence the result.
+  If $(q-1) \mid (a+b)$, set $k = a + b$ and apply \ref{lem:s_sum_dvd}:
+  if $(q-1) \mid a$ then $s(a) = s(b) = 0$; otherwise $s(a) + s(b) = (p-1) \cdot f$.
+  In both cases $s(a) + s(b) \equiv 0 \equiv s(a+b) \pmod{p-1}$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:s_frob}
+  \uses{def:s, lem:addchar_frob}
+  For all $a \in \ZZ$, $s(pa) = s(a)$.
+\end{lemma}
+
+\begin{proof}
+  Since the Frobenius $x \mapsto x^p$ is a bijection on $\cO_K/P$
+  and $\psi(x^p) = \psi(x)$, we get $g_{pa} = g_a$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:s_pos}
+  \uses{def:s, lem:gauss_sum_ne_zero, lem:gauss_sum_mem}
+  Assume $p$ is odd. If $(q-1) \nmid a$, then $s(a) > 0$.
+\end{lemma}
+
+\begin{proof}
+  Since $(q-1) \nmid a$, we have $g_a \neq 0$ by \ref{lem:gauss_sum_ne_zero}
+  and $g_a \in \fP$ by \ref{lem:gauss_sum_mem}. Hence $v_{\fP}(g_a) \geq 1 > 0$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:s_one}
+  \uses{lem:gauss_sum_mem, lem:gauss_sum_one_mod_sq, lem:zeta_sub_one_not_mem_sq}
+  Assume $q \neq 2$. Then $s(1) = 1$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:gauss_sum_mem}, $g_1 \in \fP$, so $s(1) \geq 1$.
+  By \ref{lem:gauss_sum_one_mod_sq}, $g_1 \equiv -(\zeta - 1) \pmod{\fP^2}$.
+  Since $\zeta - 1 \notin \fP^2$ by \ref{lem:zeta_sub_one_not_mem_sq},
+  we have $g_1 \notin \fP^2$, so $s(1) \leq 1$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:s_lt}
+  \uses{def:s, lem:s_subadditive, lem:s_congr, lem:s_pos, lem:s_one}
+  Assume $q \neq 2$ and $p$ is odd. For all $a \in \ZZ$ with $0 \leq a \leq p - 2$,
+  $s(a) = a$.
+\end{lemma}
+
+\begin{proof}
+  We proceed by induction on $a$. The case $a = 0$ is immediate from the
+  definition. For $a = 1$, this is \ref{lem:s_one}. Now let $2 \leq a \leq p - 2$
+  and assume $s(a-1) = a - 1$.
+
+  By \ref{lem:s_subadditive} and the induction hypothesis,
+  \[
+    s(a) \leq s(1) + s(a-1) = 1 + (a-1) = a.
+  \]
+  By \ref{lem:s_congr} and the induction hypothesis,
+  \[
+    s(a) \equiv s(1) + s(a-1) = a \pmod{p-1}.
+  \]
+  Therefore $s(a) = a + k(p-1)$ for some $k \in \ZZ$.
+  Since $s(a) \leq a$ we have $k \leq 0$, and since $s(a) > 0$
+  by \ref{lem:s_pos} and $a \leq p - 2$, we have
+  $s(a) \geq 1 > a - (p-1)$, so $k \geq 0$.
+  Hence $k = 0$ and $s(a) = a$
+  (see \texttt{GSV\_eq\_of\_lt}).
+\end{proof}
+
+\begin{lemma}
+  \label{lem:s_p_minus_one}
+  \uses{def:s, lem:s_subadditive, lem:s_congr, lem:s_pos, lem:s_one}
+  Assume $q \neq 2$ and $(q-1) \nmid (p-1)$. Then $s(p - 1) = p - 1$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:s_subadditive} applied $p-2$ times and \ref{lem:s_one},
+  \[
+    s(p-1) \leq (p-1) \cdot s(1) = p - 1.
+  \]
+  By \ref{lem:s_congr} applied repeatedly, $s(p-1) \equiv (p-1) \cdot s(1) = p-1 \equiv 0 \pmod{p-1}$,
+  so $s(p-1) = k(p-1)$ for some $k \geq 0$.
+  Since $(q-1) \nmid (p-1)$, we have $s(p-1) > 0$ by \ref{lem:s_pos},
+  hence $k \geq 1$. Combined with $s(p-1) \leq p-1$, we get $k = 1$
+  and $s(p-1) = p - 1$
+  (see \texttt{GSV\_p\_sub\_one\_eq\_of\_le}).
+\end{proof}
+
+\begin{lemma}
+  \label{lem:s_le_digit_sum}
+  \uses{def:s, lem:s_subadditive, lem:s_frob, lem:s_lt}
+  Assume $q \neq 2$ and $p$ is odd. Let $0 \leq a < q - 1$ and let
+  $a = a_0 + a_1 p + \cdots + a_{f-1} p^{f-1}$ be the $p$-adic expansion of $a$.
+  Then
+  \[
+    s(a) \leq a_0 + a_1 + \cdots + a_{f-1}.
+  \]
+\end{lemma}
+
+\begin{proof}
+  By induction on the list of digits $(a_0, \ldots, a_{f-1})$.
+  The base case $a = 0$ is immediate. For the inductive step,
+  write $a = a_0 + p \cdot a'$ where $a' = a_1 + a_2 p + \cdots + a_{f-1} p^{f-2}$.
+  By \ref{lem:s_subadditive},
+  \[
+    s(a_0 + p \cdot a') \leq s(a_0) + s(p \cdot a').
+  \]
+  By \ref{lem:s_lt}, $s(a_0) \leq a_0$.
+  By \ref{lem:s_frob}, $s(p \cdot a') = s(a')$.
+  By the induction hypothesis, $s(a') \leq a_1 + \cdots + a_{f-1}$.
+  Hence $s(a) \leq a_0 + a_1 + \cdots + a_{f-1}$
+  (see \texttt{sum\_le\_GSV\_ofDigits}).
+\end{proof}
+
+\begin{lemma}
+  \label{lem:s_sum}
+  \uses{def:s, lem:s_sum_dvd}
+  We have
+  \[
+    \sum_{a=0}^{q-2} s(a) = \frac{(q-2) \cdot f \cdot (p-1)}{2}.
+  \]
+\end{lemma}
+
+\begin{proof}
+  We pair each $a \in \{0, \ldots, q-2\}$ with $q-1-a$. By \ref{lem:s_sum_dvd}
+  with $k = q-1$, for any $a$ with $(q-1) \nmid a$,
+  \[
+    s(a) + s(q-1-a) = (p-1) \cdot f.
+  \]
+  Since $p$ is odd, $q - 1 = p^f - 1$ is even, so the central term $a = (q-1)/2$
+  satisfies $s((q-1)/2) = (p-1)f/2$. The remaining $(q-3)/2$ pairs
+  $\{a, q-1-a\}$ with $a \neq q-1-a$ each contribute $(p-1)f$, and $s(0) = 0$.
+  Therefore
+  \[
+    \sum_{a=0}^{q-2} s(a) = \frac{q-3}{2} \cdot (p-1)f + \frac{(p-1)f}{2}
+    = \frac{(q-2)(p-1)f}{2}. \qedhere
+  \]
+\end{proof}
+
+\begin{proposition}
+  \label{prop:s_digit_sum}
+  \uses{lem:s_le_digit_sum, lem:s_sum}
+  Assume $q \neq 2$ and $p$ is odd. Let $0 \leq a < q - 1$ and let
+  $a = a_0 + a_1 p + \cdots + a_{f-1} p^{f-1}$, $0 \leq a_i \leq p - 1$,
+  be the $p$-adic expansion of $a$. Then
+  \[
+    s(a) = a_0 + a_1 + \cdots + a_{f-1}.
+  \]
+\end{proposition}
+
+\begin{proof}
+  By \ref{lem:s_le_digit_sum}, $s(a) \leq a_0 + \cdots + a_{f-1}$ for all $a$.
+  Summing over $0 \leq a \leq q - 2$, we get
+  \[
+    \sum_{a=0}^{q-2} s(a) \leq \sum_{a=0}^{q-2} (a_0 + \cdots + a_{f-1}).
+  \]
+  A direct count shows that the right-hand side equals $\frac{(q-2) \cdot f \cdot (p-1)}{2}$
+  by \texttt{Nat.sum\_sum\_digits\_eq},
+  which equals the left-hand side by \ref{lem:s_sum}. Since each term satisfies
+  $s(a) \leq a_0 + \cdots + a_{f-1}$ and the sums are equal, we must have
+  $s(a) = a_0 + \cdots + a_{f-1}$ for all $a$
+  (see \texttt{GSV\_eq}).
+\end{proof}
+
+\chapter{Auxiliary results}
+
+\begin{lemma}
+  \label{lem:ramification_idx}
+  The ramification index of $\fP$ above $p$ is $p - 1$, i.e.,
+  \[
+    e(\fP \mid p) = p - 1.
+  \]
+\end{lemma}
+
+\begin{proof}
+  This follows from the general formula for the ramification index
+  in cyclotomic extensions.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:zeta_sub_one_not_mem_sq}
+  \uses{lem:ramification_idx}
+  We have $\zeta - 1 \notin \fP^2$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:ramification_idx}, $e(\fP \mid p) = p - 1$. Since $\zeta$ is a
+  primitive $p$-th root of unity, $(\zeta - 1)$ generates the unique prime
+  above $p$ in $\QQ(\zeta_p)$, which has ramification index $p - 1$. Hence
+  $v_{\fP}(\zeta - 1) = 1$, so $\zeta - 1 \notin \fP^2$.
+\end{proof}

@@ -1,54 +1,59 @@
 name: Compile blueprint
-
 on:
   push:
     branches:
-      - main # Trigger on pushes to the default branch
-  workflow_dispatch:        # Allow manual triggering of the workflow from the GitHub Actions interface
-
-# Cancel previous runs if a new commit is pushed to the same PR or branch
+      - main
+  workflow_dispatch:
 concurrency:
-  group: ${{ github.ref }}  # Group runs by the ref (branch or PR)
-  cancel-in-progress: true  # Cancel any ongoing runs in the same group
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 permissions:
-  contents: read          # Read access to repository contents
-  pages: write            # Write access to GitHub Pages
-  id-token: write         # Write access to ID tokens
-  issues: write           # Write access to issues
-  pull-requests: write    # Write access to pull requests
-
+  contents: read
+  pages: write
+  id-token: write
+  issues: write
+  pull-requests: write
 jobs:
   build_project:
     runs-on: ubuntu-latest
     name: Build project
     steps:
-      - name: Cleanup to free disk space
-        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.0
-        with:
-          tool-cache: false
-          android: true
-          dotnet: false
-          haskell: false
-          large-packages: false
-          docker-images: false
-          swap-storage: false
-
       - name: Checkout project
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 # Fetch all history for all branches and tags
-
-      - name: Build and lint project
-        uses: leanprover/lean-action@434f25c2f80ded67bba02502ad3a86f25db50709 # 2025-07-02
+          fetch-depth: 0
+      - name: Install elan
+        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
+      - name: Get Mathlib cache
+        run: ~/.elan/bin/lake exe cache get || true
+      - name: Build project
+        run: ~/.elan/bin/lake build SKW
+      - name: Build blueprint and copy to `docs/blueprint`
+        uses: xu-cheng/texlive-action@v2
         with:
-          build: true
-          lint: false
-          mk_all-check: false
-
-      - name: Compile blueprint and documentation
-        uses: leanprover-community/docgen-action@deed0cdc44dd8e5de07a300773eb751d33e32fc8 # 2025-10-26
+          docker_image: ghcr.io/xu-cheng/texlive-full:20231201
+          run: |
+            export PIP_BREAK_SYSTEM_PACKAGES=1
+            apk update
+            apk add --update make py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
+            git config --global --add safe.directory $GITHUB_WORKSPACE
+            git config --global --add safe.directory `pwd`
+            python3 -m venv env
+            source env/bin/activate
+            pip install --upgrade pip requests wheel
+            CFLAGS="-I/usr/include/graphviz" LDFLAGS="-L/usr/lib/graphviz" pip install pygraphviz
+            pip install leanblueprint
+            leanblueprint pdf
+            mkdir -p docs
+            cp blueprint/print/print.pdf docs/blueprint.pdf
+            leanblueprint web
+            cp -r blueprint/web docs/blueprint
+      - name: Upload docs & blueprint artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-pages-artifact@v3
         with:
-          blueprint: true
-          homepage: home_page
+          path: docs/
+      - name: Deploy to GitHub Pages
+        if: github.event_name == 'push'
+        id: deployment
+        uses: actions/deploy-pages@v4
