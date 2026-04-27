@@ -5,3 +5,92 @@
 % If you want to split the blueprint content into several files then
 % the current file can be a simple sequence of \input. Otherwise It
 % can start with a \section or \chapter for instance.
+
+\chapter{Setup}
+
+\section{The cyclotomic field $K$}
+
+Let $p$ be a prime number and $f$ a positive integer. Set $q = p^f$. 
+Let $K$ be the $(q-1)$-th cyclotomic field $\QQ(\zeta_{q-1})$ and $L$ 
+be an extension of $K$ containing a primitive $p$-th root of unity $\zeta_p$.
+We fix a maximal ideal $P$ of $\cO_K$ lying above $p$ and a primitive 
+$p$-th root of unity $\zeta \in \cO_L$.
+
+\section{The Teichmüller character}
+
+\begin{definition}
+  \label{def:teichmuller}
+  The \emph{Teichmüller character} is the multiplicative character
+  \[
+    \om : \cO_K/P \to \cO_L
+  \]
+  defined as the composition of the Teichmüller lift $\cO_K/P \to \cO_K$ 
+  with the inclusion $\cO_K \hookrightarrow \cO_L$.
+  It satisfies $\om(x) \equiv x \pmod{P}$ for all $x$.
+\end{definition}
+
+\begin{lemma}
+  \label{lem:teichmuller_order}
+  \uses{def:teichmuller}
+  The order of $\om$ is $q - 1$.
+\end{lemma}
+
+\begin{lemma}
+  \label{lem:teichmuller_frob}
+  \uses{def:teichmuller}
+  Let $\sigma$ be a ring endomorphism of $\cO_L$ such that 
+  $\sigma(\zeta) = \zeta^m$ for some $m \in \ZZ$. Then 
+  $\sigma(\om(x)) = \om(x)^m$ for all $x \in \cO_K/P$.
+\end{lemma}
+
+\section{The additive character}
+
+\begin{definition}
+  \label{def:addchar}
+  The \emph{additive character} $\psi : \cO_K/P \to \cO_L$ is defined by
+  \[
+    \psi(x) = \zeta^{\tr_{(\ZZ/p\ZZ)/(\cO_K/P)}(x)}
+  \]
+  where the exponent is lifted canonically to $\ZZ$.
+\end{definition}
+
+\begin{lemma}
+  \label{lem:addchar_primitive}
+  \uses{def:addchar}
+  The character $\psi$ is primitive.
+\end{lemma}
+
+\begin{lemma}
+  \label{lem:addchar_frob}
+  \uses{def:addchar}
+  For all $x \in \cO_K/P$, $\psi(x^p) = \psi(x)$.
+\end{lemma}
+
+\begin{lemma}
+  \label{lem:addchar_mod_P}
+  \uses{def:addchar}
+  Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta - 1 \in \fP$. 
+  Then $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.
+\end{lemma}
+
+\begin{lemma}
+  \label{lem:addchar_mod_P_sq}
+  \uses{lem:addchar_mod_P}
+  With the same hypotheses,
+  \[
+    \psi(x) \equiv 1 + \tr(x) \cdot (\zeta - 1) \pmod{\fP^2}
+  \]
+  for all $x \in \cO_K/P$.
+\end{lemma}
+
+\section{The Gauss sum}
+
+\begin{definition}
+  \label{def:gauss_sum_s}
+  \uses{def:teichmuller, def:addchar}
+  For $a \in \ZZ$, the \emph{Gauss sum} is
+  \[
+    g_a = g(\om^{-a}, \psi) = \sum_{x \in \cO_K/P} \om(x)^{-a} 
+    \cdot \psi(x) \in \cO_L.
+  \]
+\end{definition}
