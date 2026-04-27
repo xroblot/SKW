@@ -1,6 +1,6 @@
 name = "SKW"
 version = "0.1.0"
-defaultTargets = ["skw"]
+defaultTargets = ["SKW"]
 
 [[lean_lib]]
 name = "SKW"
