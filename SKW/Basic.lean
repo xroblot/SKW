@@ -1,1 +1,2 @@
-def hello := "world"
+-- Basic imports for SKW
+import Mathlib
