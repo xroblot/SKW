@@ -22,11 +22,10 @@ $p$-th root of unity $\zeta \in \cO_L$.
   \label{def:teichmuller}
   The \emph{Teichmüller character} is the multiplicative character
   \[
-    \om : \cO_K/P \to \cO_L
+    \om : (\cO_K/P)^\times \to \mu_{q-1}(\cO_L)
   \]
-  defined as the composition of the Teichmüller lift $\cO_K/P \to \cO_K$
-  with the inclusion $\cO_K \hookrightarrow \cO_L$.
-  It satisfies $\om(x) \equiv x \pmod{P}$ for all $x$.
+  defined as the unique group homomorphism satisfying $\om(x) \equiv x \pmod{P}$
+  for all $x \in (\cO_K/P)^\times$.
 \end{definition}
 
 \begin{lemma}
@@ -47,7 +46,7 @@ $p$-th root of unity $\zeta \in \cO_L$.
 
 \begin{definition}
   \label{def:addchar}
-  The \emph{additive character} $\psi : \cO_K/P \to \cO_L$ is defined by
+  The \emph{additive character} $\psi : \cO_K/P \to \mu_p(\cO_L)$ is defined by
   \[
     \psi(x) = \zeta^{\tr_{(\ZZ/p\ZZ)/(\cO_K/P)}(x)}
   \]
@@ -66,9 +65,9 @@ $p$-th root of unity $\zeta \in \cO_L$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:addchar_ne_zero}
+  \label{lem:addchar_ne_one}
   \uses{def:addchar}
-  The character $\psi$ is nonzero, i.e., $\psi \neq 0$, provided that
+  The character $\psi$ is nontrivial, i.e., $\psi \neq 1$, provided that
   $p \nmid f$.
 \end{lemma}
 
@@ -80,23 +79,20 @@ $p$-th root of unity $\zeta \in \cO_L$.
 
 \begin{lemma}
   \label{lem:addchar_mod_P}
-  \uses{def:addchar}
+  \uses{lem:addchar_mod_P_sq}
   Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta - 1 \in \fP$.
   Then $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.
 \end{lemma}
 
 \begin{proof}
-  There exists $a \in \mathbb{N}$ such that $\psi(x) = \zeta^a$. By the binomial theorem,
-  \[
-    \psi(x) = (1 + (\zeta - 1))^a = \sum_{n=0}^{a} \binom{a}{n} (\zeta - 1)^n.
-  \]
-  Since $\zeta - 1 \in \fP$, all terms with $n \geq 1$ lie in $\fP$.
-  Hence $\psi(x) \equiv 1 \pmod{\fP}$.
+  By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta - 1) \pmod{\fP^2}$.
+  Since $\zeta - 1 \in \fP$, the term $\tr(x) \cdot (\zeta - 1) \in \fP$,
+  hence $\psi(x) \equiv 1 \pmod{\fP}$.
 \end{proof}
 
 \begin{lemma}
   \label{lem:addchar_mod_P_sq}
-  \uses{lem:addchar_mod_P}
+  \uses{def:addchar}
   With the same hypotheses,
   \[
     \psi(x) \equiv 1 + \tr(x) \cdot (\zeta - 1) \pmod{\fP^2}
@@ -140,14 +136,14 @@ isomorphism.
 
 \begin{lemma}
   \label{lem:gauss_sum_ne_zero}
-  \uses{def:gauss_sum_s, lem:addchar_primitive, lem:teichmuller_order}
-  Assume $\mathrm{char}(L) = 0$. If $(q-1) \nmid a$, then $g_a \neq 0$.
+  \uses{def:gauss_sum_s, lem:addchar_primitive, lem:teichmuller_order, lem:gauss_sum_nonzero_aux}
+  If $(q-1) \nmid a$, then $g_a \neq 0$.
 \end{lemma}
 
 \begin{proof}
-  Since $(q-1) \nmid a$, $\omega^{-a} \neq 1$. Since $\psi$ is primitive
-  and $\#(\cO_K/P) \neq 0$ in $L$, the result follows from the
-  non-vanishing of Gauss sums for nontrivial characters.
+  Since $(q-1) \nmid a$, $\omega^{-a} \neq 1$ by \ref{lem:teichmuller_order}.
+  Since $\psi$ is primitive by \ref{lem:addchar_primitive}, the result follows
+  from \ref{lem:gauss_sum_nonzero_aux}.
 \end{proof}
 
 \begin{lemma}
@@ -167,18 +163,19 @@ isomorphism.
 \begin{lemma}
   \label{lem:gauss_sum_mem}
   \uses{def:gauss_sum_s, lem:addchar_mod_P, lem:teichmuller_order}
-  Assume $p$ is odd. If $(q-1) \nmid a$, then $g_a \in \fP$.
-
-  \emph{The case $p = 2$ is not yet handled.}
+  If $(q-1) \nmid a$, then $g_a \in \fP$.
 \end{lemma}
 
 \begin{proof}
-  Since $\zeta - 1 \in \fP$, we have $\psi \equiv 1 \pmod{\fP}$
-  by \ref{lem:addchar_mod_P}. Hence
+  By \ref{lem:addchar_mod_P}, $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.
+  Therefore
   \[
-    g_a \equiv \sum_{x \in \cO_K/P} \omega(x)^{-a} = 0 \pmod{\fP}
+    g_a = \sum_{x \in \cO_K/P} \omega(x)^{-a} \psi(x)
+    \equiv \sum_{x \in \cO_K/P} \omega(x)^{-a} \pmod{\fP}.
   \]
-  since $\omega^{-a} \neq 1$.
+  Since $(q-1) \nmid a$, we have $\omega^{-a} \neq 1$ by \ref{lem:teichmuller_order}.
+  Hence $\sum_{x \in \cO_K/P} \omega(x)^{-a} = 0$ by orthogonality of characters.
+  Therefore $g_a \equiv 0 \pmod{\fP}$, i.e.\ $g_a \in \fP$.
 \end{proof}
 
 \begin{lemma}
@@ -211,7 +208,6 @@ isomorphism.
   \[
     \sigma(g_1) = g_{\fn(\sigma)}.
   \]
-  (see \texttt{map\_GaussSum})
 \end{lemma}
 
 \begin{proof}
@@ -232,7 +228,6 @@ isomorphism.
   \[
     v_{\sigma(\fP)}(g_1) = s(\fn(\sigma^{-1})).
   \]
-  (see \texttt{Val\_smul\_GaussSum})
 \end{lemma}
 
 \begin{proof}
@@ -288,14 +283,13 @@ isomorphism.
 
 \begin{lemma}
   \label{lem:s_eq_val}
-  \uses{def:s, def:gauss_sum_s, lem:addchar_ne_zero}
+  \uses{def:s, def:gauss_sum_s, lem:addchar_ne_one, lem:gauss_sum_trivial_char}
   Assume $p \nmid f$. Then $s(a) = v_{\fP}(g_a)$ for all $a \in \ZZ$.
 \end{lemma}
 
 \begin{proof}
-  If $(q-1) \mid a$, then $\omega^{-a} = 1$, so $g_a = g(1, \psi) = -1$
-  since $\psi \neq 0$ by \ref{lem:addchar_ne_zero}. As $-1$ is a unit,
-  $v_{\fP}(-1) = 0 = s(a)$.
+  If $(q-1) \mid a$, then $\omega^{-a} = 1$, so $g_a = g_0$. By
+  \ref{lem:gauss_sum_trivial_char}, $v_{\fP}(g_0) = 0 = s(a)$.
   If $(q-1) \nmid a$, the result follows directly from the definition.
 \end{proof}
 
@@ -377,7 +371,7 @@ isomorphism.
 \begin{lemma}
   \label{lem:s_pos}
   \uses{def:s, lem:gauss_sum_ne_zero, lem:gauss_sum_mem}
-  Assume $p$ is odd. If $(q-1) \nmid a$, then $s(a) > 0$.
+  If $(q-1) \nmid a$, then $s(a) > 0$.
 \end{lemma}
 
 \begin{proof}
@@ -548,3 +542,16 @@ isomorphism.
   above $p$ in $\QQ(\zeta_p)$, which has ramification index $p - 1$. Hence
   $v_{\fP}(\zeta - 1) = 1$, so $\zeta - 1 \notin \fP^2$.
 \end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_nonzero_aux}
+  \uses{def:gauss_sum_s, lem:addchar_primitive}
+  If $\chi$ is a nontrivial multiplicative character of $\cO_K/P$ and $\psi$
+  is a primitive additive character, then $g(\chi, \psi) \neq 0$.
+\end{lemma}
+
+\begin{lemma}
+  \label{lem:gauss_sum_trivial_char}
+  \uses{def:gauss_sum_s, lem:addchar_ne_one}
+  Assume $p \nmid f$. Then $g_0 = \ldots$
+\end{lemma}
