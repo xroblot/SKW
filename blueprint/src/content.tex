@@ -180,7 +180,7 @@ isomorphism.
 
 \begin{lemma}
   \label{lem:gauss_sum_one_mod_sq}
-  \uses{lem:addchar_mod_P_sq, lem:teichmuller_order}
+  \uses{lem:addchar_mod_P_sq, lem:teichmuller_order, lem:sum_teich_trace}
   Assume $q \neq 2$ and $\zeta - 1 \in \fP$. Then
   \[
     g_1 \equiv -(\zeta - 1) \pmod{\fP^2}.
@@ -191,13 +191,11 @@ isomorphism.
   By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta - 1) \pmod{\fP^2}$
   for all $x \in \cO_K/P$. Therefore
   \[
-    g_1 = \sum_{x \in \cO_K/P} \omega(x)^{-1} \psi(x)
-    \equiv \sum_{x} \omega(x)^{-1} + (\zeta-1) \sum_{x} \omega(x)^{-1} \tr(x) \pmod{\fP^2}.
+    g_1 \equiv \sum_{x} \omega(x)^{-1} + (\zeta-1) \sum_{x} \omega(x)^{-1} \tr(x) \pmod{\fP^2}.
   \]
-  Since $q \neq 2$, we have $\omega^{-1} \neq 1$, so $\sum_x \omega(x)^{-1} = 0$
-  by \ref{lem:teichmuller_order}. Moreover,
-  $\sum_{x \in \cO_K/P} \omega(x)^{-1} \cdot \tr(x) = -1$
-  (see \texttt{GaussSum\_one\_mk\_sq\_eq\_aux3}).
+  Since $q \neq 2$, $\omega^{-1} \neq 1$ by \ref{lem:teichmuller_order}, so
+  $\sum_x \omega(x)^{-1} = 0$ by orthogonality of characters. Moreover,
+  $\sum_{x \in \cO_K/P} \omega(x)^{-1} \cdot \tr(x) = -1$ by \ref{lem:sum_teich_trace}.
   Hence $g_1 \equiv -(\zeta - 1) \pmod{\fP^2}$.
 \end{proof}
 
@@ -283,13 +281,14 @@ isomorphism.
 
 \begin{lemma}
   \label{lem:s_eq_val}
-  \uses{def:s, def:gauss_sum_s, lem:addchar_ne_one, lem:gauss_sum_trivial_char}
-  Assume $p \nmid f$. Then $s(a) = v_{\fP}(g_a)$ for all $a \in \ZZ$.
+  \uses{def:s, def:gauss_sum_s, lem:gauss_sum_trivial_char}
+  For all $a \in \ZZ$, $s(a) = v_{\fP}(g_a)$.
 \end{lemma}
 
 \begin{proof}
-  If $(q-1) \mid a$, then $\omega^{-a} = 1$, so $g_a = g_0$. By
-  \ref{lem:gauss_sum_trivial_char}, $v_{\fP}(g_0) = 0 = s(a)$.
+  If $(q-1) \mid a$, then $\omega^{-a} = 1$, so $g_a = g_0 = -1$
+  by \ref{lem:gauss_sum_trivial_char}. As $-1$ is a unit,
+  $v_{\fP}(-1) = 0 = s(a)$.
   If $(q-1) \nmid a$, the result follows directly from the definition.
 \end{proof}
 
@@ -395,13 +394,14 @@ isomorphism.
 \begin{lemma}
   \label{lem:s_lt}
   \uses{def:s, lem:s_subadditive, lem:s_congr, lem:s_pos, lem:s_one}
-  Assume $q \neq 2$ and $p$ is odd. For all $a \in \ZZ$ with $0 \leq a \leq p - 2$,
-  $s(a) = a$.
+  For all $a \in \ZZ$ with $0 \leq a \leq p - 2$, $s(a) = a$.
 \end{lemma}
 
 \begin{proof}
   We proceed by induction on $a$. The case $a = 0$ is immediate from the
-  definition. For $a = 1$, this is \ref{lem:s_one}. Now let $2 \leq a \leq p - 2$
+  definition. For $a \geq 1$, since $a \leq p - 2$ we have $p \geq 3$,
+  hence $q = p^f \geq 3$ and $q \neq 2$.
+  For $a = 1$, this is \ref{lem:s_one}. Now let $2 \leq a \leq p - 2$
   and assume $s(a-1) = a - 1$.
 
   By \ref{lem:s_subadditive} and the induction hypothesis,
@@ -416,18 +416,18 @@ isomorphism.
   Since $s(a) \leq a$ we have $k \leq 0$, and since $s(a) > 0$
   by \ref{lem:s_pos} and $a \leq p - 2$, we have
   $s(a) \geq 1 > a - (p-1)$, so $k \geq 0$.
-  Hence $k = 0$ and $s(a) = a$
-  (see \texttt{GSV\_eq\_of\_lt}).
+  Hence $k = 0$ and $s(a) = a$.
 \end{proof}
 
 \begin{lemma}
   \label{lem:s_p_minus_one}
   \uses{def:s, lem:s_subadditive, lem:s_congr, lem:s_pos, lem:s_one}
-  Assume $q \neq 2$ and $(q-1) \nmid (p-1)$. Then $s(p - 1) = p - 1$.
+  Assume $(q-1) \nmid (p-1)$. Then $s(p - 1) = p - 1$.
 \end{lemma}
 
 \begin{proof}
-  By \ref{lem:s_subadditive} applied $p-2$ times and \ref{lem:s_one},
+  Since $(q-1) \nmid (p-1)$, we have $q - 1 > 1$, hence $q \neq 2$.
+  By induction using \ref{lem:s_subadditive} and \ref{lem:s_one},
   \[
     s(p-1) \leq (p-1) \cdot s(1) = p - 1.
   \]
@@ -435,14 +435,13 @@ isomorphism.
   so $s(p-1) = k(p-1)$ for some $k \geq 0$.
   Since $(q-1) \nmid (p-1)$, we have $s(p-1) > 0$ by \ref{lem:s_pos},
   hence $k \geq 1$. Combined with $s(p-1) \leq p-1$, we get $k = 1$
-  and $s(p-1) = p - 1$
-  (see \texttt{GSV\_p\_sub\_one\_eq\_of\_le}).
+  and $s(p-1) = p - 1$.
 \end{proof}
 
 \begin{lemma}
   \label{lem:s_le_digit_sum}
-  \uses{def:s, lem:s_subadditive, lem:s_frob, lem:s_lt}
-  Assume $q \neq 2$ and $p$ is odd. Let $0 \leq a < q - 1$ and let
+  \uses{def:s, lem:s_subadditive, lem:s_frob, lem:s_lt, lem:s_p_minus_one}
+  Let $0 \leq a < q - 1$ and let
   $a = a_0 + a_1 p + \cdots + a_{f-1} p^{f-1}$ be the $p$-adic expansion of $a$.
   Then
   \[
@@ -458,11 +457,12 @@ isomorphism.
   \[
     s(a_0 + p \cdot a') \leq s(a_0) + s(p \cdot a').
   \]
-  By \ref{lem:s_lt}, $s(a_0) \leq a_0$.
+  For $s(a_0) \leq a_0$: if $a_0 \leq p-2$, this follows from \ref{lem:s_lt};
+  if $a_0 = p-1$, since $a < q-1$ we have $a' \geq 1$, hence $q > p \geq 2$
+  so $(q-1) \nmid (p-1)$, and $s(p-1) \leq p-1$ follows from \ref{lem:s_p_minus_one}.
   By \ref{lem:s_frob}, $s(p \cdot a') = s(a')$.
   By the induction hypothesis, $s(a') \leq a_1 + \cdots + a_{f-1}$.
-  Hence $s(a) \leq a_0 + a_1 + \cdots + a_{f-1}$
-  (see \texttt{sum\_le\_GSV\_ofDigits}).
+  Hence $s(a) \leq a_0 + a_1 + \cdots + a_{f-1}$.
 \end{proof}
 
 \begin{lemma}
@@ -480,20 +480,29 @@ isomorphism.
   \[
     s(a) + s(q-1-a) = (p-1) \cdot f.
   \]
-  Since $p$ is odd, $q - 1 = p^f - 1$ is even, so the central term $a = (q-1)/2$
-  satisfies $s((q-1)/2) = (p-1)f/2$. The remaining $(q-3)/2$ pairs
-  $\{a, q-1-a\}$ with $a \neq q-1-a$ each contribute $(p-1)f$, and $s(0) = 0$.
-  Therefore
+  Note that $s(0) = 0$ and $s(q-1) = 0$ by definition.
+
+  \textbf{Case $p$ odd:} $q - 1 = p^f - 1$ is even. The set $\{1, \ldots, q-2\}$
+  consists of $(q-3)/2$ pairs $\{a, q-1-a\}$ with $a \neq q-1-a$, plus the
+  central term $a = (q-1)/2$ which pairs with itself, giving
+  $s((q-1)/2) = (p-1)f/2$. Therefore
   \[
     \sum_{a=0}^{q-2} s(a) = \frac{q-3}{2} \cdot (p-1)f + \frac{(p-1)f}{2}
-    = \frac{(q-2)(p-1)f}{2}. \qedhere
+    = \frac{(q-2)(p-1)f}{2}.
+  \]
+
+  \textbf{Case $p = 2$:} $q - 1 = 2^f - 1$ is odd, so there is no central term.
+  The set $\{1, \ldots, q-2\}$ consists of $(q-2)/2$ pairs $\{a, q-1-a\}$,
+  each contributing $(p-1)f = f$. Therefore
+  \[
+    \sum_{a=0}^{q-2} s(a) = \frac{q-2}{2} \cdot f = \frac{(q-2) \cdot f \cdot (p-1)}{2}. \qedhere
   \]
 \end{proof}
 
 \begin{proposition}
   \label{prop:s_digit_sum}
   \uses{lem:s_le_digit_sum, lem:s_sum}
-  Assume $q \neq 2$ and $p$ is odd. Let $0 \leq a < q - 1$ and let
+  Let $0 \leq a < q - 1$ and let
   $a = a_0 + a_1 p + \cdots + a_{f-1} p^{f-1}$, $0 \leq a_i \leq p - 1$,
   be the $p$-adic expansion of $a$. Then
   \[
@@ -512,7 +521,6 @@ isomorphism.
   which equals the left-hand side by \ref{lem:s_sum}. Since each term satisfies
   $s(a) \leq a_0 + \cdots + a_{f-1}$ and the sums are equal, we must have
   $s(a) = a_0 + \cdots + a_{f-1}$ for all $a$
-  (see \texttt{GSV\_eq}).
 \end{proof}
 
 \chapter{Auxiliary results}
@@ -550,8 +558,38 @@ isomorphism.
   is a primitive additive character, then $g(\chi, \psi) \neq 0$.
 \end{lemma}
 
+\begin{proof}
+  This is a standard result: since $\cO_K/P$ is a finite field, $\chi \neq 1$,
+  and $\psi$ is primitive, we have $g(\chi, \psi) \cdot g(\bar\chi, \psi) = \pm q \neq 0$,
+  hence $g(\chi, \psi) \neq 0$
+  (see \texttt{gaussSum\_ne\_zero\_of\_nontrivial} in Mathlib).
+\end{proof}
+
+\begin{lemma}
+  \label{lem:sum_teich_trace}
+  \uses{def:teichmuller, def:addchar}
+  We have
+  \[
+    \sum_{x \in \cO_K/P} \omega(x)^{-1} \cdot \tr(x) = -1.
+  \]
+\end{lemma}
+
+\begin{lemma}
+  \label{lem:gauss_sum_one_left}
+  \uses{def:gauss_sum_s, def:addchar}
+  For any additive character $\psi$ of $\cO_K/P$,
+  \[
+    g(1, \psi) = \begin{cases} q - 1 & \text{if } \psi = 0 \\ -1 & \text{otherwise.} \end{cases}
+  \]
+\end{lemma}
+
 \begin{lemma}
   \label{lem:gauss_sum_trivial_char}
-  \uses{def:gauss_sum_s, lem:addchar_ne_one}
-  Assume $p \nmid f$. Then $g_0 = \ldots$
+  \uses{def:gauss_sum_s, lem:gauss_sum_one_left}
+  We have $g_0 = -1$.
 \end{lemma}
+
+\begin{proof}
+  Since $\psi$ takes values in $\mu_p(\cO_L)$, $\psi \neq 0$. Therefore
+  $g_0 = g(1, \psi) = -1$ by \ref{lem:gauss_sum_one_left}.
+\end{proof}
