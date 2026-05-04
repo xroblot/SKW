@@ -11,65 +11,103 @@
 \section{The cyclotomic field $K$}
 
 Let $p$ be a prime number and $f$ a positive integer. Set $q = p^f$.
-Let $K$ be the $(q-1)$-th cyclotomic field $\QQ(\zeta_{q-1})$ and $L$
-be an extension of $K$ containing a primitive $p$-th root of unity $\zeta_p$.
-We fix a maximal ideal $P$ of $\cO_K$ lying above $p$ and a primitive
-$p$-th root of unity $\zeta \in \cO_L$.
+Let $K = \QQ(\zeta_{q-1})$ be the $(q-1)$-th cyclotomic field.
+We fix a maximal ideal $P$ of $\cO_K$ lying above $p$.
 
 \section{The Teichmüller character}
 
 \begin{definition}
   \label{def:teichmuller}
-  The \emph{Teichmüller character} is the multiplicative character
+  \lean{teichmuller}
+  \leanok
+  The \emph{Teichmüller character} is the unique group isomorphism
   \[
-    \om : (\cO_K/P)^\times \to \mu_{q-1}(\cO_L)
+    \om : (\cO_K/P)^\times \xrightarrow{\sim} \mu_{q-1}(\cO_K)
   \]
-  defined as the unique group homomorphism satisfying $\om(x) \equiv x \pmod{P}$
-  for all $x \in (\cO_K/P)^\times$.
+  satisfying $\om(x) \equiv x \pmod{P}$ for all $x \in (\cO_K/P)^\times$,
+  extended to all of $\cO_K/P$ by $\om(0) = 0$.
 \end{definition}
 
 \begin{lemma}
   \label{lem:teichmuller_order}
   \uses{def:teichmuller}
-  The order of $\om$ is $q - 1$.
+  \lean{orderOf_teichmuller}
+  \leanok
+  The order of $\om$ as a multiplicative character is $q - 1$.
 \end{lemma}
+
+\begin{proof}
+  Since $\om$ is an isomorphism between groups of order $q - 1$, it has
+  order $q - 1$ as a group homomorphism.
+\end{proof}
 
 \begin{lemma}
   \label{lem:teichmuller_frob}
   \uses{def:teichmuller}
   Let $\sigma$ be a ring endomorphism of $\cO_L$ such that
-  $\sigma(\zeta) = \zeta^m$ for some $m \in \ZZ$. Then
+  $\sigma(\zeta_{q-1}) = \zeta_{q-1}^m$ for some $m \in \ZZ$. Then
   $\sigma(\om(x)) = \om(x)^m$ for all $x \in \cO_K/P$.
 \end{lemma}
 
+\begin{proof}
+  Since $\om(x) \in \mu_{q-1}(\cO_K)$, we have $\om(x) = \zeta_{q-1}^k$
+  for some $k$. Then $\sigma(\om(x)) = \sigma(\zeta_{q-1})^k = \zeta_{q-1}^{mk}
+  = \om(x)^m$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:teichmuller_sum}
+  \uses{def:teichmuller}
+  \lean{MulChar.sum_eq_zero_of_ne_one}
+  \leanok
+  For all $a \in \ZZ$ with $(q-1) \nmid a$,
+  \[
+    \sum_{x \in \cO_K/P} \om(x)^{-a} = 0.
+  \]
+\end{lemma}
+
+\begin{proof}
+  Since $(q-1) \nmid a$, the character $\om^{-a}$ is nontrivial by
+  \ref{lem:teichmuller_order}. By \texttt{MulChar.sum\_eq\_zero\_of\_ne\_one},
+  $\sum_{x \in \cO_K/P} \om(x)^{-a} = 0$.
+\end{proof}
+
 \section{The additive character}
+
+Let $L$ be an extension of $K$ containing a primitive $p$-th root of unity
+$\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 
 \begin{definition}
   \label{def:addchar}
   The \emph{additive character} $\psi : \cO_K/P \to \mu_p(\cO_L)$ is defined by
   \[
-    \psi(x) = \zeta^{\tr_{(\ZZ/p\ZZ)/(\cO_K/P)}(x)}
+    \psi(x) = \zeta_p^{\tr_{(\cO_K/P)/(\ZZ/p\ZZ)}(x)}
   \]
   where the exponent is lifted canonically to $\ZZ$.
 \end{definition}
 
 \begin{lemma}
-  \label{lem:addchar_primitive}
+  \label{lem:addchar_ne_one}
   \uses{def:addchar}
+  The character $\psi$ is nontrivial, i.e., $\psi \neq 1$.
+\end{lemma}
+
+\begin{proof}
+  Since the extension $\cO_K/P$ over $\ZZ/p\ZZ$ is separable, the trace
+  $\tr : \cO_K/P \to \ZZ/p\ZZ$ is nonzero, so there exists $x$ with
+  $\tr(x) \neq 0$, hence $\psi(x) = \zeta_p^{\tr(x)} \neq 1$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:addchar_primitive}
+  \uses{lem:addchar_ne_one}
   The character $\psi$ is primitive.
 \end{lemma}
 
 \begin{proof}
   Since $\cO_K/P$ is a field, any nontrivial additive character is primitive.
-  Since the trace $\tr : \cO_K/P \to \ZZ/p\ZZ$ is surjective, $\psi \neq 1$.
+  The character $\psi$ is nontrivial by \ref{lem:addchar_ne_one}.
 \end{proof}
-
-\begin{lemma}
-  \label{lem:addchar_ne_one}
-  \uses{def:addchar}
-  The character $\psi$ is nontrivial, i.e., $\psi \neq 1$, provided that
-  $p \nmid f$.
-\end{lemma}
 
 \begin{lemma}
   \label{lem:addchar_frob}
@@ -77,45 +115,53 @@ $p$-th root of unity $\zeta \in \cO_L$.
   For all $x \in \cO_K/P$, $\psi(x^p) = \psi(x)$.
 \end{lemma}
 
-\begin{lemma}
-  \label{lem:addchar_mod_P}
-  \uses{lem:addchar_mod_P_sq}
-  Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta - 1 \in \fP$.
-  Then $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.
-\end{lemma}
-
 \begin{proof}
-  By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta - 1) \pmod{\fP^2}$.
-  Since $\zeta - 1 \in \fP$, the term $\tr(x) \cdot (\zeta - 1) \in \fP$,
-  hence $\psi(x) \equiv 1 \pmod{\fP}$.
+  The Frobenius map $\varphi : x \mapsto x^p$ is a $(\ZZ/p\ZZ)$-algebra
+  automorphism of $\cO_K/P$. By \texttt{Algebra.trace\_eq\_of\_algEquiv},
+  $\tr(\varphi(x)) = \tr(x)$, i.e., $\tr(x^p) = \tr(x)$. Therefore
+  $\psi(x^p) = \zeta_p^{\tr(x^p)} = \zeta_p^{\tr(x)} = \psi(x)$.
 \end{proof}
 
 \begin{lemma}
   \label{lem:addchar_mod_P_sq}
   \uses{def:addchar}
-  With the same hypotheses,
+  Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta_p - 1 \in \fP$.
+  Then
   \[
-    \psi(x) \equiv 1 + \tr(x) \cdot (\zeta - 1) \pmod{\fP^2}
+    \psi(x) \equiv 1 + \tr(x) \cdot (\zeta_p - 1) \pmod{\fP^2}
   \]
   for all $x \in \cO_K/P$.
 \end{lemma}
 
 \begin{proof}
-  There exists $a \in \mathbb{N}$ such that $\tr(x) = a$ and $\psi(x) = \zeta^a$.
+  There exists $a \in \mathbb{N}$ such that $\tr(x) = a$ and $\psi(x) = \zeta_p^a$.
   By the binomial theorem,
   \[
-    \psi(x) = \zeta^a = (1 + (\zeta - 1))^a = \sum_{n=0}^{a} \binom{a}{n} (\zeta - 1)^n.
+    \psi(x) = \zeta_p^a = (1 + (\zeta_p - 1))^a = \sum_{n=0}^{a} \binom{a}{n} (\zeta_p - 1)^n.
   \]
-  Since $\zeta - 1 \in \fP$, we have $(\zeta - 1)^n \in \fP^n \subseteq \fP^2$ for all
+  Since $\zeta_p - 1 \in \fP$, we have $(\zeta_p - 1)^n \in \fP^n \subseteq \fP^2$ for all
   $n \geq 2$. Therefore
   \[
-    \psi(x) \equiv 1 + a(\zeta - 1) = 1 + \tr(x) \cdot (\zeta - 1) \pmod{\fP^2}. \qedhere
+    \psi(x) \equiv 1 + a(\zeta_p - 1) = 1 + \tr(x) \cdot (\zeta_p - 1) \pmod{\fP^2}.
   \]
+\end{proof}
+
+\begin{lemma}
+  \label{lem:addchar_mod_P}
+  \uses{lem:addchar_mod_P_sq}
+  Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta_p - 1 \in \fP$.
+  Then $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta_p - 1) \pmod{\fP^2}$.
+  Since $\zeta_p - 1 \in \fP$, the term $\tr(x) \cdot (\zeta_p - 1) \in \fP$,
+  hence $\psi(x) \equiv 1 \pmod{\fP}$.
 \end{proof}
 
 \chapter{The Gauss sum}
 
-Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta - 1 \in \fP$. Let $F$ be
+Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta_p - 1 \in \fP$. Let $F$ be
 the subfield of $L$ with $F = \QQ(\zeta_p)$. The Galois group $\Gal(L/F)$
 is isomorphic to $(\ZZ/(q-1)\ZZ)^\times$ via the map $\sigma \mapsto a$
 where $\sigma(\zeta_{q-1}) = \zeta_{q-1}^a$. We denote by $\fn(\sigma) \in
@@ -129,8 +175,10 @@ isomorphism.
   \uses{def:teichmuller, def:addchar}
   For $a \in \ZZ$, the \emph{Gauss sum} is
   \[
-    g_a = g(\om^{-a}, \psi) = \sum_{x \in \cO_K/P} \om(x)^{-a}
-    \cdot \psi(x) \in \cO_L.
+    g_a = \begin{cases}
+      2 & \text{if } q = 2, \\
+      g(\om^{-a}, \psi) = \displaystyle\sum_{x \in \cO_K/P} \om(x)^{-a} \cdot \psi(x) & \text{otherwise.}
+    \end{cases}
   \]
 \end{definition}
 
@@ -174,29 +222,29 @@ isomorphism.
     \equiv \sum_{x \in \cO_K/P} \omega(x)^{-a} \pmod{\fP}.
   \]
   Since $(q-1) \nmid a$, we have $\omega^{-a} \neq 1$ by \ref{lem:teichmuller_order}.
-  Hence $\sum_{x \in \cO_K/P} \omega(x)^{-a} = 0$ by orthogonality of characters.
+  Hence $\sum_{x \in \cO_K/P} \omega(x)^{-a} = 0$ by \ref{lem:teichmuller_sum}.
   Therefore $g_a \equiv 0 \pmod{\fP}$, i.e.\ $g_a \in \fP$.
 \end{proof}
 
 \begin{lemma}
   \label{lem:gauss_sum_one_mod_sq}
   \uses{lem:addchar_mod_P_sq, lem:teichmuller_order, lem:sum_teich_trace}
-  Assume $q \neq 2$ and $\zeta - 1 \in \fP$. Then
+  Assume $q \neq 2$ and $\zeta_p - 1 \in \fP$. Then
   \[
-    g_1 \equiv -(\zeta - 1) \pmod{\fP^2}.
+    g_1 \equiv -(\zeta_p - 1) \pmod{\fP^2}.
   \]
 \end{lemma}
 
 \begin{proof}
-  By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta - 1) \pmod{\fP^2}$
+  By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta_p - 1) \pmod{\fP^2}$
   for all $x \in \cO_K/P$. Therefore
   \[
-    g_1 \equiv \sum_{x} \omega(x)^{-1} + (\zeta-1) \sum_{x} \omega(x)^{-1} \tr(x) \pmod{\fP^2}.
+    g_1 \equiv \sum_{x} \omega(x)^{-1} + (\zeta_p-1) \sum_{x} \omega(x)^{-1} \tr(x) \pmod{\fP^2}.
   \]
   Since $q \neq 2$, $\omega^{-1} \neq 1$ by \ref{lem:teichmuller_order}, so
   $\sum_x \omega(x)^{-1} = 0$ by orthogonality of characters. Moreover,
   $\sum_{x \in \cO_K/P} \omega(x)^{-1} \cdot \tr(x) = -1$ by \ref{lem:sum_teich_trace}.
-  Hence $g_1 \equiv -(\zeta - 1) \pmod{\fP^2}$.
+  Hence $g_1 \equiv -(\zeta_p - 1) \pmod{\fP^2}$.
 \end{proof}
 
 \begin{lemma}
@@ -229,7 +277,9 @@ isomorphism.
 \end{lemma}
 
 \begin{proof}
-  By definition of the pushforward valuation,
+  For any prime ideal $\fQ$ of $\cO_L$ and $\alpha \in \cO_L$,
+  $v_{\sigma(\fQ)}(\alpha) = v_{\fQ}(\sigma^{-1}(\alpha))$ by definition of
+  the pushforward valuation. Applying this with $\fQ = \fP$ and $\alpha = g_1$,
   $v_{\sigma(\fP)}(g_1) = v_{\fP}(\sigma^{-1}(g_1))$.
   By \ref{lem:galois_gauss_sum} applied to $\sigma^{-1}$,
   $\sigma^{-1}(g_1) = g_{\fn(\sigma^{-1})}$.
@@ -264,7 +314,7 @@ isomorphism.
   \]
   By \ref{lem:ramification_idx}, $e(\fP \mid P) = p - 1$, hence
   \[
-    v_{\fP}(J(\omega^{-a}, \omega^{-b})) = (p-1) \cdot v_P(J(\omega^{-a}, \omega^{-b})). \qedhere
+    v_{\fP}(J(\omega^{-a}, \omega^{-b})) = (p-1) \cdot v_P(J(\omega^{-a}, \omega^{-b})).
   \]
 \end{proof}
 
@@ -282,7 +332,7 @@ isomorphism.
 \begin{lemma}
   \label{lem:s_eq_val}
   \uses{def:s, def:gauss_sum_s, lem:gauss_sum_trivial_char}
-  For all $a \in \ZZ$, $s(a) = v_{\fP}(g_a)$.
+  Assume $q \neq 2$. Then for all $a \in \ZZ$, $s(a) = v_{\fP}(g_a)$.
 \end{lemma}
 
 \begin{proof}
@@ -294,7 +344,7 @@ isomorphism.
 
 \begin{lemma}
   \label{lem:s_subadditive}
-  \uses{def:s, lem:gauss_sum_mul, lem:val_jac_pow}
+  \uses{def:s, lem:gauss_sum_mul}
   For all $a, b \in \ZZ$, $s(a + b) \leq s(a) + s(b)$.
 \end{lemma}
 
@@ -325,14 +375,19 @@ isomorphism.
 
   If $(q-1) \mid a$, then $(q-1) \mid (-a)$, so $s(a) = s(-a) = 0$ and the result is clear.
 
-  If $(q-1) \nmid a$, then $g_a \cdot g_{-a} = \omega^{-a}(-1) \cdot p^f$. Since
-  $\omega^{-a}(-1)$ is a root of unity, it is a unit in $\cO_L$, hence
+  If $(q-1) \nmid a$, then $\omega^{-a}$ is a nontrivial character and $\psi$
+  is primitive by \ref{lem:addchar_primitive}. By
+  \texttt{gaussSum\_mul\_gaussSum\_eq\_card},
+  $g(\omega^{-a}, \psi) \cdot g(\omega^{a}, \psi^{-1}) = q = p^f$.
+  Now $g(\omega^{a}, \psi^{-1}) = \omega^{a}(-1) \cdot g_{-a}$ (by a change
+  of variable $x \mapsto -x$), so $g_a \cdot g_{-a} = \omega^{a}(-1) \cdot p^f$.
+  Since $\omega^{-a}(-1)$ is a root of unity, it is a unit in $\cO_L$, hence
   $v_{\fP}(\omega^{-a}(-1)) = 0$. By \ref{lem:ramification_idx},
   $v_{\fP}(p^f) = f \cdot e(\fP \mid p) = f(p-1)$.
   Therefore
   \[
     s(a) + s(-a) = v_{\fP}(g_a) + v_{\fP}(g_{-a}) = v_{\fP}(g_a \cdot g_{-a})
-    = v_{\fP}(p^f) = (p-1) \cdot f. \qedhere
+    = v_{\fP}(p^f) = (p-1) \cdot f.
   \]
 \end{proof}
 
@@ -351,9 +406,11 @@ isomorphism.
     s(a) + s(b) = s(a+b) + v_{\fP}(J(\omega^{-a}, \omega^{-b})).
   \]
   By \ref{lem:val_jac_pow}, $v_{\fP}(J) \equiv 0 \pmod{p-1}$, hence the result.
-  If $(q-1) \mid (a+b)$, set $k = a + b$ and apply \ref{lem:s_sum_dvd}:
-  if $(q-1) \mid a$ then $s(a) = s(b) = 0$; otherwise $s(a) + s(b) = (p-1) \cdot f$.
-  In both cases $s(a) + s(b) \equiv 0 \equiv s(a+b) \pmod{p-1}$.
+  If $(q-1) \mid (a+b)$, then $s(a+b) = 0$, so we must show $s(a) + s(b) \equiv 0
+  \pmod{p-1}$. Apply \ref{lem:s_sum_dvd} with $k = a+b$ (which satisfies $(q-1) \mid k$):
+  if $(q-1) \mid a$ then $(q-1) \mid b$ as well, so $s(a) = s(b) = 0$;
+  otherwise $s(a) + s(b) = (p-1) \cdot f \equiv 0 \pmod{p-1}$.
+  In both cases $s(a) + s(b) \equiv 0 = s(a+b) \pmod{p-1}$.
 \end{proof}
 
 \begin{lemma}
@@ -363,8 +420,16 @@ isomorphism.
 \end{lemma}
 
 \begin{proof}
-  Since the Frobenius $x \mapsto x^p$ is a bijection on $\cO_K/P$
-  and $\psi(x^p) = \psi(x)$, we get $g_{pa} = g_a$.
+  The Frobenius map $\varphi : x \mapsto x^p$ is a bijection on $\cO_K/P$.
+  Using the substitution $y = \varphi(x)$,
+  \[
+    g_{pa} = \sum_{x \in \cO_K/P} \omega(x)^{-pa} \psi(x)
+    = \sum_{y \in \cO_K/P} \omega(\varphi^{-1}(y))^{-pa} \psi(\varphi^{-1}(y)).
+  \]
+  By multiplicativity of $\omega$, $\omega(\varphi^{-1}(y))^p = \omega(\varphi^{-1}(y)^p)
+  = \omega(y)$, so $\omega(\varphi^{-1}(y))^{-pa} = \omega(y)^{-a}$.
+  By \ref{lem:addchar_frob}, $\psi(\varphi^{-1}(y)) = \psi(y)$. Therefore $g_{pa} = g_a$,
+  and $s(pa) = v_{\fP}(g_{pa}) = v_{\fP}(g_a) = s(a)$.
 \end{proof}
 
 \begin{lemma}
@@ -386,8 +451,8 @@ isomorphism.
 
 \begin{proof}
   By \ref{lem:gauss_sum_mem}, $g_1 \in \fP$, so $s(1) \geq 1$.
-  By \ref{lem:gauss_sum_one_mod_sq}, $g_1 \equiv -(\zeta - 1) \pmod{\fP^2}$.
-  Since $\zeta - 1 \notin \fP^2$ by \ref{lem:zeta_sub_one_not_mem_sq},
+  By \ref{lem:gauss_sum_one_mod_sq}, $g_1 \equiv -(\zeta_p - 1) \pmod{\fP^2}$.
+  Since $\zeta_p - 1 \notin \fP^2$ by \ref{lem:zeta_sub_one_not_mem_sq},
   we have $g_1 \notin \fP^2$, so $s(1) \leq 1$.
 \end{proof}
 
@@ -422,11 +487,12 @@ isomorphism.
 \begin{lemma}
   \label{lem:s_p_minus_one}
   \uses{def:s, lem:s_subadditive, lem:s_congr, lem:s_pos, lem:s_one}
-  Assume $(q-1) \nmid (p-1)$. Then $s(p - 1) = p - 1$.
+  Assume $f \geq 2$. Then $s(p - 1) = p - 1$.
 \end{lemma}
 
 \begin{proof}
-  Since $(q-1) \nmid (p-1)$, we have $q - 1 > 1$, hence $q \neq 2$.
+  Since $f \geq 2$, we have $q = p^f \geq p^2 > p$, so $q - 1 > p - 1$ and
+  $(q-1) \nmid (p-1)$.
   By induction using \ref{lem:s_subadditive} and \ref{lem:s_one},
   \[
     s(p-1) \leq (p-1) \cdot s(1) = p - 1.
@@ -458,8 +524,9 @@ isomorphism.
     s(a_0 + p \cdot a') \leq s(a_0) + s(p \cdot a').
   \]
   For $s(a_0) \leq a_0$: if $a_0 \leq p-2$, this follows from \ref{lem:s_lt};
-  if $a_0 = p-1$, since $a < q-1$ we have $a' \geq 1$, hence $q > p \geq 2$
-  so $(q-1) \nmid (p-1)$, and $s(p-1) \leq p-1$ follows from \ref{lem:s_p_minus_one}.
+  if $a_0 = p-1$, since $a < q-1$, we have $a' \geq 1$. If $f = 1$ then
+  $q = p$ and $a < p-1$, so $a_0 \leq p-2$, contradicting $a_0 = p-1$.
+  Hence $f \geq 2$, and \ref{lem:s_p_minus_one} gives $s(p-1) = p-1 \leq p-1$.
   By \ref{lem:s_frob}, $s(p \cdot a') = s(a')$.
   By the induction hypothesis, $s(a') \leq a_1 + \cdots + a_{f-1}$.
   Hence $s(a) \leq a_0 + a_1 + \cdots + a_{f-1}$.
@@ -484,18 +551,21 @@ isomorphism.
 
   \textbf{Case $p$ odd:} $q - 1 = p^f - 1$ is even. The set $\{1, \ldots, q-2\}$
   consists of $(q-3)/2$ pairs $\{a, q-1-a\}$ with $a \neq q-1-a$, plus the
-  central term $a = (q-1)/2$ which pairs with itself, giving
-  $s((q-1)/2) = (p-1)f/2$. Therefore
+  central term $a = (q-1)/2$ which pairs with itself. Since $q \geq 3$, we have
+  $1 \leq (q-1)/2 \leq q-2$, so $(q-1) \nmid (q-1)/2$, and
+  \ref{lem:s_sum_dvd} gives $2s((q-1)/2) = (p-1)f$,
+  hence $s((q-1)/2) = (p-1)f/2$. Therefore
   \[
     \sum_{a=0}^{q-2} s(a) = \frac{q-3}{2} \cdot (p-1)f + \frac{(p-1)f}{2}
     = \frac{(q-2)(p-1)f}{2}.
   \]
 
   \textbf{Case $p = 2$:} $q - 1 = 2^f - 1$ is odd, so there is no central term.
+  Note that $q - 2 = 2(2^{f-1} - 1)$ is even, so $(q-2)/2$ is an integer.
   The set $\{1, \ldots, q-2\}$ consists of $(q-2)/2$ pairs $\{a, q-1-a\}$,
   each contributing $(p-1)f = f$. Therefore
   \[
-    \sum_{a=0}^{q-2} s(a) = \frac{q-2}{2} \cdot f = \frac{(q-2) \cdot f \cdot (p-1)}{2}. \qedhere
+    \sum_{a=0}^{q-2} s(a) = \frac{q-2}{2} \cdot f = \frac{(q-2) \cdot f \cdot (p-1)}{2}.
   \]
 \end{proof}
 
@@ -516,14 +586,696 @@ isomorphism.
   \[
     \sum_{a=0}^{q-2} s(a) \leq \sum_{a=0}^{q-2} (a_0 + \cdots + a_{f-1}).
   \]
-  A direct count shows that the right-hand side equals $\frac{(q-2) \cdot f \cdot (p-1)}{2}$
-  by \texttt{Nat.sum\_sum\_digits\_eq},
-  which equals the left-hand side by \ref{lem:s_sum}. Since each term satisfies
+  By \texttt{Nat.sum\_sum\_digits\_eq}, the right-hand side equals
+  $\frac{(q-2) \cdot f \cdot (p-1)}{2}$, which equals the left-hand side
+  by \ref{lem:s_sum}. Since each term satisfies
   $s(a) \leq a_0 + \cdots + a_{f-1}$ and the sums are equal, we must have
-  $s(a) = a_0 + \cdots + a_{f-1}$ for all $a$
+  $s(a) = a_0 + \cdots + a_{f-1}$ for all $a$.
+\end{proof}
+
+\chapter{Ideal factorization of Gauss sums}
+
+\section{Factorization in $\cO_L$}
+
+\begin{lemma}
+  \label{lem:gal_L_F}
+  \uses{def:gauss_sum_s}
+  The extension $L/F$ is Galois with $\Gal(L/F) \cong (\ZZ/(q-1)\ZZ)^\times$,
+  via the action on $\zeta_{q-1}$.
+\end{lemma}
+
+\begin{proof}
+  Since $\gcd(q-1, p) = 1$, the fields $K = \QQ(\zeta_{q-1})$ and
+  $F = \QQ(\zeta_p)$ are linearly disjoint over $\QQ$. Therefore
+  $L = KF$ is Galois over $F$ with $\Gal(L/F) \cong \Gal(K/\QQ) \cong
+  (\ZZ/(q-1)\ZZ)^\times$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:unique_prime_above_p_in_F}
+  There is a unique prime ideal of $\cO_F$ lying above $p$, namely
+  $\fP \cap \cO_F$.
+\end{lemma}
+
+\begin{proof}
+  Since $p$ is totally ramified in $F = \QQ(\zeta_p)$, there is a unique
+  prime above $p$ in $\cO_F$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:stabilizer_fP}
+  \uses{lem:gal_L_F}
+  The stabilizer of $\fP$ in $\Gal(L/F) \cong (\ZZ/(q-1)\ZZ)^\times$ is
+  the subgroup $\langle p \bmod (q-1) \rangle$, which has order $f$.
+\end{lemma}
+
+% Proof will use IsCyclotomicExtension.Rat.galEquivZMod_stabilizer and a
+% pending Mathlib PR (not yet merged) that gives the stabilizer as a
+% preimage under (Z/(q-1)Z)^* -> (Z/nZ)^*.
+
+\begin{lemma}
+  \label{lem:primes_above_p}
+  \uses{lem:gal_L_F, lem:unique_prime_above_p_in_F, lem:stabilizer_fP}
+  Every prime ideal of $\cO_L$ lying above $p$ is of the form $\sigma(\fP)$
+  for some $\sigma \in \Gal(L/F)$. Moreover, $\sigma(\fP) = \sigma'(\fP)$ if
+  and only if $\sigma^{-1}\sigma' \in \langle p \bmod (q-1) \rangle$. In
+  particular, each prime above $p$ appears exactly $f$ times in the family
+  $\{\sigma(\fP) \mid \sigma \in \Gal(L/F)\}$.
+\end{lemma}
+
+\begin{proof}
+  Let $\fQ$ be a prime of $\cO_L$ above $p$. By \ref{lem:unique_prime_above_p_in_F},
+  $\fQ \cap \cO_F = \fP \cap \cO_F$, so $\fQ$ lies above $\fP \cap \cO_F$.
+  Since $L/F$ is Galois by \ref{lem:gal_L_F}, $\Gal(L/F)$ acts transitively
+  on the primes of $\cO_L$ above $\fP \cap \cO_F$, so $\fQ = \sigma(\fP)$
+  for some $\sigma \in \Gal(L/F)$. The second statement follows from
+  \ref{lem:stabilizer_fP}.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_factorization}
+  \uses{lem:val_galois_gauss_sum, lem:primes_above_p, lem:gauss_sum_ne_zero, lem:s_frob}
+  For all $a \in \ZZ$ with $(q-1) \nmid a$,
+  \[
+    (g_a)^f = \prod_{\sigma \in \Gal(L/F)} \sigma(\fP)^{s(\fn(\sigma^{-1}))}.
+  \]
+\end{lemma}
+
+\begin{proof}
+  Since $(q-1) \nmid a$, we have $g_a \neq 0$ by \ref{lem:gauss_sum_ne_zero}.
+  The only primes dividing $(g_a)$ are those above $p$, since $g_a$ is an
+  algebraic integer whose norm is a power of $p$. By \ref{lem:primes_above_p},
+  these are exactly the $\sigma(\fP)$ for $\sigma \in \Gal(L/F)$.
+
+  For each prime $\fQ = \sigma_0(\fP)$ above $p$, the exponent of $\fQ$ in
+  $(g_a)$ is $v_{\fQ}(g_a) = s(\fn(\sigma_0^{-1}))$ by
+  \ref{lem:val_galois_gauss_sum}. By \ref{lem:primes_above_p}, $\fQ$ appears
+  exactly $f$ times in the family $\{\sigma(\fP) \mid \sigma \in \Gal(L/F)\}$,
+  namely for $\sigma = \sigma_0 \cdot \tau$ with $\tau \in \langle p \bmod
+  (q-1) \rangle$. By \ref{lem:s_frob}, $s(\fn(\sigma_0^{-1} \cdot \tau^{-1}))
+  = s(\fn(\sigma_0^{-1}))$ for all such $\tau$. Therefore the exponent of
+  $\fQ$ in the right-hand side is $f \cdot s(\fn(\sigma_0^{-1})) = f \cdot
+  v_{\fQ}(g_a)$, which equals the exponent of $\fQ$ in $(g_a)^f$.
+\end{proof}
+
+\section{Setup for Stickelberger's theorem}
+
+Let $m$ be a positive integer dividing $q - 1$, and let $d = (q-1)/m$.
+Let $\chi = \omega^{-d}$, so $\chi^m = 1$. Since $\chi$ has order $m$,
+we have $g(\chi) \in \cO_{\QQ(\zeta_m, \zeta_p)}$.
+
+Let $G = \Gal(\QQ(\zeta_m)/\QQ) \cong (\ZZ/m\ZZ)^\times$.
+For $(a, m) = 1$, let $\sigma_a \in G$ denote the element with
+$\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
+\[
+  \theta = \theta(\QQ(\zeta_m)) = \sum_{\substack{a = 1 \\ (a,m) = 1}}^{m}
+  \left\{ \frac{a}{m} \right\} \sigma_a^{-1} \in \QQ[G],
+\]
+where $\{x\}$ denotes the fractional part of $x$.
+The \emph{Stickelberger ideal} $I(\QQ(\zeta_m))$ is defined as
+$\ZZ[G] \cap \theta \ZZ[G]$, i.e., those $\ZZ[G]$-multiples of $\theta$
+with integral coefficients.
+
+\section{Descent and Stickelberger's theorem}
+
+\begin{lemma}
+  \label{lem:s_fractional_part}
+  \uses{prop:s_digit_sum}
+  For $0 \leq h < q - 1$,
+  \[
+    s(h) = (p-1) \sum_{i=0}^{f-1} \left\{ \frac{p^i h}{q-1} \right\}.
+  \]
+\end{lemma}
+
+\begin{proof}
+  Let $h = a_0 + a_1 p + \cdots + a_{f-1} p^{f-1}$ be the $p$-adic
+  expansion of $h$. By \ref{prop:s_digit_sum}, $s(h) = a_0 + \cdots + a_{f-1}$.
+  On the other hand, $p^i h \equiv a_0 p^i + \cdots + a_{f-1} p^{i+f-1}
+  \pmod{q-1}$, so
+  \[
+    \left\{ \frac{p^i h}{q-1} \right\} = \frac{1}{q-1}(a_0 p^i + a_1 p^{i+1}
+    + \cdots + a_{f-1} p^{i-1}),
+  \]
+  where the indices are taken mod $f$. Summing over $i = 0, \ldots, f-1$,
+  each digit $a_j$ appears multiplied by $(p^0 + p^1 + \cdots + p^{f-1})/(q-1) = 1/(p-1)$.
+  Therefore
+  \[
+    (p-1) \sum_{i=0}^{f-1} \left\{ \frac{p^i h}{q-1} \right\} = a_0 + \cdots + a_{f-1} = s(h).
+  \]
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_galois_action}
+  \uses{def:gauss_sum_s, lem:teichmuller_frob}
+  For any $\tau \in \Gal(L/\QQ)$ fixing $\zeta_p$,
+  \[
+    \tau(g(\chi)) = \chi(\fn(\tau))^{-1} \cdot g(\chi^{\fn(\tau)}).
+  \]
+\end{lemma}
+
+\begin{proof}
+  Since $\tau$ fixes $\zeta_p$, it fixes $\psi$. Let $b = \fn(\tau) \in (\ZZ/(q-1)\ZZ)^\times$.
+  By \ref{lem:teichmuller_frob}, $\tau(\omega(x)) = \omega(x)^b$ for all $x$,
+  so $\tau(\chi(x)) = \chi^b(x)$. Therefore
+  \[
+    \tau(g(\chi)) = -\sum_x \chi^b(x) \psi(x) = g(\chi^b).
+  \]
+  % TODO: check whether the factor \chi(b)^{-1} is needed here.
+  % The current statement has \chi(\fn(\tau))^{-1} \cdot g(\chi^{\fn(\tau)})
+  % but the computation gives g(\chi^b) directly. To be verified against
+  % Washington Lemma 6.4.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_power_fixed_1}
+  \uses{lem:gauss_sum_galois_action}
+  For any $\tau \in \Gal(L/\QQ(\zeta_m, \zeta_p))$,
+  $\tau(g(\chi)^m) = g(\chi)^m$.
+\end{lemma}
+
+\begin{proof}
+  Since $\tau$ fixes $\zeta_m$, we have $\fn(\tau) \equiv 1 \pmod{m}$, hence
+  $\chi^{\fn(\tau)} = \chi$ (as $\chi^m = 1$). By \ref{lem:gauss_sum_galois_action},
+  $\tau(g(\chi)) = \chi(\fn(\tau))^{-1} g(\chi)$. Therefore
+  $\tau(g(\chi)^m) = \chi(\fn(\tau))^{-m} g(\chi)^m = g(\chi)^m$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_galois_action_K}
+  \uses{def:gauss_sum_s, def:addchar}
+  For any $\tau \in \Gal(L/K)$ with $\tau(\zeta_p) = \zeta_p^e$,
+  \[
+    \tau(g(\chi)) = \chi^{-1}(e) \cdot g(\chi).
+  \]
+\end{lemma}
+
+\begin{proof}
+  Since $\tau \in \Gal(L/K)$, it fixes $K = \QQ(\zeta_{q-1})$, hence fixes
+  all $(q-1)$-th roots of unity, hence fixes $\omega(x)$ for all $x$.
+  Since $\tau(\zeta_p) = \zeta_p^e$, we have $\tau(\psi(x)) = \tau(\zeta_p^{\tr(x)})
+  = \zeta_p^{e \cdot \tr(x)} = \psi(ex)$. Therefore
+  \[
+    \tau(g(\chi)) = -\sum_{x \in \cO_K/P} \chi(x) \psi(ex).
+  \]
+  By the substitution $y = ex$ (which is a bijection on $\cO_K/P$ since
+  $e \in (\ZZ/p\ZZ)^\times \subset \FF_q^\times$),
+  \[
+    -\sum_x \chi(x)\psi(ex) = -\sum_y \chi(y/e)\psi(y)
+    = \chi^{-1}(e) \cdot \left(-\sum_y \chi(y)\psi(y)\right) = \chi^{-1}(e) \cdot g(\chi).
+  \]
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_power_fixed_2}
+  \uses{lem:gauss_sum_galois_action_K}
+  For any $\tau \in \Gal(L/K)$,
+  $\tau(g(\chi)^m) = g(\chi)^m$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:gauss_sum_galois_action_K}, $\tau(g(\chi)) = \chi^{-1}(e) g(\chi)$
+  where $e$ is such that $\tau(\zeta_p) = \zeta_p^e$.
+  Since $\chi^m = 1$, we have $\chi^{-1}(e)^m = 1$, hence
+  $\tau(g(\chi)^m) = \chi^{-1}(e)^m g(\chi)^m = g(\chi)^m$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_power_in_cyclotomic}
+  \uses{def:gauss_sum_s,
+        lem:gauss_sum_power_fixed_1, lem:gauss_sum_power_fixed_2}
+  We have $g(\chi)^m \in \cO_{\QQ(\zeta_m)}$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:gauss_sum_power_fixed_1}, $g(\chi)^m$ is fixed by
+  $\Gal(L/\QQ(\zeta_m, \zeta_p))$, so $g(\chi)^m \in \QQ(\zeta_m, \zeta_p)$.
+  By \ref{lem:gauss_sum_power_fixed_2}, $g(\chi)^m$ is fixed by $\Gal(L/K)$.
+  Since $\QQ(\zeta_m, \zeta_p) = KF$ and $\Gal(KF/\QQ(\zeta_m))$ is generated
+  by the restrictions of $\Gal(L/\QQ(\zeta_m, \zeta_p))$ and $\Gal(L/K)$,
+  we conclude $g(\chi)^m \in \QQ(\zeta_m)$.
+  Since $g(\chi) \in \cO_L$, we have $g(\chi)^m \in \cO_{\QQ(\zeta_m)}$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:unramified_cyclotomic}
+  \uses{lem:unramified_trivial}
+  If $\QQ(\zeta_m) \subseteq K \subseteq \QQ(\zeta_m, \zeta_p)$ and $K/\QQ(\zeta_m)$
+  is unramified at all primes, then $K = \QQ(\zeta_m)$.
+\end{lemma}
+
+\begin{proof}
+  This follows immediately from \ref{lem:unramified_trivial}.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_factorization_cyclotomic_power}
+  \uses{lem:gauss_sum_factorization, lem:s_fractional_part,
+        lem:gauss_sum_power_in_cyclotomic}
+  For any prime $\mathfrak{p}_0$ of $\QQ(\zeta_m)$ lying above $p$ with
+  $\mathfrak{p}_0 \nmid m$,
+  \[
+    (g(\chi)^{mf}) = \mathfrak{p}_0^{mf\theta}
+  \]
+  as ideals of $\cO_{\QQ(\zeta_m)}$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:gauss_sum_factorization} applied with $a = d = (q-1)/m$,
+  \[
+    (g(\chi))^f = \prod_{\sigma \in \Gal(L/F)} \sigma(\fP)^{s(\fn(\sigma^{-1}))}.
+  \]
+  Raising to the $m$-th power,
+  \[
+    (g(\chi)^{mf}) = \prod_{\sigma \in \Gal(L/F)} \sigma(\fP)^{m \cdot s(\fn(\sigma^{-1}))}.
+  \]
+  By \ref{lem:s_fractional_part}, $s(\fn(\sigma^{-1})) = (p-1)\sum_{i=0}^{f-1}
+  \{p^i \fn(\sigma^{-1})/(q-1)\}$. Summing over $\sigma \in \Gal(L/F)$ and
+  regrouping by prime of $\QQ(\zeta_m)$, the right-hand side becomes
+  $\mathfrak{p}_0^{mf\theta}$. The descent from $\cO_L$ to $\cO_{\QQ(\zeta_m)}$
+  is justified by \ref{lem:gauss_sum_power_in_cyclotomic}.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_factorization_cyclotomic}
+  \uses{lem:gauss_sum_factorization_cyclotomic_power}
+  For any prime $\mathfrak{p}_0$ of $\QQ(\zeta_m)$ lying above $p$ with
+  $\mathfrak{p}_0 \nmid m$,
+  \[
+    (g(\chi)^m) = \mathfrak{p}_0^{m\theta}
+  \]
+  as ideals of $\cO_{\QQ(\zeta_m)}$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:gauss_sum_factorization_cyclotomic_power},
+  $(g(\chi)^{mf}) = \mathfrak{p}_0^{mf\theta}$, i.e.,
+  $((g(\chi)^m)^f) = (\mathfrak{p}_0^{m\theta})^f$.
+  Since the monoid of fractional ideals of a Dedekind domain is torsion-free,
+  we conclude $(g(\chi)^m) = \mathfrak{p}_0^{m\theta}$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:stickelberger_prime_power}
+  \uses{lem:gauss_sum_factorization_cyclotomic}
+  Let $\mathfrak{p}_0$ be a prime of $\QQ(\zeta_m)$ with $\mathfrak{p}_0 \nmid m$,
+  let $\beta \in \ZZ[G]$, and suppose $\beta\theta \in \ZZ[G]$. Then
+  $\mathfrak{p}_0^{\beta\theta}$ is principal in $\QQ(\zeta_m)$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:gauss_sum_factorization_cyclotomic},
+  $(g(\chi_{\mathfrak{p}_0})^m) = \mathfrak{p}_0^{m\theta}$. Therefore
+  \[
+    \mathfrak{p}_0^{m\beta\theta} = \left(g(\chi_{\mathfrak{p}_0})^m\right)^\beta
+    = \left(g(\chi_{\mathfrak{p}_0})^{m\beta}\right)
+  \]
+  is principal in $\QQ(\zeta_m, \zeta_p)$.
+  Since $g(\chi_{\mathfrak{p}_0})^{m\beta} \in \QQ(\zeta_m)$ by
+  \ref{lem:gauss_sum_power_in_cyclotomic}, it is principal in $\QQ(\zeta_m)$.
+  Since the monoid of fractional ideals is torsion-free, $\mathfrak{p}_0^{\beta\theta}$
+  is principal.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:stickelberger_coprime_m}
+  \uses{lem:stickelberger_prime_power}
+  Let $A$ be a fractional ideal of $\QQ(\zeta_m)$ with $(A, m) = 1$,
+  let $\beta \in \ZZ[G]$, and suppose $\beta\theta \in \ZZ[G]$. Then
+  $A^{\beta\theta}$ is principal.
+\end{lemma}
+
+\begin{proof}
+  Write $A = \prod_i \mathfrak{p}_i$ with each $\mathfrak{p}_i \nmid m$.
+  By \ref{lem:stickelberger_prime_power}, each $\mathfrak{p}_i^{\beta\theta}$
+  is principal, hence so is $A^{\beta\theta} = \prod_i \mathfrak{p}_i^{\beta\theta}$.
+\end{proof}
+
+\begin{theorem}
+  \label{thm:stickelberger}
+  \uses{lem:stickelberger_coprime_m}
+  Let $A$ be a fractional ideal of $\QQ(\zeta_m)$, let $\beta \in \ZZ[G]$,
+  and suppose $\beta\theta \in \ZZ[G]$. Then $A^{\beta\theta}$ is principal.
+  Therefore, the Stickelberger ideal annihilates the ideal class group of
+  $\QQ(\zeta_m)$.
+\end{theorem}
+
+\begin{proof}
+  Write $A = (a) A_1$ with $a \in \QQ(\zeta_m)^\times$ and $(A_1, m) = 1$.
+  Then $A^{\beta\theta} = (a^{\beta\theta}) A_1^{\beta\theta}$.
+  The factor $(a^{\beta\theta})$ is principal by definition. The factor
+  $A_1^{\beta\theta}$ is principal by \ref{lem:stickelberger_coprime_m}.
+  Therefore $A^{\beta\theta}$ is principal.
+\end{proof}
+
+\chapter{The Kronecker-Weber theorem}
+
+\section{Reduction to the prime degree case}
+
+Throughout this chapter, $\zeta_m$ denotes a primitive $m$-th root of unity.
+We say that an extension is \emph{unramified} if it is unramified at all
+finite primes. A normal extension $K/F$ has \emph{exponent} $m$ if
+$\Gal(K/F)$ has exponent $m$.
+
+The goal of this chapter is to prove the following theorem.
+
+\begin{theorem}
+  \label{thm:kronecker_weber}
+  \uses{lem:kw_reduce_to_prime_power, prop:kw_odd_prime_power, prop:kw_2_power}
+  Every abelian extension of $\QQ$ is contained in a cyclotomic field.
+\end{theorem}
+
+\begin{lemma}
+  \label{lem:kw_abelian_cyclic_decomp}
+  Every finite abelian extension $K/\QQ$ is the compositum of cyclic
+  extensions of prime power degree.
+\end{lemma}
+
+\begin{proof}
+  The Galois group $\Gal(K/\QQ)$ is a finite abelian group, hence a direct
+  product of cyclic groups of prime power order. Each factor corresponds to
+  a cyclic subextension of prime power degree, and $K$ is their compositum.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_reduce_to_unramified_outside_p}
+  Let $K/\QQ$ be a cyclic extension of prime power degree $p^m$. Then there
+  exists a cyclic extension $F/\QQ$ of prime power degree $p^m$ unramified
+  outside $p$ such that $K$ is cyclotomic if and only if $F$ is cyclotomic.
+\end{lemma}
+
+% Strategy: if q \neq p is ramified in K/Q, the ramification group
+% I_q \subseteq \Gal(K/Q) \cong \ZZ/p^m\ZZ is a nontrivial subgroup. One shows
+% that there exists a cyclotomic extension L = Q(\zeta_{q^k}) such that KL = FL
+% where F/Q is cyclic of degree p^m with q unramified. The key point is that the
+% ramification of q in KL/L comes entirely from L, so can be absorbed.
+% Iterating over all primes q \neq p ramified in K gives the result.
+% See Marcus, Number Fields, Theorem 21.
+
+\begin{lemma}
+  \label{lem:kw_reduce_to_prime_power}
+  \uses{lem:kw_abelian_cyclic_decomp, lem:kw_reduce_to_unramified_outside_p,
+        prop:kw_odd_prime_power, prop:kw_2_power}
+  It suffices to prove that every cyclic extension of $\QQ$ of prime power
+  degree unramified outside $p$ is cyclotomic.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:kw_abelian_cyclic_decomp}, any finite abelian extension of
+  $\QQ$ is a compositum of cyclic extensions of prime power degree. By
+  \ref{lem:kw_reduce_to_unramified_outside_p}, each such extension can be
+  replaced by a cyclotomic extension times a cyclic extension of prime power
+  degree unramified outside $p$. By \ref{prop:kw_odd_prime_power} and
+  \ref{prop:kw_2_power}, the latter is cyclotomic.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_cyclic_compositum}
+  If $K$ and $K'$ are two cyclic $p$-extensions of $\QQ$ and their
+  compositum $KK'$ is cyclic, then $K \subseteq K'$ or $K' \subseteq K$.
+\end{lemma}
+
+\begin{proof}
+  If $K \not\subseteq K'$ and $K' \not\subseteq K$, then $KK'$ contains
+  a subgroup isomorphic to $(\ZZ/p\ZZ)^2$, contradicting the assumption
+  that $\Gal(KK'/\QQ)$ is cyclic.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_ramification_reduction}
+  \uses{lem:kw_cyclic_compositum}
+  Let $K/\QQ$ be a cyclic extension of prime power degree $p^m$. If
+  $q \neq p$ is ramified in $K/\QQ$, then there exists a cyclic cyclotomic
+  extension $L/\QQ$ such that $KL = FL$ for some cyclic extension $F/\QQ$
+  of prime power degree in which $q$ is unramified.
+\end{lemma}
+
+\begin{lemma}
+  \label{lem:kw_minkowski}
+  Every extension of $\QQ$ of degree greater than $1$ is ramified at some
+  finite prime.
+\end{lemma}
+
+% Proof uses Minkowski's theorem on discriminants: |d_K| > 1 for any
+% nontrivial extension K/Q, so some prime divides d_K and is thus ramified.
+% A Mathlib PR is in progress for this result.
+
+\begin{proposition}
+  \label{prop:kw_2_quadratic}
+  The only quadratic extensions of $\QQ$ unramified outside $2$ are
+  $\QQ(i)$, $\QQ(\sqrt{-2})$, and $\QQ(\sqrt{2})$. In particular, the
+  maximal real abelian $2$-extension of $\QQ$ with exponent $2$ and
+  unramified outside $2$ is $\QQ(\sqrt{2})$, which is the subfield of
+  $\QQ(\zeta_8)$ of degree $2$.
+\end{proposition}
+
+\begin{proof}
+  A quadratic extension of $\QQ$ unramified outside $2$ has discriminant
+  a power of $2$, so it is of the form $\QQ(\sqrt{d})$ with $d \in \{-1, \pm 2\}$.
+  This gives exactly the three fields listed. Among these, only $\QQ(\sqrt{2})$
+  is real.
+\end{proof}
+
+\begin{proposition}
+  \label{prop:kw_2_power}
+  \uses{prop:kw_2_quadratic, lem:kw_cyclic_compositum, prop:kw_exponent_p}
+  Let $K/\QQ$ be a cyclic extension of degree $2^m$ unramified outside $2$.
+  Then $K$ is cyclotomic.
+\end{proposition}
+
+\begin{proof}
+  If $m = 1$ we are done by \ref{prop:kw_2_quadratic}. If $m \geq 2$,
+  assume first that $K$ is nonreal. Then $K(i)/K$ is a quadratic extension,
+  and its maximal real subfield $M$ is cyclic of degree $2^m$ over $\QQ$.
+  Since $K/\QQ$ is cyclotomic if and only if $M$ is, we may assume that
+  $K$ is totally real.
+
+  Let $K'$ be the maximal real subfield of $\QQ(\zeta_{2^{m+2}})$. If $K'K$
+  is not cyclic, then it contains three real quadratic subfields unramified
+  outside $2$, contradicting \ref{prop:kw_2_quadratic}. Thus $K'K$ is
+  cyclic, and \ref{lem:kw_cyclic_compositum} implies $K = K'$.
+\end{proof}
+
+\begin{proposition}
+  \label{prop:kw_odd_prime_power}
+  \uses{prop:kw_exponent_p, lem:kw_cyclic_compositum}
+  Let $K/\QQ$ be a cyclic extension of odd prime power degree $p^m$
+  unramified outside $p$. Then $K$ is cyclotomic.
+\end{proposition}
+
+\begin{proof}
+  Let $K'$ be the subfield of degree $p^m$ in $\QQ(\zeta_{p^{m+1}})$.
+  If $K'K$ is not cyclic, then it contains a subfield of type $(p, p)$
+  unramified outside $p$, which contradicts \ref{prop:kw_exponent_p}.
+  Thus $K'K$ is cyclic, and \ref{lem:kw_cyclic_compositum} implies
+  $K = K'$.
+\end{proof}
+
+\section{The prime degree case}
+
+\begin{proposition}
+  \label{prop:kw_exponent_p}
+  \uses{thm:stickelberger, lem:kw_kummer, lem:kw_abelian_kummer,
+        lem:kw_split_prime, lem:kw_mu_pth_power_ideal, lem:kw_class_trivial,
+        lem:kw_mu_unit, lem:kw_unit_root_of_unity}
+  Let $p$ be an odd prime. The maximal abelian extension of $\QQ$ of
+  exponent $p$ unramified outside $p$ is cyclic of degree $p$: it is
+  the subfield of degree $p$ of $\QQ(\zeta_{p^2})$.
+\end{proposition}
+
+\begin{proof}
+  Let $K/\QQ$ be a cyclic extension of prime degree $p$ unramified outside $p$.
+  By the sequence of lemmas below, $L = KF = \QQ(\zeta_{p^2})$
+  (see \ref{lem:kw_unit_root_of_unity}). Therefore $K \subseteq \QQ(\zeta_{p^2})$.
+  Since $[K:\QQ] = p = [\QQ(\zeta_{p^2}):F]$ and $K \cap F = \QQ$, $K$ is
+  the unique subfield of degree $p$ of $\QQ(\zeta_{p^2})$ linearly disjoint
+  from $F$, which is the subfield of degree $p$ of $\QQ(\zeta_{p^2})$ over $\QQ$.
+  Since any two cyclic extensions of degree $p$ unramified outside $p$ are
+  contained in $\QQ(\zeta_{p^2})$, the maximal such extension is exactly this
+  subfield.
+\end{proof}
+
+The proof of \ref{prop:kw_exponent_p} proceeds via the following lemmas.
+Let $K/\QQ$ be a cyclic extension of prime degree $p$ unramified outside $p$.
+Set $F = \QQ(\zeta_p)$ and $L = KF$.
+
+\begin{lemma}
+  \label{lem:kw_kummer}
+  \uses{lem:kw_abelian_kummer}
+  With the above notation, $L = F(\sqrt[p]{\mu})$ for some nonzero
+  $\mu \in \cO_F$, and $L/F$ is unramified outside $p$.
+\end{lemma}
+
+\begin{proof}
+  Since $[K:\QQ] = p$ and $[F:\QQ] = p-1$ are coprime, $K \cap F = \QQ$,
+  so $[L:F] = [KF:F] = [K:\QQ] = p$. The extension $L/F$ is Galois with
+  cyclic Galois group of order $p$, and $F$ contains the $p$-th roots of
+  unity $\mu_p$. By Kummer theory (\texttt{IsCyclic} + \texttt{Kummer}),
+  $L = F(\sqrt[p]{\mu})$ for some $\mu \in F^\times$. Multiplying by a
+  $p$-th power if necessary, we may assume $\mu \in \cO_F$.
+
+  For the ramification: let $q \neq p$ be a prime. Since $K/\QQ$ is
+  unramified at $q$ and $F/\QQ$ is unramified at $q$ (as $F = \QQ(\zeta_p)$
+  is only ramified at $p$), the compositum $L = KF$ is also unramified
+  at $q$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_abelian_kummer}
+  \uses{lem:kummer_abelian_criterion}
+  The Kummer extension $L = F(\sqrt[p]{\mu})$ is abelian over $\QQ$ if
+  and only if for every $\sigma_a \in \Gal(F/\QQ)$ there exists
+  $\xi \in F^\times$ such that $\sigma_a(\mu) = \xi^p \mu^a$.
+\end{lemma}
+
+% This is a general result on Kummer extensions; see Washington, Lemma 14.7
+% or Hilbert, Satz 147. Moved to auxiliary results chapter; proof to be added later.
+
+\begin{lemma}
+  \label{lem:kw_split_prime}
+  \uses{lem:kw_abelian_kummer}
+  Let $\mathfrak{q}$ be a prime ideal of $F$ with $(\mu) = \mathfrak{q}^r \mathfrak{a}$
+  with $\mathfrak{q} \nmid \mathfrak{a}$. If $p \nmid r$ and $L/\QQ$ is
+  abelian, then $\mathfrak{q}$ splits completely in $F/\QQ$.
+\end{lemma}
+
+\begin{proof}
+  Let $\sigma_a$ be an element of the decomposition group of $\mathfrak{q}$
+  in $\Gal(F/\QQ)$, so $\sigma_a(\mathfrak{q}) = \mathfrak{q}$.
+  Since $L/\QQ$ is abelian, by \ref{lem:kw_abelian_kummer} there exists
+  $\xi \in F^\times$ such that $\sigma_a(\mu) = \xi^p \mu^a$. Since
+  $\sigma_a(\mathfrak{q}) = \mathfrak{q}$, applying $\sigma_a$ to the
+  factorization $(\mu) = \mathfrak{q}^r \mathfrak{a}$ gives
+  $(\xi^p \mu^a) = \mathfrak{q}^r \sigma_a(\mathfrak{a})$, hence
+  $\mathfrak{q}^r \| \xi^p \mu^a$. But also $(\mu^a) = \mathfrak{q}^{ar}\mathfrak{a}^a$,
+  so $\mathfrak{q}^r \| \xi^p \mu^a$ implies $r \equiv ar \pmod{p}$.
+  Since $p \nmid r$, this forces $a \equiv 1 \pmod{p}$,
+  so $\sigma_a = 1$ and $\mathfrak{q}$ splits completely in $F/\QQ$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_mu_val_p}
+  \uses{lem:kw_split_prime}
+  For any prime $\mathfrak{q}$ of $\cO_F$, $p \mid v_{\mathfrak{q}}(\mu)$.
+\end{lemma}
+
+\begin{proof}
+  Write $v_{\mathfrak{q}}(\mu) = r$. If $\mathfrak{q} \nmid p$, then
+  $\mathfrak{q}$ does not split completely in $F/\QQ$ (since $F/\QQ$ is
+  totally ramified at $p$ and unramified elsewhere, so primes above $q \neq p$
+  have nontrivial decomposition group). By \ref{lem:kw_split_prime}, $p \mid r$.
+  If $\mathfrak{q} = \mathfrak{p}_p = (1-\zeta_p)$, the same argument applies:
+  $\mathfrak{p}_p$ does not split completely in $F/\QQ$, so $p \mid r$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_mu_pth_power_ideal}
+  \uses{lem:kw_split_prime, lem:kw_abelian_kummer, lem:kw_mu_val_p}
+  With the above notation, $(1 - \zeta_p) \nmid \mu$, and $(\mu) = \mathfrak{a}^p$
+  for some ideal $\mathfrak{a}$ of $\cO_F$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:kw_mu_val_p}, $p \mid v_{\mathfrak{q}}(\mu)$ for every prime
+  $\mathfrak{q}$. Therefore $(\mu) = \mathfrak{a}^p$ where
+  $\mathfrak{a} = \prod_{\mathfrak{q}} \mathfrak{q}^{v_{\mathfrak{q}}(\mu)/p}$.
+  In particular, $v_{\mathfrak{p}_p}(\mu) \equiv 0 \pmod{p}$, so either
+  $v_{\mathfrak{p}_p}(\mu) = 0$ (i.e. $(1-\zeta_p) \nmid \mu$) or
+  $v_{\mathfrak{p}_p}(\mu) \geq p$. The case $v_{\mathfrak{p}_p}(\mu) \geq p$
+  would mean $(1-\zeta_p)^p \mid \mu$, but since $L/F$ is unramified outside
+  $p$ and $\mu$ generates the Kummer extension, replacing $\mu$ by
+  $\mu/(1-\zeta_p)^p$ (which generates the same extension) we may assume
+  $v_{\mathfrak{p}_p}(\mu) = 0$, i.e. $(1-\zeta_p) \nmid \mu$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_class_trivial}
+  \uses{lem:kw_mu_pth_power_ideal, thm:stickelberger}
+  The ideal class $[\mathfrak{a}]$ is trivial, i.e., $\mathfrak{a}$ is principal.
+\end{lemma}
+
+\begin{proof}
+  From $(\mu) = \mathfrak{a}^p$ and $\sigma_a(\mu) = \xi^p \mu^a$
+  (by \ref{lem:kw_abelian_kummer}), we get
+  $\sigma_a(\mathfrak{a})^p = \sigma_a(\mathfrak{a}^p) = \sigma_a((\mu)) =
+  (\xi^p \mu^a) = \mathfrak{a}^{pa}$. Since the ideal monoid is torsion-free,
+  $\sigma_a(\mathfrak{a}) = \mathfrak{a}^a$, hence $\sigma_a([\mathfrak{a}]) =
+  [\mathfrak{a}]^a$ for every $1 \leq a < p$.
+
+  Now apply \ref{thm:stickelberger} with $M = F$, $m = p$, and
+  $\theta = \sum_{a=1}^{p-1} \{a/p\} \sigma_a^{-1} = \frac{1}{p}\sum_{a=1}^{p-1}
+  a\sigma_a^{-1}$. Taking $\beta = p \in \ZZ[G]$, we have $\beta\theta =
+  \sum_{a=1}^{p-1} a\sigma_a^{-1} \in \ZZ[G]$. By \ref{thm:stickelberger},
+  $[\mathfrak{a}]^{\beta\theta} = 1$. We compute
+  \[
+    [\mathfrak{a}]^{\beta\theta} = \prod_{a=1}^{p-1} \sigma_a^{-1}([\mathfrak{a}])^a
+    = \prod_{a=1}^{p-1} [\mathfrak{a}]^{a^{-1} \cdot a} = [\mathfrak{a}]^{p-1}
+    = [\mathfrak{a}]^{-1},
+  \]
+  where we used $\sigma_a^{-1}([\mathfrak{a}]) = [\mathfrak{a}]^{a^{-1}}$
+  (since $\sigma_{a^{-1}}([\mathfrak{a}]) = [\mathfrak{a}]^{a^{-1}}$).
+  Therefore $[\mathfrak{a}]^{-1} = 1$, i.e. $[\mathfrak{a}] = 1$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_mu_unit}
+  \uses{lem:kw_class_trivial}
+  There exists a unit $\eta \in \cO_F^\times$ such that $\mu = \alpha^p \eta$
+  for some $\alpha \in \cO_F$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:kw_class_trivial}, $\mathfrak{a} = (\alpha)$ for some
+  $\alpha \in \cO_F$. Then $(\mu) = \mathfrak{a}^p = (\alpha^p)$, so
+  $\mu/\alpha^p \in \cO_F^\times$. Setting $\eta = \mu/\alpha^p$ gives
+  $\mu = \alpha^p \eta$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_unit_root_of_unity}
+  \uses{lem:kw_mu_unit, lem:kw_abelian_kummer}
+  The unit $\eta$ is a $p$-th power times a root of unity, so $\mu = \zeta_p^t$
+  for some $t$. Therefore $L = \QQ(\zeta_{p^2})$.
+\end{lemma}
+
+\begin{proof}
+  Write $\eta = \zeta_p^t \varepsilon$ where $\varepsilon$ is a unit in the
+  maximal real subfield of $F$, so $\sigma_{-1}(\varepsilon) = \varepsilon$.
+  Since $L/\QQ$ is abelian, by \ref{lem:kw_abelian_kummer} applied to
+  $\sigma_{-1}$, there exists $\xi \in F^\times$ such that
+  $\sigma_{-1}(\mu) = \xi^p \mu^{-1}$. Since $\mu = \alpha^p \zeta_p^t \varepsilon$,
+  \[
+    \sigma_{-1}(\mu) = \alpha^p \zeta_p^{-t} \varepsilon
+    \quad \text{and} \quad
+    \xi^p \mu^{-1} = \xi^p \alpha^{-p} \zeta_p^{-t} \varepsilon^{-1}.
+  \]
+  Equating, $\varepsilon^2 = (\xi/\alpha)^{-p}$, so $\varepsilon$ is a $p$-th
+  power in $F^\times$. Therefore $\mu = \alpha^p \zeta_p^t \varepsilon =
+  (\alpha')^p \zeta_p^t$ for some $\alpha' \in \cO_F$, and
+  $L = F(\sqrt[p]{\mu}) = F(\sqrt[p]{\zeta_p^t}) \subseteq \QQ(\zeta_{p^2})$.
+  Since $[L:F] = p = [\QQ(\zeta_{p^2}):F]$, we conclude $L = \QQ(\zeta_{p^2})$.
 \end{proof}
 
 \chapter{Auxiliary results}
+
+\begin{lemma}
+  \label{lem:unramified_trivial}
+  Any abelian extension of $\QQ(\zeta_m)$ contained in $\QQ(\zeta_m, \zeta_p)$
+  and unramified at all primes is trivial.
+\end{lemma}
+
+\begin{lemma}
+  \label{lem:kummer_abelian_criterion}
+  Let $F$ be a number field containing $\mu_p$, let $\mu \in F^\times$, and
+  let $L = F(\sqrt[p]{\mu})$. Let $G_0 \leq \Gal(F/\QQ)$ be a subgroup.
+  Then $L/\QQ$ is Galois with $\Gal(L/\QQ)$ extending $G_0$ if and only if
+  for every $\sigma \in G_0$ there exists $\xi \in F^\times$ such that
+  $\sigma(\mu) = \xi^p \mu^{a(\sigma)}$ for some $a(\sigma) \in \ZZ$.
+  In particular, $L/\QQ$ is abelian if and only if for every
+  $\sigma_a \in \Gal(F/\QQ)$ there exists $\xi \in F^\times$ such that
+  $\sigma_a(\mu) = \xi^p \mu^a$.
+\end{lemma}
+
+% See Washington, Lemma 14.7 or Hilbert, Satz 147.
 
 \begin{lemma}
   \label{lem:ramification_idx}
@@ -541,14 +1293,14 @@ isomorphism.
 \begin{lemma}
   \label{lem:zeta_sub_one_not_mem_sq}
   \uses{lem:ramification_idx}
-  We have $\zeta - 1 \notin \fP^2$.
+  We have $\zeta_p - 1 \notin \fP^2$.
 \end{lemma}
 
 \begin{proof}
-  By \ref{lem:ramification_idx}, $e(\fP \mid p) = p - 1$. Since $\zeta$ is a
-  primitive $p$-th root of unity, $(\zeta - 1)$ generates the unique prime
+  By \ref{lem:ramification_idx}, $e(\fP \mid p) = p - 1$. Since $\zeta_p$ is a
+  primitive $p$-th root of unity, $(\zeta_p - 1)$ generates the unique prime
   above $p$ in $\QQ(\zeta_p)$, which has ramification index $p - 1$. Hence
-  $v_{\fP}(\zeta - 1) = 1$, so $\zeta - 1 \notin \fP^2$.
+  $v_{\fP}(\zeta_p - 1) = 1$, so $\zeta_p - 1 \notin \fP^2$.
 \end{proof}
 
 \begin{lemma}
@@ -559,10 +1311,10 @@ isomorphism.
 \end{lemma}
 
 \begin{proof}
-  This is a standard result: since $\cO_K/P$ is a finite field, $\chi \neq 1$,
-  and $\psi$ is primitive, we have $g(\chi, \psi) \cdot g(\bar\chi, \psi) = \pm q \neq 0$,
-  hence $g(\chi, \psi) \neq 0$
-  (see \texttt{gaussSum\_ne\_zero\_of\_nontrivial} in Mathlib).
+  Since $\chi \neq 1$ and $\psi$ is primitive, we have
+  $g(\chi, \psi) \cdot g(\chi^{-1}, \psi^{-1}) = q \neq 0$
+  (see \texttt{gaussSum\_mul\_gaussSum\_eq\_card} in Mathlib),
+  hence $g(\chi, \psi) \neq 0$.
 \end{proof}
 
 \begin{lemma}
@@ -579,17 +1331,19 @@ isomorphism.
   \uses{def:gauss_sum_s, def:addchar}
   For any additive character $\psi$ of $\cO_K/P$,
   \[
-    g(1, \psi) = \begin{cases} q - 1 & \text{if } \psi = 0 \\ -1 & \text{otherwise.} \end{cases}
+    g(1, \psi) = \begin{cases} q - 1 & \text{if } \psi = 1 \\ -1 & \text{otherwise,} \end{cases}
   \]
+  where $\psi = 1$ denotes the trivial character (identically equal to $1$).
 \end{lemma}
 
 \begin{lemma}
   \label{lem:gauss_sum_trivial_char}
   \uses{def:gauss_sum_s, lem:gauss_sum_one_left}
-  We have $g_0 = -1$.
+  Assume $q \neq 2$. Then $g_0 = -1$.
 \end{lemma}
 
 \begin{proof}
-  Since $\psi$ takes values in $\mu_p(\cO_L)$, $\psi \neq 0$. Therefore
+  Since $\psi$ takes values in $\mu_p(\cO_L)$ and $\psi$ is nontrivial by
+  \ref{lem:addchar_ne_one}, we have $\psi \neq 1$. Therefore
   $g_0 = g(1, \psi) = -1$ by \ref{lem:gauss_sum_one_left}.
 \end{proof}
