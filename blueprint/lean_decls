@@ -1,3 +1,10 @@
 teichmuller
 orderOf_teichmuller
+map_teichmuller_apply_eq_pow
 MulChar.sum_eq_zero_of_ne_one
+addCharTrace
+addCharTrace_ne_one
+addCharTrace_isPrimitive
+addCharTrace_frob_apply
+addCharTrace_mk_sq_eq
+addCharTrace_mk_eq_one

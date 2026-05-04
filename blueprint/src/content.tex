@@ -37,12 +37,15 @@ We fix a maximal ideal $P$ of $\cO_K$ lying above $p$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Since $\om$ is an isomorphism between groups of order $q - 1$, it has
   order $q - 1$ as a group homomorphism.
 \end{proof}
 
 \begin{lemma}
   \label{lem:teichmuller_frob}
+  \lean{map_teichmuller_apply_eq_pow}
+  \leanok
   \uses{def:teichmuller}
   Let $\sigma$ be a ring endomorphism of $\cO_L$ such that
   $\sigma(\zeta_{q-1}) = \zeta_{q-1}^m$ for some $m \in \ZZ$. Then
@@ -50,6 +53,7 @@ We fix a maximal ideal $P$ of $\cO_K$ lying above $p$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Since $\om(x) \in \mu_{q-1}(\cO_K)$, we have $\om(x) = \zeta_{q-1}^k$
   for some $k$. Then $\sigma(\om(x)) = \sigma(\zeta_{q-1})^k = \zeta_{q-1}^{mk}
   = \om(x)^m$.
@@ -67,6 +71,7 @@ We fix a maximal ideal $P$ of $\cO_K$ lying above $p$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Since $(q-1) \nmid a$, the character $\om^{-a}$ is nontrivial by
   \ref{lem:teichmuller_order}. By \texttt{MulChar.sum\_eq\_zero\_of\_ne\_one},
   $\sum_{x \in \cO_K/P} \om(x)^{-a} = 0$.
@@ -79,6 +84,8 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 
 \begin{definition}
   \label{def:addchar}
+  \lean{addCharTrace}
+  \leanok
   The \emph{additive character} $\psi : \cO_K/P \to \mu_p(\cO_L)$ is defined by
   \[
     \psi(x) = \zeta_p^{\tr_{(\cO_K/P)/(\ZZ/p\ZZ)}(x)}
@@ -89,10 +96,13 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addchar_ne_one}
   \uses{def:addchar}
+  \lean{addCharTrace_ne_one}
+  \leanok
   The character $\psi$ is nontrivial, i.e., $\psi \neq 1$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Since the extension $\cO_K/P$ over $\ZZ/p\ZZ$ is separable, the trace
   $\tr : \cO_K/P \to \ZZ/p\ZZ$ is nonzero, so there exists $x$ with
   $\tr(x) \neq 0$, hence $\psi(x) = \zeta_p^{\tr(x)} \neq 1$.
@@ -101,10 +111,13 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addchar_primitive}
   \uses{lem:addchar_ne_one}
+  \lean{addCharTrace_isPrimitive}
+  \leanok
   The character $\psi$ is primitive.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Since $\cO_K/P$ is a field, any nontrivial additive character is primitive.
   The character $\psi$ is nontrivial by \ref{lem:addchar_ne_one}.
 \end{proof}
@@ -112,10 +125,13 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addchar_frob}
   \uses{def:addchar}
+  \lean{addCharTrace_frob_apply}
+  \leanok
   For all $x \in \cO_K/P$, $\psi(x^p) = \psi(x)$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   The Frobenius map $\varphi : x \mapsto x^p$ is a $(\ZZ/p\ZZ)$-algebra
   automorphism of $\cO_K/P$. By \texttt{Algebra.trace\_eq\_of\_algEquiv},
   $\tr(\varphi(x)) = \tr(x)$, i.e., $\tr(x^p) = \tr(x)$. Therefore
@@ -125,6 +141,8 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addchar_mod_P_sq}
   \uses{def:addchar}
+  \lean{addCharTrace_mk_sq_eq}
+  \leanok
   Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta_p - 1 \in \fP$.
   Then
   \[
@@ -134,6 +152,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   There exists $a \in \mathbb{N}$ such that $\tr(x) = a$ and $\psi(x) = \zeta_p^a$.
   By the binomial theorem,
   \[
@@ -149,11 +168,14 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addchar_mod_P}
   \uses{lem:addchar_mod_P_sq}
+  \lean{addCharTrace_mk_eq_one}
+  \leanok
   Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta_p - 1 \in \fP$.
   Then $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta_p - 1) \pmod{\fP^2}$.
   Since $\zeta_p - 1 \in \fP$, the term $\tr(x) \cdot (\zeta_p - 1) \in \fP$,
   hence $\psi(x) \equiv 1 \pmod{\fP}$.
