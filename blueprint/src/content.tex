@@ -183,6 +183,8 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 
 \chapter{The Gauss sum}
 
+Throughout this chapter and the next two, we assume that $p$ is an odd prime.
+
 Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta_p - 1 \in \fP$. Let $F$ be
 the subfield of $L$ with $F = \QQ(\zeta_p)$. The Galois group $\Gal(L/F)$
 is isomorphic to $(\ZZ/(q-1)\ZZ)^\times$ via the map $\sigma \mapsto a$
@@ -195,48 +197,24 @@ isomorphism.
 \begin{definition}
   \label{def:gauss_sum_s}
   \uses{def:teichmuller, def:addchar}
+  \lean{GaussSum}
+  \leanok
   For $a \in \ZZ$, the \emph{Gauss sum} is
   \[
-    g_a = \begin{cases}
-      2 & \text{if } q = 2, \\
-      g(\om^{-a}, \psi) = \displaystyle\sum_{x \in \cO_K/P} \om(x)^{-a} \cdot \psi(x) & \text{otherwise.}
-    \end{cases}
+    g_a = g(\om^{-a}, \psi) = \sum_{x \in \cO_K/P} \om(x)^{-a} \cdot \psi(x).
   \]
 \end{definition}
 
 \begin{lemma}
-  \label{lem:gauss_sum_ne_zero}
-  \uses{def:gauss_sum_s, lem:addchar_primitive, lem:teichmuller_order, lem:gauss_sum_nonzero_aux}
-  If $(q-1) \nmid a$, then $g_a \neq 0$.
-\end{lemma}
-
-\begin{proof}
-  Since $(q-1) \nmid a$, $\omega^{-a} \neq 1$ by \ref{lem:teichmuller_order}.
-  Since $\psi$ is primitive by \ref{lem:addchar_primitive}, the result follows
-  from \ref{lem:gauss_sum_nonzero_aux}.
-\end{proof}
-
-\begin{lemma}
-  \label{lem:gauss_sum_mul}
-  \uses{def:gauss_sum_s}
-  If $(q-1) \nmid (a+b)$, then
-  \[
-    g_a \cdot g_b = g_{a+b} \cdot J(\omega^{-a}, \omega^{-b}).
-  \]
-\end{lemma}
-
-\begin{proof}
-  This follows from \texttt{jacobiSum\_mul\_nontrivial} applied to
-  $\chi = \omega^{-a}$ and $\phi = \omega^{-b}$.
-\end{proof}
-
-\begin{lemma}
   \label{lem:gauss_sum_mem}
-  \uses{def:gauss_sum_s, lem:addchar_mod_P, lem:teichmuller_order}
+  \uses{def:gauss_sum_s, lem:addchar_mod_P, lem:teichmuller_order, lem:teichmuller_sum}
+  \lean{GaussSum_mem}
+  \leanok
   If $(q-1) \nmid a$, then $g_a \in \fP$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:addchar_mod_P}, $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.
   Therefore
   \[
@@ -249,9 +227,48 @@ isomorphism.
 \end{proof}
 
 \begin{lemma}
+  \label{lem:gauss_sum_norm}
+  \uses{def:gauss_sum_s, lem:addchar_primitive, lem:teichmuller_order, lem:gauss_sum_mem}
+  \lean{norm_GaussSum}
+  \leanok
+  If $(q-1) \nmid a$, then there exists $k \geq 1$ such that
+  $N_{L/\QQ}(g_a) = \pm p^k$.
+  In particular, the only rational prime dividing $N_{L/\QQ}(g_a)$ is $p$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Since $(q-1) \nmid a$, $\omega^{-a}$ is nontrivial by
+  \ref{lem:teichmuller_order}, and $\psi$ is primitive by
+  \ref{lem:addchar_primitive}. By \texttt{gaussSum\_mul\_gaussSum\_eq\_card},
+  \[
+    g_a \cdot g_{-a} = \omega^a(-1) \cdot q = \pm p^f.
+  \]
+  Taking norms, $N_{L/\QQ}(g_a) \cdot N_{L/\QQ}(g_{-a}) = \pm p^{f \cdot [L:\QQ]}$.
+  Since both norms are integers and their product is $\pm p^{f \cdot [L:\QQ]}$,
+  each is of the form $\pm p^k$ for some $k \geq 0$. By \ref{lem:gauss_sum_mem},
+  $g_a \in \fP$, so $g_a$ is not a unit in $\cO_L$, hence $N_{L/\QQ}(g_a) \neq \pm 1$,
+  thus $k \geq 1$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:gauss_sum_ne_zero}
+  \uses{lem:gauss_sum_norm}
+  \lean{GaussSum_ne_zero}
+  \leanok
+  If $(q-1) \nmid a$, then $g_a \neq 0$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  By \ref{lem:gauss_sum_norm}, $N_{L/\QQ}(g_a) = \pm p^k \neq 0$,
+  hence $g_a \neq 0$.
+\end{proof}
+
+\begin{lemma}
   \label{lem:gauss_sum_one_mod_sq}
   \uses{lem:addchar_mod_P_sq, lem:teichmuller_order, lem:sum_teich_trace}
-  Assume $q \neq 2$ and $\zeta_p - 1 \in \fP$. Then
+  Assume $\zeta_p - 1 \in \fP$. Then
   \[
     g_1 \equiv -(\zeta_p - 1) \pmod{\fP^2}.
   \]
@@ -263,8 +280,9 @@ isomorphism.
   \[
     g_1 \equiv \sum_{x} \omega(x)^{-1} + (\zeta_p-1) \sum_{x} \omega(x)^{-1} \tr(x) \pmod{\fP^2}.
   \]
-  Since $q \neq 2$, $\omega^{-1} \neq 1$ by \ref{lem:teichmuller_order}, so
-  $\sum_x \omega(x)^{-1} = 0$ by orthogonality of characters. Moreover,
+  Since $p$ is odd, $q - 1 \geq 2$, so $\omega^{-1} \neq 1$ by
+  \ref{lem:teichmuller_order}, and $\sum_x \omega(x)^{-1} = 0$ by orthogonality
+  of characters. Moreover,
   $\sum_{x \in \cO_K/P} \omega(x)^{-1} \cdot \tr(x) = -1$ by \ref{lem:sum_teich_trace}.
   Hence $g_1 \equiv -(\zeta_p - 1) \pmod{\fP^2}$.
 \end{proof}
@@ -311,6 +329,20 @@ isomorphism.
 \section{Jacobi sums}
 
 \begin{lemma}
+  \label{lem:gauss_sum_mul}
+  \uses{def:gauss_sum_s}
+  If $(q-1) \nmid (a+b)$, then
+  \[
+    g_a \cdot g_b = g_{a+b} \cdot J(\omega^{-a}, \omega^{-b}).
+  \]
+\end{lemma}
+
+\begin{proof}
+  This follows from \texttt{jacobiSum\_mul\_nontrivial} applied to
+  $\chi = \omega^{-a}$ and $\phi = \omega^{-b}$.
+\end{proof}
+
+\begin{lemma}
   \label{lem:jac_in_OK}
   \uses{def:gauss_sum_s}
   For all $a, b \in \ZZ$, $J(\omega^{-a}, \omega^{-b}) \in \cO_K$.
@@ -354,7 +386,7 @@ isomorphism.
 \begin{lemma}
   \label{lem:s_eq_val}
   \uses{def:s, def:gauss_sum_s, lem:gauss_sum_trivial_char}
-  Assume $q \neq 2$. Then for all $a \in \ZZ$, $s(a) = v_{\fP}(g_a)$.
+  For all $a \in \ZZ$, $s(a) = v_{\fP}(g_a)$.
 \end{lemma}
 
 \begin{proof}
@@ -468,7 +500,7 @@ isomorphism.
 \begin{lemma}
   \label{lem:s_one}
   \uses{lem:gauss_sum_mem, lem:gauss_sum_one_mod_sq, lem:zeta_sub_one_not_mem_sq}
-  Assume $q \neq 2$. Then $s(1) = 1$.
+  $s(1) = 1$.
 \end{lemma}
 
 \begin{proof}
@@ -486,9 +518,7 @@ isomorphism.
 
 \begin{proof}
   We proceed by induction on $a$. The case $a = 0$ is immediate from the
-  definition. For $a \geq 1$, since $a \leq p - 2$ we have $p \geq 3$,
-  hence $q = p^f \geq 3$ and $q \neq 2$.
-  For $a = 1$, this is \ref{lem:s_one}. Now let $2 \leq a \leq p - 2$
+  definition. For $a = 1$, this is \ref{lem:s_one}. Now let $2 \leq a \leq p - 2$
   and assume $s(a-1) = a - 1$.
 
   By \ref{lem:s_subadditive} and the induction hypothesis,
@@ -676,7 +706,7 @@ isomorphism.
 
 \begin{lemma}
   \label{lem:gauss_sum_factorization}
-  \uses{lem:val_galois_gauss_sum, lem:primes_above_p, lem:gauss_sum_ne_zero, lem:s_frob}
+  \uses{lem:val_galois_gauss_sum, lem:primes_above_p, lem:gauss_sum_norm, lem:s_frob}
   For all $a \in \ZZ$ with $(q-1) \nmid a$,
   \[
     (g_a)^f = \prod_{\sigma \in \Gal(L/F)} \sigma(\fP)^{s(\fn(\sigma^{-1}))}.
@@ -684,9 +714,10 @@ isomorphism.
 \end{lemma}
 
 \begin{proof}
-  Since $(q-1) \nmid a$, we have $g_a \neq 0$ by \ref{lem:gauss_sum_ne_zero}.
-  The only primes dividing $(g_a)$ are those above $p$, since $g_a$ is an
-  algebraic integer whose norm is a power of $p$. By \ref{lem:primes_above_p},
+  Since $(q-1) \nmid a$, we have $g_a \neq 0$ by \ref{lem:gauss_sum_norm}.
+  The only primes dividing $(g_a)$ are those above $p$, since by
+  \ref{lem:gauss_sum_norm} the only rational prime dividing $N_{L/\QQ}(g_a)$
+  is $p$. By \ref{lem:primes_above_p},
   these are exactly the $\sigma(\fP)$ for $\sigma \in \Gal(L/F)$.
 
   For each prime $\fQ = \sigma_0(\fP)$ above $p$, the exponent of $\fQ$ in
@@ -1361,7 +1392,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \begin{lemma}
   \label{lem:gauss_sum_trivial_char}
   \uses{def:gauss_sum_s, lem:gauss_sum_one_left}
-  Assume $q \neq 2$. Then $g_0 = -1$.
+  $g_0 = -1$.
 \end{lemma}
 
 \begin{proof}

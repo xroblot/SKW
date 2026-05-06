@@ -26,6 +26,13 @@ theorem addCharTrace_apply [P.LiesOver 𝒑] (x : A ⧸ P) :
     addCharTrace P hζ x =
       ζ ^ (Int.quotientSpanNatEquivZMod p (Algebra.trace (ℤ ⧸ 𝒑) (A ⧸ P) x)).val := rfl
 
+theorem exists_nat_addCharTrace_eq_pow [P.LiesOver 𝒑] (x : A ⧸ P) :
+    ∃ a : ℕ, addCharTrace P hζ x = ζ ^ a ∧ Algebra.trace (ℤ ⧸ 𝒑) (A ⧸ P) x = a := by
+  refine ⟨(Int.quotientSpanNatEquivZMod p (Algebra.trace (ℤ ⧸ 𝒑) (A ⧸ P) x)).val, rfl, ?_⟩
+  rw [← map_natCast (Ideal.Quotient.mk 𝒑), ← Int.quotientSpanNatEquivZMod_comp_castRingHom p,
+    RingHom.comp_apply, map_natCast]
+  simp only [ZMod.natCast_val, ZMod.cast_id', id_eq, RingHom.coe_coe, RingEquiv.symm_apply_apply]
+
 theorem addCharTrace_apply_eq_one_iff [P.LiesOver 𝒑] {x : A ⧸ P} :
     addCharTrace P hζ x = 1 ↔ Algebra.trace (ℤ ⧸ 𝒑) (A ⧸ P) x = 0 := by
   rw [addCharTrace_apply, ← orderOf_dvd_iff_pow_eq_one, ← hζ.eq_orderOf, ← ZMod.natCast_eq_zero_iff,
@@ -62,17 +69,18 @@ theorem addCharTrace_mk_eq_one [P.LiesOver 𝒑] {𝓟 : Ideal R} (h : ζ - 1 �
     rw [Quotient.eq_zero_iff_mem.mpr h, zero_pow x.succ_ne_zero, zero_mul]
 
 include hζ in
-theorem addCharTrace_mk_sq_eq [P.LiesOver 𝒑] {𝓟 : Ideal R} (h : ζ - 1 ∈ 𝓟) (x : A ⧸ P) :
+theorem addCharTrace_mk_sq_eq [P.LiesOver 𝒑] {𝓟 : Ideal R} [(𝓟 ^ 2).LiesOver 𝒑] (h : ζ - 1 ∈ 𝓟)
+    (x : A ⧸ P) :
     Ideal.Quotient.mk (𝓟 ^ 2) (addCharTrace P hζ x) =
-      1 + ((Int.quotientSpanNatEquivZMod p (Algebra.trace (ℤ ⧸ 𝒑) (A ⧸ P) x)).val : R ⧸ 𝓟 ^ 2) *
-        (Ideal.Quotient.mk (𝓟 ^ 2) (ζ - 1)) := by
-  rw [addCharTrace_apply, show ζ = (ζ - 1) + 1 by ring, add_pow]
-  simp only [one_pow, mul_one, map_sum, map_mul, map_natCast, sub_add_cancel]
-  cases ((Int.quotientSpanNatEquivZMod p) ((Algebra.trace (ℤ ⧸ 𝒑) (A ⧸ P)) x)).val
+      1 + Algebra.trace (ℤ ⧸ 𝒑) (A ⧸ P) x • (Ideal.Quotient.mk (𝓟 ^ 2) (ζ - 1)) := by
+  obtain ⟨a, ha, ha'⟩ := exists_nat_addCharTrace_eq_pow P hζ x
+  rw [ha, ha', show ζ = (ζ - 1) + 1 by ring, add_pow]
+  simp only [one_pow, mul_one, map_sum, map_mul, map_natCast, sub_add_cancel, Algebra.smul_def]
+  cases a
   · simp
   · simp only [Finset.sum_range_succ', zero_add, pow_one, Nat.choose_one_right, Nat.cast_add,
       Nat.cast_one, pow_zero, Nat.choose_zero_right, mul_one]
-    rw [Finset.sum_eq_zero fun x _ ↦ ?_, zero_add, add_comm, mul_comm, map_one]
+    rw [Finset.sum_eq_zero fun x _ ↦ ?_, zero_add, map_one, add_comm, mul_comm]
     rw [Quotient.eq_zero_iff_mem.mpr, zero_mul]
     rw [add_assoc, pow_add]
     exact Ideal.mul_mem_left _ _ <| Submodule.pow_mem_pow 𝓟 h 2

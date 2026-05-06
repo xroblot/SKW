@@ -8,3 +8,7 @@ addCharTrace_isPrimitive
 addCharTrace_frob_apply
 addCharTrace_mk_sq_eq
 addCharTrace_mk_eq_one
+GaussSum
+GaussSum_mem
+norm_GaussSum
+GaussSum_ne_zero
