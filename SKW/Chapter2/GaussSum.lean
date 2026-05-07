@@ -25,7 +25,16 @@ theorem three_le_p_pow [hp : Fact (p.Prime)] [hp' : Fact (Odd p)] : 3 ≤ p ^ f 
   refine le_trans (Nat.le_pow hf) ?_
   exact (Nat.pow_le_pow_iff_left hf.ne').mpr <| (Nat.Prime.odd_iff hp.out).mp hp'.out
 
+theorem coprime_pow_sub_one [Fact (p.Prime)] : (p ^ f - 1).Coprime p := by
+  have hf : f ≠ 0 := by
+    by_contra!; aesop
+  rw [← Nat.coprime_pow_right_iff hf.pos, Nat.coprime_self_sub_left NeZero.one_le]
+  exact Nat.gcd_one_left _
+
 variable {p f}
+
+-- variable {L : Type*} [Field L] {ζ η : 𝓞 L} (hζ : IsPrimitiveRoot ζ p)
+--    (hη : IsPrimitiveRoot η (p ^ f - 1)) (𝓟 : Ideal (𝓞 L))
 
 variable {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p ^ f - 1} ℚ K]
   {P : Ideal (𝓞 K)}
@@ -167,9 +176,9 @@ theorem sum_sum_inv_mul_pow_eq_neg_one [P.LiesOver 𝒑] :
   · exact NeZero.one_le
   · rwa [Nat.pred_eq_sub_one, Finset.mem_range, ← Nat.add_lt_iff_lt_sub_right] at hi
 
-variable [hp' : Fact (Odd p)] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
+variable [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
 
-theorem mk_sq_gausssum_eq [𝓟.LiesOver P] [P.LiesOver 𝒑] :
+theorem mk_sq_gausssum_eq [hp' : Fact (Odd p)] [𝓟.LiesOver P] [P.LiesOver 𝒑] :
     Ideal.Quotient.mk (𝓟 ^ 2) (GaussSum hbij hζ 1) = -(ζ - 1 : 𝓞 L) := by
   have : 3 ≤ p := (Nat.Prime.odd_iff hp.out).mp hp'.out
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
@@ -193,31 +202,57 @@ theorem mk_sq_gausssum_eq [𝓟.LiesOver P] [P.LiesOver 𝒑] :
       FiniteField.algebraMap_trace_eq_sum_pow, map_sum, Finset.mul_sum, ← map_mul, ← map_sum]
   rw [sum_sum_inv_mul_pow_eq_neg_one, map_neg, map_one, neg_one_mul, map_neg]
 
+set_option backward.isDefEq.respectTransparency false in
+variable (p f K) in
+def galFEquiv : Gal(L/F) ≃* (ZMod (p ^ f - 1))ˣ :=
+  letI K' := (IsScalarTower.toAlgHom ℚ K L).fieldRange
+  haveI := F_isCyclotomicExtension p hζ
+  haveI := IsCyclotomicExtension.isAbelianGalois {p * (p ^ f - 1)} ℚ L
+  haveI : IsCyclotomicExtension {p ^ f - 1} ℚ K' := .equiv _ ℚ K
+    (IsScalarTower.toAlgHom ℚ K L).equivFieldRange
+  haveI := IsCyclotomicExtension.isAbelianGalois {p ^ f - 1} ℚ K'
+  (MulEquiv.ofBijective (IntermediateField.restrictRestrictAlgEquivMapHom ℚ K' F L)
+    ⟨by
+      refine IntermediateField.restrictRestrictAlgEquivMapHom_injective _ _ ?_
+      have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ (⊤ : IntermediateField ℚ L) :=
+      IsCyclotomicExtension.equiv _ _ _ topEquiv.symm
+      have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ ↥(K' ⊔ F) := by
+        rw [mul_comm, ← Nat.Coprime.lcm_eq_mul (coprime_pow_sub_one p f)]
+        exact isCyclotomicExtension_lcm_sup ℚ L (p ^ f - 1) p  K' F
+      exact isCyclotomicExtension_eq {p * (p ^ f - 1)}  ℚ L _ _,
+    by
+      refine IntermediateField.restrictRestrictAlgEquivMapHom_surjective K' F ?_
+      apply IntermediateField.LinearDisjoint.inf_eq_bot
+      apply IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (p ^ f - 1) p K' F
+        (coprime_pow_sub_one p f)⟩).trans<| IsCyclotomicExtension.Rat.galEquivZMod (p ^ f - 1) K'
 
 set_option backward.isDefEq.respectTransparency false in
 variable (p f) in
-def galFEquiv : Gal(L/F) ≃* (ZMod (p ^ f - 1))ˣ := by
-  let s := IsScalarTower.toAlgHom ℚ K L
-  let K' := s.fieldRange
-  have := F_isCyclotomicExtension p hζ
-  have : IsCyclotomicExtension {p ^ f - 1} ℚ K' := .equiv _ ℚ K (AlgHom.equivFieldRange s)
+theorem apply_eq_pow_galFEquiv (σ : Gal(L/F)) (x : L) (h : x ^ (p ^ f - 1) = 1) :
+    σ x = x ^ (galFEquiv p f K hζ σ).val.val := by
+  let K' := (IsScalarTower.toAlgHom ℚ K L).fieldRange
+  have : IsCyclotomicExtension {p ^ f - 1} ℚ K' := .equiv _ ℚ K
+    (IsScalarTower.toAlgHom ℚ K L).equivFieldRange
   have := IsCyclotomicExtension.isAbelianGalois {p ^ f - 1} ℚ K'
-  let e := MulEquiv.ofBijective (IntermediateField.restrictRestrictAlgEquivMapHom ℚ K' F L)
-    ⟨?_, ?_⟩
-  let g := IsCyclotomicExtension.Rat.galEquivZMod (p ^ f - 1) K'
-  exact e.trans g
-  · refine IntermediateField.restrictRestrictAlgEquivMapHom_injective _ _ ?_
-    sorry
-    -- apply IntermediateField.restrictRestrictAlgEquivMapHom_injective
-  · refine IntermediateField.restrictRestrictAlgEquivMapHom_surjective K' F ?_
+  have hx : x ∈ K' := by
+    rw [← orderOf_dvd_iff_pow_eq_one] at h
+    have : NeZero (orderOf x) := ⟨by
+      by_contra! h
+      aesop⟩
+    have : IsCyclotomicExtension {orderOf x} ℚ ℚ⟮x⟯ :=
+      (IsPrimitiveRoot.orderOf x).intermediateField_adjoin_isCyclotomicExtension ℚ
+    refine adjoin_simple_le_iff.mp ?_
+    exact isCyclotomicExtension_le_of_dvd ℚ L (orderOf x) (p ^ f - 1) ℚ⟮x⟯ K' h
+  let y : K' := ⟨x, hx⟩
+  have := AlgEquiv.restrictNormalHom_apply K' (σ.restrictScalars ℚ) ⟨x, hx⟩
+  erw [← this]
+  simp [galFEquiv]
+  rw [IsCyclotomicExtension.Rat.galEquivZMod_apply_of_pow_eq (p ^ f - 1)]
+  rfl
+  simpa [y, Subtype.ext_iff]
 
-
-variable (p f) in
-theorem apply_eq_pow_galFEquiv (σ : Gal(L/F)) (η : L) (hη : η ^ (p ^ f - 1) = 1) :
-    σ η = η ^ (galFEquiv p f σ).val.val := sorry
-
-example [P.LiesOver 𝒑] (σ : Gal(L/F)) :
-    σ (GaussSum hbij hζ 1) = GaussSum hbij hζ (galFEquiv p f σ).val.val := by
+example [hp' : Fact (Odd p)] [P.LiesOver 𝒑] (σ : Gal(L/F)) :
+    σ (GaussSum hbij hζ 1) = GaussSum hbij hζ (galFEquiv p f K hζ σ).val.val := by
   simp_rw [GaussSum, gaussSum, MulChar.ringHomComp_apply, map_sum, map_mul,
     ← IsScalarTower.algebraMap_apply]
   refine Fintype.sum_congr _ _ fun x ↦ ?_
@@ -226,7 +261,7 @@ example [P.LiesOver 𝒑] (σ : Gal(L/F)) :
     simp only [Int.reduceNeg, zpow_neg, zpow_one]
     rw [MulChar.inv_apply', ← MulChar.ringHomComp_apply, ← MulChar.ringHomComp_apply,
       ← AlgEquiv.coe_ringEquiv', ← RingEquiv.coe_toRingHom,
-      map_teichmuller_apply_eq_pow hbij _ (galFEquiv p f σ).val.val _ hη,
+      map_teichmuller_apply_eq_pow hbij _ (galFEquiv p f K hζ σ).val.val _ hη,
       ← MulChar.ringHomComp_inv, ← MulChar.inv_apply', zpow_natCast]
     · simp
       rw [toto p f]

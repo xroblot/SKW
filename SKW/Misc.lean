@@ -5,6 +5,7 @@ public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
 public import Mathlib.NumberTheory.MulChar.Basic
 public import Mathlib.NumberTheory.NumberField.Units.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 
 @[expose] public section
 
@@ -65,3 +66,29 @@ noncomputable def AlgHom.equivFieldRange {K L L' : Type*} [Field K] [Field L] [F
 theorem equivFieldRange_apply {K L L' : Type*} [Field K] [Field L] [Field L'] [Algebra K L]
     [Algebra K L'] (f : L →ₐ[K] L') (x : L) : f.equivFieldRange x = f x :=
   rfl
+
+theorem IsCyclotomicExtension.Rat.discr_coprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂] (K₁ K₂ : Type*)
+    [Field K₁] [Field K₂] [NumberField K₁] [NumberField K₂] [IsCyclotomicExtension {n₁} ℚ K₁]
+    [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
+    IsCoprime (NumberField.discr K₁) (NumberField.discr K₂) := by
+  rw [Int.isCoprime_iff_nat_coprime, natAbs_discr  n₁ K₁, natAbs_discr  n₂ K₂]
+  refine Nat.Coprime.coprime_div_left ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
+  refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
+  exact Nat.Coprime.pow_left _ (Nat.Coprime.pow_right _ h)
+
+theorem IntermediateField.linearDisjoint_iff'' {F E : Type*} [Field F] [Field E] [Algebra F E]
+    (A : IntermediateField F E) (L : Type*) [Field L] [Algebra F L] [Algebra L E]
+    [IsScalarTower F L E] :
+    A.LinearDisjoint L ↔ A.LinearDisjoint (IsScalarTower.toAlgHom F L E).fieldRange := by
+  rw [linearDisjoint_iff', AlgHom.fieldRange_toSubalgebra]
+
+theorem IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂]
+    {E : Type*} [Field E] [NumberField E] (K₁ : IntermediateField ℚ E) [NumberField K₁] (K₂ : Type*)
+    [Field K₂] [NumberField K₂] [Algebra K₂ E] [IsCyclotomicExtension {n₁} ℚ K₁]
+    [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
+    K₁.LinearDisjoint K₂ := by
+  have : IsCyclotomicExtension {n₂} ℚ (IsScalarTower.toAlgHom ℚ K₂ E).fieldRange :=
+    .equiv _ ℚ K₂ (AlgHom.equivFieldRange _)
+  have : IsGalois ℚ K₁ := IsCyclotomicExtension.isGalois {n₁} ℚ K₁
+  rw [IntermediateField.linearDisjoint_iff'']
+  exact NumberField.linearDisjoint_of_isGalois_isCoprime_discr E _ _ <| discr_coprime n₁ n₂ K₁ _ h
