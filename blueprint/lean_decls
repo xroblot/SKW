@@ -12,3 +12,4 @@ GaussSum
 GaussSum_mem
 norm_GaussSum
 GaussSum_ne_zero
+mk_sq_gausssum_eq

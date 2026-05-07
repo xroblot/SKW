@@ -22,7 +22,6 @@ theorem rootsOfUnity.coe_mapQuot (x : rootsOfUnity n R) :
 
 variable {n I} (hbij : Function.Bijective (rootsOfUnity.mapQuot n I))
 
-@[simps!]
 noncomputable def teichmuller : MulChar (R ⧸ I) R :=
   MulChar.ofUnitHom <| (rootsOfUnity n R).subtype.comp (MulEquiv.ofBijective _ hbij).symm.toMonoidHom
 
@@ -30,10 +29,15 @@ attribute [local instance] Ideal.Quotient.field
 
 open Classical
 
+theorem teichmuller_apply (x : R ⧸ I) :
+    teichmuller hbij x =
+      if hx : IsUnit x then
+        (((MulEquiv.ofBijective (rootsOfUnity.mapQuot n I) hbij).symm hx.unit).val : R) else 0 := rfl
+
 theorem teichmuller_eq_one (hI : I = ⊤) :
     teichmuller hbij = 1 := by
   rw [← Ideal.Quotient.subsingleton_iff] at hI
-  exact MulChar.eq_one_iff.mpr fun x ↦ by simp [isUnit_iff_eq_one, Units.eq_one x]
+  exact MulChar.eq_one_iff.mpr fun x ↦ by simp [teichmuller_apply, isUnit_iff_eq_one, Units.eq_one x]
 
 theorem teichmuller_apply_zero (hI : I ≠ ⊤) :
     teichmuller hbij 0 = 0 := by
@@ -71,11 +75,13 @@ theorem exists_nat_teichmuller_eq_pow [IsDomain R] [NeZero n] {ζ : R} (hζ : Is
   obtain ⟨a, -, ha⟩ := hζ.eq_pow_of_pow_eq_one this
   exact ⟨a, ha.symm⟩
 
-theorem map_teichmuller_apply_eq_pow [IsDomain R] [NeZero n] {σ : R →+* R} {m : ℕ} {ζ : R}
-    (hm : m ≠ 0) (hζ : IsPrimitiveRoot ζ n) (hσ : σ ζ = ζ ^ m) (x : R ⧸ I) :
-    σ (teichmuller hbij x) = (teichmuller hbij x) ^ m  := by
+theorem map_teichmuller_apply_eq_pow [IsDomain R] [NeZero n] {S : Type*}
+    [CommRing S] (f : R →+* S) {σ : S →+* S} (m : ℕ) {ζ : R}
+    (hm : m ≠ 0) (hζ : IsPrimitiveRoot ζ n) (hσ : σ (f ζ) = (f ζ) ^ m) (x : R ⧸ I) :
+    σ ((teichmuller hbij).ringHomComp f x) = (teichmuller hbij ^ m).ringHomComp f x  := by
+  let a := (hζ.isUnit (NeZero.ne _)).unit
   by_cases hx : IsUnit x
   · lift x to (R ⧸ I)ˣ using hx
     obtain ⟨a , ha⟩ := exists_nat_teichmuller_eq_pow hbij hζ x
-    rw [ha, map_pow, hσ, pow_right_comm]
-  · simp [dif_neg hx, zero_pow hm]
+    simp [MulChar.ringHomComp_apply, MulChar.pow_apply' _ hm, ha, hσ, pow_right_comm]
+  · simp [MulChar.map_nonunit _ hx]

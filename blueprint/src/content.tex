@@ -267,7 +267,9 @@ isomorphism.
 
 \begin{lemma}
   \label{lem:gauss_sum_one_mod_sq}
-  \uses{lem:addchar_mod_P_sq, lem:teichmuller_order, lem:sum_teich_trace}
+  \uses{lem:addchar_mod_P_sq, lem:teichmuller_order}
+  \lean{mk_sq_gausssum_eq}
+  \leanok
   Assume $\zeta_p - 1 \in \fP$. Then
   \[
     g_1 \equiv -(\zeta_p - 1) \pmod{\fP^2}.
@@ -275,6 +277,7 @@ isomorphism.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta_p - 1) \pmod{\fP^2}$
   for all $x \in \cO_K/P$. Therefore
   \[
@@ -1369,15 +1372,6 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   (see \texttt{gaussSum\_mul\_gaussSum\_eq\_card} in Mathlib),
   hence $g(\chi, \psi) \neq 0$.
 \end{proof}
-
-\begin{lemma}
-  \label{lem:sum_teich_trace}
-  \uses{def:teichmuller, def:addchar}
-  We have
-  \[
-    \sum_{x \in \cO_K/P} \omega(x)^{-1} \cdot \tr(x) = -1.
-  \]
-\end{lemma}
 
 \begin{lemma}
   \label{lem:gauss_sum_one_left}

@@ -53,3 +53,15 @@ instance Ideal.Quotient.isScalarTower_of_liesOver_liesOver {A B C : Type*} [Comm
   have : Quotient.mk'' x = Ideal.Quotient.mk p x := rfl
   simp [this, Ideal.Quotient.algebraMap_mk_of_liesOver, ← IsScalarTower.algebraMap_apply]
 
+noncomputable def AlgHom.equivFieldRange {K L L' : Type*} [Field K] [Field L] [Field L'] [Algebra K L]
+    [Algebra K L'] (f : L →ₐ[K] L') :
+    L ≃ₐ[K] f.fieldRange :=
+  (AlgEquiv.ofBijective
+    (f.codRestrict f.range fun x ↦ AlgHom.mem_fieldRange.mpr ⟨x, rfl⟩)
+    ⟨fun _ _ h ↦ f.injective (congr_arg Subtype.val h),
+     fun ⟨_, hy⟩ ↦ (AlgHom.mem_fieldRange.mp hy).imp fun _ hx => Subtype.ext hx⟩)
+
+@[simp]
+theorem equivFieldRange_apply {K L L' : Type*} [Field K] [Field L] [Field L'] [Algebra K L]
+    [Algebra K L'] (f : L →ₐ[K] L') (x : L) : f.equivFieldRange x = f x :=
+  rfl
