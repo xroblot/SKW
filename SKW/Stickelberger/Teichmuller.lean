@@ -1,8 +1,5 @@
 module
 
-public import Mathlib.NumberTheory.MulChar.Basic
-public import Mathlib.RingTheory.Ideal.Quotient.Basic
-public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 public import SKW.Misc
 
 @[expose] public section
@@ -76,8 +73,8 @@ theorem exists_nat_teichmuller_eq_pow [IsDomain R] [NeZero n] {ζ : R} (hζ : Is
   exact ⟨a, ha.symm⟩
 
 theorem map_teichmuller_apply_eq_pow [IsDomain R] [NeZero n] {S : Type*}
-    [CommRing S] (f : R →+* S) {σ : S →+* S} (m : ℕ) {ζ : R}
-    (hm : m ≠ 0) (hζ : IsPrimitiveRoot ζ n) (hσ : σ (f ζ) = (f ζ) ^ m) (x : R ⧸ I) :
+    [CommRing S] {F : Type*} [FunLike F S S] [RingHomClass F S S] (σ : F) (f : R →+* S) 
+    (m : ℕ) {ζ : R} (hm : m ≠ 0) (hζ : IsPrimitiveRoot ζ n) (hσ : σ (f ζ) = (f ζ) ^ m) (x : R ⧸ I) :
     σ ((teichmuller hbij).ringHomComp f x) = (teichmuller hbij ^ m).ringHomComp f x  := by
   let a := (hζ.isUnit (NeZero.ne _)).unit
   by_cases hx : IsUnit x

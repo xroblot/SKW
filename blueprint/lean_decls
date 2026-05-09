@@ -13,3 +13,7 @@ GaussSum_mem
 norm_GaussSum
 GaussSum_ne_zero
 mk_sq_gausssum_eq
+gal_gaussSum_eq_gaussSum
+GaussSum_mul_GaussSum
+JacobiSum
+gaussSum_one_left

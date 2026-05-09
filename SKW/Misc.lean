@@ -6,6 +6,7 @@ public import Mathlib.NumberTheory.MulChar.Basic
 public import Mathlib.NumberTheory.NumberField.Units.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
+public import Mathlib.NumberTheory.GaussSum
 
 @[expose] public section
 
@@ -92,3 +93,56 @@ theorem IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (n₁ n₂ : ℕ) [Ne
   have : IsGalois ℚ K₁ := IsCyclotomicExtension.isGalois {n₁} ℚ K₁
   rw [IntermediateField.linearDisjoint_iff'']
   exact NumberField.linearDisjoint_of_isGalois_isCoprime_discr E _ _ <| discr_coprime n₁ n₂ K₁ _ h
+
+theorem gaussSum_one_one {R : Type*} [CommRing R] [Fintype R] {R' : Type*}
+    [CommRing R'] : gaussSum (1 : MulChar R R') (1 : AddChar R R') = Nat.card Rˣ := by
+  classical
+  simp [gaussSum, MulChar.sum_one_eq_card_units]
+
+theorem gaussSum_one_left {R : Type*} [Field R] [Fintype R] {R' : Type*} [CommRing R'] [IsDomain R']
+    {ψ : AddChar R R'} (hψ : ψ ≠ 1) : gaussSum 1 ψ = -1 := by
+  classical
+  rw [gaussSum, ← Finset.univ.add_sum_erase _ (Finset.mem_univ 0), MulChar.map_zero, zero_mul,
+    zero_add]
+  have : ∀ x ∈ Finset.univ.erase (0 : R), (1 : MulChar R R') x = 1 :=
+    fun x hx ↦ MulChar.one_apply <| isUnit_iff_ne_zero.mpr <| Finset.ne_of_mem_erase hx
+  simp_rw +contextual [this, one_mul]
+  rw [Finset.sum_erase_eq_sub (Finset.mem_univ 0), AddChar.map_zero_eq_one, AddChar.sum_eq_ite,
+    ite_sub, zero_sub, if_neg (by rwa [← AddChar.one_eq_zero])]
+
+theorem gaussSum_one_right {R : Type*} [CommRing R] [Fintype R] {R' : Type*} [CommRing R']
+    [IsDomain R'] {χ : MulChar R R'} (hχ : χ ≠ 1) : gaussSum χ 1 = 0 := by
+  simpa [gaussSum] using MulChar.sum_eq_zero_of_ne_one hχ
+
+theorem Ideal.multiplicity_bot {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
+    multiplicity I ⊤ = 0 := by
+  rw [← one_eq_top, multiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
+
+@[simp]
+theorem MonoidHom.compAddChar_one {A M : Type*} [AddMonoid A] [Monoid M] {N : Type*}
+    [Monoid N] (f : M →* N) :
+    f.compAddChar (1 : AddChar A M) = 1 := by
+  ext; simp
+
+theorem MonoidHom.compAddChar_eq_one_iff {A M : Type*} [AddMonoid A] [Monoid M] {N : Type*}
+    [Monoid N] {f : M →* N} (hf : Function.Injective f) {φ : AddChar A M} :
+    f.compAddChar φ = 1 ↔ φ = 1 := by
+  rw [← MonoidHom.compAddChar_one f, (f.compAddChar_injective_right hf).eq_iff]
+
+theorem smul_eq_galRestrict_apply (A : Type*) {K L B : Type*} [CommRing A] [IsIntegrallyClosed A]
+    [Field K] [Field L] [CommRing B] [Algebra A K] [IsFractionRing A K] [Algebra B L] [IsFractionRing B L]
+    [Algebra A B] [Algebra K L] [Algebra A L] [IsScalarTower A K L] [IsScalarTower A B L]
+    [IsIntegralClosure B A L] [Algebra.IsAlgebraic K L] [MulSemiringAction Gal(L/K) B]
+    [SMulDistribClass Gal(L/K) B L] (σ : Gal(L/K)) (x : B) :
+    σ • x = galRestrict A K L B σ x := by
+  apply FaithfulSMul.algebraMap_injective B L
+  rw [algebraMap.smul', AlgEquiv.smul_def, algebraMap_galRestrict_apply]
+
+@[simps]
+def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike F R S]
+    [RingHomClass F R S]  (e : F) : Ideal R ≃+* Ideal S where
+  toFun := Ideal.map e
+  invFun := Ideal.comap e
+  __ := Ideal.mapHom e
+  left_inv _ := by simpa using comap_map_of_bijective _ (EquivLike.bijective e)
+  right_inv _ := by simpa using Ideal.map_comap_of_surjective _ (EquivLike.surjective e) _
