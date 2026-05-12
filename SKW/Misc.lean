@@ -33,11 +33,6 @@ def MulChar.ringHomCompHom {R : Type*} [CommMonoid R] {R' : Type*} [CommRing R']
   map_one' := by rw [ringHomComp_one]
   map_mul' _ _ := MulChar.ringHomComp_mul _ _ f
 
-theorem NumberField.isUnit_iff_norm' {K : Type*} [Field K] [NumberField K] {x : RingOfIntegers K} :
-    IsUnit x ↔ (Algebra.norm ℤ x).natAbs = 1 := by
-  rw [isUnit_iff_norm, ← (FaithfulSMul.algebraMap_injective ℕ ℚ).eq_iff, RingOfIntegers.coe_norm,
-    eq_natCast, Nat.cast_natAbs, map_one, ← Algebra.coe_norm_int, Int.cast_abs]
-
 theorem Ideal.pow_liesOver_of_liesOver {R S : Type*} [CommRing R] [CommRing S] [Algebra R S] (p : Ideal R) (P : Ideal S) [P.LiesOver p]
     {i : ℕ} (hi : i + 1 ≤ Ideal.ramificationIdx p P) :
     (P ^ (i + 1)).LiesOver p := by
@@ -118,6 +113,10 @@ theorem Ideal.multiplicity_bot {R : Type*} [CommSemiring R] {I : Ideal R} (hI : 
     multiplicity I ⊤ = 0 := by
   rw [← one_eq_top, multiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
 
+theorem Ideal.emultiplicity_bot {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
+    emultiplicity I ⊤ = 0 := by
+  rw [← one_eq_top, emultiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
+
 @[simp]
 theorem MonoidHom.compAddChar_one {A M : Type*} [AddMonoid A] [Monoid M] {N : Type*}
     [Monoid N] (f : M →* N) :
@@ -146,3 +145,55 @@ def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike 
   __ := Ideal.mapHom e
   left_inv _ := by simpa using comap_map_of_bijective _ (EquivLike.bijective e)
   right_inv _ := by simpa using Ideal.map_comap_of_surjective _ (EquivLike.surjective e) _
+
+theorem ZMod.orderOf_mod_self_pow_sub_one (a k : ℕ) (ha : 1 < a) :
+    orderOf (a : ZMod (a ^ k - 1)) = k := by
+  have h₁ {n : ℕ} (hn : 0 < n) : 2 ≤ a ^ n := (Nat.le_pow hn).trans <| Nat.pow_le_pow_left ha n
+  have h₂ {a k b : ℕ} (hb : 1 ≤ b) : (b : ZMod (a ^ k - 1)) = 1 ↔ a ^ k - 1 ∣ b - 1 := by
+    rw [← Nat.cast_one (R := ZMod (a ^ k - 1)), ZMod.natCast_eq_natCast_iff,
+      Nat.ModEq.comm, Nat.modEq_iff_dvd, ← Nat.cast_sub hb, Int.natCast_dvd_natCast]
+  obtain rfl | hk := Nat.eq_zero_or_pos k
+  · refine orderOf_eq_zero_iff'.mpr fun n hn ↦ ?_
+    rw [← Nat.cast_pow, ne_eq, h₂ (one_le_two.trans (h₁ hn)), pow_zero, tsub_self, zero_dvd_iff]
+    grind
+  refine (orderOf_eq_iff hk).mpr ⟨?_, fun m hm hm' ↦ ?_⟩
+  · rw [← Nat.cast_pow, h₂ (one_le_two.trans (h₁ hk))]
+  · rw [← Nat.cast_pow, ne_eq, h₂ (one_le_two.trans (h₁ hm'))]
+    refine Nat.not_dvd_of_pos_of_lt (by aesop) ?_
+    rwa [Nat.sub_lt_sub_iff_right (one_le_two.trans (h₁ hm')), Nat.pow_lt_pow_iff_right ha]
+
+theorem NumberField.Units.natAbs_norm (K : Type*) [Field K] [NumberField K] (x : (RingOfIntegers K)ˣ) :
+    (Algebra.norm ℤ x.val).natAbs = 1 := by
+  apply Rat.natCast_injective
+  rw [Nat.cast_natAbs, Int.cast_abs, Algebra.coe_norm_int, NumberField.Units.norm, Nat.cast_one]
+
+theorem NumberField.isUnit_iff_natAbs_norm {K : Type*} [Field K] [NumberField K] {x : RingOfIntegers K} :
+    IsUnit x ↔ (Algebra.norm ℤ x).natAbs = 1 := by
+  rw [isUnit_iff_norm, ← Rat.natCast_injective.eq_iff, RingOfIntegers.coe_norm,
+    Nat.cast_natAbs, Nat.cast_one, ← Algebra.coe_norm_int, Int.cast_abs]
+
+theorem MulChar.zpow_apply_coe_eq_apply_zpow {R : Type*} [CommGroupWithZero R] {R' : Type u_2}
+    [CommMonoidWithZero R'] (χ : MulChar R R') (n : ℤ) (a : Rˣ) :
+    (χ ^ n) a = χ (a ^ n : Rˣ) := by
+  obtain ⟨n, (rfl | rfl)⟩ := Int.eq_nat_or_neg n
+  · simp [pow_apply_coe]
+  · rw [zpow_neg, zpow_natCast, inv_apply', ← Units.val_inv_eq_inv_val, pow_apply_coe, ← inv_zpow',
+      zpow_natCast, Units.val_pow_eq_pow_val, map_pow]
+
+theorem Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' {R : Type*} [CommRing R]
+    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul R S]
+    {v : Ideal R} {w : Ideal S} {I : Ideal R} (hv : Irreducible v) (hw : Irreducible w)
+    (hw_bot : w ≠ ⊥) [w.LiesOver v] :
+    emultiplicity w (map (algebraMap R S) I) = v.ramificationIdx w * emultiplicity v I := by
+  by_cases hI : I = ⊥
+  · rw [hI, map_bot, ← zero_eq_bot, ← zero_eq_bot, emultiplicity_zero, emultiplicity_zero, ENat.mul_top]
+    simp only [ne_eq, Nat.cast_eq_zero]
+    apply ramificationIdx_ne_zero (map_ne_bot_of_ne_bot <| hv.ne_zero) (isPrime_of_prime hw.prime)
+    rw [map_le_iff_le_comap, over_def w v]
+  · exact emultiplicity_map_eq_ramificationIdx_mul hI hv hw hw_bot
+
+
+theorem Ideal.IsDedekindDomain.finiteMulticity {R : Type*} [CommRing R] [IsDedekindDomain R]
+    {I J : Ideal R} (hI : I ≠ ⊤) (hJ : J ≠ ⊥) :
+    FiniteMultiplicity I J :=
+  FiniteMultiplicity.of_not_isUnit (by rwa [Ideal.isUnit_iff]) hJ

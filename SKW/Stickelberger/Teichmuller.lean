@@ -41,6 +41,11 @@ theorem teichmuller_apply_zero (hI : I ≠ ⊤) :
   have : Nontrivial (R ⧸ I) := Submodule.Quotient.nontrivial_iff.mpr hI
   rw [teichmuller_apply, dif_neg not_isUnit_zero]
 
+theorem isUnit_teichmuller_zpow_apply [I.IsMaximal] (a : ℤ) (x : (R ⧸ I)ˣ) :
+    IsUnit ((teichmuller hbij ^ a) x) := by
+  rw [MulChar.zpow_apply_coe_eq_apply_zpow, teichmuller_apply, dif_pos (Units.isUnit _)]
+  exact Units.isUnit _
+
 theorem teichmuller_mk_eq [I.IsMaximal] (x : R ⧸ I) :
     Ideal.Quotient.mk I (teichmuller hbij x) = x := by
   by_cases hI : I = ⊤
@@ -73,7 +78,7 @@ theorem exists_nat_teichmuller_eq_pow [IsDomain R] [NeZero n] {ζ : R} (hζ : Is
   exact ⟨a, ha.symm⟩
 
 theorem map_teichmuller_apply_eq_pow [IsDomain R] [NeZero n] {S : Type*}
-    [CommRing S] {F : Type*} [FunLike F S S] [RingHomClass F S S] (σ : F) (f : R →+* S) 
+    [CommRing S] {F : Type*} [FunLike F S S] [RingHomClass F S S] (σ : F) (f : R →+* S)
     (m : ℕ) {ζ : R} (hm : m ≠ 0) (hζ : IsPrimitiveRoot ζ n) (hσ : σ (f ζ) = (f ζ) ^ m) (x : R ⧸ I) :
     σ ((teichmuller hbij).ringHomComp f x) = (teichmuller hbij ^ m).ringHomComp f x  := by
   let a := (hζ.isUnit (NeZero.ne _)).unit
