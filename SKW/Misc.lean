@@ -192,8 +192,18 @@ theorem Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' {R : Ty
     rw [map_le_iff_le_comap, over_def w v]
   · exact emultiplicity_map_eq_ramificationIdx_mul hI hv hw hw_bot
 
-
 theorem Ideal.IsDedekindDomain.finiteMulticity {R : Type*} [CommRing R] [IsDedekindDomain R]
     {I J : Ideal R} (hI : I ≠ ⊤) (hJ : J ≠ ⊥) :
     FiniteMultiplicity I J :=
   FiniteMultiplicity.of_not_isUnit (by rwa [Ideal.isUnit_iff]) hJ
+
+theorem Nat.digits_pow_sub_one {b : ℕ} (hb : 1 < b) (l : ℕ) :
+    b.digits (b ^ l - 1) = List.replicate l (b - 1) := by
+  suffices b ^ l - 1 = Nat.ofDigits b (List.replicate l (b - 1)) by
+    rw [this, Nat.digits_ofDigits _ hb _ (by grind) (by grind)]
+  induction l with
+    | zero => simp
+    | succ l hl =>
+        rw [List.replicate_succ, Nat.ofDigits_cons, ← hl, add_comm (b - 1), Nat.mul_sub, mul_one,
+          ← Nat.pow_succ', ← Nat.add_sub_assoc hb.le,
+          Nat.sub_add_cancel (Nat.le_self_pow l.succ_ne_zero b)]

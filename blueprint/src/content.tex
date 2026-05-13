@@ -409,6 +409,10 @@ isomorphism.
   For all $a, b \in \ZZ$, $J(\omega^{-a}, \omega^{-b}) \in \cO_K$.
 \end{lemma}
 
+\begin{proof}
+\leanok
+\end{proof}
+
 \begin{lemma}
   \label{lem:jac_ne_zero}
   \uses{lem:gauss_sum_mul, lem:gauss_sum_ne_zero}
@@ -466,7 +470,7 @@ isomorphism.
 
 \begin{lemma}
   \label{lem:s_eq_zero}
-  \uses{def:s, def:gauss_sum_s, lem:gauss_sum_trivial_char}
+  \uses{def:s, lem:gauss_sum_one_left, lem:addchar_ne_one, lem:teichmuller_order}
   \lean{valGauss_eq_zero}
   \leanok
   If $(q - 1) \mid a$, then $s(a) = 0$.
@@ -474,9 +478,10 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  We have $\omega^{-a} = 1$, so $g_a = g_0 = -1$
-  by \ref{lem:gauss_sum_trivial_char}. As $-1$ is a unit,
-  $v_{\fP}(-1) = 0 = s(a)$.
+  Since $(q-1) \mid a$, $\omega^{-a} = 1$ by \ref{lem:teichmuller_order},
+  so $g_a = \sum_{x} \psi(x)$, which equals $0$ by \ref{lem:gauss_sum_one_left}
+  since $\psi$ is nontrivial by \ref{lem:addchar_ne_one}.
+  Hence $s(a) = v_{\fP}(0) = 0$.
 \end{proof}
 
 \begin{lemma}
@@ -731,6 +736,8 @@ isomorphism.
 \begin{lemma}
   \label{lem:s_sum}
   \uses{def:s, lem:s_sum_dvd}
+  \lean{two_mul_sum_valGauss}
+  \leanok
   We have
   \[
     \sum_{a=0}^{q-2} s(a) = \frac{(q-2) \cdot f \cdot (p-1)}{2}.
@@ -738,6 +745,7 @@ isomorphism.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   We pair each $a \in \{0, \ldots, q-2\}$ with $q-1-a$. By \ref{lem:s_sum_dvd}
   with $k = q-1$, for any $a$ with $(q-1) \nmid a$,
   \[
@@ -760,6 +768,8 @@ isomorphism.
 \begin{proposition}
   \label{prop:s_digit_sum}
   \uses{lem:s_le_digit_sum, lem:s_sum}
+  \lean{valGauss_toNat_eq_sum_digits}
+  \leanok
   Let $0 \leq a < q - 1$ and let
   $a = a_0 + a_1 p + \cdots + a_{f-1} p^{f-1}$, $0 \leq a_i \leq p - 1$,
   be the $p$-adic expansion of $a$. Then
@@ -769,6 +779,7 @@ isomorphism.
 \end{proposition}
 
 \begin{proof}
+  \leanok
   By \ref{lem:s_le_digit_sum}, $s(a) \leq a_0 + \cdots + a_{f-1}$ for all $a$.
   Summing over $0 \leq a \leq q - 2$, we get
   \[
@@ -802,6 +813,9 @@ isomorphism.
   The stabilizer of $\fP$ in $\Gal(L/F) \cong (\ZZ/(q-1)\ZZ)^\times$ is
   the subgroup $\langle p \bmod (q-1) \rangle$, which has order $f$.
 \end{lemma}
+
+\begin{proof}
+\end{proof}
 
 % Proof will use IsCyclotomicExtension.Rat.galEquivZMod_stabilizer and a
 % pending Mathlib PR (not yet merged) that gives the stabilizer as a
@@ -1083,6 +1097,9 @@ The goal of this chapter is to prove the following theorem.
   Every abelian extension of $\QQ$ is contained in a cyclotomic field.
 \end{theorem}
 
+\begin{proof}
+\end{proof}
+
 \begin{lemma}
   \label{lem:kw_abelian_cyclic_decomp}
   Every finite abelian extension $K/\QQ$ is the compositum of cyclic
@@ -1101,6 +1118,9 @@ The goal of this chapter is to prove the following theorem.
   exists a cyclic extension $F/\QQ$ of prime power degree $p^m$ unramified
   outside $p$ such that $K$ is cyclotomic if and only if $F$ is cyclotomic.
 \end{lemma}
+
+\begin{proof}
+\end{proof}
 
 % Strategy: if q \neq p is ramified in K/Q, the ramification group
 % I_q \subseteq \Gal(K/Q) \cong \ZZ/p^m\ZZ is a nontrivial subgroup. One shows
@@ -1148,11 +1168,17 @@ The goal of this chapter is to prove the following theorem.
   of prime power degree in which $q$ is unramified.
 \end{lemma}
 
+\begin{proof}
+\end{proof}
+
 \begin{lemma}
   \label{lem:kw_minkowski}
   Every extension of $\QQ$ of degree greater than $1$ is ramified at some
   finite prime.
 \end{lemma}
+
+\begin{proof}
+\end{proof}
 
 % Proof uses Minkowski's theorem on discriminants: |d_K| > 1 for any
 % nontrivial extension K/Q, so some prime divides d_K and is thus ramified.
@@ -1196,7 +1222,7 @@ The goal of this chapter is to prove the following theorem.
 
 \begin{proposition}
   \label{prop:kw_odd_prime_power}
-  \uses{prop:kw_exponent_p, lem:kw_cyclic_compositum}
+  \uses{prop:kw_exponent_p, lem:kw_cyclic_compositum, lem:kw_minkowski}
   Let $K/\QQ$ be a cyclic extension of odd prime power degree $p^m$
   unramified outside $p$. Then $K$ is cyclotomic.
 \end{proposition}
@@ -1265,6 +1291,12 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   and only if for every $\sigma_a \in \Gal(F/\QQ)$ there exists
   $\xi \in F^\times$ such that $\sigma_a(\mu) = \xi^p \mu^a$.
 \end{lemma}
+
+\begin{proof}
+\end{proof}
+
+\begin{proof}
+\end{proof}
 
 % This is a general result on Kummer extensions; see Washington, Lemma 14.7
 % or Hilbert, Satz 147. Moved to auxiliary results chapter; proof to be added later.
@@ -1373,7 +1405,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
 \begin{lemma}
   \label{lem:kw_unit_root_of_unity}
-  \uses{lem:kw_mu_unit, lem:kw_abelian_kummer}
+  \uses{lem:kw_mu_unit, lem:kw_abelian_kummer, lem:unramified_cyclotomic}
   The unit $\eta$ is a $p$-th power times a root of unity, so $\mu = \zeta_p^t$
   for some $t$. Therefore $L = \QQ(\zeta_{p^2})$.
 \end{lemma}
@@ -1404,6 +1436,9 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   and unramified at all primes is trivial.
 \end{lemma}
 
+\begin{proof}
+\end{proof}
+
 \begin{lemma}
   \label{lem:kummer_abelian_criterion}
   Let $F$ be a number field containing $\mu_p$, let $\mu \in F^\times$, and
@@ -1415,6 +1450,9 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   $\sigma_a \in \Gal(F/\QQ)$ there exists $\xi \in F^\times$ such that
   $\sigma_a(\mu) = \xi^p \mu^a$.
 \end{lemma}
+
+\begin{proof}
+\end{proof}
 
 % See Washington, Lemma 14.7 or Hilbert, Satz 147.
 
@@ -1437,28 +1475,17 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \begin{lemma}
   \label{lem:zeta_sub_one_not_mem_sq}
   \uses{lem:ramification_idx}
+  \lean{zeta_sub_one_not_mem_sq}
+  \leanok
   We have $\zeta_p - 1 \notin \fP^2$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:ramification_idx}, $e(\fP \mid p) = p - 1$. Since $\zeta_p$ is a
   primitive $p$-th root of unity, $(\zeta_p - 1)$ generates the unique prime
   above $p$ in $\QQ(\zeta_p)$, which has ramification index $p - 1$. Hence
   $v_{\fP}(\zeta_p - 1) = 1$, so $\zeta_p - 1 \notin \fP^2$.
-\end{proof}
-
-\begin{lemma}
-  \label{lem:gauss_sum_nonzero_aux}
-  \uses{def:gauss_sum_s, lem:addchar_primitive}
-  If $\chi$ is a nontrivial multiplicative character of $\cO_K/P$ and $\psi$
-  is a primitive additive character, then $g(\chi, \psi) \neq 0$.
-\end{lemma}
-
-\begin{proof}
-  Since $\chi \neq 1$ and $\psi$ is primitive, we have
-  $g(\chi, \psi) \cdot g(\chi^{-1}, \psi^{-1}) = q \neq 0$
-  (see \texttt{gaussSum\_mul\_gaussSum\_eq\_card} in Mathlib),
-  hence $g(\chi, \psi) \neq 0$.
 \end{proof}
 
 \begin{lemma}
@@ -1473,14 +1500,6 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   where $\psi = 1$ denotes the trivial character (identically equal to $1$).
 \end{lemma}
 
-\begin{lemma}
-  \label{lem:gauss_sum_trivial_char}
-  \uses{def:gauss_sum_s, lem:gauss_sum_one_left}
-  $g_0 = -1$.
-\end{lemma}
-
 \begin{proof}
-  Since $\psi$ takes values in $\mu_p(\cO_L)$ and $\psi$ is nontrivial by
-  \ref{lem:addchar_ne_one}, we have $\psi \neq 1$. Therefore
-  $g_0 = g(1, \psi) = -1$ by \ref{lem:gauss_sum_one_left}.
+\leanok
 \end{proof}

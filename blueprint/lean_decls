@@ -36,5 +36,7 @@ exists_eq_valGauss_self_add_mul
 valGauss_eq_self
 valGauss_p_sub_one
 valGauss_le_sum_digits
+two_mul_sum_valGauss
 ramificationIdx_eq_p_sub_one
+zeta_sub_one_not_mem_sq
 gaussSum_one_left
