@@ -68,22 +68,31 @@ theorem orderOf_teichmuller [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ n) :
       IsPrimitiveRoot.val_toRootsOfUnity_coe, ne_eq, hζ.pow_eq_one_iff_dvd]
     exact Nat.not_dvd_of_pos_of_lt h₂ h₁
 
-theorem exists_nat_teichmuller_eq_pow [IsDomain R] [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ n)
-    (x : (R ⧸ I)ˣ) :
-    ∃ a : ℕ, teichmuller hbij x = ζ ^ a := by
-  have : (teichmuller hbij x) ^ n = 1 := by
-    have := DFunLike.congr_fun (pow_orderOf_eq_one (teichmuller hbij)) ↑x
-    rwa [MulChar.pow_apply_coe, MulChar.one_apply_coe, orderOf_teichmuller hbij hζ] at this
+theorem orderOf_teichmuller_zpow [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ n) (a : ℤ) :
+    orderOf (teichmuller hbij ^ a) ∣ n := by
+  nth_rewrite 2 [← orderOf_teichmuller hbij hζ]
+  exact orderOf_dvd_of_mem_zpowers <| Subgroup.zpow_mem_zpowers (teichmuller hbij) a
+
+theorem exists_nat_teichmuller_zpow_eq_pow [IsDomain R] [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ n)
+    (a : ℤ) (x : (R ⧸ I)ˣ) :
+    ∃ m : ℕ, (teichmuller hbij ^ a) x = ζ ^ m := by
+  have : ((teichmuller hbij ^ a) x) ^ n = 1 := by
+    obtain ⟨t, ht⟩ := orderOf_teichmuller_zpow hbij hζ a
+    have := DFunLike.congr_fun (pow_orderOf_eq_one (teichmuller hbij ^ a)) ↑x
+    rw [MulChar.pow_apply_coe, MulChar.one_apply_coe] at this
+    nth_rewrite 2 [ht]
+    rw [pow_mul, this, one_pow]
   obtain ⟨a, -, ha⟩ := hζ.eq_pow_of_pow_eq_one this
   exact ⟨a, ha.symm⟩
 
-theorem map_teichmuller_apply_eq_pow [IsDomain R] [NeZero n] {S : Type*}
+theorem map_teichmuller_zpow_eq [IsDomain R] [NeZero n] {S : Type*}
     [CommRing S] {F : Type*} [FunLike F S S] [RingHomClass F S S] (σ : F) (f : R →+* S)
-    (m : ℕ) {ζ : R} (hm : m ≠ 0) (hζ : IsPrimitiveRoot ζ n) (hσ : σ (f ζ) = (f ζ) ^ m) (x : R ⧸ I) :
-    σ ((teichmuller hbij).ringHomComp f x) = (teichmuller hbij ^ m).ringHomComp f x  := by
-  let a := (hζ.isUnit (NeZero.ne _)).unit
+    (m : ℕ) {ζ : R} (hm : m ≠ 0) (hζ : IsPrimitiveRoot ζ n) (hσ : σ (f ζ) = (f ζ) ^ m) (a : ℤ)
+    (x : R ⧸ I) :
+    σ ((teichmuller hbij ^ a).ringHomComp f x) = (teichmuller hbij ^ (a * m)).ringHomComp f x  := by
   by_cases hx : IsUnit x
   · lift x to (R ⧸ I)ˣ using hx
-    obtain ⟨a , ha⟩ := exists_nat_teichmuller_eq_pow hbij hζ x
-    simp [MulChar.ringHomComp_apply, MulChar.pow_apply' _ hm, ha, hσ, pow_right_comm]
+    obtain ⟨t , ht⟩ := exists_nat_teichmuller_zpow_eq_pow hbij hζ a x
+    rw [MulChar.ringHomComp_apply, ht, map_pow, map_pow, hσ,MulChar.ringHomComp_apply,
+      zpow_mul, zpow_natCast, MulChar.pow_apply' _ hm, ht, map_pow, map_pow, pow_right_comm]
   · simp [MulChar.map_nonunit _ hx]
