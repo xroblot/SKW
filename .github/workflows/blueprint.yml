@@ -1,4 +1,4 @@
-name: Compile blueprint
+name: Compile blueprint and documentation
 on:
   push:
     branches:
@@ -11,49 +11,21 @@ permissions:
   contents: read
   pages: write
   id-token: write
-  issues: write
-  pull-requests: write
+
 jobs:
-  build_project:
+  build:
     runs-on: ubuntu-latest
-    name: Build project
     steps:
       - name: Checkout project
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           fetch-depth: 0
-      - name: Install elan
-        run: curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh -s -- -y
-      - name: Get Mathlib cache
-        run: ~/.elan/bin/lake exe cache get || true
+
       - name: Build project
-        run: ~/.elan/bin/lake build SKW
-      - name: Build blueprint and copy to `docs/blueprint`
-        uses: xu-cheng/texlive-action@v2
+        id: build-lean
+        uses: leanprover/lean-action@f807b338d95de7813c5c50d018f1c23c9b93b4ec # v1.2.0
+
+      - name: Build documentation and blueprint
+        uses: leanprover-community/docgen-action@main
         with:
-          docker_image: ghcr.io/xu-cheng/texlive-full:20231201
-          run: |
-            export PIP_BREAK_SYSTEM_PACKAGES=1
-            apk update
-            apk add --update make py3-pip git pkgconfig graphviz graphviz-dev gcc musl-dev
-            git config --global --add safe.directory $GITHUB_WORKSPACE
-            git config --global --add safe.directory `pwd`
-            python3 -m venv env
-            source env/bin/activate
-            pip install --upgrade pip requests wheel
-            CFLAGS="-I/usr/include/graphviz" LDFLAGS="-L/usr/lib/graphviz" pip install pygraphviz
-            pip install leanblueprint
-            leanblueprint pdf
-            mkdir -p docs
-            cp blueprint/print/print.pdf docs/blueprint.pdf
-            leanblueprint web
-            cp -r blueprint/web docs/blueprint
-      - name: Upload docs & blueprint artifact
-        if: github.event_name == 'push'
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/
-      - name: Deploy to GitHub Pages
-        if: github.event_name == 'push'
-        id: deployment
-        uses: actions/deploy-pages@v4
+          blueprint: true

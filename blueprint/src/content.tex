@@ -29,7 +29,7 @@ We fix a maximal ideal $P$ of $\cO_K$ lying above $p$.
 \end{definition}
 
 \begin{lemma}
-  \label{lem:teichmuller_order}
+  \label{lem:orderOf_teichmuller}
   \uses{def:teichmuller}
   \lean{orderOf_teichmuller}
   \leanok
@@ -43,7 +43,7 @@ We fix a maximal ideal $P$ of $\cO_K$ lying above $p$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:teichmuller_frob}
+  \label{lem:map_teichmuller_zpow_eq}
   \lean{map_teichmuller_zpow_eq}
   \leanok
   \uses{def:teichmuller}
@@ -61,7 +61,7 @@ We fix a maximal ideal $P$ of $\cO_K$ lying above $p$.
 
 \begin{lemma}
   \label{lem:teichmuller_sum}
-  \uses{def:teichmuller, lem:teichmuller_order}
+  \uses{def:teichmuller, lem:orderOf_teichmuller}
   \leanok
   For all $a \in \ZZ$ with $(q-1) \nmid a$,
   \[
@@ -72,7 +72,7 @@ We fix a maximal ideal $P$ of $\cO_K$ lying above $p$.
 \begin{proof}
   \leanok
   Since $(q-1) \nmid a$, the character $\om^{-a}$ is nontrivial by
-  \ref{lem:teichmuller_order}. By \texttt{MulChar.sum\_eq\_zero\_of\_ne\_one},
+  \ref{lem:orderOf_teichmuller}. By \texttt{MulChar.sum\_eq\_zero\_of\_ne\_one},
   $\sum_{x \in \cO_K/P} \om(x)^{-a} = 0$.
 \end{proof}
 
@@ -93,7 +93,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \end{definition}
 
 \begin{lemma}
-  \label{lem:addchar_ne_one}
+  \label{lem:addCharTrace_ne_one}
   \uses{def:addchar}
   \lean{addCharTrace_ne_one}
   \leanok
@@ -108,8 +108,8 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:addchar_primitive}
-  \uses{lem:addchar_ne_one}
+  \label{lem:addCharTrace_isPrimitive}
+  \uses{lem:addCharTrace_ne_one}
   \lean{addCharTrace_isPrimitive}
   \leanok
   The character $\psi$ is primitive.
@@ -118,11 +118,11 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{proof}
   \leanok
   Since $\cO_K/P$ is a field, any nontrivial additive character is primitive.
-  The character $\psi$ is nontrivial by \ref{lem:addchar_ne_one}.
+  The character $\psi$ is nontrivial by \ref{lem:addCharTrace_ne_one}.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:addchar_frob}
+  \label{lem:addCharTrace_frob_apply}
   \uses{def:addchar}
   \lean{addCharTrace_frob_apply}
   \leanok
@@ -138,7 +138,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:addchar_mod_P_sq}
+  \label{lem:addCharTrace_mk_sq_eq}
   \uses{def:addchar}
   \lean{addCharTrace_mk_sq_eq}
   \leanok
@@ -165,8 +165,8 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:addchar_mod_P}
-  \uses{lem:addchar_mod_P_sq}
+  \label{lem:addCharTrace_mk_eq_one}
+  \uses{lem:addCharTrace_mk_sq_eq}
   \lean{addCharTrace_mk_eq_one}
   \leanok
   Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta_p - 1 \in \fP$.
@@ -175,7 +175,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 
 \begin{proof}
   \leanok
-  By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta_p - 1) \pmod{\fP^2}$.
+  By \ref{lem:addCharTrace_mk_sq_eq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta_p - 1) \pmod{\fP^2}$.
   Since $\zeta_p - 1 \in \fP$, the term $\tr(x) \cdot (\zeta_p - 1) \in \fP$,
   hence $\psi(x) \equiv 1 \pmod{\fP}$.
 \end{proof}
@@ -206,8 +206,8 @@ isomorphism.
 \end{definition}
 
 \begin{lemma}
-  \label{lem:gauss_sum_periodic}
-  \uses{def:gauss_sum_s, lem:teichmuller_order}
+  \label{lem:GaussSum_periodic}
+  \uses{def:gauss_sum_s, lem:orderOf_teichmuller}
   \lean{GaussSum_periodic}
   \leanok
   If $(q-1) \mid k$, then for all $a \in \ZZ$, $g_{a+k} = g_a$.
@@ -215,13 +215,13 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  Since $\omega^{q-1} = 1$ by \ref{lem:teichmuller_order}, $(q-1) \mid k$ implies
+  Since $\omega^{q-1} = 1$ by \ref{lem:orderOf_teichmuller}, $(q-1) \mid k$ implies
   $\omega^{-k} = 1$, so $\omega^{-(a+k)} = \omega^{-a}$, hence $g_{a+k} = g_a$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:gauss_sum_mem}
-  \uses{def:gauss_sum_s, lem:addchar_mod_P, lem:teichmuller_order, lem:teichmuller_sum}
+  \label{lem:GaussSum_mem}
+  \uses{def:gauss_sum_s, lem:addCharTrace_mk_eq_one, lem:orderOf_teichmuller, lem:teichmuller_sum}
   \lean{GaussSum_mem}
   \leanok
   If $(q-1) \nmid a$, then $g_a \in \fP$.
@@ -229,20 +229,20 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  By \ref{lem:addchar_mod_P}, $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.
+  By \ref{lem:addCharTrace_mk_eq_one}, $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.
   Therefore
   \[
     g_a = \sum_{x \in \cO_K/P} \omega(x)^{-a} \psi(x)
     \equiv \sum_{x \in \cO_K/P} \omega(x)^{-a} \pmod{\fP}.
   \]
-  Since $(q-1) \nmid a$, we have $\omega^{-a} \neq 1$ by \ref{lem:teichmuller_order}.
+  Since $(q-1) \nmid a$, we have $\omega^{-a} \neq 1$ by \ref{lem:orderOf_teichmuller}.
   Hence $\sum_{x \in \cO_K/P} \omega(x)^{-a} = 0$ by \ref{lem:teichmuller_sum}.
   Therefore $g_a \equiv 0 \pmod{\fP}$, i.e.\ $g_a \in \fP$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:gauss_sum_mul_neg}
-  \uses{def:gauss_sum_s, lem:addchar_primitive, def:teichmuller}
+  \label{lem:GaussSum_mul_GaussSum_neg}
+  \uses{def:gauss_sum_s, lem:addCharTrace_isPrimitive, def:teichmuller}
   \lean{GaussSum_mul_GaussSum_neg}
   \leanok
   If $(q-1) \nmid a$, then
@@ -254,7 +254,7 @@ isomorphism.
 \begin{proof}
   \leanok
   Since $(q-1) \nmid a$, $\omega^{-a}$ is nontrivial and $\psi$ is primitive
-  by \ref{lem:addchar_primitive}. By \texttt{gaussSum\_mul\_gaussSum\_eq\_card},
+  by \ref{lem:addCharTrace_isPrimitive}. By \texttt{gaussSum\_mul\_gaussSum\_eq\_card},
   $g(\omega^{-a}, \psi) \cdot g(\omega^{a}, \psi^{-1}) = p^f$.
   By the change of variable $x \mapsto -x$,
   $g(\omega^{a}, \psi^{-1}) = \omega^{a}(-1) \cdot g_{-a}$.
@@ -262,8 +262,8 @@ isomorphism.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:gauss_sum_norm}
-  \uses{def:gauss_sum_s, lem:gauss_sum_mul_neg, lem:gauss_sum_mem}
+  \label{lem:norm_GaussSum}
+  \uses{def:gauss_sum_s, lem:GaussSum_mul_GaussSum_neg, lem:GaussSum_mem}
   \lean{norm_GaussSum}
   \leanok
   If $(q-1) \nmid a$, then there exists $k \geq 1$ such that
@@ -273,17 +273,17 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  By \ref{lem:gauss_sum_mul_neg}, $g_a \cdot g_{-a} = \omega^a(-1) \cdot p^f = \pm p^f$.
+  By \ref{lem:GaussSum_mul_GaussSum_neg}, $g_a \cdot g_{-a} = \omega^a(-1) \cdot p^f = \pm p^f$.
   Taking norms, $N_{L/\QQ}(g_a) \cdot N_{L/\QQ}(g_{-a}) = \pm p^{f \cdot [L:\QQ]}$.
   Since both norms are integers and their product is $\pm p^{f \cdot [L:\QQ]}$,
-  each is of the form $\pm p^k$ for some $k \geq 0$. By \ref{lem:gauss_sum_mem},
+  each is of the form $\pm p^k$ for some $k \geq 0$. By \ref{lem:GaussSum_mem},
   $g_a \in \fP$, so $g_a$ is not a unit in $\cO_L$, hence $N_{L/\QQ}(g_a) \neq \pm 1$,
   thus $k \geq 1$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:gauss_sum_one_mod_sq}
-  \uses{lem:addchar_mod_P_sq, lem:teichmuller_order}
+  \label{lem:mk_sq_gausssum_eq}
+  \uses{lem:addCharTrace_mk_sq_eq, lem:orderOf_teichmuller}
   \lean{mk_sq_gausssum_eq}
   \leanok
   Assume $\zeta_p - 1 \in \fP$. Then
@@ -294,20 +294,20 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  By \ref{lem:addchar_mod_P_sq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta_p - 1) \pmod{\fP^2}$
+  By \ref{lem:addCharTrace_mk_sq_eq}, $\psi(x) \equiv 1 + \tr(x) \cdot (\zeta_p - 1) \pmod{\fP^2}$
   for all $x \in \cO_K/P$. Therefore
   \[
     g_1 \equiv \sum_{x} \omega(x)^{-1} + (\zeta_p-1) \sum_{x} \omega(x)^{-1} \tr(x) \pmod{\fP^2}.
   \]
   Since $p$ is odd, $q - 1 \geq 2$, so $\omega^{-1} \neq 1$ by
-  \ref{lem:teichmuller_order}, and $\sum_x \omega(x)^{-1} = 0$ by orthogonality
+  \ref{lem:orderOf_teichmuller}, and $\sum_x \omega(x)^{-1} = 0$ by orthogonality
   of characters. Moreover,
   Computing the trace via powers of Frobenius, $\sum_{x \in \cO_K/P} \omega(x)^{-1} \cdot \tr(x) = -1$.
   Hence $g_1 \equiv -(\zeta_p - 1) \pmod{\fP^2}$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:gal_L_F}
+  \label{lem:galFEquiv}
   \uses{def:gauss_sum_s}
   \lean{galFEquiv}
   \leanok
@@ -324,8 +324,8 @@ isomorphism.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:galois_gauss_sum_a}
-  \uses{def:gauss_sum_s, lem:teichmuller_frob}
+  \label{lem:gal_gaussSum_eq_gaussSum}
+  \uses{def:gauss_sum_s, lem:map_teichmuller_zpow_eq}
   \lean{gal_gaussSum_eq_gaussSum}
   \leanok
   For all $\sigma \in \Gal(L/F)$ and $a \in \ZZ$,
@@ -337,7 +337,7 @@ isomorphism.
 \begin{proof}
   \leanok
   Since $\sigma \in \Gal(L/F)$, it fixes $\zeta_p$, hence $\psi$.
-  By \ref{lem:teichmuller_frob}, $\sigma(\omega(x)) = \omega(x)^{\fn(\sigma)}$
+  By \ref{lem:map_teichmuller_zpow_eq}, $\sigma(\omega(x)) = \omega(x)^{\fn(\sigma)}$
   for all $x$. Therefore
   \[
     \sigma(g_a) = \sum_{x \in \cO_K/P} \sigma(\omega(x)^{-a}) \cdot \psi(x)
@@ -347,8 +347,8 @@ isomorphism.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:gauss_sum_frob}
-  \uses{def:gauss_sum_s, lem:addchar_frob}
+  \label{lem:GaussSum_frob}
+  \uses{def:gauss_sum_s, lem:addCharTrace_frob_apply}
   \lean{GaussSum_frob}
   \leanok
   For all $a \in \ZZ$, $g_{pa} = g_a$.
@@ -364,14 +364,14 @@ isomorphism.
   \]
   By multiplicativity of $\omega$, $\omega(\varphi^{-1}(y))^p = \omega(\varphi^{-1}(y)^p)
   = \omega(y)$, so $\omega(\varphi^{-1}(y))^{-pa} = \omega(y)^{-a}$.
-  By \ref{lem:addchar_frob}, $\psi(\varphi^{-1}(y)) = \psi(y)$.
+  By \ref{lem:addCharTrace_frob_apply}, $\psi(\varphi^{-1}(y)) = \psi(y)$.
   Therefore $g_{pa} = g_a$.
 \end{proof}
 
 \section{Jacobi sums}
 
 \begin{lemma}
-  \label{lem:gauss_sum_mul}
+  \label{lem:GaussSum_mul_GaussSum}
   \uses{def:gauss_sum_s}
   \lean{GaussSum_mul_GaussSum}
   \leanok
@@ -390,7 +390,7 @@ isomorphism.
 \begin{lemma}
   \lean{JacobiSum}
   \leanok
-  \label{lem:jac_in_OK}
+  \label{lem:JacobiSum}
   \uses{def:gauss_sum_s}
   For all $a, b \in \ZZ$, $J(\omega^{-a}, \omega^{-b}) \in \cO_K$.
 \end{lemma}
@@ -412,8 +412,8 @@ isomorphism.
 \end{definition}
 
 \begin{lemma}
-  \label{lem:s_eq_zero}
-  \uses{def:s, lem:gauss_sum_one_left, lem:addchar_ne_one, lem:teichmuller_order}
+  \label{lem:valGauss_eq_zero}
+  \uses{def:s, lem:gaussSum_one_left, lem:addCharTrace_ne_one, lem:orderOf_teichmuller}
   \lean{valGauss_eq_zero}
   \leanok
   If $(q - 1) \mid a$, then $s(a) = 0$.
@@ -421,15 +421,15 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  Since $(q-1) \mid a$, $\omega^{-a} = 1$ by \ref{lem:teichmuller_order},
-  so $g_a = \sum_{x} \psi(x)$, which equals $0$ by \ref{lem:gauss_sum_one_left}
-  since $\psi$ is nontrivial by \ref{lem:addchar_ne_one}.
+  Since $(q-1) \mid a$, $\omega^{-a} = 1$ by \ref{lem:orderOf_teichmuller},
+  so $g_a = \sum_{x} \psi(x)$, which equals $0$ by \ref{lem:gaussSum_one_left}
+  since $\psi$ is nontrivial by \ref{lem:addCharTrace_ne_one}.
   Hence $s(a) = v_{\fP}(0) = 0$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:s_subadditive}
-  \uses{def:s, lem:gauss_sum_mul, lem:s_eq_zero}
+  \label{lem:valGauss_subadditive}
+  \uses{def:s, lem:GaussSum_mul_GaussSum, lem:valGauss_eq_zero}
   \lean{valGauss_subadditive}
   \leanok
   For all $a, b \in \ZZ$, $s(a + b) \leq s(a) + s(b)$.
@@ -437,8 +437,8 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  If $(q-1) \mid (a+b)$ then $s(a+b) = 0$ by \ref{lem:s_eq_zero} and the result is trivial.
-  Otherwise, by \ref{lem:gauss_sum_mul},
+  If $(q-1) \mid (a+b)$ then $s(a+b) = 0$ by \ref{lem:valGauss_eq_zero} and the result is trivial.
+  Otherwise, by \ref{lem:GaussSum_mul_GaussSum},
   \[
     g_a \cdot g_b = g_{a+b} \cdot J(\omega^{-a}, \omega^{-b}).
   \]
@@ -447,8 +447,8 @@ isomorphism.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:s_sum_dvd}
-  \uses{def:s, lem:ramification_idx, lem:s_eq_zero, lem:gauss_sum_periodic, lem:gauss_sum_mul_neg}
+  \label{lem:valGauss_add_valGauss_sub_self}
+  \uses{def:s, lem:ramificationIdx_eq_p_sub_one, lem:valGauss_eq_zero, lem:GaussSum_periodic, lem:GaussSum_mul_GaussSum_neg}
   \lean{valGauss_add_valGauss_sub_self}
   \leanok
   Assume $(q-1) \mid k$. Then
@@ -461,14 +461,14 @@ isomorphism.
 \begin{proof}
   \leanok
   Since $(q-1) \mid k$, we have $s(k-a) = s(-a)$ by periodicity of $g$:
-  by \ref{lem:gauss_sum_periodic}, $g_{a+(q-1)} = g_a$, so $s$ has period $q-1$.
+  by \ref{lem:GaussSum_periodic}, $g_{a+(q-1)} = g_a$, so $s$ has period $q-1$.
 
-  If $(q-1) \mid a$, then $(q-1) \mid (-a)$, so $s(a) = s(-a) = 0$ by \ref{lem:s_eq_zero} and the result is clear.
+  If $(q-1) \mid a$, then $(q-1) \mid (-a)$, so $s(a) = s(-a) = 0$ by \ref{lem:valGauss_eq_zero} and the result is clear.
 
-  If $(q-1) \nmid a$, by \ref{lem:gauss_sum_mul_neg},
+  If $(q-1) \nmid a$, by \ref{lem:GaussSum_mul_GaussSum_neg},
   $g_a \cdot g_{-a} = \omega^{a}(-1) \cdot p^f$.
   Since $\omega^{a}(-1)$ is a root of unity, it is a unit in $\cO_L$, hence
-  $v_{\fP}(\omega^{a}(-1)) = 0$. By \ref{lem:ramification_idx},
+  $v_{\fP}(\omega^{a}(-1)) = 0$. By \ref{lem:ramificationIdx_eq_p_sub_one},
   $v_{\fP}(p^f) = f \cdot e(\fP \mid p) = f(p-1)$.
   Therefore
   \[
@@ -478,8 +478,8 @@ isomorphism.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:s_frob}
-  \uses{def:s, lem:gauss_sum_frob}
+  \label{lem:valGauss_frob}
+  \uses{def:s, lem:GaussSum_frob}
   \lean{valGauss_frob}
   \leanok
   For all $a \in \ZZ$, $s(pa) = s(a)$.
@@ -487,13 +487,13 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  By \ref{lem:gauss_sum_frob}, $g_{pa} = g_a$, hence
+  By \ref{lem:GaussSum_frob}, $g_{pa} = g_a$, hence
   $s(pa) = v_{\fP}(g_{pa}) = v_{\fP}(g_a) = s(a)$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:s_one}
-  \uses{lem:gauss_sum_mem, lem:gauss_sum_one_mod_sq, lem:zeta_sub_one_not_mem_sq}
+  \label{lem:valGauss_one}
+  \uses{lem:GaussSum_mem, lem:mk_sq_gausssum_eq, lem:zeta_sub_one_not_mem_sq}
   \lean{valGauss_one}
   \leanok
   $s(1) = 1$.
@@ -501,15 +501,15 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  By \ref{lem:gauss_sum_mem}, $g_1 \in \fP$, so $s(1) \geq 1$.
-  By \ref{lem:gauss_sum_one_mod_sq}, $g_1 \equiv -(\zeta_p - 1) \pmod{\fP^2}$.
+  By \ref{lem:GaussSum_mem}, $g_1 \in \fP$, so $s(1) \geq 1$.
+  By \ref{lem:mk_sq_gausssum_eq}, $g_1 \equiv -(\zeta_p - 1) \pmod{\fP^2}$.
   Since $\zeta_p - 1 \notin \fP^2$ by \ref{lem:zeta_sub_one_not_mem_sq},
   we have $g_1 \notin \fP^2$, so $s(1) \leq 1$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:s_le}
-  \uses{def:s, lem:s_subadditive, lem:s_one, lem:s_eq_zero}
+  \label{lem:valGauss_le_self}
+  \uses{def:s, lem:valGauss_subadditive, lem:valGauss_one, lem:valGauss_eq_zero}
   \lean{valGauss_le_self}
   \leanok
   For all $a \in \ZZ$ with $a \geq 0$, $s(a) \leq a$.
@@ -517,8 +517,8 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  By induction on $a$. The case $a = 0$ follows from \ref{lem:s_eq_zero}
-  (since $(q-1) \mid 0$). For $a \geq 1$, by \ref{lem:s_subadditive} and
+  By induction on $a$. The case $a = 0$ follows from \ref{lem:valGauss_eq_zero}
+  (since $(q-1) \mid 0$). For $a \geq 1$, by \ref{lem:valGauss_subadditive} and
   the induction hypothesis,
   \[
     s(a) \leq s(1) + s(a-1) \leq 1 + (a-1) = a. \qedhere
@@ -526,8 +526,8 @@ isomorphism.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:s_le_digit_sum}
-  \uses{def:s, lem:s_subadditive, lem:s_frob, lem:s_le}
+  \label{lem:valGauss_toNat_le_sum_digits}
+  \uses{def:s, lem:valGauss_subadditive, lem:valGauss_frob, lem:valGauss_le_self}
   \lean{valGauss_toNat_le_sum_digits}
   \leanok
   Let $0 \leq a$ and let
@@ -543,19 +543,19 @@ isomorphism.
   By induction on the list of digits $(a_0, \ldots, a_{t-1})$.
   The base case $a = 0$ is immediate. For the inductive step,
   write $a = a_0 + p \cdot a'$ where $a' = a_1 + a_2 p + \cdots + a_{t-1} p^{t-2}$.
-  By \ref{lem:s_subadditive},
+  By \ref{lem:valGauss_subadditive},
   \[
     s(a_0 + p \cdot a') \leq s(a_0) + s(p \cdot a').
   \]
-  By \ref{lem:s_le}, $s(a_0) \leq a_0$.
-  By \ref{lem:s_frob}, $s(p \cdot a') = s(a')$.
+  By \ref{lem:valGauss_le_self}, $s(a_0) \leq a_0$.
+  By \ref{lem:valGauss_frob}, $s(p \cdot a') = s(a')$.
   By the induction hypothesis, $s(a') \leq a_1 + \cdots + a_{t-1}$.
   Hence $s(a) \leq a_0 + a_1 + \cdots + a_{t-1}$.
 \end{proof}
 
 \begin{lemma}
   \label{lem:s_sum}
-  \uses{def:s, lem:s_sum_dvd, lem:s_eq_zero}
+  \uses{def:s, lem:valGauss_add_valGauss_sub_self, lem:valGauss_eq_zero}
   \leanok
   We have
   \[
@@ -565,18 +565,18 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  We pair each $a \in \{0, \ldots, q-2\}$ with $q-1-a$. By \ref{lem:s_sum_dvd}
+  We pair each $a \in \{0, \ldots, q-2\}$ with $q-1-a$. By \ref{lem:valGauss_add_valGauss_sub_self}
   with $k = q-1$, for any $a$ with $(q-1) \nmid a$,
   \[
     s(a) + s(q-1-a) = (p-1) \cdot f.
   \]
-  Note that $s(0) = 0$ and $s(q-1) = 0$ by \ref{lem:s_eq_zero}.
+  Note that $s(0) = 0$ and $s(q-1) = 0$ by \ref{lem:valGauss_eq_zero}.
 
   Since $p$ is odd, $q - 1 = p^f - 1$ is even. The set $\{1, \ldots, q-2\}$
   consists of $(q-3)/2$ pairs $\{a, q-1-a\}$ with $a \neq q-1-a$, plus the
   central term $a = (q-1)/2$ which pairs with itself. Since $q \geq 3$, we have
   $1 \leq (q-1)/2 \leq q-2$, so $(q-1) \nmid (q-1)/2$, and
-  \ref{lem:s_sum_dvd} gives $2s((q-1)/2) = (p-1)f$,
+  \ref{lem:valGauss_add_valGauss_sub_self} gives $2s((q-1)/2) = (p-1)f$,
   hence $s((q-1)/2) = (p-1)f/2$. Therefore
   \[
     \sum_{a=0}^{q-2} s(a) = \frac{q-3}{2} \cdot (p-1)f + \frac{(p-1)f}{2}
@@ -585,8 +585,8 @@ isomorphism.
 \end{proof}
 
 \begin{proposition}
-  \label{prop:s_digit_sum}
-  \uses{lem:s_le_digit_sum, lem:s_sum}
+  \label{prop:valGauss_toNat_eq_sum_digits}
+  \uses{lem:valGauss_toNat_le_sum_digits, lem:s_sum}
   \lean{valGauss_toNat_eq_sum_digits}
   \leanok
   Let $0 \leq a < q - 1$ and let
@@ -599,7 +599,7 @@ isomorphism.
 
 \begin{proof}
   \leanok
-  By \ref{lem:s_le_digit_sum}, $s(a) \leq a_0 + \cdots + a_{f-1}$ for all $a$.
+  By \ref{lem:valGauss_toNat_le_sum_digits}, $s(a) \leq a_0 + \cdots + a_{f-1}$ for all $a$.
   Summing over $0 \leq a \leq q - 2$, we get
   \[
     \sum_{a=0}^{q-2} s(a) \leq \sum_{a=0}^{q-2} (a_0 + \cdots + a_{f-1}).
@@ -636,16 +636,19 @@ Let $G = \Gal(\QQ(\zeta_m)/\QQ) \cong (\ZZ/m\ZZ)^\times$.
 For $(a, m) = 1$, let $\sigma_a \in G$ denote the element with
 $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \[
-  \theta = \theta(\QQ(\zeta_m)) = \sum_{\substack{a = 1 \\ (a,m) = 1}}^{m}
-  \left\{ \frac{a}{m} \right\} \sigma_a^{-1} \in \QQ[G],
+  \Theta = \Theta(\QQ(\zeta_m)) = \sum_{\substack{a = 1 \\ (a,m) = 1}}^{m}
+  a \cdot \sigma_a^{-1} \in \ZZ[G].
 \]
-where $\{x\}$ denotes the fractional part of $x$.
+\begin{remark}
+  With the notation of Washington, $\Theta = m\theta$ where
+  $\theta = \sum_{(a,m)=1} \{a/m\} \sigma_a^{-1} \in \QQ[G]$.
+\end{remark}
 
 \section{Descent and Stickelberger's theorem}
 
 \begin{lemma}
   \label{lem:s_fractional_part}
-  \uses{prop:s_digit_sum}
+  \uses{prop:valGauss_toNat_eq_sum_digits}
   For $0 \leq h < q - 1$,
   \[
     s(h) = (p-1) \sum_{i=0}^{f-1} \left\{ \frac{p^i h}{q-1} \right\}.
@@ -654,7 +657,7 @@ where $\{x\}$ denotes the fractional part of $x$.
 
 \begin{proof}
   Let $h = a_0 + a_1 p + \cdots + a_{f-1} p^{f-1}$ be the $p$-adic
-  expansion of $h$. By \ref{prop:s_digit_sum}, $s(h) = a_0 + \cdots + a_{f-1}$.
+  expansion of $h$. By \ref{prop:valGauss_toNat_eq_sum_digits}, $s(h) = a_0 + \cdots + a_{f-1}$.
   On the other hand, $p^i h \equiv a_0 p^i + \cdots + a_{f-1} p^{i+f-1}
   \pmod{q-1}$, so
   \[
@@ -670,8 +673,27 @@ where $\{x\}$ denotes the fractional part of $x$.
 \end{proof}
 
 \begin{lemma}
+  \label{lem:s_mod}
+  \uses{lem:s_fractional_part}
+  For $a \in (\ZZ/m\ZZ)^\times$,
+  \[
+    m \cdot s(ad) = (p-1) \sum_{i=0}^{f-1} (ap^i \bmod m).
+  \]
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:s_fractional_part} applied to $h = ad$,
+  \[
+    s(ad) = (p-1) \sum_{i=0}^{f-1} \left\{ \frac{p^i \cdot ad}{q-1} \right\}
+           = (p-1) \sum_{i=0}^{f-1} \left\{ \frac{ap^i}{m} \right\}.
+  \]
+  Since $m \cdot \{ap^i/m\} = ap^i \bmod m$ for each $i$, multiplying by $m$
+  gives the result.
+\end{proof}
+
+\begin{lemma}
   \label{lem:gauss_sum_power_fixed_1}
-  \uses{lem:galois_gauss_sum_a}
+  \uses{lem:gal_gaussSum_eq_gaussSum}
   For any $\tau \in \Gal(L/\QQ(\zeta_m, \zeta_p))$,
   $\tau(g_d^m) = g_d^m$.
 \end{lemma}
@@ -679,7 +701,7 @@ where $\{x\}$ denotes the fractional part of $x$.
 \begin{proof}
   Since $\tau$ fixes $\zeta_m$, we have $\fn(\tau) \equiv 1 \pmod{m}$, so
   $d \cdot \fn(\tau) \equiv d \pmod{q-1}$.
-  By \ref{lem:galois_gauss_sum_a},
+  By \ref{lem:gal_gaussSum_eq_gaussSum},
   $\tau(g_d) = g_{d \cdot \fn(\tau)} = g_d$.
   Therefore $\tau(g_d^m) = g_d^m$.
 \end{proof}
@@ -791,12 +813,12 @@ where $\{x\}$ denotes the fractional part of $x$.
   \label{lem:valuation_gauss_sum_power}
   \uses{lem:gauss_sum_in_cyclotomic, lem:L_E_unramified,
         lem:p_totally_ramified_in_E,
-        lem:galois_gauss_sum_a, lem:gauss_sum_galois_action_K, def:s,
-        lem:s_fractional_part}
+        lem:gal_gaussSum_eq_gaussSum, lem:gauss_sum_galois_action_K, def:s,
+        lem:s_mod}
   For $a \in (\ZZ/m\ZZ)^\times$,
   \[
-    v_{\sigma_a^{-1}(\tilde{\fp}_0)}(g_d^m) = m \sum_{i=0}^{f-1}
-    \left\{ \frac{ap^i}{m} \right\}.
+    v_{\sigma_a^{-1}(\tilde{\fp}_0)}(g_d^m) = \sum_{i=0}^{f-1}
+    (ap^i \bmod m).
   \]
 \end{lemma}
 
@@ -807,7 +829,7 @@ where $\{x\}$ denotes the fractional part of $x$.
   \]
   Lift $\sigma_a \in G = \Gal(\QQ(\zeta_m)/\QQ)$ to an element
   $\tilde{\sigma}_a \in \Gal(L/F)$ with $\mathfrak{n}(\tilde{\sigma}_a) \equiv a
-  \pmod{m}$. By \ref{lem:galois_gauss_sum_a},
+  \pmod{m}$. By \ref{lem:gal_gaussSum_eq_gaussSum},
   $\tilde{\sigma}_a(g_d) = g_{d \cdot \mathfrak{n}(\tilde{\sigma}_a)}$.
   The ambiguity in the lift is an element of $\Gal(L/\QQ(\zeta_m, \zeta_p))$,
   which acts on $g_d$ by \ref{lem:gauss_sum_galois_action_K} as multiplication
@@ -818,9 +840,12 @@ where $\{x\}$ denotes the fractional part of $x$.
   Since $E/\QQ(\zeta_m)$ is totally ramified of degree $p-1$ above $\tilde{\fp}_0$
   by \ref{lem:p_totally_ramified_in_E}, we have
   $v_{\sigma_a^{-1}(\tilde{\fp})} = (p-1) \cdot v_{\sigma_a^{-1}(\tilde{\fp}_0)}$.
-  Therefore $v_{\sigma_a^{-1}(\tilde{\fp}_0)}(g_d^m) = \frac{m \cdot s(ad)}{p-1}
-  = m \sum_{i=0}^{f-1} \left\{ \frac{ap^i}{m} \right\}$,
-  where the last equality is \ref{lem:s_fractional_part}.
+  Therefore
+  \[
+    v_{\sigma_a^{-1}(\tilde{\fp}_0)}(g_d^m) = \frac{m \cdot s(ad)}{p-1}
+    = \sum_{i=0}^{f-1} (ap^i \bmod m),
+  \]
+  where the last equality is \ref{lem:s_mod}.
 \end{proof}
 
 \begin{lemma}
@@ -828,52 +853,54 @@ where $\{x\}$ denotes the fractional part of $x$.
   \uses{lem:stabilizer_tP0}
   For $a \in (\ZZ/m\ZZ)^\times$,
   \[
-    v_{\sigma_a^{-1}(\tilde{\fp}_0)}(\tilde{\fp}_0^{m\theta}) =
-    m \sum_{i=0}^{f-1} \left\{ \frac{ap^i}{m} \right\}.
+    v_{\sigma_a^{-1}(\tilde{\fp}_0)}(\tilde{\fp}_0^{\Theta}) =
+    \sum_{i=0}^{f-1} (ap^i \bmod m).
   \]
 \end{lemma}
 
 \begin{proof}
-  By definition of $\theta$ and \ref{lem:stabilizer_tP0}, regrouping the
+  By definition of $\Theta$ and \ref{lem:stabilizer_tP0}, regrouping the
   sum over $(\ZZ/m\ZZ)^\times$ by orbits under $\langle p \rangle$:
   \[
-    v_{\sigma_a^{-1}(\tilde{\fp}_0)}(\tilde{\fp}_0^{m\theta})
-    = m \sum_{b \in (\ZZ/m\ZZ)^\times} \left\{\frac{b}{m}\right\}
+    v_{\sigma_a^{-1}(\tilde{\fp}_0)}(\tilde{\fp}_0^{\Theta})
+    = \sum_{b \in (\ZZ/m\ZZ)^\times} b \cdot
       v_{\sigma_a^{-1}(\tilde{\fp}_0)}(\sigma_b^{-1}(\tilde{\fp}_0))
-    = m \sum_{i=0}^{f-1} \left\{ \frac{ap^i}{m} \right\},
+    = \sum_{i=0}^{f-1} (ap^i \bmod m),
   \]
   since $v_{\sigma_a^{-1}(\tilde{\fp}_0)}(\sigma_b^{-1}(\tilde{\fp}_0)) = 1$
-  if $b \in a\langle p \rangle$ and $0$ otherwise.
+  if $b \equiv ap^i \pmod{m}$ for some $i$, and $0$ otherwise.
 \end{proof}
 
 \begin{lemma}
   \label{lem:gauss_sum_factorization_cyclotomic}
-  \uses{lem:gauss_sum_power_in_cyclotomic, lem:gauss_sum_norm,
+  \lean{GaussSum_factorization}
+  \uses{lem:gauss_sum_power_in_cyclotomic, lem:norm_GaussSum,
         lem:valuation_gauss_sum_power, lem:valuation_stickelberger,
         lem:stabilizer_tP0}
+  \leanok
   \[
-    (g_d^m) = \tilde{\fp}_0^{m\theta}
+    (g_d^m) = \tilde{\fp}_0^{\Theta}
   \]
   as ideals of $\cO_{\QQ(\zeta_m)}$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:gauss_sum_power_in_cyclotomic}, $g_d^m \in \cO_{\QQ(\zeta_m)}$.
-  By \ref{lem:gauss_sum_norm}, $g_d^m$ is only divisible by primes above $p$.
-  Similarly, $\tilde{\fp}_0^{m\theta}$ only involves primes above $p$.
+  By \ref{lem:norm_GaussSum}, $g_d^m$ is only divisible by primes above $p$.
+  Similarly, $\tilde{\fp}_0^{\Theta}$ only involves primes above $p$.
   It therefore suffices to check that for every prime $\mathfrak{q} =
   \sigma_a^{-1}(\tilde{\fp}_0)$ of $\cO_{\QQ(\zeta_m)}$ above $p$,
   \[
-    v_{\mathfrak{q}}(g_d^m) = v_{\mathfrak{q}}(\tilde{\fp}_0^{m\theta}).
+    v_{\mathfrak{q}}(g_d^m) = v_{\mathfrak{q}}(\tilde{\fp}_0^{\Theta}).
   \]
+  By \ref{lem:valuation_gauss_sum_power},
   \[
-    v_{\mathfrak{q}}(g_d^m) = m \sum_{i=0}^{f-1} \left\{ \frac{ap^i}{m} \right\}
+    v_{\mathfrak{q}}(g_d^m) = \sum_{i=0}^{f-1} (ap^i \bmod m).
   \]
-  by \ref{lem:valuation_gauss_sum_power}. On the other hand, by
-  \ref{lem:valuation_stickelberger},
+  By \ref{lem:valuation_stickelberger},
   \[
-    v_{\mathfrak{q}}(\tilde{\fp}_0^{m\theta}) = m \sum_{i=0}^{f-1}
-    \left\{ \frac{ap^i}{m} \right\}.
+    v_{\mathfrak{q}}(\tilde{\fp}_0^{\Theta}) = \sum_{i=0}^{f-1} (ap^i \bmod m).
   \]
   The two sides are equal, which completes the proof.
 \end{proof}
@@ -881,12 +908,12 @@ where $\{x\}$ denotes the fractional part of $x$.
 \begin{theorem}
   \label{thm:stickelberger}
   \uses{lem:gauss_sum_factorization_cyclotomic}
-  The ideal $\tilde{\fp}_0^{m\theta}$ is principal in $\QQ(\zeta_m)$.
+  The ideal $\tilde{\fp}_0^{\Theta}$ is principal in $\QQ(\zeta_m)$.
 \end{theorem}
 
 \begin{proof}
   By \ref{lem:gauss_sum_factorization_cyclotomic},
-  $(g_d^m) = \tilde{\fp}_0^{m\theta}$.
+  $(g_d^m) = \tilde{\fp}_0^{\Theta}$.
 \end{proof}
 
 \chapter{The Kronecker-Weber theorem}
@@ -1180,11 +1207,11 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
   Now, $\mathfrak{a}$ is coprime to $p$ by \ref{lem:kw_mu_pth_power_ideal}.
   By \ref{thm:stickelberger} applied with $m = p$, the ideal
-  $\mathfrak{a}^{p\theta}$ is principal in $\QQ(\zeta_p)$. Since
-  $p\theta = \sum_{a=1}^{p-1} a\sigma_a^{-1} \in \ZZ[G]$, we compute
-  $[\mathfrak{a}]^{p\theta}$:
+  $\mathfrak{a}^{\Theta}$ is principal in $\QQ(\zeta_p)$, where
+  $\Theta = \sum_{a=1}^{p-1} a\sigma_a^{-1} \in \ZZ[G]$. We compute
+  $[\mathfrak{a}]^{\Theta}$:
   \[
-    [\mathfrak{a}]^{p\theta} = \prod_{a=1}^{p-1} \sigma_a^{-1}([\mathfrak{a}])^a
+    [\mathfrak{a}]^{\Theta} = \prod_{a=1}^{p-1} \sigma_a^{-1}([\mathfrak{a}])^a
     = \prod_{a=1}^{p-1} [\mathfrak{a}]^{a^{-1} \cdot a} = [\mathfrak{a}]^{p-1},
   \]
   where we used $\sigma_a^{-1}([\mathfrak{a}]) = [\mathfrak{a}]^{a^{-1}}$
@@ -1192,7 +1219,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   Since $(\mu) = \mathfrak{a}^p$, the ideal $\mathfrak{a}^p$ is principal,
   so $[\mathfrak{a}]^p = 1$ in the class group. Therefore
   $[\mathfrak{a}]^{p-1} = [\mathfrak{a}]^{-1}$, and since
-  $[\mathfrak{a}]^{p\theta} = 1$ (as $\mathfrak{a}^{p\theta}$ is principal),
+  $[\mathfrak{a}]^{\Theta} = 1$ (as $\mathfrak{a}^{\Theta}$ is principal),
   we get $[\mathfrak{a}]^{-1} = 1$, i.e. $[\mathfrak{a}] = 1$.
 \end{proof}
 
@@ -1256,7 +1283,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 % See Washington, Lemma 14.7 or Hilbert, Satz 147.
 
 \begin{lemma}
-  \label{lem:ramification_idx}
+  \label{lem:ramificationIdx_eq_p_sub_one}
   \lean{ramificationIdx_eq_p_sub_one}
   \leanok
   The ramification index of $\fP$ above $p$ is $p - 1$, i.e.,
@@ -1273,7 +1300,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
 \begin{lemma}
   \label{lem:zeta_sub_one_not_mem_sq}
-  \uses{lem:ramification_idx}
+  \uses{lem:ramificationIdx_eq_p_sub_one}
   \lean{zeta_sub_one_not_mem_sq}
   \leanok
   We have $\zeta_p - 1 \notin \fP^2$.
@@ -1281,14 +1308,14 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
 \begin{proof}
   \leanok
-  By \ref{lem:ramification_idx}, $e(\fP \mid p) = p - 1$. Since $\zeta_p$ is a
+  By \ref{lem:ramificationIdx_eq_p_sub_one}, $e(\fP \mid p) = p - 1$. Since $\zeta_p$ is a
   primitive $p$-th root of unity, $(\zeta_p - 1)$ generates the unique prime
   above $p$ in $\QQ(\zeta_p)$, which has ramification index $p - 1$. Hence
   $v_{\fP}(\zeta_p - 1) = 1$, so $\zeta_p - 1 \notin \fP^2$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:gauss_sum_one_left}
+  \label{lem:gaussSum_one_left}
   \uses{def:gauss_sum_s, def:addchar}
   \lean{gaussSum_one_left}
   \leanok

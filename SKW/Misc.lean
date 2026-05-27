@@ -7,6 +7,7 @@ public import Mathlib.NumberTheory.NumberField.Units.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 public import Mathlib.NumberTheory.GaussSum
+public import Mathlib.Data.List.Indexes
 
 @[expose] public section
 
@@ -111,11 +112,11 @@ theorem gaussSum_one_right {R : Type*} [CommRing R] [Fintype R] {R' : Type*} [Co
     [IsDomain R'] {χ : MulChar R R'} (hχ : χ ≠ 1) : gaussSum χ 1 = 0 := by
   simpa [gaussSum] using MulChar.sum_eq_zero_of_ne_one hχ
 
-theorem Ideal.multiplicity_bot {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
+theorem Ideal.multiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
     multiplicity I ⊤ = 0 := by
   rw [← one_eq_top, multiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
 
-theorem Ideal.emultiplicity_bot {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
+theorem Ideal.emultiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
     emultiplicity I ⊤ = 0 := by
   rw [← one_eq_top, emultiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
 
@@ -380,3 +381,214 @@ theorem MulAction.orbitProdStabilizerEquivGroup_apply_smul {α β : Type*} [Grou
 --     orbitProdStabilizerEquivGroup α b (x, σ) = ofOrbit x * σ := by
 --   rw [orbitProdStabilizerEquivGroup]
 --   simp
+
+theorem List.mapIdx_replicate {α β : Type*} (f : ℕ → α → β) (n : ℕ) (a : α) :
+    mapIdx f (replicate n a) = map (fun n ↦ f n a) (range n) := by
+  induction n with
+  | zero => simp
+  | succ n hn => simp [replicate_succ', mapIdx_append, range_succ, hn]
+
+theorem Nat.digitsAppend_def (b l n : ℕ) :
+    Nat.digitsAppend b l n = b.digits n ++ List.replicate (l - (b.digits n).length) 0 := by
+  sorry
+
+theorem Nat.mem_digitsAppend_of_mem_digits {b n : ℕ} (l d : ℕ) (hd : d ∈ b.digits n) :
+    d ∈ b.digitsAppend l n := by
+  rw [digitsAppend_def, List.mem_append]
+  exact Or.inl hd
+
+theorem Nat.digitsAppend_sum_eq_digits_sum (b l n : ℕ) :
+    (Nat.digitsAppend b l n).sum = (Nat.digits b n).sum := by
+  rw [Nat.digitsAppend_def, List.sum_append, List.sum_replicate, nsmul_zero, add_zero]
+
+theorem Nat.eq_mapIdx_digits_sum (b n : ℕ) :
+    n = (List.mapIdx (fun i a ↦ a * b ^ i) (b.digits n)).sum := by
+  convert Nat.ofDigits_eq_sum_mapIdx b (b.digits n)
+  rw [Nat.ofDigits_digits]
+
+theorem Nat.digits_base_pow_sub_one {b : ℕ} (hb : 1 < b) (k : ℕ) :
+    b.digits (b ^ k - 1) = List.replicate k (b - 1) := by
+  induction k with
+  | zero => simp
+  | succ k hk =>
+      rw [List.replicate_succ, ← hk,
+        show b ^ (k + 1) - 1 = (b - 1) + b * (b ^ k - 1) by
+          rw [Nat.mul_sub, ← Nat.pow_succ', mul_one, add_comm (b - 1), ← Nat.add_sub_assoc hb.le,
+            Nat.sub_add_cancel (by bound)],
+        Nat.digits_add _ hb _ _ (Nat.sub_one_lt_of_lt hb) (by grind)]
+
+theorem Nat.digits_eq_replicate_base_sub_one_iff {b : ℕ} (hb : 1 < b) (n k : ℕ) :
+    b.digits n = List.replicate k (b - 1) ↔ n = b ^ k - 1 := by
+  refine ⟨?_, fun h ↦ by rw [h, digits_base_pow_sub_one hb]⟩
+  intro h
+  have := congr_arg (Nat.ofDigits b) h
+  rwa [ofDigits_digits, ← digits_base_pow_sub_one hb, ofDigits_digits] at this
+
+example (b l n : ℕ) (p : b.digitsAppend l n ≠ []) :
+    b.digitsAppend l n = b.digits n ↔ (b.digitsAppend l n).getLast p ≠ 0 := by
+  nth_rewrite 1 [b.digitsAppend_def]
+  rw [List.append_right_eq_self]
+  
+  sorry
+
+theorem Nat.digitsAppend_eq_replicate_base_sub_one_iff {b : ℕ} (hb : 1 < b) (l n : ℕ) :
+    b.digitsAppend l n = List.replicate l (b - 1) ↔ n = b ^ l - 1 := by
+  rw [← digits_eq_replicate_base_sub_one_iff hb, digitsAppend_def]
+
+  -- exact getLast_digit_ne_zero b hn
+  constructor
+  ·
+    sorry
+  · intro h
+    rw [h]
+    rw [List.replicate_append_replicate]
+    sorry
+
+  refine ⟨?_, fun h ↦ by rw [h, digits_base_pow_sub_one hb]⟩
+  intro h
+  have := congr_arg (Nat.ofDigits b) h
+  rwa [ofDigits_digits, ← digits_base_pow_sub_one hb, ofDigits_digits] at this
+
+theorem Nat.eq_sum_digits_mul_pow (b n : ℕ) :
+    n = ∑ i : Fin (b.digits n).length, (b.digits n)[i] * b ^ i.val := by
+  convert Nat.eq_mapIdx_digits_sum b n
+  simp [List.mapIdx_eq_zipIdx_map, ← Fin.sum_univ_fun_getElem,
+      ← Fin.sum_congr' _ List.length_zipIdx.symm]
+
+theorem Nat.eq_mapIdx_digitsAppend_sum (b l n : ℕ) :
+    n = (List.mapIdx (fun i a ↦ a * b ^ i) (b.digitsAppend l n)).sum := by
+  simpa [digitsAppend_def, List.mapIdx_append, List.mapIdx_replicate] using Nat.eq_mapIdx_digits_sum b n
+
+theorem Nat.eq_sum_digitsAppend_mul_pow {b n : ℕ} (l : ℕ) (hb : 1 < b) (hn : n < b ^ l):
+    haveI : (b.digitsAppend l n).length = l := length_digitsAppend hb l hn
+    n = ∑ i : Fin l, (b.digitsAppend l n)[i] * b ^ i.val := by
+  convert Nat.eq_mapIdx_digitsAppend_sum b l n
+  simp [List.mapIdx_eq_zipIdx_map, ← Fin.sum_univ_fun_getElem,
+    ← Fin.sum_congr' _ (List.length_zipIdx.trans (length_digitsAppend hb l hn)).symm]
+
+example (b l a : ℕ) (hb : 1 < b) [NeZero l] (ha : a < b ^ l - 1) :
+    (b - 1) * ∑ j ∈ Finset.range l, Int.fract (b ^ j * a / (b ^ l - 1 : ℕ) : ℚ) =
+      (Nat.digits b a).sum := by
+  have ha' : a < b ^ l := by grind
+  let L' := b.digitsAppend l a
+  have hL : (b.digitsAppend l a).length = l := Nat.length_digitsAppend hb l ha'
+  rw [← Nat.digitsAppend_sum_eq_digits_sum b l, Finset.sum_range]
+  have {j : Fin l} : Int.fract (b ^ j.val * a / (b ^ l - 1 : ℕ) : ℚ) =
+      (∑ i : Fin l, (b.digitsAppend l a)[i] * b ^ (j + i).val) / (b ^ l - 1) := by
+    refine Int.fract_eq_iff.mpr ⟨?_, ?_, ?_⟩
+    · bound
+    · refine (Rat.div_lt_iff ?_).mpr ?_
+      · sorry
+      · rw [one_mul, ← Nat.cast_pow, ← Nat.cast_one, ← Nat.cast_sub (by grind), Rat.natCast_lt_natCast]
+        · obtain ⟨i₀, h₀⟩ : ∃ i : Fin l, (b.digitsAppend l a)[i] < b - 1 := by
+            suffices ∃ d ∈ b.digitsAppend l a, d < b - 1 by
+              obtain ⟨d, hd₁, hd₂⟩ := this
+              rw [List.mem_iff_get] at hd₁
+              obtain ⟨i₀, rfl⟩ := hd₁
+              exact ⟨(finCongr hL) i₀, by simpa⟩
+            contrapose! ha
+            have : b.digits a = List.replicate l (b - 1) := by
+              rw [List.eq_replicate_iff]
+              refine ⟨?_, ?_⟩
+              ·
+                sorry
+              · intro d hd
+                refine le_antisymm ?_ ?_
+                · rw [Nat.le_iff_lt_add_one, Nat.sub_add_cancel hb.le]
+                  exact Nat.digits_lt_base hb hd
+                · apply ha
+                  exact Nat.mem_digitsAppend_of_mem_digits l d hd
+            rw [Nat.digits_eq_replicate_base_sub_one_iff hb] at this
+            rw [this]
+          rw [← Equiv.sum_comp (Equiv.addRight j).symm]
+          simp only [Equiv.addRight_symm, Equiv.coe_addRight, Fin.getElem_fin,
+            add_neg_cancel_comm_assoc]
+          have : b ^ l - 1 = ∑ i : Fin l, (b - 1) * b ^ i.val := by
+            rw [← Finset.mul_sum, mul_comm, ← Finset.sum_range, geom_sum_mul_of_one_le hb.le]
+          rw [this]
+          refine Finset.sum_lt_sum (fun i _ ↦ ?_) ⟨i₀ + j, Finset.mem_univ _, ?_⟩
+          · gcongr
+            rw [Nat.le_iff_lt_add_one, Nat.sub_add_cancel hb.le]
+            exact Nat.lt_of_mem_digitsAppend hb l _ <| List.mem_of_getElem rfl
+          · refine mul_lt_mul_of_pos_right (by simpa) (by positivity)
+    rw [Nat.cast_sub, Nat.cast_pow, Nat.cast_one, ← sub_div]
+    suffices (b ^ l - 1 : ℤ) ∣ b ^ j.val * a -
+        ∑ i : Fin l, (b.digitsAppend l a)[i] * b ^ (i + j).val by
+      obtain ⟨c, hc⟩ := this
+      refine ⟨c, ?_⟩
+      rw [div_eq_iff, mul_comm (c : ℚ)]
+      simp_rw [add_comm j]
+      exact_mod_cast hc
+      sorry
+    rw [congr_arg ((↑) : ℕ → ℤ) <| Nat.eq_sum_digitsAppend_mul_pow l hb ha', Nat.cast_sum,
+      Finset.mul_sum, Nat.cast_sum, ← Finset.sum_sub_distrib]
+    refine Finset.dvd_sum fun i _ ↦ ?_
+    rw [Nat.cast_mul, Nat.cast_mul, Nat.cast_pow, Nat.cast_pow, mul_comm, mul_assoc, ← pow_add,
+      ← mul_sub, Fin.val_add]
+    nth_rewrite 1 [← Nat.mod_add_div (i + j) l, pow_add]
+    rw [← mul_sub_one, ← mul_assoc]
+    refine Int.dvd_mul_of_dvd_right ?_
+    exact pow_one_sub_dvd_pow_mul_sub_one _ _ _
+    sorry
+  simp_rw [this, Fin.getElem_fin, Nat.cast_sum, Nat.cast_mul, Nat.cast_pow, ← Finset.sum_div]
+  rw [Finset.sum_comm]
+--  simp_rw [← Fin.val_add]
+  conv_lhs =>
+    enter [2, 1, 2, k]
+    rw [← Equiv.sum_comp (Equiv.addRight k).symm, ← Finset.mul_sum]
+    simp only [Equiv.addRight_symm_apply, neg_add_cancel_right, ← Finset.sum_range,
+      geom_sum_eq (Nat.cast_ne_one.mpr hb.ne')]
+  rw [← Finset.sum_mul, mul_div_assoc, div_div_cancel_left', mul_comm, mul_assoc, inv_mul_cancel₀,
+    mul_one, Nat.cast_list_sum, ← Fin.sum_univ_fun_getElem, ← Fin.sum_congr' _ hL]
+  rfl
+  sorry
+  sorry
+
+
+
+example (b l a : ℕ) (hb : 1 < b) [NeZero l] (ha : a < b ^ l - 1) :
+    (b - 1) * ∑ j ∈ Finset.range l, Int.fract (b ^ j * a / (b ^ l - 1 : ℕ) : ℚ) =
+      (Nat.digits b a).sum := by
+
+  let L := b.digitsAppend l a
+  have hL := Nat.length_digitsAppend hb l (n := a) sorry
+  -- have : a = ∑ i : Fin l, L[i] * b ^ i.val := by
+  --   rw [← Fin.sum_congr' _ hL]
+  --   simp only [Fin.getElem_fin, Fin.val_cast]
+  --   rw [Fin.sum_univ_fun_getElem L (fun i ↦ L[i] * b ^ i)]
+  --   sorry
+  -- rw [← Nat.digitsAppend_sum b l a]
+  have {j} : Int.fract (b ^ j * a / (b ^ l - 1 : ℕ) : ℚ) =
+      (∑ i : Fin l, L[i] * b ^ ((j + i) % l)) / (b ^ l - 1) := by
+    induction j with
+    | zero =>
+        rw [Int.fract_eq_self.mpr]
+        · simp [Nat.mod_eq_of_lt, Nat.eq_sum_digitsAppend_mul_pow]
+
+        · refine ⟨?_, ?_⟩
+          · bound
+          · rwa [pow_zero, one_mul, div_lt_iff₀, one_mul, Rat.natCast_lt_natCast]
+            rw [Rat.natCast_pos]
+            linarith
+    | succ n ih =>
+
+
+        sorry
+  simp_rw [this, Fin.getElem_fin, Nat.cast_sum, Nat.cast_mul, Nat.cast_pow, ← Finset.sum_div]
+  rw [Finset.sum_comm]
+  simp_rw [Finset.sum_range, ← Fin.val_add]
+  conv_lhs =>
+    enter [2, 1, 2, a]
+    rw [← Equiv.sum_comp (Equiv.addRight a).symm]
+    simp only [Equiv.addRight_symm_apply, neg_add_cancel_right]
+    rw [← Finset.mul_sum, ← Finset.sum_range, geom_sum_eq (Nat.cast_ne_one.mpr hb.ne')]
+  rw [← Finset.sum_mul, mul_div_assoc, div_div_cancel_left']
+  rw [mul_comm, mul_assoc, inv_mul_cancel₀, mul_one]
+  rw [← Nat.digitsAppend_sum_eq_digits_sum b l, Nat.cast_list_sum]
+  rw [← Fin.sum_univ_fun_getElem]
+  rw [← Fin.sum_congr' _ hL]
+
+  rfl
+  rw [sub_ne_zero, Nat.cast_ne_one]
+  exact hb.ne'
+  sorry

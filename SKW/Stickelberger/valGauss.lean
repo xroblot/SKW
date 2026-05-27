@@ -40,7 +40,7 @@ include hη
 theorem valGauss_eq_zero [P.LiesOver 𝒑] [𝓟.IsPrime] (a : ℤ) (h : ↑(p ^ f - 1 : ℕ) ∣ a) :
     valGauss hbij hζ 𝓟 a = 0 := by
   rw [valGauss, GaussSum, orderOf_dvd_iff_zpow_eq_one.mp, MulChar.ringHomComp_one,
-    gaussSum_one_left, span_singleton_neg, span_singleton_one, emultiplicity_bot]
+    gaussSum_one_left, span_singleton_neg, span_singleton_one, emultiplicity_top]
   · exact IsPrime.ne_top'
   · rw [ne_eq, MonoidHom.compAddChar_eq_one_iff (FaithfulSMul.algebraMap_injective _ _)]
     exact addCharTrace_ne_one P hζ
@@ -87,7 +87,7 @@ theorem valGauss_subadditive [NeZero 𝓟] [P.LiesOver 𝒑] (a b : ℤ) :
   have h𝓟 : Prime 𝓟 := prime_of_isPrime (NeZero.ne 𝓟) inferInstance
   by_cases h : ↑(p ^ f - 1 : ℕ) ∣ a + b
   · rw [valGauss_eq_zero hbij hζ hη 𝓟 _ h]
-    exact zero_le _
+    exact zero_le
   · rw [valGauss, valGauss, valGauss, ← emultiplicity_mul h𝓟, span_mul_span,
       Set.singleton_mul_singleton, GaussSum_mul_GaussSum _ _ _ _ h, ← Set.singleton_mul_singleton,
       ← span_mul_span, emultiplicity_mul h𝓟]

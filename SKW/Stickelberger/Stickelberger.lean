@@ -30,7 +30,7 @@ local instance : Fintype (𝓞 K ⧸ P) := Fintype.ofFinite (𝓞 K ⧸ P)
 
 attribute [local instance] Ideal.Quotient.field
 
-variable (m d : ℕ) (hm : orderOf (p : ZMod m) = f) (hmd : p ^ f - 1 = m * d)
+variable (m d : ℕ) (hmf : orderOf (p : ZMod m) = f) (hmd : p ^ f - 1 = m * d)
 
 variable {E : Type*} [Field E] [NumberField E] [IsCyclotomicExtension {m * p} ℚ E]
 
@@ -59,22 +59,25 @@ theorem lemma38 [Algebra E L] [𝓟.LiesOver 𝒑] [𝓟.LiesOver tP] :
 theorem lemma39 [Algebra E₀ E] [tP.LiesOver tP₀] [tP.LiesOver 𝒑] :
     ramificationIdx tP₀ tP = p - 1 := sorry
 
-theorem lemma40 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] (a : (ZMod m)ˣ) (hp' : p.Coprime m)
+variable (p) in
+theorem lemma40_1 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] (hp' : p.Coprime m) :
+    MulEquiv.mapSubgroup (galEquivZMod m E₀) (MulAction.stabilizer Gal(E₀/ℚ) tP₀) =
+      Subgroup.zpowers (ZMod.unitOfCoprime p hp') := sorry
+
+theorem lemma40_2 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] (a : (ZMod m)ˣ) (hp' : p.Coprime m)
     (b : Subgroup.zpowers (ZMod.unitOfCoprime p hp')) :
     (galEquivZMod m E₀).symm (a * b) • tP₀ = (galEquivZMod m E₀).symm a • tP₀ := sorry
-
-def mθ (a : (ZMod m)) : ℕ := a.val - m * ⌊a.val / m⌋₊
 
 theorem lemma41 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] [P.LiesOver 𝒑] [Algebra E₀ L]
     (a : (ZMod m)ˣ) {Γ : 𝓞 E₀}
     (hΓ : (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 E₀) (𝓞 L) Γ) :
     emultiplicity (((galEquivZMod m E₀).symm a⁻¹) • tP₀) (span {Γ}) =
-      ∑ j ∈ Finset.range f, mθ m (a.val.val * p ^ j) := sorry
+      ∑ j ∈ Finset.range f, (a.val.val * p ^ j) % m := sorry
 
 theorem lemma42 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] (a : (ZMod m)ˣ) :
     emultiplicity (((galEquivZMod m E₀).symm a)⁻¹ • tP₀)
-      (∏ a, (((galEquivZMod m E₀).symm a)⁻¹ • tP₀) ^ (mθ m a)) =
-        ∑ i ∈ Finset.range f, mθ m (a.val.val * p ^ i) := sorry
+      (∏ a, (((galEquivZMod m E₀).symm a)⁻¹ • tP₀) ^ a.val.val) =
+        ∑ j ∈ Finset.range f, (a.val.val * p ^ j) % m := sorry
 
 variable [IsCyclotomicExtension {p ^ f - 1} ℚ K] [NeZero f] [𝓟.IsPrime]
 
@@ -100,8 +103,8 @@ theorem lemma43_1 [P.LiesOver 𝒑] [Algebra E₀ L] {P₀ : Ideal (𝓞 E₀)} 
   exact hP₀.ne_zero
 
 theorem lemma43_2 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] {P₀ : Ideal (𝓞 E₀)} (hP₀ : Prime P₀) :
-    emultiplicity P₀ (∏ a, (((galEquivZMod m E₀).symm a)⁻¹ • tP₀) ^ (mθ m a)) =
-      ∑ a, if (galEquivZMod m E₀).symm a • P₀ = tP₀ then mθ m a else 0 := sorry
+    emultiplicity P₀ (∏ a, (((galEquivZMod m E₀).symm a)⁻¹ • tP₀) ^ a.val.val) =
+      ∑ a, if (galEquivZMod m E₀).symm a • P₀ = tP₀ then a.val.val else 0 := sorry
 
 variable (K) in
 theorem lemma43_3 [Algebra E₀ L] (σ : Gal(E₀/ℚ)) :
@@ -109,35 +112,87 @@ theorem lemma43_3 [Algebra E₀ L] (σ : Gal(E₀/ℚ)) :
 
 theorem lemma43_4 [NeZero m] (b : (ZMod m)ˣ) (hp' : p.Coprime m) (g : (ZMod m)ˣ → ℕ) :
     ∑ a with a * b⁻¹ ∈ Finset.image (fun x ↦ ZMod.unitOfCoprime p hp' ^ x)
-      (Finset.range f), g a = ∑ j ∈ Finset.range f, g (b * (ZMod.unitOfCoprime p hp') ^ j) := sorry
+      (Finset.range f), g a = ∑ j ∈ Finset.range f, g (b * (ZMod.unitOfCoprime p hp') ^ j) := by
+  have : 1 = 0 := sorry
+  sorry
+  -- apply Finset.sum_nbij (fun j _ ↦ b * ZMod.unitOfCoprime p hp' ^ j)
+  -- · intro j hj
+  --   simp [Finset.mem_filter, Finset.mem_image]
+  --   exact ⟨j, Finset.mem_range.mp hj, by group⟩
+  -- · intro j₁ _ j₂ _ h
+  --   have := mul_left_cancel₀ (b.ne_one) h  -- injectivité
+  --   exact orderOf_injective (ZMod.unitOfCoprime p hp') (by rwa [hm]) this
+  -- · intro a ha
+  --   simp [Finset.mem_filter, Finset.mem_image] at ha
+  --   obtain ⟨j, hj, hjb⟩ := ha.2
+  --   exact ⟨j, Finset.mem_range.mpr hj, by rw [← hjb]; group⟩
+  -- · intro j _; rfl
 
-include K 𝓟 hη in
-theorem lemma43 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] [NeZero 𝓟] [P.LiesOver 𝒑]
-    [Algebra E₀ L] [𝓟.LiesOver tP₀] (Γ : 𝓞 E₀)
+omit [𝓟.IsPrime] in
+include hη hmd hmf in
+theorem GaussSum_factorization [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] [NeZero 𝓟] [P.LiesOver 𝒑]
+    [Algebra E₀ L] [tP₀.IsPrime] [𝓟.LiesOver tP₀] [tP₀.LiesOver 𝒑] (Γ : 𝓞 E₀)
     (hΓ : (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 E₀) (𝓞 L) Γ) :
-    span {Γ} = ∏ a, (((galEquivZMod m E₀).symm a)⁻¹ • tP₀) ^ mθ m a := by
+    span {Γ} = ∏ a : (ZMod m)ˣ, (((galEquivZMod m E₀).symm a)⁻¹ • tP₀) ^ a.val.val := by
   rw [UniqueFactorizationMonoid.eq_iff_emultiplicity_eq]
   intro P₀ hP₀
+  have : P₀.IsMaximal := (isPrime_of_prime hP₀).isMaximal hP₀.ne_zero
   by_cases hP₀' : P₀.LiesOver 𝒑
-  · have hp' : p.Coprime m := sorry
-    obtain ⟨σ, rfl⟩ : ∃ σ : Gal(E₀/ℚ), P₀ = σ⁻¹ • tP₀ := sorry
+  · have := IsCyclotomicExtension.isGalois {m} ℚ E₀
+    have hp' : p.Coprime m := (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro d hmd.symm
+    obtain ⟨σ, rfl⟩ : ∃ σ : Gal(E₀/ℚ), P₀ = σ⁻¹ • tP₀ := by
+      obtain ⟨σ, rfl⟩ := exists_smul_eq_of_isGaloisGroup 𝒑 tP₀ P₀ Gal(E₀/ℚ)
+      exact ⟨σ⁻¹, by rw [inv_inv]⟩
     rw [lemma43_2 _ _ hP₀]
-    obtain ⟨b, hb⟩ : ∃ b, σ⁻¹ = (galEquivZMod m E₀).symm b⁻¹ := sorry
+    obtain ⟨b, hb⟩ : ∃ b, σ⁻¹ = (galEquivZMod m E₀).symm b⁻¹ :=
+      ⟨galEquivZMod m E₀ σ, by rw [map_inv, MulEquiv.symm_apply_apply]⟩
     rw [hb, lemma41 hbij hζ m d tP₀ _ hΓ]
-    simp_rw [smul_smul, ← MulAction.mem_stabilizer_iff, ← map_mul]
+    simp_rw [smul_smul, ← map_mul, ← MulAction.mem_stabilizer_iff]
+    simp_rw [Finset.sum_ite, Finset.sum_const_zero, add_zero]
     conv_rhs =>
-      enter [1, 2, x, 1]
-      rw [← Subgroup.mem_map_equiv, MulEquiv.toMonoidHom_eq_coe]
-    have t₀ : Subgroup.map (↑(galEquivZMod m E₀)) (MulAction.stabilizer Gal(E₀/ℚ) tP₀) =
-      Subgroup.zpowers (ZMod.unitOfCoprime p hp') := sorry
-    have t₁ : orderOf (ZMod.unitOfCoprime p hp') = f := sorry
-    have t₂ : IsOfFinOrder (ZMod.unitOfCoprime p hp') := sorry
-    simp_rw [t₀, IsOfFinOrder.mem_zpowers_iff_mem_range_orderOf t₂, t₁]
+      enter [1, 1, 1, x]
+      rw [← Subgroup.mem_map_equiv, ← MulEquiv.coe_mapSubgroup, lemma40_1 p m tP₀ hp']
+    have t₁ : orderOf (ZMod.unitOfCoprime p hp') = f := by
+      rwa [← orderOf_units, ZMod.coe_unitOfCoprime]
+    have t₂ : IsOfFinOrder (ZMod.unitOfCoprime p hp') := by
+      exact isOfFinOrder_of_finite (ZMod.unitOfCoprime p hp')
+    simp_rw [IsOfFinOrder.mem_zpowers_iff_mem_range_orderOf t₂, t₁, lemma43_4]
+    simp [← ZMod.val_natCast]
+  · obtain ⟨𝓠, _, _⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) P₀
+    have {σ : Gal(E₀/ℚ)} : σ • P₀ ≠ tP₀ := by
+      contrapose! hP₀'
+      rw [(smul_eq_iff_eq_inv_smul _).mp hP₀']
+      exact LiesOver.smul σ⁻¹
+    rw [lemma43_1 hbij hζ hη 𝓠 m d hΓ hP₀ hP₀', lemma43_2 m tP₀ hP₀, Nat.cast_sum]
+    simp [if_neg this]
+
+#exit
+
+
+
+
+
+  ·
+
+
+
+
+
+
+
+    have t₁ : orderOf (ZMod.unitOfCoprime p hp') = f := by
+      rwa [← orderOf_units, ZMod.coe_unitOfCoprime]
+    have t₂ : IsOfFinOrder (ZMod.unitOfCoprime p hp') := by
+      exact isOfFinOrder_of_finite (ZMod.unitOfCoprime p hp')
+    simp_rw [IsOfFinOrder.mem_zpowers_iff_mem_range_orderOf t₂, t₁]
     simp_rw [Finset.sum_ite, Finset.sum_const_zero, add_zero, lemma43_4]
-    simp
-  · have : 𝓟.LiesOver P₀ := sorry
-    have {σ : Gal(E₀/ℚ)} : σ • P₀ ≠ tP₀ := sorry
-    rw [lemma43_1 hbij hζ hη 𝓟 m d hΓ hP₀ hP₀', lemma43_2 m tP₀ hP₀, Nat.cast_sum]
+    simp [← ZMod.val_natCast]
+  · obtain ⟨𝓠, _, _⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) P₀
+    have {σ : Gal(E₀/ℚ)} : σ • P₀ ≠ tP₀ := by
+      contrapose! hP₀'
+      rw [(smul_eq_iff_eq_inv_smul _).mp hP₀']
+      exact LiesOver.smul σ⁻¹
+    rw [lemma43_1 hbij hζ hη 𝓠 m d hΓ hP₀ hP₀', lemma43_2 m tP₀ hP₀, Nat.cast_sum]
     simp [if_neg this]
 
 #exit
