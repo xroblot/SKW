@@ -424,12 +424,17 @@ theorem Nat.digits_eq_replicate_base_sub_one_iff {b : ℕ} (hb : 1 < b) (n k : �
   have := congr_arg (Nat.ofDigits b) h
   rwa [ofDigits_digits, ← digits_base_pow_sub_one hb, ofDigits_digits] at this
 
+#exit
+
 example (b l n : ℕ) (p : b.digitsAppend l n ≠ []) :
     b.digitsAppend l n = b.digits n ↔ (b.digitsAppend l n).getLast p ≠ 0 := by
   nth_rewrite 1 [b.digitsAppend_def]
-  rw [List.append_right_eq_self]
-  
-  sorry
+  rw [List.append_right_eq_self, List.replicate_eq_nil_iff]
+  constructor
+  ·
+    sorry
+  ·
+    sorry
 
 theorem Nat.digitsAppend_eq_replicate_base_sub_one_iff {b : ℕ} (hb : 1 < b) (l n : ℕ) :
     b.digitsAppend l n = List.replicate l (b - 1) ↔ n = b ^ l - 1 := by
