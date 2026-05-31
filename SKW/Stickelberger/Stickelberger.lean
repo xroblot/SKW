@@ -24,73 +24,170 @@ variable {ζ : 𝓞 F} (hζ : IsPrimitiveRoot ζ p) {η : 𝓞 K} (hη : IsPrimi
 
 variable [P.IsMaximal] (𝓟 : Ideal (𝓞 L)) [hp : Fact (p.Prime)]
 
-variable [IsCyclotomicExtension {p} ℚ F]
-
 local instance : Fintype (𝓞 K ⧸ P) := Fintype.ofFinite (𝓞 K ⧸ P)
 
 attribute [local instance] Ideal.Quotient.field
 
-variable (m d : ℕ) (hmf : orderOf (p : ZMod m) = f) (hmd : p ^ f - 1 = m * d)
+variable (m d : ℕ) (hmf : orderOf (p : ZMod m) = f) (hdm : p ^ f - 1 = d * m)
 
-variable {E : Type*} [Field E] [NumberField E] [IsCyclotomicExtension {m * p} ℚ E]
+variable {E : IntermediateField ℚ L} [IsCyclotomicExtension {m * p} ℚ E] (𝔓 : Ideal (𝓞 E))
 
-variable (tP : Ideal (𝓞 E))
+variable {k : IntermediateField ℚ L} (𝔭 : Ideal (𝓞 k))
 
-variable {E₀ : Type*} [Field E₀] [NumberField E₀] -- [IsCyclotomicExtension {m} ℚ E₀]
+include hη hdm in
+theorem smul_gaussSum_eq_gaussSum' [NeZero f] [NeZero m] [Fact (Odd p)] [IsCyclotomicExtension {p} ℚ F]
+    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [IsCyclotomicExtension {p ^ f - 1} ℚ K] [P.LiesOver 𝒑]
+    [Algebra F E] [IsScalarTower F E L] (τ : Gal(L/E)) :
+    τ • (GaussSum hbij hζ d ^ m) = GaussSum hbij hζ d ^ m := by
+  have : IsGalois ℚ L := IsCyclotomicExtension.isGalois {p * (p ^ f - 1)} ℚ L
+  convert_to (τ.restrictScalars F) • (GaussSum hbij hζ d ^ m) = _
+  rw [smul_pow', gal_gaussSum_eq_gaussSum hbij hζ hη]
+  obtain ⟨k, hk⟩ : ∃ k, (d : ℤ) *
+      (galFEquiv p f K (τ.restrictScalars F)).val.val = d + (p ^ f - 1 : ℕ) * k := by
+    have t₀ : τ.restrictScalars F • algebraMap (𝓞 K) (𝓞 L) (η ^ d) =
+        algebraMap (𝓞 K) (𝓞 L) (η ^ d) := by
+      apply FaithfulSMul.algebraMap_injective (𝓞 L) L
+      rw [algebraMap.smul', ← IsScalarTower.algebraMap_apply]
+      obtain ⟨x, hx⟩ : ∃ x : E, algebraMap (𝓞 K) L (η ^ d) = algebraMap E L x := by
+        let ε := IsCyclotomicExtension.zeta (m * p) ℚ E
+        have hε := IsCyclotomicExtension.zeta_spec (m * p) ℚ E
+        replace hε := hε.map_of_injective <| FaithfulSMul.algebraMap_injective E L
+        obtain ⟨i, -, hi⟩ := hε.eq_pow_of_pow_eq_one (ξ := algebraMap (𝓞 K) L (η ^ d))
+          (by
+            rw [← map_pow, ← pow_mul, ← mul_assoc, ← hdm, pow_mul, hη.pow_eq_one, one_pow, map_one])
+        refine ⟨ε ^ i, ?_⟩
+        rw [map_pow _ ε, hi]
+      rw [hx, AlgEquiv.smul_def, AlgEquiv.coe_restrictScalars', AlgEquiv.commutes]
+    have := congr_arg (· ^ d) <| galLFEquiv_apply_eta p f hη (τ.restrictScalars F)
+    dsimp only at this
+    rw [← map_pow, ← map_pow, ← smul_pow', ← map_pow, t₀, ← pow_mul,
+      (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 L)).eq_iff,
+      ← pow_mod_orderOf _ d, ← pow_mod_orderOf _ (_ * d), ← hη.eq_orderOf] at this
+    have := congr_arg ((↑) : ℕ → ℤ) <| hη.pow_inj (Nat.mod_lt _ <| NeZero.pos (p ^ f - 1))
+      (Nat.mod_lt _ <| NeZero.pos (p ^ f - 1)) this
+    rwa [Int.natCast_mod, Int.natCast_mod, Int.natCast_mul, ← Int.ModEq,
+      Int.modEq_iff_add_fac, mul_comm] at this
+  rw [hk, GaussSum_periodic hbij hζ hη]
+  exact Dvd.intro k rfl
 
-variable (tP₀ : Ideal (𝓞 E₀))
-
-theorem lemma34 [P.LiesOver 𝒑] [Algebra E L] (τ : Gal(L/E)) :
-    τ • (GaussSum hbij hζ d ^ m) = GaussSum hbij hζ d ^ m := sorry
-
-theorem lemma35 [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ}
+include hη in
+theorem smul_gaussSum_eq_mul_gaussSum [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ} (he : ¬ p ∣ e)
     (h : τ • algebraMap (𝓞 F) (𝓞 L) ζ = algebraMap (𝓞 F) (𝓞 L) ζ ^ e) :
-    τ • GaussSum hbij hζ d = ((teichmuller hbij ^ (-(d : ℤ))) e)  • GaussSum hbij hζ d := sorry
+    τ • GaussSum hbij hζ d =
+      algebraMap (𝓞 K) (𝓞 L) ((teichmuller hbij ^ d) e) * GaussSum hbij hζ d := by
+  let u : (𝓞 K ⧸ P)ˣ := IsUnit.unit (a := e) (by
+    rw [isUnit_iff_ne_zero]
+    simpa [CharP.cast_eq_zero_iff, Ideal.ringChar_quot, ← (liesOver_iff P 𝒑).mp inferInstance])
+  have hu : (u : 𝓞 K ⧸ P) = (e : 𝓞 K ⧸ P) := IsUnit.unit_spec _
+  have : algebraMap (𝓞 K) (𝓞 L) ((teichmuller hbij ^ (-(d : ℤ))) ↑e) ≠ 0 := by
+    rw [map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective _ _)]
+    exact teichmuller_zpow_apply_ne_zero hbij (-d) u
+  refine mul_left_cancel₀ this ?_
+  rw [← mul_assoc, ← map_mul, ← MulChar.mul_apply, zpow_neg, ← zpow_natCast, zpow_natCast,
+    inv_mul_cancel, MulChar.one_apply (by exact Units.isUnit u), map_one, one_mul]
+  convert gaussSum_mulShift ((teichmuller hbij ^ (-(d : ℤ))).ringHomComp (algebraMap (𝓞 K) (𝓞 L)))
+    ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace P hζ)) u
+  · simp [hu]
+  · simp_rw [GaussSum, gaussSum, Finset.smul_sum, smul_mul']
+    congr! with x
+    · rw [smul_eq_galRestrict_apply (𝓞 K), map_teichmuller_zpow_eq hbij _ _ 1 one_ne_zero hη (by simp),
+        Nat.cast_one, mul_one]
+    · rw [smul_eq_galRestrict_apply (𝓞 K), algebraMap_comp_addCharTrace,
+        monoidHom_comp_addCharTrace_eq_mulShift _ _ _ e]
+      · simp [hu]
+      · rwa [smul_eq_galRestrict_apply (𝓞 K)] at h
 
-theorem lemme36 [P.LiesOver 𝒑] (τ : Gal(L/K)) :
-    τ • (GaussSum hbij hζ d) ^ m = GaussSum hbij hζ d ^ m := sorry
+include hη hdm in
+theorem smul_gaussSum_eq_gaussSum [NeZero m] [P.LiesOver 𝒑] (τ : Gal(L/K)) :
+    τ • (GaussSum hbij hζ d ^ m) = GaussSum hbij hζ d ^ m := by
+  obtain ⟨e, he₁, he₂⟩ : ∃ e, ¬ p ∣ e ∧
+      τ • algebraMap (𝓞 F) (𝓞 L) ζ = algebraMap (𝓞 F) (𝓞 L) ζ ^ e := by
+    rw [smul_eq_galRestrict_apply (𝓞 K)]
+    replace hζ : IsPrimitiveRoot (algebraMap (𝓞 F) (𝓞 L) ζ) p :=
+      hζ.map_of_injective (FaithfulSMul.algebraMap_injective _ _)
+    refine ⟨(hζ.autToPow (𝓞 K) ((galRestrict (𝓞 K) (K) L (𝓞 L)) τ)).val.val, ?_,
+      (hζ.autToPow_spec _ _).symm⟩
+    rw [← hp.out.coprime_iff_not_dvd, Nat.coprime_comm]
+    exact ZMod.val_coe_unit_coprime _
+  have : IsUnit (e : 𝓞 K ⧸ P) := by
+    rw [isUnit_iff_ne_zero]
+    simpa [CharP.cast_eq_zero_iff, Ideal.ringChar_quot, ← (liesOver_iff P 𝒑).mp inferInstance]
+  rw [smul_pow', smul_gaussSum_eq_mul_gaussSum hbij hζ hη _ _ he₁ he₂, mul_pow, ← map_pow,
+    ← MulChar.pow_apply' _ (NeZero.ne m), ← pow_mul, ← hdm, show teichmuller hbij ^ (p ^ f - 1) = 1 by
+        convert pow_orderOf_eq_one (teichmuller hbij)
+        exact (orderOf_teichmuller hbij hη).symm,
+    MulChar.one_apply this, map_one, one_mul]
 
-theorem lemma37 [Algebra E₀ L] [P.LiesOver 𝒑] :
-    ∃ Γ : 𝓞 E₀, (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 E₀) (𝓞 L) Γ := sorry
+set_option backward.isDefEq.respectTransparency false in
+include hη hdm in
+  theorem lemma37 [NeZero f] [NeZero m] [Fact (Odd p)] [Algebra F E] [IsScalarTower F E L]
+    [P.LiesOver 𝒑] [IsCyclotomicExtension {m} ℚ k]
+    [IsCyclotomicExtension {p} ℚ F]
+    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [IsCyclotomicExtension {p ^ f - 1} ℚ K] :
+    ∃ Γ : 𝓞 k, GaussSum hbij hζ d ^ m = algebraMap (𝓞 k) (𝓞 L) Γ := by
+  have : IsAbelianGalois ℚ L := IsCyclotomicExtension.isAbelianGalois {p * (p ^ f - 1)} ℚ L
+  suffices ↑(GaussSum hbij hζ d ^ m : 𝓞 L) ∈ k from
+    ⟨⟨⟨(GaussSum hbij hζ d ^ m : 𝓞 L), this⟩,
+      coe_isIntegral_iff.mp <| RingOfIntegers.isIntegral_coe _⟩, rfl⟩
+  have : k = E ⊓ K := by
+    refine (eq_of_le_iff_finrank_eq (le_inf_iff.mpr ⟨?_, ?_⟩)).mpr ?_
+    · exact isCyclotomicExtension_le_of_dvd ℚ L m (m * p) k E <| dvd_mul_right m p
+    · exact isCyclotomicExtension_le_of_dvd ℚ L m (p ^ f - 1) k K <| dvd_of_mul_left_eq d hdm.symm
+    · rw [IsCyclotomicExtension.Rat.finrank m k]
+      
 
-theorem lemma38 [Algebra E L] [𝓟.LiesOver 𝒑] [𝓟.LiesOver tP] :
-    ramificationIdx tP 𝓟 = 1 := sorry
+      sorry
+  rw [this, IntermediateField.mem_inf]
+  refine ⟨?_, ?_⟩
+  · rw [RingOfIntegers.coe_eq_algebraMap]
+    obtain ⟨x, hx⟩ := (IsGaloisGroup.isInvariant (A := 𝓞 E)).isInvariant
+      (GaussSum hbij hζ d ^ m)
+        fun τ : Gal(L/E) ↦ smul_gaussSum_eq_gaussSum' hbij hζ hη m d hdm τ
+    simp [← hx, ← IsScalarTower.algebraMap_apply (𝓞 E) (𝓞 L) L, IsScalarTower.algebraMap_apply (𝓞 E) E L,
+      IntermediateField.algebraMap_apply]
+  · rw [RingOfIntegers.coe_eq_algebraMap]
+    obtain ⟨x, hx⟩ := (IsGaloisGroup.isInvariant (A := 𝓞 K)).isInvariant
+      (GaussSum hbij hζ d ^ m) fun τ : Gal(L/K) ↦ smul_gaussSum_eq_gaussSum hbij hζ hη m d hdm τ
+    simp [← hx, ← IsScalarTower.algebraMap_apply (𝓞 K) (𝓞 L) L, IsScalarTower.algebraMap_apply (𝓞 K) K L,
+      IntermediateField.algebraMap_apply]
 
-theorem lemma39 [Algebra E₀ E] [tP.LiesOver tP₀] [tP.LiesOver 𝒑] :
-    ramificationIdx tP₀ tP = p - 1 := sorry
+theorem lemma38 [Algebra E L] [𝓟.LiesOver 𝒑] [𝓟.LiesOver 𝔓] :
+    ramificationIdx 𝔓 𝓟 = 1 := sorry
+
+theorem lemma39 [Algebra k E] [𝔓.LiesOver 𝔭] [𝔓.LiesOver 𝒑] :
+    ramificationIdx 𝔭 𝔓 = p - 1 := sorry
 
 variable (p) in
-theorem lemma40_1 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] (hp' : p.Coprime m) :
-    MulEquiv.mapSubgroup (galEquivZMod m E₀) (MulAction.stabilizer Gal(E₀/ℚ) tP₀) =
+theorem lemma40_1 [IsCyclotomicExtension {m} ℚ k] [NeZero m] (hp' : p.Coprime m) :
+    MulEquiv.mapSubgroup (galEquivZMod m k) (MulAction.stabilizer Gal(k/ℚ) 𝔭) =
       Subgroup.zpowers (ZMod.unitOfCoprime p hp') := sorry
 
-theorem lemma40_2 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] (a : (ZMod m)ˣ) (hp' : p.Coprime m)
+theorem lemma40_2 [IsCyclotomicExtension {m} ℚ k] [NeZero m] (a : (ZMod m)ˣ) (hp' : p.Coprime m)
     (b : Subgroup.zpowers (ZMod.unitOfCoprime p hp')) :
-    (galEquivZMod m E₀).symm (a * b) • tP₀ = (galEquivZMod m E₀).symm a • tP₀ := sorry
+    (galEquivZMod m k).symm (a * b) • 𝔭 = (galEquivZMod m k).symm a • 𝔭 := sorry
 
-theorem lemma41 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] [P.LiesOver 𝒑] [Algebra E₀ L]
-    (a : (ZMod m)ˣ) {Γ : 𝓞 E₀}
-    (hΓ : (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 E₀) (𝓞 L) Γ) :
-    emultiplicity (((galEquivZMod m E₀).symm a⁻¹) • tP₀) (span {Γ}) =
+theorem lemma41 [IsCyclotomicExtension {m} ℚ k] [NeZero m] [P.LiesOver 𝒑] (a : (ZMod m)ˣ) {Γ : 𝓞 k}
+    (hΓ : (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 k) (𝓞 L) Γ) :
+    emultiplicity (((galEquivZMod m k).symm a⁻¹) • 𝔭) (span {Γ}) =
       ∑ j ∈ Finset.range f, (a.val.val * p ^ j) % m := sorry
 
-theorem lemma42 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] (a : (ZMod m)ˣ) :
-    emultiplicity (((galEquivZMod m E₀).symm a)⁻¹ • tP₀)
-      (∏ a, (((galEquivZMod m E₀).symm a)⁻¹ • tP₀) ^ a.val.val) =
+theorem lemma42 [IsCyclotomicExtension {m} ℚ k] [NeZero m] (a : (ZMod m)ˣ) :
+    emultiplicity (((galEquivZMod m k).symm a)⁻¹ • 𝔭)
+      (∏ a, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val) =
         ∑ j ∈ Finset.range f, (a.val.val * p ^ j) % m := sorry
 
-variable [IsCyclotomicExtension {p ^ f - 1} ℚ K] [NeZero f] [𝓟.IsPrime]
+variable [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p ^ f - 1} ℚ K] [NeZero f] [𝓟.IsPrime]
 
 include hη 𝓟 in
-theorem lemma43_1 [P.LiesOver 𝒑] [Algebra E₀ L] {P₀ : Ideal (𝓞 E₀)} [NeZero 𝓟]
-    [𝓟.LiesOver P₀] {Γ : 𝓞 E₀} (hΓ : (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 E₀) (𝓞 L) Γ)
-    (hP₀ : Prime P₀) (hP₀' : ¬ P₀.LiesOver 𝒑) :
-    emultiplicity P₀ (span {Γ}) = 0 := by
+theorem lemma43_1 [P.LiesOver 𝒑] {𝔭 : Ideal (𝓞 k)} [NeZero 𝓟]
+    [𝓟.LiesOver 𝔭] {Γ : 𝓞 k} (hΓ : (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 k) (𝓞 L) Γ)
+    (hP₀ : Prime 𝔭) (hP₀' : ¬ 𝔭.LiesOver 𝒑) :
+    emultiplicity 𝔭 (span {Γ}) = 0 := by
   have h𝓟 : Prime 𝓟 := (prime_iff_isPrime (NeZero.ne _)).mpr inferInstance
   have : emultiplicity 𝓟 (span {GaussSum hbij hζ d ^ m}) = 0 := by
     have : ¬ 𝓟.LiesOver 𝒑 := by
       contrapose! hP₀'
-      exact LiesOver.tower_bot 𝓟 P₀ 𝒑
+      exact LiesOver.tower_bot 𝓟 𝔭 𝒑
     have := valGauss_eq_zero_of_not_liesOver hbij hζ hη 𝓟 this d
     rw [valGauss] at this
     rw [← span_singleton_pow, emultiplicity_pow h𝓟, this, mul_zero]
@@ -102,68 +199,81 @@ theorem lemma43_1 [P.LiesOver 𝒑] [Algebra E₀ L] {P₀ : Ideal (𝓞 E₀)} 
   apply IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver
   exact hP₀.ne_zero
 
-theorem lemma43_2 [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] {P₀ : Ideal (𝓞 E₀)} (hP₀ : Prime P₀) :
-    emultiplicity P₀ (∏ a, (((galEquivZMod m E₀).symm a)⁻¹ • tP₀) ^ a.val.val) =
-      ∑ a, if (galEquivZMod m E₀).symm a • P₀ = tP₀ then a.val.val else 0 := sorry
+theorem lemma43_2 [IsCyclotomicExtension {m} ℚ k] [NeZero m] {𝔮 : Ideal (𝓞 k)} (hQ₀ : Prime 𝔮) :
+    emultiplicity 𝔮 (∏ a, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val) =
+      ∑ a, if (galEquivZMod m k).symm a • 𝔮 = 𝔭 then a.val.val else 0 := sorry
 
 variable (K) in
-theorem lemma43_3 [Algebra E₀ L] (σ : Gal(E₀/ℚ)) :
-    ∃ τ : Gal(L/K), σ • tP₀ = comap (algebraMap (𝓞 E₀) (𝓞 L)) (τ • 𝓟) := sorry
+theorem lemma43_3 (σ : Gal(k/ℚ)) :
+    ∃ τ : Gal(L/K), σ • 𝔭 = comap (algebraMap (𝓞 k) (𝓞 L)) (τ • 𝓟) := sorry
 
 theorem lemma43_4 [NeZero m] (b : (ZMod m)ˣ) (hp' : p.Coprime m) (g : (ZMod m)ˣ → ℕ) :
     ∑ a with a * b⁻¹ ∈ Finset.image (fun x ↦ ZMod.unitOfCoprime p hp' ^ x)
       (Finset.range f), g a = ∑ j ∈ Finset.range f, g (b * (ZMod.unitOfCoprime p hp') ^ j) := by
-  have : 1 = 0 := sorry
   sorry
-  -- apply Finset.sum_nbij (fun j _ ↦ b * ZMod.unitOfCoprime p hp' ^ j)
-  -- · intro j hj
-  --   simp [Finset.mem_filter, Finset.mem_image]
-  --   exact ⟨j, Finset.mem_range.mp hj, by group⟩
-  -- · intro j₁ _ j₂ _ h
-  --   have := mul_left_cancel₀ (b.ne_one) h  -- injectivité
-  --   exact orderOf_injective (ZMod.unitOfCoprime p hp') (by rwa [hm]) this
-  -- · intro a ha
-  --   simp [Finset.mem_filter, Finset.mem_image] at ha
-  --   obtain ⟨j, hj, hjb⟩ := ha.2
-  --   exact ⟨j, Finset.mem_range.mpr hj, by rw [← hjb]; group⟩
-  -- · intro j _; rfl
+  -- have hord : orderOf (ZMod.unitOfCoprime p hp') = f := by
+  --   rwa [← orderOf_units, ZMod.coe_unitOfCoprime]
+  -- FIXME: this cannot work since (ZMod m)ˣ is not an AddCommMonoid
+  -- rw [← Finset.sum_image (f := fun j => b * ZMod.unitOfCoprime p hp' ^ j)]
+  -- · congr 1
+  --   ext a
+  --   simp only [Finset.mem_filter, Finset.mem_univ, true_and, Finset.mem_image, Finset.mem_range]
+  --   constructor
+  --   · rintro ⟨j, hj, hjb⟩
+  --     exact ⟨j, hj, by rw [hjb]; group⟩
+  --   · rintro ⟨j, hj, rfl⟩
+  --     exact ⟨j, hj, by group⟩
+  -- · intro j₁ hj₁ j₂ hj₂ heq
+  --   have hpow : ZMod.unitOfCoprime p hp' ^ j₁ = ZMod.unitOfCoprime p hp' ^ j₂ :=
+  --     mul_left_cancel heq
+  --   rcases le_or_lt j₁ j₂ with h | h
+  --   · have h0 : ZMod.unitOfCoprime p hp' ^ (j₂ - j₁) = 1 :=
+  --       mul_left_cancel (a := ZMod.unitOfCoprime p hp' ^ j₁)
+  --         (by rw [mul_one, ← pow_add, Nat.add_sub_cancel' h, hpow])
+  --     have hdvd := orderOf_dvd_of_pow_eq_one h0
+  --     rw [hord] at hdvd; omega
+  --   · have h0 : ZMod.unitOfCoprime p hp' ^ (j₁ - j₂) = 1 :=
+  --       mul_left_cancel (a := ZMod.unitOfCoprime p hp' ^ j₂)
+  --         (by rw [mul_one, ← pow_add, Nat.add_sub_cancel' h.le, ← hpow])
+  --     have hdvd := orderOf_dvd_of_pow_eq_one h0
+  --     rw [hord] at hdvd; omega
 
 omit [𝓟.IsPrime] in
-include hη hmd hmf in
-theorem GaussSum_factorization [IsCyclotomicExtension {m} ℚ E₀] [NeZero m] [NeZero 𝓟] [P.LiesOver 𝒑]
-    [Algebra E₀ L] [tP₀.IsPrime] [𝓟.LiesOver tP₀] [tP₀.LiesOver 𝒑] (Γ : 𝓞 E₀)
-    (hΓ : (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 E₀) (𝓞 L) Γ) :
-    span {Γ} = ∏ a : (ZMod m)ˣ, (((galEquivZMod m E₀).symm a)⁻¹ • tP₀) ^ a.val.val := by
+include hη hdm hmf in
+theorem GaussSum_factorization [IsCyclotomicExtension {m} ℚ k] [NeZero m] [NeZero 𝓟] [P.LiesOver 𝒑]
+    [𝔭.IsPrime] [𝓟.LiesOver 𝔭] [𝔭.LiesOver 𝒑] (Γ : 𝓞 k)
+    (hΓ : (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 k) (𝓞 L) Γ) :
+    span {Γ} = ∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val := by
   rw [UniqueFactorizationMonoid.eq_iff_emultiplicity_eq]
-  intro P₀ hP₀
-  have : P₀.IsMaximal := (isPrime_of_prime hP₀).isMaximal hP₀.ne_zero
-  by_cases hP₀' : P₀.LiesOver 𝒑
-  · have := IsCyclotomicExtension.isGalois {m} ℚ E₀
-    have hp' : p.Coprime m := (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro d hmd.symm
-    obtain ⟨σ, rfl⟩ : ∃ σ : Gal(E₀/ℚ), P₀ = σ⁻¹ • tP₀ := by
-      obtain ⟨σ, rfl⟩ := exists_smul_eq_of_isGaloisGroup 𝒑 tP₀ P₀ Gal(E₀/ℚ)
+  intro 𝔮 hQ₀
+  have : 𝔮.IsMaximal := (isPrime_of_prime hQ₀).isMaximal hQ₀.ne_zero
+  by_cases hP₀' : 𝔮.LiesOver 𝒑
+  · have := IsCyclotomicExtension.isGalois {m} ℚ k
+    have hp' : p.Coprime m := (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro_left d hdm.symm
+    obtain ⟨σ, rfl⟩ : ∃ σ : Gal(k/ℚ), 𝔮 = σ⁻¹ • 𝔭 := by
+      obtain ⟨σ, rfl⟩ := exists_smul_eq_of_isGaloisGroup 𝒑 𝔭 𝔮 Gal(k/ℚ)
       exact ⟨σ⁻¹, by rw [inv_inv]⟩
-    rw [lemma43_2 _ _ hP₀]
-    obtain ⟨b, hb⟩ : ∃ b, σ⁻¹ = (galEquivZMod m E₀).symm b⁻¹ :=
-      ⟨galEquivZMod m E₀ σ, by rw [map_inv, MulEquiv.symm_apply_apply]⟩
-    rw [hb, lemma41 hbij hζ m d tP₀ _ hΓ]
+    rw [lemma43_2 _ _ hQ₀]
+    obtain ⟨b, hb⟩ : ∃ b, σ⁻¹ = (galEquivZMod m k).symm b⁻¹ :=
+      ⟨galEquivZMod m k σ, by rw [map_inv, MulEquiv.symm_apply_apply]⟩
+    rw [hb, lemma41 hbij hζ m d 𝔭 _ hΓ]
     simp_rw [smul_smul, ← map_mul, ← MulAction.mem_stabilizer_iff]
     simp_rw [Finset.sum_ite, Finset.sum_const_zero, add_zero]
     conv_rhs =>
       enter [1, 1, 1, x]
-      rw [← Subgroup.mem_map_equiv, ← MulEquiv.coe_mapSubgroup, lemma40_1 p m tP₀ hp']
+      rw [← Subgroup.mem_map_equiv, ← MulEquiv.coe_mapSubgroup, lemma40_1 p m 𝔭 hp']
     have t₁ : orderOf (ZMod.unitOfCoprime p hp') = f := by
       rwa [← orderOf_units, ZMod.coe_unitOfCoprime]
     have t₂ : IsOfFinOrder (ZMod.unitOfCoprime p hp') := by
       exact isOfFinOrder_of_finite (ZMod.unitOfCoprime p hp')
     simp_rw [IsOfFinOrder.mem_zpowers_iff_mem_range_orderOf t₂, t₁, lemma43_4]
     simp [← ZMod.val_natCast]
-  · obtain ⟨𝓠, _, _⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) P₀
-    have {σ : Gal(E₀/ℚ)} : σ • P₀ ≠ tP₀ := by
+  · obtain ⟨𝓠, _, _⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔮
+    have {σ : Gal(k/ℚ)} : σ • 𝔮 ≠ 𝔭 := by
       contrapose! hP₀'
       rw [(smul_eq_iff_eq_inv_smul _).mp hP₀']
       exact LiesOver.smul σ⁻¹
-    rw [lemma43_1 hbij hζ hη 𝓠 m d hΓ hP₀ hP₀', lemma43_2 m tP₀ hP₀, Nat.cast_sum]
+    rw [lemma43_1 hbij hζ hη 𝓠 m d hΓ hQ₀ hP₀', lemma43_2 m 𝔭 hQ₀, Nat.cast_sum]
     simp [if_neg this]
 
 #exit

@@ -46,6 +46,10 @@ theorem isUnit_teichmuller_zpow_apply [I.IsMaximal] (a : ℤ) (x : (R ⧸ I)ˣ) 
   rw [MulChar.zpow_apply_coe_eq_apply_zpow, teichmuller_apply, dif_pos (Units.isUnit _)]
   exact Units.isUnit _
 
+theorem teichmuller_zpow_apply_ne_zero [Nontrivial R] [I.IsMaximal] (a : ℤ) (x : (R ⧸ I)ˣ) :
+    (teichmuller hbij ^ a) x ≠ 0 :=
+  (isUnit_teichmuller_zpow_apply hbij a x).ne_zero
+
 theorem teichmuller_mk_eq [I.IsMaximal] (x : R ⧸ I) :
     Ideal.Quotient.mk I (teichmuller hbij x) = x := by
   by_cases hI : I = ⊤

@@ -83,7 +83,7 @@ theorem addCharTrace_mk_sq_eq [P.LiesOver 𝒑] {𝓟 : Ideal R} [(𝓟 ^ 2).Lie
     rw [add_assoc, pow_add]
     exact Ideal.mul_mem_left _ _ <| Submodule.pow_mem_pow 𝓟 h 2
 
-theorem algebraMap_com_addCharTrace [P.LiesOver 𝒑] {S : Type*} [CommRing S] [Algebra R S]
+theorem algebraMap_comp_addCharTrace [P.LiesOver 𝒑] {S : Type*} [CommRing S] [Algebra R S]
     [FaithfulSMul R S] :
     (algebraMap R S).compAddChar (addCharTrace P hζ) =
         addCharTrace P (hζ.map_of_injective (FaithfulSMul.algebraMap_injective R S)) := by
@@ -95,3 +95,17 @@ theorem algebraMap_com_addCharTrace [P.LiesOver 𝒑] {S : Type*} [CommRing S] [
     Function.comp_apply, ha, hb, map_pow]
   refine (hζ₀.isOfFinOrder (NeZero.ne _)).pow_eq_pow_iff_modEq.mpr ?_
   rwa [hb', CharP.natCast_eq_natCast, Int.ringChar_idealQuot, hζ₀.eq_orderOf, Nat.ModEq.comm] at ha'
+
+theorem monoidHom_comp_addCharTrace_eq_mulShift [P.LiesOver 𝒑] {F : Type*} [FunLike F R R]
+    [MonoidHomClass F R R] (f : F) (n : ℕ) (h : f ζ = ζ ^ n) (x) :
+    f (addCharTrace P hζ x) = (addCharTrace P hζ).mulShift n x := by
+  rw [AddChar.mulShift_apply]
+  obtain ⟨a, ha, ha'⟩ := exists_nat_addCharTrace_eq_pow P hζ x
+  obtain ⟨b, hb, hb'⟩ := exists_nat_addCharTrace_eq_pow P hζ (n * x)
+  have : n * a % p = b % p := by
+    suffices (n * a : ℤ ⧸ 𝒑) = b by
+      rwa [← Nat.cast_mul, CharP.natCast_eq_natCast, Int.ringChar_idealQuot] at this
+    rw [← ha', ← hb', ← smul_eq_mul, ← map_smul, Algebra.smul_def]
+    simp
+  rw [ha, hb, map_pow, h, ← pow_mul, ← pow_mod_orderOf _ (n * a), ← pow_mod_orderOf _ b,
+    ← hζ.eq_orderOf, this]

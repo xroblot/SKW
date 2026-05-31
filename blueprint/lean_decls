@@ -27,6 +27,9 @@ valGauss_one
 valGauss_le_self
 valGauss_toNat_le_sum_digits
 valGauss_toNat_eq_sum_digits
+smul_gaussSum_eq_gaussSum'
+smul_gaussSum_eq_mul_gaussSum
+smul_gaussSum_eq_gaussSum
 GaussSum_factorization
 ramificationIdx_eq_p_sub_one
 zeta_sub_one_not_mem_sq

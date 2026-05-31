@@ -351,7 +351,7 @@ theorem valGauss_toNat_eq_sum_digits [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : �
         Nat.sum_sum_digits_eq hp.out.one_lt, Nat.choose_two_right, mul_rotate',
         Nat.div_mul_cancel (Nat.two_dvd_mul_sub_one p)]
     _ = f * (p - 1) * (p ^ f - 2) + 2 * (p.digits (p ^ f - 1)).sum := by
-      rw [Nat.digits_pow_sub_one hp.out.one_lt, List.sum_replicate, smul_eq_mul, mul_comm 2,
+      rw [Nat.digits_base_pow_sub_one hp.out.one_lt, List.sum_replicate, smul_eq_mul, mul_comm 2,
         ← mul_add, Nat.sub_add_cancel (Nat.le_of_succ_le (three_le_p_pow p f)), ← mul_assoc,
         mul_assoc f, ← Nat.pow_add_one, Nat.sub_add_cancel NeZero.one_le, Nat.mul_right_comm]
     _ = 2 * (∑ i ∈ Finset.range (p ^ f - 1), (valGauss hbij hζ 𝓟 i).toNat +

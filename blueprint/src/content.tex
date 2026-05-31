@@ -694,11 +694,14 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \begin{lemma}
   \label{lem:gauss_sum_power_fixed_1}
   \uses{lem:gal_gaussSum_eq_gaussSum}
+  \lean{smul_gaussSum_eq_gaussSum'}
+  \leanok
   For any $\tau \in \Gal(L/\QQ(\zeta_m, \zeta_p))$,
   $\tau(g_d^m) = g_d^m$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Since $\tau$ fixes $\zeta_m$, we have $\fn(\tau) \equiv 1 \pmod{m}$, so
   $d \cdot \fn(\tau) \equiv d \pmod{q-1}$.
   By \ref{lem:gal_gaussSum_eq_gaussSum},
@@ -709,13 +712,16 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \begin{lemma}
   \label{lem:gauss_sum_galois_action_K}
   \uses{def:gauss_sum_s, def:addchar}
-  For any $\tau \in \Gal(L/K)$ with $\tau(\zeta_p) = \zeta_p^e$,
+  \lean{smul_gaussSum_eq_mul_gaussSum}
+  \leanok
+  For any $\tau \in \Gal(L/K)$ with $\tau(\zeta_p) = \zeta_p^e$ and $e \in (\mathbb{Z}/p\mathbb{Z})^\times$,
   \[
     \tau(g_d) = \omega^d(e)^{-1} \cdot g_d.
   \]
 \end{lemma}
 
 \begin{proof}
+   \leanok
   Since $\tau \in \Gal(L/K)$, it fixes $K = \QQ(\zeta_{q-1})$, hence fixes
   all $(q-1)$-th roots of unity, hence fixes $\omega(x)$ for all $x$.
   Since $\tau(\zeta_p) = \zeta_p^e$, we have $\tau(\psi(x)) = \psi(ex)$. Therefore
@@ -733,11 +739,14 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \begin{lemma}
   \label{lem:gauss_sum_power_fixed_2}
   \uses{lem:gauss_sum_galois_action_K}
+  \lean{smul_gaussSum_eq_gaussSum}
+  \leanok
   For any $\tau \in \Gal(L/K)$,
   $\tau(g_d^m) = g_d^m$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:gauss_sum_galois_action_K}, $\tau(g_d) = \omega^d(e)^{-1} g_d$
   where $e$ is such that $\tau(\zeta_p) = \zeta_p^e$.
   Since $md = q-1$, we have $\omega^d(e)^{-m} = \omega^{q-1}(e)^{-1} = 1$, hence

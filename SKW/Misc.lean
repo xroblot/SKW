@@ -1,26 +1,160 @@
 module
 
-public import Mathlib.Algebra.Group.Equiv.Defs
-public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
-public import Mathlib.NumberTheory.MulChar.Basic
-public import Mathlib.NumberTheory.NumberField.Units.Basic
-public import Mathlib.NumberTheory.RamificationInertia.Ramification
-public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
-public import Mathlib.NumberTheory.GaussSum
-public import Mathlib.Data.List.Indexes
+public import Mathlib.FieldTheory.LinearDisjoint
+public import Mathlib.LinearAlgebra.FreeModule.PID
+public import Mathlib.RingTheory.SimpleModule.Basic
+
+-- public import Mathlib.Algebra.Group.Equiv.Defs
+-- public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+-- public import Mathlib.NumberTheory.MulChar.Basic
+-- public import Mathlib.NumberTheory.NumberField.Units.Basic
+-- public import Mathlib.NumberTheory.RamificationInertia.Ramification
+-- public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
+-- public import Mathlib.NumberTheory.GaussSum
+-- public import Mathlib.Data.List.Indexes
 
 @[expose] public section
 
+/-! ### Intermediate Fields -/
+
+open Module in
+/-- If `F ≤ E` are two intermediate fields of a finite extension `L / K`,
+then `F = E` iff [F : K] = [E : K]`. -/
+theorem IntermediateField.eq_of_le_iff_finrank_eq {K L : Type*} [Field K] [Field L] [Algebra K L]
+    {F E : IntermediateField K L} [FiniteDimensional K L] (h_le : F ≤ E) :
+    F = E ↔ finrank K F = finrank K E := by
+  refine ⟨fun h ↦ ?_, fun h ↦ eq_of_le_of_finrank_eq h_le h⟩
+  have := (finrank_mul_finrank K F L).trans (finrank_mul_finrank K E L).symm
+  rwa [show finrank F L = finrank E L by rw [h], mul_left_inj' finrank_pos.ne'] at this
+
+open Module in
+/-- If `F ≤ E` are two intermediate fields of a finite extension `L / K`,
+then `F = E` iff [L : F] = [L : E]`. -/
+theorem IntermediateField.eq_of_le_iff_finrank_eq' {K L : Type*} [Field K] [Field L] [Algebra K L]
+    {F E : IntermediateField K L} [FiniteDimensional K L] (h_le : F ≤ E) :
+    F = E ↔ finrank F L = finrank E L := by
+  refine ⟨fun h ↦ ?_, fun h ↦ eq_of_le_of_finrank_eq' h_le h⟩
+  have := (finrank_mul_finrank K F L).trans (finrank_mul_finrank K E L).symm
+  rwa [show finrank K F = finrank K E by rw [h], mul_right_inj' finrank_pos.ne'] at this
+
+open Module in
+lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Field E] [Algebra F E]
+    (K L : IntermediateField F E) [IsGalois F K] [FiniteDimensional F K] [FiniteDimensional F L]
+    [Algebra K ↥(K ⊔ L)] [IsScalarTower F K ↥(K ⊔ L)] (hinf : K ⊓ L = ⊥) :
+    finrank K ↥(K ⊔ L) = finrank F L := by
+  rw [← mul_right_inj', ← (LinearDisjoint.of_inf_eq_bot hinf).finrank_sup, finrank_mul_finrank]
+  exact finrank_pos.ne'
+
+-- set_option maxHeartbeats 8000000 in
+-- set_option synthInstance.maxHeartbeats 60000 in
+set_option trace.profiler.useHeartbeats true in
+set_option trace.profiler true in
+set_option trace.Meta.synthInstance true in
+set_option trace.profiler.threshold 100000 in
+open Module in
+theorem IntermediateField.finrank_sup_mul_finrank_inf_eq' {k L : Type*} [Field k] [Field L] [Algebra k L]
+    (E F : IntermediateField k L) [FiniteDimensional k E] [IsGalois k E] [IsGalois k F] :
+    finrank k ↑(E ⊔ F) * finrank k ↥(E ⊓ F) = finrank k E * finrank k F := by
+  let : Algebra ↥E ↥(E ⊔ F) := (inclusion le_sup_left).toRingHom.toAlgebra
+  let : Algebra ↥(E ⊓ F) ↥F := (inclusion inf_le_right).toRingHom.toAlgebra
+  haveI : IsScalarTower k ↥E ↥(E ⊔ F) := sorry
+  haveI : IsScalarTower k ↥(E ⊓ F) ↥F := sorry
+  haveI : FiniteDimensional k ↥(E ⊓ F) := sorry
+  haveI : FiniteDimensional k ↥E := sorry
+  suffices h : finrank E ↑(E ⊔ F) = finrank ↑(E ⊓ F) F by
+    rwa [← finrank_mul_finrank k E ↑(E ⊔ F), ← finrank_mul_finrank k ↑(E ⊓ F) F, mul_assoc,
+      mul_right_inj' finrank_pos.ne', mul_comm, mul_right_inj' finrank_pos.ne']
+  let : Algebra ↥(E ⊓ F) ↥(E ⊔ F) := sorry
+  have : IsScalarTower ↑(E ⊓ F) E ↑(E ⊔ F) := sorry
+  have : finrank ↑(E ⊓ F) E ≠ 0 := sorry
+  rw [← mul_right_inj' this, finrank_mul_finrank]
+  let : Algebra ↥(E ⊓ F) ↥E := (inclusion inf_le_left).toRingHom.toAlgebra
+  let E' : IntermediateField ↑(E ⊓ F) L := E.extendScalars (F := E ⊓ F) inf_le_left
+  let F' : IntermediateField ↑(E ⊓ F) L := F.extendScalars (F := E ⊓ F) inf_le_right
+  let : Algebra E' ↑(E' ⊔ F') := (inclusion le_sup_left).toRingHom.toAlgebra
+  have : Module ↥E' ↥(E' ⊔ F') := Algebra.toModule
+  calc finrank ↑(E ⊓ F) ↑(E ⊔ F)
+      = finrank ↑(E ⊓ F) ↑(E' ⊔ F') := ?_
+    _ = finrank ↑(E ⊓ F) E' * finrank E' ↑(E' ⊔ F') := by sorry
+    _ = finrank ↑(E ⊓ F) E * finrank E' ↑(E' ⊔ F') := by sorry
+    _ = finrank ↑(E ⊓ F) E * finrank ↑(E ⊓ F) F' := sorry
+    _ = finrank ↑(E ⊓ F) E * finrank ↑(E ⊓ F) F := by sorry
+
+#exit
+
+
+
+
+  -- Reduce to the trivial-inf case over E ⊓ F via extendScalars
+  letI : Algebra ↥(E ⊓ F) ↥E := (inclusion inf_le_left).toRingHom.toAlgebra
+  let E' : IntermediateField ↥(E ⊓ F) L := E.extendScalars (F := E ⊓ F) inf_le_left
+  let F' : IntermediateField ↥(E ⊓ F) L := F.extendScalars (F := E ⊓ F) inf_le_right
+  letI : Algebra ↥E' ↥(E' ⊔ F') := (inclusion le_sup_left).toRingHom.toAlgebra
+  letI : Algebra ↥(E ⊓ F) ↥(E ⊔ F) := sorry
+  haveI : IsScalarTower ↥(E ⊓ F) ↥E ↥(E ⊔ F) := sorry
+  haveI : IsScalarTower ↥(E ⊓ F) ↥E' ↥(E' ⊔ F') := sorry
+  haveI : IsGalois ↥(E ⊓ F) ↥E' := sorry
+  haveI : FiniteDimensional ↥(E ⊓ F) ↥E' := sorry
+  haveI : FiniteDimensional ↥(E ⊓ F) ↥F' := sorry
+  have hinf : E' ⊓ F' = ⊥ := sorry
+  -- Identity LinearEquivs between E/F and their extendScalars (same carrier, same scalar action)
+  have lE : ↥E ≃ₗ[↥(E ⊓ F)] ↥E' :=
+    { toFun    := fun x => ⟨x.val, (mem_extendScalars inf_le_left).mpr x.property⟩
+      invFun   := fun x => ⟨x.val, (mem_extendScalars inf_le_left).mp x.property⟩
+      left_inv  := fun x => Subtype.ext rfl
+      right_inv := fun x => Subtype.ext rfl
+      map_add'  := fun x y => Subtype.ext rfl
+      map_smul' := fun r x => Subtype.ext (by simp only [Algebra.smul_def]; norm_cast) }
+  have lF : ↥F ≃ₗ[↥(E ⊓ F)] ↥F' :=
+    { toFun    := fun x => ⟨x.val, (mem_extendScalars inf_le_right).mpr x.property⟩
+      invFun   := fun x => ⟨x.val, (mem_extendScalars inf_le_right).mp x.property⟩
+      left_inv  := fun x => Subtype.ext rfl
+      right_inv := fun x => Subtype.ext rfl
+      map_add'  := fun x y => Subtype.ext rfl
+      map_smul' := fun r x => Subtype.ext (by simp only [Algebra.smul_def]; norm_cast) }
+  -- Tower law chain over E⊓F
+  have htower_L : finrank ↥(E ⊓ F) ↥E * finrank ↥E ↥(E ⊔ F) =
+      finrank ↥(E ⊓ F) ↥(E ⊔ F) := finrank_mul_finrank _ _ _
+  haveI : FiniteDimensional ↥(E ⊓ F) ↥E := sorry
+  set_option synthInstance.maxHeartbeats 100000 in
+  have htower_R : finrank ↥(E ⊓ F) ↥E' * finrank ↥E' ↥(E' ⊔ F') =
+      finrank ↥(E ⊓ F) ↥(E' ⊔ F') := finrank_mul_finrank _ _ _
+  have hstep : finrank ↥E' ↥(E' ⊔ F') = finrank ↥(E ⊓ F) ↥F' :=
+    finrank_sup_eq_of_inf_eq_bot E' F' hinf
+  -- hEF_eq: (E⊔F) and (E'⊔F') have the same (E⊓F)-finrank
+  -- (via lEF : ↥(E⊔F) ≃ₗ[E⊓F] ↥((E⊔F).extendScalars) and equivOfEq extendScalars_sup)
+  have hEF_eq : finrank ↥(E ⊓ F) ↥(E ⊔ F) = finrank ↥(E ⊓ F) ↥(E' ⊔ F') := by sorry
+  -- Cancel finrank (E⊓F) E on both sides
+  have hkey : finrank ↥(E ⊓ F) ↥E * finrank ↥E ↥(E ⊔ F) =
+              finrank ↥(E ⊓ F) ↥E * finrank ↥(E ⊓ F) ↥F := by
+    rw [htower_L, hEF_eq, ← htower_R, ← lE.finrank_eq, hstep, ← lF.finrank_eq]
+  exact Nat.eq_of_mul_eq_mul_left finrank_pos hkey
+
+#exit
+
 open NumberField
+
+/-! ### MulEquiv / AlgHom / AlgEquiv -/
 
 @[to_additive (attr := simp)]
 theorem MulEquiv.ofBijective_symm_apply_apply {M N F : Type*} [Mul M] [Mul N] [FunLike F M N]
     [MulHomClass F M N] (f : F) (hf : Function.Bijective f) (a : M) :
     (ofBijective f hf).symm (f a) = a := (symm_apply_eq (ofBijective f hf)).mpr rfl
 
-theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [Nontrivial S] [IsDedekindDomain S]
-    [Module.Free ℤ S] (I : Ideal S) :
-    Ideal.absNorm I = Nat.card (S ⧸ I) := rfl
+noncomputable def AlgHom.equivFieldRange {K L L' : Type*} [Field K] [Field L] [Field L'] [Algebra K L]
+    [Algebra K L'] (f : L →ₐ[K] L') :
+    L ≃ₐ[K] f.fieldRange :=
+  (AlgEquiv.ofBijective
+    (f.codRestrict f.range fun x ↦ AlgHom.mem_fieldRange.mpr ⟨x, rfl⟩)
+    ⟨fun _ _ h ↦ f.injective (congr_arg Subtype.val h),
+     fun ⟨_, hy⟩ ↦ (AlgHom.mem_fieldRange.mp hy).imp fun _ hx => Subtype.ext hx⟩)
+
+@[simp]
+theorem equivFieldRange_apply {K L L' : Type*} [Field K] [Field L] [Field L'] [Algebra K L]
+    [Algebra K L'] (f : L →ₐ[K] L') (x : L) : f.equivFieldRange x = f x :=
+  rfl
+
+/-! ### MulChar -/
 
 theorem MulChar.ringHomComp_zpow {R : Type*} [CommMonoidWithZero R] {R' : Type*} [CommRing R'] {R'' : Type*}
     [CommRing R''] (χ : MulChar R R') (f : R' →+* R'') (n : ℤ) :
@@ -36,61 +170,28 @@ def MulChar.ringHomCompHom {R : Type*} [CommMonoid R] {R' : Type*} [CommRing R']
   map_one' := by rw [ringHomComp_one]
   map_mul' _ _ := MulChar.ringHomComp_mul _ _ f
 
-theorem Ideal.pow_liesOver_of_liesOver {R S : Type*} [CommRing R] [CommRing S] [Algebra R S] (p : Ideal R) (P : Ideal S) [P.LiesOver p]
-    {i : ℕ} (hi : i + 1 ≤ Ideal.ramificationIdx p P) :
-    (P ^ (i + 1)).LiesOver p := by
-  rw [liesOver_iff]
-  apply le_antisymm
-  · exact le_trans le_comap_pow_ramificationIdx <| comap_mono (pow_le_pow_right hi)
-  · refine le_trans (comap_mono <| pow_le_pow_right (Nat.le_add_left 1 i)) ?_
-    rw [pow_one, ← Ideal.under_def, ← Ideal.over_def P p]
+theorem MulChar.zpow_apply_coe_eq_apply_zpow {R : Type*} [CommGroupWithZero R] {R' : Type u_2}
+    [CommMonoidWithZero R'] (χ : MulChar R R') (n : ℤ) (a : Rˣ) :
+    (χ ^ n) a = χ (a ^ n : Rˣ) := by
+  obtain ⟨n, (rfl | rfl)⟩ := Int.eq_nat_or_neg n
+  · simp [pow_apply_coe]
+  · rw [zpow_neg, zpow_natCast, inv_apply', ← Units.val_inv_eq_inv_val, pow_apply_coe, ← inv_zpow',
+      zpow_natCast, Units.val_pow_eq_pow_val, map_pow]
 
-instance Ideal.Quotient.isScalarTower_of_liesOver_liesOver {A B C : Type*} [CommRing A] [CommRing B]
-    [CommRing C] [Algebra A B] [Algebra A C] [Algebra B C] [IsScalarTower A B C] (Q : Ideal C)
-    (P : Ideal B) (p : Ideal A) [Q.LiesOver P] [P.LiesOver p] [Q.LiesOver p] :
-    IsScalarTower (A ⧸ p) (B ⧸ P) (C ⧸ Q) := by
-  refine IsScalarTower.of_algebraMap_eq fun x ↦ Quotient.inductionOn' x fun x ↦ ?_
-  have : Quotient.mk'' x = Ideal.Quotient.mk p x := rfl
-  simp [this, Ideal.Quotient.algebraMap_mk_of_liesOver, ← IsScalarTower.algebraMap_apply]
-
-noncomputable def AlgHom.equivFieldRange {K L L' : Type*} [Field K] [Field L] [Field L'] [Algebra K L]
-    [Algebra K L'] (f : L →ₐ[K] L') :
-    L ≃ₐ[K] f.fieldRange :=
-  (AlgEquiv.ofBijective
-    (f.codRestrict f.range fun x ↦ AlgHom.mem_fieldRange.mpr ⟨x, rfl⟩)
-    ⟨fun _ _ h ↦ f.injective (congr_arg Subtype.val h),
-     fun ⟨_, hy⟩ ↦ (AlgHom.mem_fieldRange.mp hy).imp fun _ hx => Subtype.ext hx⟩)
+/-! ### AddChar / MonoidHom.compAddChar -/
 
 @[simp]
-theorem equivFieldRange_apply {K L L' : Type*} [Field K] [Field L] [Field L'] [Algebra K L]
-    [Algebra K L'] (f : L →ₐ[K] L') (x : L) : f.equivFieldRange x = f x :=
-  rfl
+theorem MonoidHom.compAddChar_one {A M : Type*} [AddMonoid A] [Monoid M] {N : Type*}
+    [Monoid N] (f : M →* N) :
+    f.compAddChar (1 : AddChar A M) = 1 := by
+  ext; simp
 
-theorem IsCyclotomicExtension.Rat.discr_coprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂] (K₁ K₂ : Type*)
-    [Field K₁] [Field K₂] [NumberField K₁] [NumberField K₂] [IsCyclotomicExtension {n₁} ℚ K₁]
-    [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
-    IsCoprime (NumberField.discr K₁) (NumberField.discr K₂) := by
-  rw [Int.isCoprime_iff_nat_coprime, natAbs_discr  n₁ K₁, natAbs_discr  n₂ K₂]
-  refine Nat.Coprime.coprime_div_left ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
-  refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
-  exact Nat.Coprime.pow_left _ (Nat.Coprime.pow_right _ h)
+theorem MonoidHom.compAddChar_eq_one_iff {A M : Type*} [AddMonoid A] [Monoid M] {N : Type*}
+    [Monoid N] {f : M →* N} (hf : Function.Injective f) {φ : AddChar A M} :
+    f.compAddChar φ = 1 ↔ φ = 1 := by
+  rw [← MonoidHom.compAddChar_one f, (f.compAddChar_injective_right hf).eq_iff]
 
-theorem IntermediateField.linearDisjoint_iff'' {F E : Type*} [Field F] [Field E] [Algebra F E]
-    (A : IntermediateField F E) (L : Type*) [Field L] [Algebra F L] [Algebra L E]
-    [IsScalarTower F L E] :
-    A.LinearDisjoint L ↔ A.LinearDisjoint (IsScalarTower.toAlgHom F L E).fieldRange := by
-  rw [linearDisjoint_iff', AlgHom.fieldRange_toSubalgebra]
-
-theorem IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂]
-    {E : Type*} [Field E] [NumberField E] (K₁ : IntermediateField ℚ E) [NumberField K₁] (K₂ : Type*)
-    [Field K₂] [NumberField K₂] [Algebra K₂ E] [IsCyclotomicExtension {n₁} ℚ K₁]
-    [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
-    K₁.LinearDisjoint K₂ := by
-  have : IsCyclotomicExtension {n₂} ℚ (IsScalarTower.toAlgHom ℚ K₂ E).fieldRange :=
-    .equiv _ ℚ K₂ (AlgHom.equivFieldRange _)
-  have : IsGalois ℚ K₁ := IsCyclotomicExtension.isGalois {n₁} ℚ K₁
-  rw [IntermediateField.linearDisjoint_iff'']
-  exact NumberField.linearDisjoint_of_isGalois_isCoprime_discr E _ _ <| discr_coprime n₁ n₂ K₁ _ h
+/-! ### Gauss sums -/
 
 theorem gaussSum_one_one {R : Type*} [CommRing R] [Fintype R] {R' : Type*}
     [CommRing R'] : gaussSum (1 : MulChar R R') (1 : AddChar R R') = Nat.card Rˣ := by
@@ -112,6 +213,12 @@ theorem gaussSum_one_right {R : Type*} [CommRing R] [Fintype R] {R' : Type*} [Co
     [IsDomain R'] {χ : MulChar R R'} (hχ : χ ≠ 1) : gaussSum χ 1 = 0 := by
   simpa [gaussSum] using MulChar.sum_eq_zero_of_ne_one hχ
 
+/-! ### Ideal -/
+
+theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [Nontrivial S] [IsDedekindDomain S]
+    [Module.Free ℤ S] (I : Ideal S) :
+    Ideal.absNorm I = Nat.card (S ⧸ I) := rfl
+
 theorem Ideal.multiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
     multiplicity I ⊤ = 0 := by
   rw [← one_eq_top, multiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
@@ -119,26 +226,6 @@ theorem Ideal.multiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : 
 theorem Ideal.emultiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
     emultiplicity I ⊤ = 0 := by
   rw [← one_eq_top, emultiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
-
-@[simp]
-theorem MonoidHom.compAddChar_one {A M : Type*} [AddMonoid A] [Monoid M] {N : Type*}
-    [Monoid N] (f : M →* N) :
-    f.compAddChar (1 : AddChar A M) = 1 := by
-  ext; simp
-
-theorem MonoidHom.compAddChar_eq_one_iff {A M : Type*} [AddMonoid A] [Monoid M] {N : Type*}
-    [Monoid N] {f : M →* N} (hf : Function.Injective f) {φ : AddChar A M} :
-    f.compAddChar φ = 1 ↔ φ = 1 := by
-  rw [← MonoidHom.compAddChar_one f, (f.compAddChar_injective_right hf).eq_iff]
-
-theorem smul_eq_galRestrict_apply (A : Type*) {K L B : Type*} [CommRing A] [IsIntegrallyClosed A]
-    [Field K] [Field L] [CommRing B] [Algebra A K] [IsFractionRing A K] [Algebra B L] [IsFractionRing B L]
-    [Algebra A B] [Algebra K L] [Algebra A L] [IsScalarTower A K L] [IsScalarTower A B L]
-    [IsIntegralClosure B A L] [Algebra.IsAlgebraic K L] [MulSemiringAction Gal(L/K) B]
-    [SMulDistribClass Gal(L/K) B L] (σ : Gal(L/K)) (x : B) :
-    σ • x = galRestrict A K L B σ x := by
-  apply FaithfulSMul.algebraMap_injective B L
-  rw [algebraMap.smul', AlgEquiv.smul_def, algebraMap_galRestrict_apply]
 
 @[simps]
 def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike F R S]
@@ -149,39 +236,58 @@ def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike 
   left_inv _ := by simpa using comap_map_of_bijective _ (EquivLike.bijective e)
   right_inv _ := by simpa using Ideal.map_comap_of_surjective _ (EquivLike.surjective e) _
 
-theorem ZMod.orderOf_mod_self_pow_sub_one (a k : ℕ) (ha : 1 < a) :
-    orderOf (a : ZMod (a ^ k - 1)) = k := by
-  have h₁ {n : ℕ} (hn : 0 < n) : 2 ≤ a ^ n := (Nat.le_pow hn).trans <| Nat.pow_le_pow_left ha n
-  have h₂ {a k b : ℕ} (hb : 1 ≤ b) : (b : ZMod (a ^ k - 1)) = 1 ↔ a ^ k - 1 ∣ b - 1 := by
-    rw [← Nat.cast_one (R := ZMod (a ^ k - 1)), ZMod.natCast_eq_natCast_iff,
-      Nat.ModEq.comm, Nat.modEq_iff_dvd, ← Nat.cast_sub hb, Int.natCast_dvd_natCast]
-  obtain rfl | hk := Nat.eq_zero_or_pos k
-  · refine orderOf_eq_zero_iff'.mpr fun n hn ↦ ?_
-    rw [← Nat.cast_pow, ne_eq, h₂ (one_le_two.trans (h₁ hn)), pow_zero, tsub_self, zero_dvd_iff]
-    grind
-  refine (orderOf_eq_iff hk).mpr ⟨?_, fun m hm hm' ↦ ?_⟩
-  · rw [← Nat.cast_pow, h₂ (one_le_two.trans (h₁ hk))]
-  · rw [← Nat.cast_pow, ne_eq, h₂ (one_le_two.trans (h₁ hm'))]
-    refine Nat.not_dvd_of_pos_of_lt (by aesop) ?_
-    rwa [Nat.sub_lt_sub_iff_right (one_le_two.trans (h₁ hm')), Nat.pow_lt_pow_iff_right ha]
+theorem Ideal.infinite_of_not_isField {R : Type*} [CommRing R] [Nontrivial R]
+    [IsCancelMulZero (Ideal R)] (h : ¬IsField R) :
+    Infinite (Ideal R) := by
+  obtain ⟨I, h₁, h₂⟩ := Ring.not_isField_iff_exists_prime.mp h
+  apply Infinite.of_injective (fun n : ℕ ↦ I ^ n)
+  intro n m hI
+  dsimp at hI
+  by_contra! h
+  obtain h | h := Nat.ne_iff_lt_or_gt.mp h
+  · obtain ⟨t, ht, rfl⟩ := lt_iff_exists_add.mp h
+    rw [pow_add, left_eq_mul₀ (pow_ne_zero n h₁), Ideal.one_eq_top, Ideal.pow_eq_top_iff] at hI
+    exact h₂.ne_top <| hI.resolve_right ht.ne'
+  · obtain ⟨t, ht, rfl⟩ := lt_iff_exists_add.mp h
+    rw [pow_add, mul_eq_left₀ (pow_ne_zero m h₁), Ideal.one_eq_top, Ideal.pow_eq_top_iff] at hI
+    exact h₂.ne_top <| hI.resolve_right ht.ne'
 
-theorem NumberField.Units.natAbs_norm (K : Type*) [Field K] [NumberField K] (x : (RingOfIntegers K)ˣ) :
-    (Algebra.norm ℤ x.val).natAbs = 1 := by
-  apply Rat.natCast_injective
-  rw [Nat.cast_natAbs, Int.cast_abs, Algebra.coe_norm_int, NumberField.Units.norm, Nat.cast_one]
+instance (K : Type*) [Field K] [NumberField K] :
+    Infinite (Ideal (𝓞 K)) :=
+  Ideal.infinite_of_not_isField (RingOfIntegers.not_isField K)
 
-theorem NumberField.isUnit_iff_natAbs_norm {K : Type*} [Field K] [NumberField K] {x : RingOfIntegers K} :
-    IsUnit x ↔ (Algebra.norm ℤ x).natAbs = 1 := by
-  rw [isUnit_iff_norm, ← Rat.natCast_injective.eq_iff, RingOfIntegers.coe_norm,
-    Nat.cast_natAbs, Nat.cast_one, ← Algebra.coe_norm_int, Int.cast_abs]
+/-! ### Ideal — LiesOver / ramification -/
 
-theorem MulChar.zpow_apply_coe_eq_apply_zpow {R : Type*} [CommGroupWithZero R] {R' : Type u_2}
-    [CommMonoidWithZero R'] (χ : MulChar R R') (n : ℤ) (a : Rˣ) :
-    (χ ^ n) a = χ (a ^ n : Rˣ) := by
-  obtain ⟨n, (rfl | rfl)⟩ := Int.eq_nat_or_neg n
-  · simp [pow_apply_coe]
-  · rw [zpow_neg, zpow_natCast, inv_apply', ← Units.val_inv_eq_inv_val, pow_apply_coe, ← inv_zpow',
-      zpow_natCast, Units.val_pow_eq_pow_val, map_pow]
+theorem Ideal.pow_liesOver_of_liesOver {R S : Type*} [CommRing R] [CommRing S] [Algebra R S] (p : Ideal R) (P : Ideal S) [P.LiesOver p]
+    {i : ℕ} (hi : i + 1 ≤ Ideal.ramificationIdx p P) :
+    (P ^ (i + 1)).LiesOver p := by
+  rw [liesOver_iff]
+  apply le_antisymm
+  · exact le_trans le_comap_pow_ramificationIdx <| comap_mono (pow_le_pow_right hi)
+  · refine le_trans (comap_mono <| pow_le_pow_right (Nat.le_add_left 1 i)) ?_
+    rw [pow_one, ← Ideal.under_def, ← Ideal.over_def P p]
+
+instance Ideal.Quotient.isScalarTower_of_liesOver_liesOver {A B C : Type*} [CommRing A] [CommRing B]
+    [CommRing C] [Algebra A B] [Algebra A C] [Algebra B C] [IsScalarTower A B C] (Q : Ideal C)
+    (P : Ideal B) (p : Ideal A) [Q.LiesOver P] [P.LiesOver p] [Q.LiesOver p] :
+    IsScalarTower (A ⧸ p) (B ⧸ P) (C ⧸ Q) := by
+  refine IsScalarTower.of_algebraMap_eq fun x ↦ Quotient.inductionOn' x fun x ↦ ?_
+  have : Quotient.mk'' x = Ideal.Quotient.mk p x := rfl
+  simp [this, Ideal.Quotient.algebraMap_mk_of_liesOver, ← IsScalarTower.algebraMap_apply]
+
+theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [Nontrivial R]
+    [IsDedekindDomain R] [Module.Free ℤ R] [Algebra.IsIntegral ℤ R] (I : Ideal R)
+    [I.IsPrime] {p k : ℕ} [hp : Fact (Nat.Prime p)] (hI : Ideal.absNorm I ∣ p ^ k) :
+    I.LiesOver (Ideal.span {(p : ℤ)}) := by
+  have : NeZero I := ⟨by
+    contrapose! hI
+    rw [hI, map_zero, Nat.zero_dvd]
+    exact NeZero.ne (p ^ k)⟩
+  have := (Int.absNorm_under_dvd_absNorm I).trans hI
+  rw [Ideal.liesOver_iff, ← Nat.prime_eq_prime_of_dvd_pow (Nat.absNorm_under_prime I)
+    hp.out this, Int.ideal_span_absNorm_eq_self]
+
+/-! ### Ideal — IsDedekindDomain / emultiplicity -/
 
 -- Replace Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul?
 theorem Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' {R : Type*} [CommRing R]
@@ -212,16 +318,72 @@ theorem Ideal.IsDedekindDomain.finiteMulticity {R : Type*} [CommRing R] [IsDedek
     FiniteMultiplicity I J :=
   FiniteMultiplicity.of_not_isUnit (by rwa [Ideal.isUnit_iff]) hJ
 
-theorem Nat.digits_pow_sub_one {b : ℕ} (hb : 1 < b) (l : ℕ) :
-    b.digits (b ^ l - 1) = List.replicate l (b - 1) := by
-  suffices b ^ l - 1 = Nat.ofDigits b (List.replicate l (b - 1)) by
-    rw [this, Nat.digits_ofDigits _ hb _ (by grind) (by grind)]
-  induction l with
-    | zero => simp
-    | succ l hl =>
-        rw [List.replicate_succ, Nat.ofDigits_cons, ← hl, add_comm (b - 1), Nat.mul_sub, mul_one,
-          ← Nat.pow_succ', ← Nat.add_sub_assoc hb.le,
-          Nat.sub_add_cancel (Nat.le_self_pow l.succ_ne_zero b)]
+/-! ### IsCyclotomicExtension -/
+
+theorem IsCyclotomicExtension.Rat.discr_coprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂] (K₁ K₂ : Type*)
+    [Field K₁] [Field K₂] [NumberField K₁] [NumberField K₂] [IsCyclotomicExtension {n₁} ℚ K₁]
+    [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
+    IsCoprime (NumberField.discr K₁) (NumberField.discr K₂) := by
+  rw [Int.isCoprime_iff_nat_coprime, natAbs_discr  n₁ K₁, natAbs_discr  n₂ K₂]
+  refine Nat.Coprime.coprime_div_left ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
+  refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
+  exact Nat.Coprime.pow_left _ (Nat.Coprime.pow_right _ h)
+
+theorem IntermediateField.linearDisjoint_iff'' {F E : Type*} [Field F] [Field E] [Algebra F E]
+    (A : IntermediateField F E) (L : Type*) [Field L] [Algebra F L] [Algebra L E]
+    [IsScalarTower F L E] :
+    A.LinearDisjoint L ↔ A.LinearDisjoint (IsScalarTower.toAlgHom F L E).fieldRange := by
+  rw [linearDisjoint_iff', AlgHom.fieldRange_toSubalgebra]
+
+theorem IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂]
+    {E : Type*} [Field E] [NumberField E] (K₁ : IntermediateField ℚ E) [NumberField K₁] (K₂ : Type*)
+    [Field K₂] [NumberField K₂] [Algebra K₂ E] [IsCyclotomicExtension {n₁} ℚ K₁]
+    [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
+    K₁.LinearDisjoint K₂ := by
+  have : IsCyclotomicExtension {n₂} ℚ (IsScalarTower.toAlgHom ℚ K₂ E).fieldRange :=
+    .equiv _ ℚ K₂ (AlgHom.equivFieldRange _)
+  have : IsGalois ℚ K₁ := IsCyclotomicExtension.isGalois {n₁} ℚ K₁
+  rw [IntermediateField.linearDisjoint_iff'']
+  exact NumberField.linearDisjoint_of_isGalois_isCoprime_discr E _ _ <| discr_coprime n₁ n₂ K₁ _ h
+
+/-! ### NumberField.Units -/
+
+theorem NumberField.Units.natAbs_norm (K : Type*) [Field K] [NumberField K] (x : (RingOfIntegers K)ˣ) :
+    (Algebra.norm ℤ x.val).natAbs = 1 := by
+  apply Rat.natCast_injective
+  rw [Nat.cast_natAbs, Int.cast_abs, Algebra.coe_norm_int, NumberField.Units.norm, Nat.cast_one]
+
+theorem NumberField.isUnit_iff_natAbs_norm {K : Type*} [Field K] [NumberField K] {x : RingOfIntegers K} :
+    IsUnit x ↔ (Algebra.norm ℤ x).natAbs = 1 := by
+  rw [isUnit_iff_norm, ← Rat.natCast_injective.eq_iff, RingOfIntegers.coe_norm,
+    Nat.cast_natAbs, Nat.cast_one, ← Algebra.coe_norm_int, Int.cast_abs]
+
+/-! ### Galois / galRestrict -/
+
+theorem smul_eq_galRestrict_apply (A : Type*) {K L B : Type*} [CommRing A] [IsIntegrallyClosed A]
+    [Field K] [Field L] [CommRing B] [Algebra A K] [IsFractionRing A K] [Algebra B L] [IsFractionRing B L]
+    [Algebra A B] [Algebra K L] [Algebra A L] [IsScalarTower A K L] [IsScalarTower A B L]
+    [IsIntegralClosure B A L] [Algebra.IsAlgebraic K L] [MulSemiringAction Gal(L/K) B]
+    [SMulDistribClass Gal(L/K) B L] (σ : Gal(L/K)) (x : B) :
+    σ • x = galRestrict A K L B σ x := by
+  apply FaithfulSMul.algebraMap_injective B L
+  rw [algebraMap.smul', AlgEquiv.smul_def, algebraMap_galRestrict_apply]
+
+/-! ### Prime / WfDvdMonoid / UniqueFactorizationMonoid -/
+
+theorem Prime.emultiplicity_self {α : Type*} [CommMonoidWithZero α] [IsCancelMulZero α]
+    [WfDvdMonoid α] {a : α} (ha : Prime a) : emultiplicity a a = 1 :=
+  (FiniteMultiplicity.of_prime_left ha ha.ne_zero).emultiplicity_self
+
+theorem Prime.emultiplicity_prime {α : Type*} [CommMonoidWithZero α] [IsCancelMulZero α]
+    [WfDvdMonoid α] [DecidableRel ((· ∣ ·) : α → α → Prop)] {p q : α} (hp : Prime p)
+    (hq : Prime q) :
+    emultiplicity p q = if Associated p q then 1 else 0 := by
+  split_ifs with h
+  · obtain ⟨u, rfl⟩ := h
+    rw [emultiplicity_mul hp, hp.emultiplicity_self,
+      emultiplicity_of_unit_right (hp.not_unit), add_zero]
+  · rwa [emultiplicity_eq_zero, hp.dvd_prime_iff_associated hq]
 
 theorem WfDvdMonoid.eq_zero_iff_forall_prime_pow_dvd {R : Type*} [CommMonoidWithZero R]
     [IsCancelMulZero R] [WfDvdMonoid R] {a p : R} (hp : Prime p) :
@@ -296,51 +458,25 @@ theorem UniqueFactorizationMonoid.eq_iff_emultiplicity_eq {R : Type*}
     simp [Subsingleton.elim p 1] at h
   rw [← associated_iff_eq, associated_iff_emultiplicity_eq' _ _ p hp]
 
-theorem Ideal.infinite_of_not_isField {R : Type*} [CommRing R] [Nontrivial R]
-    [IsCancelMulZero (Ideal R)] (h : ¬IsField R) :
-    Infinite (Ideal R) := by
-  obtain ⟨I, h₁, h₂⟩ := Ring.not_isField_iff_exists_prime.mp h
-  apply Infinite.of_injective (fun n : ℕ ↦ I ^ n)
-  intro n m hI
-  dsimp at hI
-  by_contra! h
-  obtain h | h := Nat.ne_iff_lt_or_gt.mp h
-  · obtain ⟨t, ht, rfl⟩ := lt_iff_exists_add.mp h
-    rw [pow_add, left_eq_mul₀ (pow_ne_zero n h₁), Ideal.one_eq_top, Ideal.pow_eq_top_iff] at hI
-    exact h₂.ne_top <| hI.resolve_right ht.ne'
-  · obtain ⟨t, ht, rfl⟩ := lt_iff_exists_add.mp h
-    rw [pow_add, mul_eq_left₀ (pow_ne_zero m h₁), Ideal.one_eq_top, Ideal.pow_eq_top_iff] at hI
-    exact h₂.ne_top <| hI.resolve_right ht.ne'
+/-! ### ZMod -/
 
-instance (K : Type*) [Field K] [NumberField K] :
-    Infinite (Ideal (𝓞 K)) :=
-  Ideal.infinite_of_not_isField (RingOfIntegers.not_isField K)
+theorem ZMod.orderOf_mod_self_pow_sub_one (a k : ℕ) (ha : 1 < a) :
+    orderOf (a : ZMod (a ^ k - 1)) = k := by
+  have h₁ {n : ℕ} (hn : 0 < n) : 2 ≤ a ^ n := (Nat.le_pow hn).trans <| Nat.pow_le_pow_left ha n
+  have h₂ {a k b : ℕ} (hb : 1 ≤ b) : (b : ZMod (a ^ k - 1)) = 1 ↔ a ^ k - 1 ∣ b - 1 := by
+    rw [← Nat.cast_one (R := ZMod (a ^ k - 1)), ZMod.natCast_eq_natCast_iff,
+      Nat.ModEq.comm, Nat.modEq_iff_dvd, ← Nat.cast_sub hb, Int.natCast_dvd_natCast]
+  obtain rfl | hk := Nat.eq_zero_or_pos k
+  · refine orderOf_eq_zero_iff'.mpr fun n hn ↦ ?_
+    rw [← Nat.cast_pow, ne_eq, h₂ (one_le_two.trans (h₁ hn)), pow_zero, tsub_self, zero_dvd_iff]
+    grind
+  refine (orderOf_eq_iff hk).mpr ⟨?_, fun m hm hm' ↦ ?_⟩
+  · rw [← Nat.cast_pow, h₂ (one_le_two.trans (h₁ hk))]
+  · rw [← Nat.cast_pow, ne_eq, h₂ (one_le_two.trans (h₁ hm'))]
+    refine Nat.not_dvd_of_pos_of_lt (by aesop) ?_
+    rwa [Nat.sub_lt_sub_iff_right (one_le_two.trans (h₁ hm')), Nat.pow_lt_pow_iff_right ha]
 
-theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [Nontrivial R]
-    [IsDedekindDomain R] [Module.Free ℤ R] [Algebra.IsIntegral ℤ R] (I : Ideal R)
-    [I.IsPrime] {p k : ℕ} [hp : Fact (Nat.Prime p)] (hI : Ideal.absNorm I ∣ p ^ k) :
-    I.LiesOver (Ideal.span {(p : ℤ)}) := by
-  have : NeZero I := ⟨by
-    contrapose! hI
-    rw [hI, map_zero, Nat.zero_dvd]
-    exact NeZero.ne (p ^ k)⟩
-  have := (Int.absNorm_under_dvd_absNorm I).trans hI
-  rw [Ideal.liesOver_iff, ← Nat.prime_eq_prime_of_dvd_pow (Nat.absNorm_under_prime I)
-    hp.out this, Int.ideal_span_absNorm_eq_self]
-
-theorem Prime.emultiplicity_self {α : Type*} [CommMonoidWithZero α] [IsCancelMulZero α]
-    [WfDvdMonoid α] {a : α} (ha : Prime a) : emultiplicity a a = 1 :=
-  (FiniteMultiplicity.of_prime_left ha ha.ne_zero).emultiplicity_self
-
-theorem Prime.emultiplicity_prime {α : Type*} [CommMonoidWithZero α] [IsCancelMulZero α]
-    [WfDvdMonoid α] [DecidableRel ((· ∣ ·) : α → α → Prop)] {p q : α} (hp : Prime p)
-    (hq : Prime q) :
-    emultiplicity p q = if Associated p q then 1 else 0 := by
-  split_ifs with h
-  · obtain ⟨u, rfl⟩ := h
-    rw [emultiplicity_mul hp, hp.emultiplicity_self,
-      emultiplicity_of_unit_right (hp.not_unit), add_zero]
-  · rwa [emultiplicity_eq_zero, hp.dvd_prime_iff_associated hq]
+/-! ### Finset / MulAction -/
 
 @[to_additive]
 theorem Finset.prod_filter_eq_eq_pow_card {α β γ : Type*} [Fintype α] [CommMonoid γ]
@@ -361,26 +497,7 @@ theorem MulAction.orbitProdStabilizerEquivGroup_apply_smul {α β : Type*} [Grou
     MulAction.orbitProdStabilizerEquivGroup α b (x, y) • b = x := by
   rw [← MulAction.orbitProdStabilizerEquivGroup_symm_apply_fst, Equiv.symm_apply_apply]
 
--- @[to_additive]
--- noncomputable def MulAction.ofOrbit {α β : Type*} [Group α] [MulAction α β] {b : β}
---     (x : orbit α b) : α := x.prop.choose
-
--- @[to_additive (attr := simp)]
--- theorem MulAction.ofOrbit_smul {α β : Type*} [Group α] [MulAction α β] {b : β}
---     (x : orbit α b) : ofOrbit x • b = x := x.prop.choose_spec
-
--- @[to_additive (attr := simp)]
--- theorem MulAction.orbitEquivQuotientStabilizer_apply {α β : Type*} [Group α] [MulAction α β]
---     {b : β} (x : orbit α b) :
---     orbitEquivQuotientStabilizer α b x = ofOrbit x := by
---   simp [orbitEquivQuotientStabilizer, Equiv.symm_apply_eq]
-
--- @[to_additive (attr := simp)]
--- theorem MulAction.orbitProdStabilizerEquivGroup_apply {α β : Type*} [Group α] [MulAction α β]
---     (b : β) (a : α) (x : orbit α b) (σ : stabilizer α b) :
---     orbitProdStabilizerEquivGroup α b (x, σ) = ofOrbit x * σ := by
---   rw [orbitProdStabilizerEquivGroup]
---   simp
+/-! ### List / Nat.digits -/
 
 theorem List.mapIdx_replicate {α β : Type*} (f : ℕ → α → β) (n : ℕ) (a : α) :
     mapIdx f (replicate n a) = map (fun n ↦ f n a) (range n) := by
@@ -388,9 +505,34 @@ theorem List.mapIdx_replicate {α β : Type*} (f : ℕ → α → β) (n : ℕ) 
   | zero => simp
   | succ n hn => simp [replicate_succ', mapIdx_append, range_succ, hn]
 
+theorem Nat.digits_base_pow_sub_one {b : ℕ} (hb : 1 < b) (l : ℕ) :
+    b.digits (b ^ l - 1) = List.replicate l (b - 1) := by
+  suffices b ^ l - 1 = Nat.ofDigits b (List.replicate l (b - 1)) by
+    rw [this, Nat.digits_ofDigits _ hb _ (by grind) (by grind)]
+  induction l with
+    | zero => simp
+    | succ l hl =>
+        rw [List.replicate_succ, Nat.ofDigits_cons, ← hl, add_comm (b - 1), Nat.mul_sub, mul_one,
+          ← Nat.pow_succ', ← Nat.add_sub_assoc hb.le,
+          Nat.sub_add_cancel (Nat.le_self_pow l.succ_ne_zero b)]
+
+theorem Nat.digits_eq_replicate_base_sub_one_iff {b : ℕ} (hb : 1 < b) (n k : ℕ) :
+    b.digits n = List.replicate k (b - 1) ↔ n = b ^ k - 1 := by
+  refine ⟨?_, fun h ↦ by rw [h, digits_base_pow_sub_one hb]⟩
+  intro h
+  have := congr_arg (Nat.ofDigits b) h
+  rwa [ofDigits_digits, ← digits_base_pow_sub_one hb, ofDigits_digits] at this
+
 theorem Nat.digitsAppend_def (b l n : ℕ) :
     Nat.digitsAppend b l n = b.digits n ++ List.replicate (l - (b.digits n).length) 0 := by
   sorry
+
+theorem Nat.digitsAppend_eq_nil_iff {b l n : ℕ} :
+    Nat.digitsAppend b l n = [] ↔ n = 0 ∧ l = 0 := by
+  rw [digitsAppend_def, List.append_eq_nil_iff, digits_eq_nil_iff_eq_zero,
+    List.replicate_eq_nil_iff, Nat.sub_eq_zero_iff_le, and_congr_right_iff]
+  intro h
+  rw [h, digits_zero, List.length_nil, le_zero]
 
 theorem Nat.mem_digitsAppend_of_mem_digits {b n : ℕ} (l d : ℕ) (hd : d ∈ b.digits n) :
     d ∈ b.digitsAppend l n := by
@@ -401,58 +543,21 @@ theorem Nat.digitsAppend_sum_eq_digits_sum (b l n : ℕ) :
     (Nat.digitsAppend b l n).sum = (Nat.digits b n).sum := by
   rw [Nat.digitsAppend_def, List.sum_append, List.sum_replicate, nsmul_zero, add_zero]
 
+theorem Nat.digitsAppend_eq_digits_iff {b l n : ℕ} (hn : n ≠ 0) (p : b.digitsAppend l n ≠ []) :
+    b.digitsAppend l n = b.digits n ↔ (b.digitsAppend l n).getLast p ≠ 0 := by
+  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
+  · rw! [h]
+    exact Nat.getLast_digit_ne_zero _ hn
+  · contrapose! h
+    rw [ne_eq, b.digitsAppend_def, List.append_right_eq_self, List.replicate_eq_nil_iff] at h
+    rw! [b.digitsAppend_def]
+    rw [List.getLast_append_right, List.getLast_replicate]
+    rwa [ne_eq, List.replicate_eq_nil_iff]
+
 theorem Nat.eq_mapIdx_digits_sum (b n : ℕ) :
     n = (List.mapIdx (fun i a ↦ a * b ^ i) (b.digits n)).sum := by
   convert Nat.ofDigits_eq_sum_mapIdx b (b.digits n)
   rw [Nat.ofDigits_digits]
-
-theorem Nat.digits_base_pow_sub_one {b : ℕ} (hb : 1 < b) (k : ℕ) :
-    b.digits (b ^ k - 1) = List.replicate k (b - 1) := by
-  induction k with
-  | zero => simp
-  | succ k hk =>
-      rw [List.replicate_succ, ← hk,
-        show b ^ (k + 1) - 1 = (b - 1) + b * (b ^ k - 1) by
-          rw [Nat.mul_sub, ← Nat.pow_succ', mul_one, add_comm (b - 1), ← Nat.add_sub_assoc hb.le,
-            Nat.sub_add_cancel (by bound)],
-        Nat.digits_add _ hb _ _ (Nat.sub_one_lt_of_lt hb) (by grind)]
-
-theorem Nat.digits_eq_replicate_base_sub_one_iff {b : ℕ} (hb : 1 < b) (n k : ℕ) :
-    b.digits n = List.replicate k (b - 1) ↔ n = b ^ k - 1 := by
-  refine ⟨?_, fun h ↦ by rw [h, digits_base_pow_sub_one hb]⟩
-  intro h
-  have := congr_arg (Nat.ofDigits b) h
-  rwa [ofDigits_digits, ← digits_base_pow_sub_one hb, ofDigits_digits] at this
-
-#exit
-
-example (b l n : ℕ) (p : b.digitsAppend l n ≠ []) :
-    b.digitsAppend l n = b.digits n ↔ (b.digitsAppend l n).getLast p ≠ 0 := by
-  nth_rewrite 1 [b.digitsAppend_def]
-  rw [List.append_right_eq_self, List.replicate_eq_nil_iff]
-  constructor
-  ·
-    sorry
-  ·
-    sorry
-
-theorem Nat.digitsAppend_eq_replicate_base_sub_one_iff {b : ℕ} (hb : 1 < b) (l n : ℕ) :
-    b.digitsAppend l n = List.replicate l (b - 1) ↔ n = b ^ l - 1 := by
-  rw [← digits_eq_replicate_base_sub_one_iff hb, digitsAppend_def]
-
-  -- exact getLast_digit_ne_zero b hn
-  constructor
-  ·
-    sorry
-  · intro h
-    rw [h]
-    rw [List.replicate_append_replicate]
-    sorry
-
-  refine ⟨?_, fun h ↦ by rw [h, digits_base_pow_sub_one hb]⟩
-  intro h
-  have := congr_arg (Nat.ofDigits b) h
-  rwa [ofDigits_digits, ← digits_base_pow_sub_one hb, ofDigits_digits] at this
 
 theorem Nat.eq_sum_digits_mul_pow (b n : ℕ) :
     n = ∑ i : Fin (b.digits n).length, (b.digits n)[i] * b ^ i.val := by
@@ -471,9 +576,14 @@ theorem Nat.eq_sum_digitsAppend_mul_pow {b n : ℕ} (l : ℕ) (hb : 1 < b) (hn :
   simp [List.mapIdx_eq_zipIdx_map, ← Fin.sum_univ_fun_getElem,
     ← Fin.sum_congr' _ (List.length_zipIdx.trans (length_digitsAppend hb l hn)).symm]
 
-example (b l a : ℕ) (hb : 1 < b) [NeZero l] (ha : a < b ^ l - 1) :
+theorem Nat.sub_one_mul_sum_fract_div_eq_digits_sum (b l a : ℕ) (hb : 1 < b) [NeZero l]
+    (ha : a < b ^ l - 1) :
     (b - 1) * ∑ j ∈ Finset.range l, Int.fract (b ^ j * a / (b ^ l - 1 : ℕ) : ℚ) =
       (Nat.digits b a).sum := by
+  by_cases h₀ : a = 0
+  · simp [h₀]
+  have : 1 < b ^ l := Nat.one_lt_pow (NeZero.ne _) hb
+  have : 1 < (b : ℚ) ^ l := by rwa [← Nat.cast_pow, Nat.one_lt_cast]
   have ha' : a < b ^ l := by grind
   let L' := b.digitsAppend l a
   have hL : (b.digitsAppend l a).length = l := Nat.length_digitsAppend hb l ha'
@@ -483,7 +593,7 @@ example (b l a : ℕ) (hb : 1 < b) [NeZero l] (ha : a < b ^ l - 1) :
     refine Int.fract_eq_iff.mpr ⟨?_, ?_, ?_⟩
     · bound
     · refine (Rat.div_lt_iff ?_).mpr ?_
-      · sorry
+      · positivity
       · rw [one_mul, ← Nat.cast_pow, ← Nat.cast_one, ← Nat.cast_sub (by grind), Rat.natCast_lt_natCast]
         · obtain ⟨i₀, h₀⟩ : ∃ i : Fin l, (b.digitsAppend l a)[i] < b - 1 := by
             suffices ∃ d ∈ b.digitsAppend l a, d < b - 1 by
@@ -495,8 +605,13 @@ example (b l a : ℕ) (hb : 1 < b) [NeZero l] (ha : a < b ^ l - 1) :
             have : b.digits a = List.replicate l (b - 1) := by
               rw [List.eq_replicate_iff]
               refine ⟨?_, ?_⟩
-              ·
-                sorry
+              · have : b.digitsAppend l a ≠ [] := by
+                  rw [ne_eq, Nat.digitsAppend_eq_nil_iff, not_and_or]
+                  exact Or.inl h₀
+                rw [← (Nat.digitsAppend_eq_digits_iff h₀ this).mpr,
+                  Nat.length_digitsAppend hb l ha']
+                specialize ha _ (List.getLast_mem this)
+                grind
               · intro d hd
                 refine le_antisymm ?_ ?_
                 · rw [Nat.le_iff_lt_add_one, Nat.sub_add_cancel hb.le]
@@ -524,20 +639,19 @@ example (b l a : ℕ) (hb : 1 < b) [NeZero l] (ha : a < b ^ l - 1) :
       rw [div_eq_iff, mul_comm (c : ℚ)]
       simp_rw [add_comm j]
       exact_mod_cast hc
-      sorry
+      grind
     rw [congr_arg ((↑) : ℕ → ℤ) <| Nat.eq_sum_digitsAppend_mul_pow l hb ha', Nat.cast_sum,
       Finset.mul_sum, Nat.cast_sum, ← Finset.sum_sub_distrib]
     refine Finset.dvd_sum fun i _ ↦ ?_
     rw [Nat.cast_mul, Nat.cast_mul, Nat.cast_pow, Nat.cast_pow, mul_comm, mul_assoc, ← pow_add,
       ← mul_sub, Fin.val_add]
     nth_rewrite 1 [← Nat.mod_add_div (i + j) l, pow_add]
-    rw [← mul_sub_one, ← mul_assoc]
+    rw [← _root_.mul_sub_one, ← mul_assoc]
     refine Int.dvd_mul_of_dvd_right ?_
     exact pow_one_sub_dvd_pow_mul_sub_one _ _ _
-    sorry
+    bound
   simp_rw [this, Fin.getElem_fin, Nat.cast_sum, Nat.cast_mul, Nat.cast_pow, ← Finset.sum_div]
   rw [Finset.sum_comm]
---  simp_rw [← Fin.val_add]
   conv_lhs =>
     enter [2, 1, 2, k]
     rw [← Equiv.sum_comp (Equiv.addRight k).symm, ← Finset.mul_sum]
@@ -546,54 +660,56 @@ example (b l a : ℕ) (hb : 1 < b) [NeZero l] (ha : a < b ^ l - 1) :
   rw [← Finset.sum_mul, mul_div_assoc, div_div_cancel_left', mul_comm, mul_assoc, inv_mul_cancel₀,
     mul_one, Nat.cast_list_sum, ← Fin.sum_univ_fun_getElem, ← Fin.sum_congr' _ hL]
   rfl
-  sorry
-  sorry
+  · rw [sub_ne_zero, Nat.cast_ne_one]
+    exact hb.ne'
+  grind
 
+-- /- #### AlgHom #### -/
 
+-- variable {A : Type*} (B : Type*) {C : Type*} {D : Type*} [CommSemiring A] [CommSemiring C]
+--   [CommSemiring D] [Algebra A C] [Algebra A D] [CommSemiring B] [Algebra A B] [Algebra B C]
+--   [IsScalarTower A B C] (f : C →ₐ[A] D)
 
-example (b l a : ℕ) (hb : 1 < b) [NeZero l] (ha : a < b ^ l - 1) :
-    (b - 1) * ∑ j ∈ Finset.range l, Int.fract (b ^ j * a / (b ^ l - 1 : ℕ) : ℚ) =
-      (Nat.digits b a).sum := by
+-- @[simp]
+-- theorem AlgHom.extendScalars_apply (x : C) :
+--     f.extendScalars B x = f x := rfl
 
-  let L := b.digitsAppend l a
-  have hL := Nat.length_digitsAppend hb l (n := a) sorry
-  -- have : a = ∑ i : Fin l, L[i] * b ^ i.val := by
-  --   rw [← Fin.sum_congr' _ hL]
-  --   simp only [Fin.getElem_fin, Fin.val_cast]
-  --   rw [Fin.sum_univ_fun_getElem L (fun i ↦ L[i] * b ^ i)]
-  --   sorry
-  -- rw [← Nat.digitsAppend_sum b l a]
-  have {j} : Int.fract (b ^ j * a / (b ^ l - 1 : ℕ) : ℚ) =
-      (∑ i : Fin l, L[i] * b ^ ((j + i) % l)) / (b ^ l - 1) := by
-    induction j with
-    | zero =>
-        rw [Int.fract_eq_self.mpr]
-        · simp [Nat.mod_eq_of_lt, Nat.eq_sum_digitsAppend_mul_pow]
+-- set_option backward.isDefEq.respectTransparency false in
+-- /-- Extend the scalars of an `AlgEquiv`. -/
+-- def AlgEquiv.extendScalars (e : C ≃ₐ[A] D) :
+--      @AlgEquiv B C D _ _ _ _ (e.toAlgHom.restrictDomain B).toRingHom.toAlgebra :=
+--   letI : Algebra B D := (e.toAlgHom.restrictDomain B).toRingHom.toAlgebra
+--   { __ := e.toAlgHom.extendScalars B
+--     invFun := e.symm
+--     left_inv _ := by simp only [toAlgHom_eq_coe, AlgHom.toRingHom_eq_coe,
+--       RingHom.toMonoidHom_eq_coe, AlgHom.toRingHom_toMonoidHom, OneHom.toFun_eq_coe,
+--       MonoidHom.toOneHom_coe, MonoidHom.coe_coe, AlgHom.extendScalars_apply, AlgHom.coe_coe,
+--       symm_apply_apply]
+--     right_inv _ := by simp only [toAlgHom_eq_coe, AlgHom.toRingHom_eq_coe,
+--       RingHom.toMonoidHom_eq_coe, AlgHom.toRingHom_toMonoidHom, OneHom.toFun_eq_coe,
+--       MonoidHom.toOneHom_coe, MonoidHom.coe_coe, AlgHom.extendScalars_apply, AlgHom.coe_coe,
+--       apply_symm_apply] }
 
-        · refine ⟨?_, ?_⟩
-          · bound
-          · rwa [pow_zero, one_mul, div_lt_iff₀, one_mul, Rat.natCast_lt_natCast]
-            rw [Rat.natCast_pos]
-            linarith
-    | succ n ih =>
+-- @[simp]
+-- theorem AlgEquiv.extendScalars_apply (e : C ≃ₐ[A] D) (x : C) :
+--     e.extendScalars B x = e x := rfl
 
+def ArithmeticFunction.phi : ArithmeticFunction ℤ where
+  toFun n := Nat.totient n
+  map_zero' := by simp
 
-        sorry
-  simp_rw [this, Fin.getElem_fin, Nat.cast_sum, Nat.cast_mul, Nat.cast_pow, ← Finset.sum_div]
-  rw [Finset.sum_comm]
-  simp_rw [Finset.sum_range, ← Fin.val_add]
-  conv_lhs =>
-    enter [2, 1, 2, a]
-    rw [← Equiv.sum_comp (Equiv.addRight a).symm]
-    simp only [Equiv.addRight_symm_apply, neg_add_cancel_right]
-    rw [← Finset.mul_sum, ← Finset.sum_range, geom_sum_eq (Nat.cast_ne_one.mpr hb.ne')]
-  rw [← Finset.sum_mul, mul_div_assoc, div_div_cancel_left']
-  rw [mul_comm, mul_assoc, inv_mul_cancel₀, mul_one]
-  rw [← Nat.digitsAppend_sum_eq_digits_sum b l, Nat.cast_list_sum]
-  rw [← Fin.sum_univ_fun_getElem]
-  rw [← Fin.sum_congr' _ hL]
+@[simp]
+theorem ArithmeticFunction.phi_apply (n : ℕ) :
+    phi n = Nat.totient n := rfl
 
-  rfl
-  rw [sub_ne_zero, Nat.cast_ne_one]
-  exact hb.ne'
-  sorry
+open Nat in
+theorem ArithmeticFunction.isMultiplicative_phi :
+    IsMultiplicative phi :=
+  IsMultiplicative.iff_ne_zero.mpr ⟨by simp, fun _ _ h ↦ by simp [Nat.totient_mul h]⟩
+
+theorem Nat.totient_mul_totient_eq (m n : ℕ) :
+    totient m * totient n = totient (lcm m n) * totient (gcd m n) := by
+  have :=  ArithmeticFunction.IsMultiplicative.lcm_apply_mul_gcd_apply
+    ArithmeticFunction.isMultiplicative_phi (x := m) (y := n)
+  rwa [ArithmeticFunction.phi_apply, ArithmeticFunction.phi_apply, ArithmeticFunction.phi_apply,
+    ArithmeticFunction.phi_apply, ← Nat.cast_mul, ← Nat.cast_mul, Nat.cast_inj, eq_comm] at this

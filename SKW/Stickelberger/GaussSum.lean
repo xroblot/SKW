@@ -143,7 +143,7 @@ theorem GaussSum_mem [𝓟.LiesOver 𝒑] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ �
     GaussSum hbij hζ a ∈ 𝓟 := by
   have h𝓟 := zeta_sub_one_mem hζ 𝓟
   simp_rw [← Quotient.eq_zero_iff_mem, GaussSum, gaussSum, map_sum, map_mul,
-    algebraMap_com_addCharTrace, addCharTrace_mk_eq_one _ _ h𝓟, mul_one, ← map_sum]
+    algebraMap_comp_addCharTrace, addCharTrace_mk_eq_one _ _ h𝓟, mul_one, ← map_sum]
   rw [MulChar.sum_eq_zero_of_ne_one (teichmuller_pow_comp_algebraMap_ne_one hbij (- a)
     (by rwa [Int.dvd_neg])), map_zero]
 
@@ -162,7 +162,7 @@ omit [IsCyclotomicExtension {p} ℚ F] in
 theorem GaussSum_mul_GaussSum_neg [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) :
     GaussSum hbij hζ a * GaussSum hbij hζ (- a) =
       algebraMap (𝓞 K) (𝓞 L) ((teichmuller hbij ^ (- a)) (- 1)) * p ^ f := by
-  rw [GaussSum, GaussSum, ← mul_gaussSum_inv_eq_gaussSum, algebraMap_com_addCharTrace,
+  rw [GaussSum, GaussSum, ← mul_gaussSum_inv_eq_gaussSum, algebraMap_comp_addCharTrace,
     mul_right_comm, neg_neg, zpow_neg, ← MulChar.ringHomComp_inv, mul_assoc,
     gaussSum_mul_gaussSum_eq_card (teichmuller_pow_comp_algebraMap_ne_one hbij a ha)
     (addCharTrace_isPrimitive P (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) (𝓞 L)))),
@@ -246,7 +246,7 @@ theorem mk_sq_gausssum_eq [hp' : Fact (Odd p)] [𝓟.LiesOver P] [P.LiesOver �
     refine inv_ne_one.mpr ?_
     exact teichmuller_ne_one hbij
   simp_rw [GaussSum, gaussSum, zpow_neg, zpow_one, MulChar.ringHomComp_apply, map_sum, map_mul,
-    algebraMap_com_addCharTrace, addCharTrace_mk_sq_eq P hζ₀ h𝓟, mul_add, mul_one,
+    algebraMap_comp_addCharTrace, addCharTrace_mk_sq_eq P hζ₀ h𝓟, mul_add, mul_one,
     Finset.sum_add_distrib, ← map_sum, MulChar.sum_eq_zero_of_ne_one h, map_zero, zero_add,
     Algebra.smul_def, ← mul_assoc, ← Finset.sum_mul, mk_sq_gausssum_eq_aux]
   simp
@@ -293,7 +293,7 @@ theorem galFEquiv_val_ne_zero [Fact (Odd p)] (σ : Gal(L/F)) :
 
 include hη in
 set_option backward.isDefEq.respectTransparency false in
-theorem galLF_apply_eta (σ : Gal(L/F)) :
+theorem galLFEquiv_apply_eta (σ : Gal(L/F)) :
     σ • (algebraMap (𝓞 K) (𝓞 L) η) = (algebraMap (𝓞 K) (𝓞 L)) η ^ (galFEquiv p f K σ).val.val := by
   have : IsGalois ℚ K := IsCyclotomicExtension.isGalois {p ^ f - 1} ℚ K
   convert RingHom.congr_arg (algebraMap (𝓞 K) (𝓞 L))
@@ -305,17 +305,29 @@ theorem galLF_apply_eta (σ : Gal(L/F)) :
   exact (AlgEquiv.restrictNormalHom_apply K (AlgEquiv.restrictScalars ℚ σ) η).symm
 
 include hη in
+theorem galLFEquiv_eq_of_smul_eq_pow (σ : Gal(L/F)) {a : ℕ}
+    (h : σ • algebraMap (𝓞 K) (𝓞 L) η = algebraMap (𝓞 K) (𝓞 L) η ^ a) :
+    (galFEquiv p f K σ).val.val = a % (p ^ f - 1) := by
+  rw [galLFEquiv_apply_eta p f hη, ← map_pow, ← map_pow,
+    (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 L)).eq_iff, ← pow_mod_orderOf _ a] at h
+  have := hη.pow_inj (ZMod.val_lt _) ?_ h
+  · nth_rewrite 1 [← hη.eq_orderOf] at this
+    exact this
+  · rw [← hη.eq_orderOf]
+    exact Nat.mod_lt a <| NeZero.pos (p ^ f - 1)
+
+include hη in
 omit [P.IsMaximal] in
-theorem galLF_apply_teichmuller_zpow [Fact (Odd p)] (σ : Gal(L/F)) (a : ℤ) (x : 𝓞 K ⧸ P) :
+theorem galLFEquiv_apply_teichmuller_zpow [Fact (Odd p)] (σ : Gal(L/F)) (a : ℤ) (x : 𝓞 K ⧸ P) :
     σ • (((teichmuller hbij) ^ (- a)).ringHomComp (algebraMap (𝓞 K) (𝓞 L)) x) =
       ((teichmuller hbij) ^ (- a * (galFEquiv p f K σ).val.val : ℤ)).ringHomComp
         (algebraMap (𝓞 K) (𝓞 L)) x := by
   rw [smul_eq_galRestrict_apply (𝓞 F) σ,
     map_teichmuller_zpow_eq hbij _ _ (galFEquiv p f K σ).val.val (galFEquiv_val_ne_zero p f σ) hη]
-  rw [← smul_eq_galRestrict_apply, galLF_apply_eta p f hη]
+  rw [← smul_eq_galRestrict_apply, galLFEquiv_apply_eta p f hη]
 
 omit [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal] in
-theorem galLF_apply_addCharTrace [P.LiesOver 𝒑] (σ : Gal(L/F)) (x : 𝓞 K ⧸ P) :
+theorem galLFEquiv_apply_addCharTrace [P.LiesOver 𝒑] (σ : Gal(L/F)) (x : 𝓞 K ⧸ P) :
     σ • ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace P hζ) x) =
       (algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace P hζ) x := by
   obtain ⟨a, ha, ha'⟩ := exists_nat_addCharTrace_eq_pow P hζ x
@@ -326,8 +338,8 @@ variable {p f}
 include hη in
 theorem gal_gaussSum_eq_gaussSum [Fact (Odd p)] [P.LiesOver 𝒑] (σ : Gal(L/F)) (a : ℤ) :
     σ • GaussSum hbij hζ a = GaussSum hbij hζ (a * (galFEquiv p f K σ).val.val) := by
-  simp_rw [GaussSum, gaussSum, Finset.smul_sum, smul_mul', galLF_apply_addCharTrace,
-    galLF_apply_teichmuller_zpow p f hbij hη, neg_mul]
+  simp_rw [GaussSum, gaussSum, Finset.smul_sum, smul_mul', galLFEquiv_apply_addCharTrace,
+    galLFEquiv_apply_teichmuller_zpow p f hbij hη, neg_mul]
 
 def JacobiSum (a b : ℤ) : 𝓞 K := jacobiSum (teichmuller hbij ^ (-a)) (teichmuller hbij ^ (-b))
 
@@ -339,14 +351,3 @@ theorem GaussSum_mul_GaussSum [P.LiesOver 𝒑] (a b : ℤ) (h : ¬ ↑(p ^ f - 
     ← zpow_add, neg_add, jacobiSum_ringHomComp, JacobiSum]
   rw [← MulChar.ringHomComp_mul, ← zpow_add, ← neg_add]
   exact teichmuller_pow_comp_algebraMap_ne_one hbij _ (by rwa [Int.dvd_neg])
-
--- include hζ in
--- omit [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] in
--- theorem JacobiSum_ne_zero [P.LiesOver 𝒑] (a b : ℤ) (h : ¬ ↑(p ^ f - 1 : ℕ) ∣ a + b)
---     (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) (hb : ¬ ↑(p ^ f - 1 : ℕ) ∣ b) :
---     JacobiSum hbij a b ≠ 0 := by
---   have hnz : GaussSum hbij hζ a * GaussSum hbij hζ b ≠ 0 :=
---     mul_ne_zero (GaussSum_ne_zero_of_not_dvd hbij hζ a ha)
---       (GaussSum_ne_zero_of_not_dvd hbij hζ b hb)
---   rw [GaussSum_mul_GaussSum _ _ _ _ h, mul_ne_zero_iff] at hnz
---   exact (map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective _ _)).mp hnz.2
