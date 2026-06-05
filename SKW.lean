@@ -1,6 +1,14 @@
 import SKW.Basic
 import SKW.Misc
+import SKW.Prereqs.AlgebraMisc
+import SKW.Prereqs.CyclotomicField
+import SKW.Prereqs.Digits
+import SKW.Prereqs.Ideals
+import SKW.Prereqs.IntermediateFields
+import SKW.Prereqs.MulChars
+import SKW.Prereqs.NumberTheory
 import SKW.Stickelberger.AddCharTrace
+import SKW.Stickelberger.Factorization
 import SKW.Stickelberger.GaussSum
 import SKW.Stickelberger.Stickelberger
 import SKW.Stickelberger.Teichmuller

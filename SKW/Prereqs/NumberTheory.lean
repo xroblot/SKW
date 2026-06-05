@@ -1,9 +1,9 @@
 module
 
+public import Mathlib.NumberTheory.ArithmeticFunction.Defs
 public import Mathlib.NumberTheory.NumberField.Units.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.NumberTheory.RamificationInertia.Galois
-
 @[expose] public section
 
 open NumberField
@@ -137,3 +137,25 @@ theorem ZMod.orderOf_mod_self_pow_sub_one (a k : ℕ) (ha : 1 < a) :
   · rw [← Nat.cast_pow, ne_eq, h₂ (one_le_two.trans (h₁ hm'))]
     refine Nat.not_dvd_of_pos_of_lt (by aesop) ?_
     rwa [Nat.sub_lt_sub_iff_right (one_le_two.trans (h₁ hm')), Nat.pow_lt_pow_iff_right ha]
+
+/-! ### ArithmeticFunction.phi -/
+
+def ArithmeticFunction.phi : ArithmeticFunction ℤ where
+  toFun n := Nat.totient n
+  map_zero' := by simp
+
+@[simp]
+theorem ArithmeticFunction.phi_apply (n : ℕ) :
+    phi n = Nat.totient n := rfl
+
+open Nat in
+theorem ArithmeticFunction.isMultiplicative_phi :
+    IsMultiplicative phi :=
+  IsMultiplicative.iff_ne_zero.mpr ⟨by simp, fun _ _ h ↦ by simp [Nat.totient_mul h]⟩
+
+theorem Nat.totient_mul_totient_eq (m n : ℕ) :
+    totient m * totient n = totient (lcm m n) * totient (gcd m n) := by
+  have :=  ArithmeticFunction.IsMultiplicative.lcm_apply_mul_gcd_apply
+    ArithmeticFunction.isMultiplicative_phi (x := m) (y := n)
+  rwa [ArithmeticFunction.phi_apply, ArithmeticFunction.phi_apply, ArithmeticFunction.phi_apply,
+    ArithmeticFunction.phi_apply, ← Nat.cast_mul, ← Nat.cast_mul, Nat.cast_inj, eq_comm] at this

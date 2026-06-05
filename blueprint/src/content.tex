@@ -623,15 +623,6 @@ ideal of $\cO_E$ lying below $\fP$, i.e.\ $\tilde{\fp} = \fP \cap \cO_E$,
 and by $\tilde{\fp}_0$ the prime ideal of $\cO_{\QQ(\zeta_m)}$ lying below
 $\fP$, i.e.\ $\tilde{\fp}_0 = \fP \cap \cO_{\QQ(\zeta_m)}$.
 
-\begin{lemma}
-  \label{lem:gauss_sum_in_cyclotomic}
-  \uses{def:gauss_sum_s}
-  We have $g_d \in \cO_E$.
-\end{lemma}
-
-\begin{proof}
-\end{proof}
-
 Let $G = \Gal(\QQ(\zeta_m)/\QQ) \cong (\ZZ/m\ZZ)^\times$.
 For $(a, m) = 1$, let $\sigma_a \in G$ denote the element with
 $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
@@ -649,6 +640,8 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \begin{lemma}
   \label{lem:s_fractional_part}
   \uses{prop:valGauss_toNat_eq_sum_digits}
+  \lean{Nat.sub_one_mul_sum_fract_div_eq_digits_sum}
+  \leanok
   For $0 \leq h < q - 1$,
   \[
     s(h) = (p-1) \sum_{i=0}^{f-1} \left\{ \frac{p^i h}{q-1} \right\}.
@@ -656,6 +649,7 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Let $h = a_0 + a_1 p + \cdots + a_{f-1} p^{f-1}$ be the $p$-adic
   expansion of $h$. By \ref{prop:valGauss_toNat_eq_sum_digits}, $s(h) = a_0 + \cdots + a_{f-1}$.
   On the other hand, $p^i h \equiv a_0 p^i + \cdots + a_{f-1} p^{i+f-1}
@@ -675,6 +669,8 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \begin{lemma}
   \label{lem:s_mod}
   \uses{lem:s_fractional_part}
+  \lean{mul_valGauss_eq_mul_sum}
+  \leanok
   For $a \in (\ZZ/m\ZZ)^\times$,
   \[
     m \cdot s(ad) = (p-1) \sum_{i=0}^{f-1} (ap^i \bmod m).
@@ -682,6 +678,7 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:s_fractional_part} applied to $h = ad$,
   \[
     s(ad) = (p-1) \sum_{i=0}^{f-1} \left\{ \frac{p^i \cdot ad}{q-1} \right\}
@@ -755,12 +752,14 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 
 \begin{lemma}
   \label{lem:gauss_sum_power_in_cyclotomic}
-  \uses{def:gauss_sum_s, lem:gauss_sum_in_cyclotomic,
-        lem:gauss_sum_power_fixed_1, lem:gauss_sum_power_fixed_2}
+  \uses{def:gauss_sum_s, lem:gauss_sum_power_fixed_1, lem:gauss_sum_power_fixed_2}
+  \lean{exists_mem_gaussSum_pow_eq}
+  \leanok
   We have $g_d^m \in \cO_{\QQ(\zeta_m)}$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:gauss_sum_power_fixed_1}, $g_d^m$ is fixed by
   $\Gal(L/\QQ(\zeta_m, \zeta_p))$, so $g_d^m \in \QQ(\zeta_m, \zeta_p)$.
   By \ref{lem:gauss_sum_power_fixed_2}, $g_d^m$ is fixed by $\Gal(L/K)$.
@@ -772,10 +771,13 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 
 \begin{lemma}
   \label{lem:L_E_unramified}
+  \lean{ramificationIdx_eq_one}
+  \leanok
   The extension $L/E$ is unramified above $p$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   We have $L = E(\zeta_{q-1})$ and $E = \QQ(\zeta_m, \zeta_p)$. Since
   $\gcd(q-1, p) = 1$, the extension $\QQ(\zeta_{q-1})/\QQ$ is unramified
   at $p$. Since the ramification above $p$ in $L/\QQ$ comes entirely from
@@ -785,12 +787,15 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 
 \begin{lemma}
   \label{lem:p_totally_ramified_in_E}
+  \lean{ramificationIdx_eq_sub_one}
+  \leanok
   The extension $E/\QQ(\zeta_m)$ is totally ramified above $\tilde{\fp}_0$
   with ramification index $p - 1$. In particular,
   $\tilde{\fp}^{p-1} = \tilde{\fp}_0 \cdot \cO_E$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Since $\gcd(m, p) = 1$ (as $m \mid q - 1$ and $\gcd(q-1, p) = 1$),
   the fields $\QQ(\zeta_m)$ and $\QQ(\zeta_p)$ are linearly disjoint over
   $\QQ$, and $E = \QQ(\zeta_m) \cdot \QQ(\zeta_p)$. The extension
@@ -802,6 +807,8 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 
 \begin{lemma}
   \label{lem:stabilizer_tP0}
+  \lean{galEquivZMod_stabilizer'}
+  \leanok
   The stabilizer of $\tilde{\fp}_0$ in $G = \Gal(\QQ(\zeta_m)/\QQ)$ is
   the subgroup $\langle \sigma_p \rangle$, which has order $f$.
   In particular, for $a \in (\ZZ/m\ZZ)^\times$ and $0 \leq i \leq f-1$,
@@ -811,6 +818,7 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Since $f$ is the multiplicative order of $p$ modulo $m$ by hypothesis,
   $\langle \sigma_p \rangle$ has order $f$ in $G$. The stabilizer of
   $\tilde{\fp}_0$ in $G$ is the decomposition group of $\tilde{\fp}_0$
@@ -820,10 +828,12 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 
 \begin{lemma}
   \label{lem:valuation_gauss_sum_power}
-  \uses{lem:gauss_sum_in_cyclotomic, lem:L_E_unramified,
+  \uses{lem:L_E_unramified,
         lem:p_totally_ramified_in_E,
         lem:gal_gaussSum_eq_gaussSum, lem:gauss_sum_galois_action_K, def:s,
         lem:s_mod}
+  \lean{emultiplicity_galEquivZMod_symm_smul_gaussSum}
+  \leanok
   For $a \in (\ZZ/m\ZZ)^\times$,
   \[
     v_{\sigma_a^{-1}(\tilde{\fp}_0)}(g_d^m) = \sum_{i=0}^{f-1}
@@ -832,7 +842,8 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \end{lemma}
 
 \begin{proof}
-  Since $g_d \in \cO_E$ by \ref{lem:gauss_sum_in_cyclotomic}, we have
+  \leanok
+  Since $g_d \in \cO_E$, we have
   \[
     v_{\sigma_a^{-1}(\tilde{\fp})}(g_d) = v_{\tilde{\fp}}(\sigma_a(g_d)).
   \]
@@ -860,6 +871,8 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \begin{lemma}
   \label{lem:valuation_stickelberger}
   \uses{lem:stabilizer_tP0}
+  \lean{sum_with_mul_inv_mem_eq_sum_range}
+  \leanok
   For $a \in (\ZZ/m\ZZ)^\times$,
   \[
     v_{\sigma_a^{-1}(\tilde{\fp}_0)}(\tilde{\fp}_0^{\Theta}) =
@@ -868,6 +881,7 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By definition of $\Theta$ and \ref{lem:stabilizer_tP0}, regrouping the
   sum over $(\ZZ/m\ZZ)^\times$ by orbits under $\langle p \rangle$:
   \[
@@ -917,10 +931,13 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \begin{theorem}
   \label{thm:stickelberger}
   \uses{lem:gauss_sum_factorization_cyclotomic}
+  \label{Stickelberger}
+  \leanok
   The ideal $\tilde{\fp}_0^{\Theta}$ is principal in $\QQ(\zeta_m)$.
 \end{theorem}
 
 \begin{proof}
+  \leanok
   By \ref{lem:gauss_sum_factorization_cyclotomic},
   $(g_d^m) = \tilde{\fp}_0^{\Theta}$.
 \end{proof}

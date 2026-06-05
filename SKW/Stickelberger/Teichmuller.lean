@@ -13,6 +13,7 @@ of order `n` to `(R ⧸ I)ˣ`.
 def rootsOfUnity.mapQuot : (rootsOfUnity n R) →* (R ⧸ I)ˣ :=
   (Units.map (Ideal.Quotient.mk I).toMonoidHom).restrict _
 
+
 @[simp]
 theorem rootsOfUnity.coe_mapQuot (x : rootsOfUnity n R) :
     (rootsOfUnity.mapQuot n I x).val = Ideal.Quotient.mk I x.val := rfl

@@ -14,7 +14,7 @@ open NumberField
 
 /-! ### Ideal -/
 
-theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [Nontrivial S] [IsDedekindDomain S]
+theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [IsDedekindDomain S]
     [Module.Free ℤ S] (I : Ideal S) :
     Ideal.absNorm I = Nat.card (S ⧸ I) := rfl
 
@@ -74,9 +74,9 @@ instance Ideal.Quotient.isScalarTower_of_liesOver_liesOver {A B C : Type*} [Comm
   have : Quotient.mk'' x = Ideal.Quotient.mk p x := rfl
   simp [this, Ideal.Quotient.algebraMap_mk_of_liesOver, ← IsScalarTower.algebraMap_apply]
 
-theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [Nontrivial R]
-    [IsDedekindDomain R] [Module.Free ℤ R] [Algebra.IsIntegral ℤ R] (I : Ideal R)
-    [I.IsPrime] {p k : ℕ} [hp : Fact (Nat.Prime p)] (hI : Ideal.absNorm I ∣ p ^ k) :
+theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDedekindDomain R]
+    [Module.Free ℤ R] [Algebra.IsIntegral ℤ R] (I : Ideal R) [I.IsPrime] {p k : ℕ}
+    [hp : Fact (Nat.Prime p)] (hI : Ideal.absNorm I ∣ p ^ k) :
     I.LiesOver (Ideal.span {(p : ℤ)}) := by
   have : NeZero I := ⟨by
     contrapose! hI
@@ -117,31 +117,20 @@ theorem Ideal.IsDedekindDomain.finiteMulticity {R : Type*} [CommRing R] [IsDedek
     FiniteMultiplicity I J :=
   FiniteMultiplicity.of_not_isUnit (by rwa [Ideal.isUnit_iff]) hJ
 
-/-! ### IsCyclotomicExtension -/
+open Pointwise in
+@[simp]
+theorem Ideal.smul_eq_bot_iff {M : Type*} {R : Type*} [Group M] [Semiring R] [MulSemiringAction M R]
+    {m : M} {I : Ideal R} : m • I = ⊥ ↔ I = ⊥ := by
+  rw [smul_eq_iff_eq_inv_smul, smul_bot]
 
-open NumberField in
-theorem IsCyclotomicExtension.Rat.discr_coprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂] (K₁ K₂ : Type*)
-    [Field K₁] [Field K₂] [NumberField K₁] [NumberField K₂] [IsCyclotomicExtension {n₁} ℚ K₁]
-    [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
-    IsCoprime (NumberField.discr K₁) (NumberField.discr K₂) := by
-  rw [Int.isCoprime_iff_nat_coprime, natAbs_discr  n₁ K₁, natAbs_discr  n₂ K₂]
-  refine Nat.Coprime.coprime_div_left ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
-  refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
-  exact Nat.Coprime.pow_left _ (Nat.Coprime.pow_right _ h)
+open Pointwise in
+@[simp]
+theorem Ideal.smul_top {M : Type*} {R : Type*} [Monoid M] [CommRing R] [MulSemiringAction M R] {m : M} :
+    m • (⊤ : Ideal R) = ⊤ := by
+  rw [← one_eq_top, smul_one]
 
-theorem IntermediateField.linearDisjoint_iff'' {F E : Type*} [Field F] [Field E] [Algebra F E]
-    (A : IntermediateField F E) (L : Type*) [Field L] [Algebra F L] [Algebra L E]
-    [IsScalarTower F L E] :
-    A.LinearDisjoint L ↔ A.LinearDisjoint (IsScalarTower.toAlgHom F L E).fieldRange := by
-  rw [linearDisjoint_iff', AlgHom.fieldRange_toSubalgebra]
-
-theorem IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂]
-    {E : Type*} [Field E] [NumberField E] (K₁ : IntermediateField ℚ E) [NumberField K₁] (K₂ : Type*)
-    [Field K₂] [NumberField K₂] [Algebra K₂ E] [IsCyclotomicExtension {n₁} ℚ K₁]
-    [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
-    K₁.LinearDisjoint K₂ := by
-  have : IsCyclotomicExtension {n₂} ℚ (IsScalarTower.toAlgHom ℚ K₂ E).fieldRange :=
-    .equiv _ ℚ K₂ (AlgHom.equivFieldRange _)
-  have : IsGalois ℚ K₁ := IsCyclotomicExtension.isGalois {n₁} ℚ K₁
-  rw [IntermediateField.linearDisjoint_iff'']
-  exact NumberField.linearDisjoint_of_isGalois_isCoprime_discr E _ _ <| discr_coprime n₁ n₂ K₁ _ h
+open Pointwise in
+@[simp]
+theorem Ideal.smul_eq_top_iff {M : Type*} {R : Type*} [Group M] [CommRing R] [MulSemiringAction M R]
+    {m : M} {I : Ideal R} : m • I = ⊤ ↔ I = ⊤ := by
+  rw [smul_eq_iff_eq_inv_smul, smul_top]

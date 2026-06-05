@@ -3,11 +3,6 @@ module
 public import Mathlib.FieldTheory.LinearDisjoint
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 
-attribute [instance 100] Subalgebra.instModuleSubtypeMem
-attribute [instance 100] Subsemiring.instModuleSubtypeMem
-attribute [instance 100] IntermediateField.instModuleSubtypeMem
-attribute [instance 100] IntermediateField.instModuleSubtypeMem_1
-
 @[expose] public section
 
 /-! ### Intermediate Fields -/
@@ -44,7 +39,7 @@ set_option maxHeartbeats 500000 in
 set_option synthInstance.maxHeartbeats 100000 in
 set_option backward.isDefEq.respectTransparency false in
 open Module in
-theorem IntermediateField.finrank_sup_mul_finrank_inf_eq' {k L : Type*} [Field k] [Field L] [Algebra k L]
+theorem IntermediateField.finrank_sup_mul_finrank_inf_eq {k L : Type*} [Field k] [Field L] [Algebra k L]
     (E F : IntermediateField k L) [FiniteDimensional k E]  [FiniteDimensional k F] [IsGalois k E] :
     finrank k ↑(E ⊔ F) * finrank k ↥(E ⊓ F) = finrank k E * finrank k F := by
   let : Algebra E ↑(E ⊔ F) := (inclusion le_sup_left).toRingHom.toAlgebra

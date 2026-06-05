@@ -54,6 +54,11 @@ theorem valGauss_periodic [P.LiesOver 𝒑] {k : ℤ} (hk : ↑(p ^ f - 1 : ℕ)
     valGauss hbij hζ 𝓟 (a + k) = valGauss hbij hζ 𝓟 a := by
   rw [valGauss, valGauss, GaussSum_periodic hbij hζ hη hk]
 
+theorem valGauss_periodic' [P.LiesOver 𝒑] (a b : ℤ) (h : a ≡ b [ZMOD (p ^ f - 1 : ℕ)]) :
+    valGauss hbij hζ 𝓟 a = valGauss hbij hζ 𝓟 b := by
+  obtain ⟨k, hk⟩ := Int.modEq_iff_add_fac.mp h
+  rw [hk, valGauss_periodic hbij hζ hη _ (dvd_mul_right _ k)]
+
 variable [IsCyclotomicExtension {p ^ f - 1} ℚ K]
 
 theorem valGauss_eq_zero_of_not_liesOver [NeZero f] [IsCyclotomicExtension {p} ℚ F]
@@ -357,3 +362,23 @@ theorem valGauss_toNat_eq_sum_digits [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : �
     _ = 2 * (∑ i ∈ Finset.range (p ^ f - 1), (valGauss hbij hζ 𝓟 i).toNat +
         (p.digits (p ^ f - 1)).sum) := by
       rw [mul_add, two_mul_sum_valGauss_toNat hbij hζ hη]
+
+theorem valGauss_toNat_eq_sum_digits_mod [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ)
+    (ha : ¬ a ≡ -1 [ZMOD (p ^f - 1 : ℕ)]) :
+    (valGauss hbij hζ 𝓟 a).toNat = (Nat.digits p (a % (p ^ f - 1))).sum := by
+  have : ∃ k, (a : ℤ) = (a % (p ^ f - 1) : ℕ) + k * (p ^ f - 1: ℕ) := by
+    obtain ⟨k, hk⟩ := Int.modEq_iff_add_fac.mp <| Int.mod_modEq (a : ℤ) (p ^ f - 1 : ℕ)
+    refine ⟨k, by rwa [Int.natCast_mod, mul_comm k]⟩
+  obtain ⟨k, hk⟩ := this
+  rw [hk, valGauss_periodic hbij hζ hη _ (dvd_mul_left _ k), valGauss_toNat_eq_sum_digits hbij hζ hη]
+  contrapose! ha
+  suffices a % (p ^ f - 1) = (p ^ f - 1) - 1 by
+    apply Int.ModEq.trans (Int.mod_modEq (a : ℤ) _).symm ?_
+    rw [Int.ofNat_mod_ofNat, this, Nat.cast_sub (n := p ^ f - 1) NeZero.one_le, Nat.cast_one,
+      sub_eq_add_neg, Int.add_modEq_right_iff]
+  exact le_antisymm (Nat.le_sub_one_of_lt <| Nat.mod_lt a (NeZero.pos _)) (Nat.le_of_succ_le ha)
+
+theorem valGauss_eq_sum_digits [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) (ha : a ≤ p ^ f - 2) :
+    valGauss hbij hζ 𝓟 a = (Nat.digits p a).sum := by
+  rw [← valGauss_toNat_eq_sum_digits hbij hζ hη 𝓟 a ha,  ENat.coe_toNat]
+  exact valGauss_ne_top₀' hbij hζ hη 𝓟 a

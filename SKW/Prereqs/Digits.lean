@@ -105,13 +105,13 @@ theorem Nat.eq_sum_digitsAppend_mul_pow {b n : ℕ} (l : ℕ) (hb : 1 < b) (hn :
   simp [List.mapIdx_eq_zipIdx_map, ← Fin.sum_univ_fun_getElem,
     ← Fin.sum_congr' _ (List.length_zipIdx.trans (length_digitsAppend hb l hn)).symm]
 
-theorem Nat.sub_one_mul_sum_fract_div_eq_digits_sum (b l a : ℕ) (hb : 1 < b) [NeZero l]
-    (ha : a < b ^ l - 1) :
+theorem Nat.sub_one_mul_sum_fract_div_eq_digits_sum {b l a : ℕ} (hb : 1 < b) [NeZero l]
+    (ha : a ≤ b ^ l - 2) :
     (b - 1) * ∑ j ∈ Finset.range l, Int.fract (b ^ j * a / (b ^ l - 1 : ℕ) : ℚ) =
       (Nat.digits b a).sum := by
   by_cases h₀ : a = 0
   · simp [h₀]
-  have : 1 < b ^ l := Nat.one_lt_pow (NeZero.ne _) hb
+  have hb' : 1 < b ^ l := Nat.one_lt_pow (NeZero.ne _) hb
   have : 1 < (b : ℚ) ^ l := by rwa [← Nat.cast_pow, Nat.one_lt_cast]
   have ha' : a < b ^ l := by grind
   let L' := b.digitsAppend l a
@@ -149,6 +149,7 @@ theorem Nat.sub_one_mul_sum_fract_div_eq_digits_sum (b l a : ℕ) (hb : 1 < b) [
                   exact Nat.mem_digitsAppend_of_mem_digits l d hd
             rw [Nat.digits_eq_replicate_base_sub_one_iff hb] at this
             rw [this]
+            exact sub_succ_lt_self (b ^ l) 1 hb'
           rw [← Equiv.sum_comp (Equiv.addRight j).symm]
           simp only [Equiv.addRight_symm, Equiv.coe_addRight, Fin.getElem_fin,
             add_neg_cancel_comm_assoc]
@@ -193,24 +194,17 @@ theorem Nat.sub_one_mul_sum_fract_div_eq_digits_sum (b l a : ℕ) (hb : 1 < b) [
     exact hb.ne'
   grind
 
-/-! ### ArithmeticFunction.phi -/
-
-def ArithmeticFunction.phi : ArithmeticFunction ℤ where
-  toFun n := Nat.totient n
-  map_zero' := by simp
-
-@[simp]
-theorem ArithmeticFunction.phi_apply (n : ℕ) :
-    phi n = Nat.totient n := rfl
-
-open Nat in
-theorem ArithmeticFunction.isMultiplicative_phi :
-    IsMultiplicative phi :=
-  IsMultiplicative.iff_ne_zero.mpr ⟨by simp, fun _ _ h ↦ by simp [Nat.totient_mul h]⟩
-
-theorem Nat.totient_mul_totient_eq (m n : ℕ) :
-    totient m * totient n = totient (lcm m n) * totient (gcd m n) := by
-  have :=  ArithmeticFunction.IsMultiplicative.lcm_apply_mul_gcd_apply
-    ArithmeticFunction.isMultiplicative_phi (x := m) (y := n)
-  rwa [ArithmeticFunction.phi_apply, ArithmeticFunction.phi_apply, ArithmeticFunction.phi_apply,
-    ArithmeticFunction.phi_apply, ← Nat.cast_mul, ← Nat.cast_mul, Nat.cast_inj, eq_comm] at this
+theorem mul_fract_div_eq_mod (a b : ℤ) (hb : 0 < b) :
+    b * Int.fract ((a / b : ℚ)) = (a % b : ℤ) := by
+  rw [Int.fract, mul_sub, mul_div_cancel₀ _ (by aesop), ← Int.cast_mul, ← Int.cast_sub, Int.cast_inj,
+    eq_comm, mul_comm]
+  refine (Int.emod_eq_iff hb.ne').mpr ⟨?_, ?_, ?_⟩
+  · have := Int.sub_floor_div_mul_nonneg (a : ℚ) (b := (b : ℚ)) ?_
+    exact_mod_cast this
+    exact_mod_cast hb
+  · have := Int.sub_floor_div_mul_lt (a : ℚ) (b := (b : ℚ)) ?_
+    rw [Int.natAbs_of_nonneg hb.le]
+    exact_mod_cast this
+    exact_mod_cast hb
+  · rw [sub_sub_cancel_left, Int.dvd_neg, mul_comm]
+    exact Int.dvd_mul_right b _

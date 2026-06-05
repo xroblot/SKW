@@ -172,7 +172,6 @@ theorem GaussSum_mul_GaussSum_neg [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : �
 theorem norm_GaussSum [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) :
     ∃ k : ℕ, 1 ≤ k ∧ (Algebra.norm ℤ (GaussSum hbij hζ a)).natAbs = p ^ k := by
   have := congr_arg (fun x ↦ Int.natAbs (Algebra.norm ℤ x)) <| GaussSum_mul_GaussSum_neg hbij hζ a ha
-  dsimp at this
   rw [map_mul, map_mul, Int.natAbs_mul, Int.natAbs_mul,  show (p : 𝓞 L) = algebraMap ℤ (𝓞 L) p by simp,
     map_pow, Algebra.norm_algebraMap_of_basis (NumberField.RingOfIntegers.basis L),
     ← pow_mul, Int.natAbs_pow, Int.natAbs_natCast, ← isUnit_neg_one.unit_spec,
@@ -195,8 +194,8 @@ theorem GaussSum_ne_zero_of_not_dvd [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha :
 
 set_option synthInstance.maxHeartbeats 30000 in
 omit [NeZero (p ^ f - 1)] [IsCyclotomicExtension {p ^ f - 1} ℚ K] [𝓟.IsPrime] in
-theorem mk_sq_gausssum_eq_aux [DecidableEq (𝓞 K ⧸ P)] [(𝓟 ^ 2).LiesOver P]
-    [(𝓟 ^ 2).LiesOver 𝒑] [P.LiesOver 𝒑] [(𝓟 ^ 2).LiesOver P] :
+theorem mk_sq_gausssum_eq_aux [DecidableEq (𝓞 K ⧸ P)] [(𝓟 ^ 2).LiesOver 𝒑] [P.LiesOver 𝒑]
+    [(𝓟 ^ 2).LiesOver P] :
     ∑ x, Ideal.Quotient.mk (𝓟 ^ 2) (algebraMap (𝓞 K) (𝓞 L) ((teichmuller hbij) ⁻¹ x)) *
       algebraMap (ℤ ⧸ 𝒑) (𝓞 L ⧸ 𝓟 ^ 2) (Algebra.trace (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) x) = - 1 := by
   simp_rw [Ideal.Quotient.mk_algebraMap, IsScalarTower.algebraMap_apply (𝓞 K) (𝓞 K ⧸ P) (𝓞 L ⧸ 𝓟 ^ 2),
@@ -303,6 +302,14 @@ theorem galLFEquiv_apply_eta (σ : Gal(L/F)) :
   rw [algebraMap.smul', AlgEquiv.smul_def, ← IsScalarTower.algebraMap_apply,
     IsScalarTower.algebraMap_apply (𝓞 K) K L]
   exact (AlgEquiv.restrictNormalHom_apply K (AlgEquiv.restrictScalars ℚ σ) η).symm
+
+include hη in
+set_option backward.isDefEq.respectTransparency false in
+theorem galLFEquiv_apply_of_pow_eq_one (σ : Gal(L/F)) {x : 𝓞 L} (hx : x ^ (p ^ f - 1) = 1) :
+    σ • x = x ^ (galFEquiv p f K σ).val.val := by
+  obtain ⟨a, -, rfl⟩ :=
+    (hη.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 L))).eq_pow_of_pow_eq_one hx
+  rw [smul_pow', galLFEquiv_apply_eta p f hη, pow_right_comm]
 
 include hη in
 theorem galLFEquiv_eq_of_smul_eq_pow (σ : Gal(L/F)) {a : ℕ}
