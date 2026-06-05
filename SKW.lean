@@ -13,3 +13,10 @@ import SKW.Stickelberger.GaussSum
 import SKW.Stickelberger.Stickelberger
 import SKW.Stickelberger.Teichmuller
 import SKW.Stickelberger.valGauss
+import SKW.KroneckerWeber.KummerCriterion
+import SKW.KroneckerWeber.Basic
+import SKW.KroneckerWeber.ClassGroup
+import SKW.KroneckerWeber.Reduction
+import SKW.KroneckerWeber.OddPrimePower
+import SKW.KroneckerWeber.TwoPower
+import SKW.KroneckerWeber.KroneckerWeber
