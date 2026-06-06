@@ -7,7 +7,7 @@ public import Mathlib.NumberTheory.RamificationInertia.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.RingTheory.RootsOfUnity.Basic
 
-public import SKW.KroneckerWeber.KummerCriterion
+public import SKW.Prereqs.KummerExtension
 
 @[expose] public section
 

@@ -5,6 +5,7 @@ import SKW.Prereqs.CyclotomicField
 import SKW.Prereqs.Digits
 import SKW.Prereqs.Ideals
 import SKW.Prereqs.IntermediateFields
+import SKW.Prereqs.KummerExtension
 import SKW.Prereqs.MulChars
 import SKW.Prereqs.NumberTheory
 import SKW.Stickelberger.AddCharTrace
@@ -13,7 +14,6 @@ import SKW.Stickelberger.GaussSum
 import SKW.Stickelberger.Stickelberger
 import SKW.Stickelberger.Teichmuller
 import SKW.Stickelberger.valGauss
-import SKW.KroneckerWeber.KummerCriterion
 import SKW.KroneckerWeber.Basic
 import SKW.KroneckerWeber.ClassGroup
 import SKW.KroneckerWeber.Reduction
