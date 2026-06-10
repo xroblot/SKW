@@ -39,6 +39,7 @@ galEquivZMod_stabilizer'
 emultiplicity_galEquivZMod_symm_smul_gaussSum
 sum_with_mul_inv_mem_eq_sum_range
 GaussSum_factorization
+kw_abelian_kummer
 ramificationIdx_eq_p_sub_one
 zeta_sub_one_not_mem_sq
 gaussSum_one_left

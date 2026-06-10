@@ -1,5 +1,10 @@
 import SKW.Basic
 import SKW.Misc
+import SKW.PRed2Mathlib.AlgebraMisc
+import SKW.PRed2Mathlib.IntermediateFields
+import SKW.PRed2Mathlib.KummerExtension
+import SKW.PRed2Mathlib.MulChars
+import SKW.PRed2Mathlib.NumberTheory
 import SKW.Prereqs.AlgebraMisc
 import SKW.Prereqs.CyclotomicField
 import SKW.Prereqs.Digits
@@ -7,6 +12,7 @@ import SKW.Prereqs.Ideals
 import SKW.Prereqs.IntermediateFields
 import SKW.Prereqs.KummerExtension
 import SKW.Prereqs.MulChars
+import SKW.Prereqs.Normal
 import SKW.Prereqs.NumberTheory
 import SKW.Stickelberger.AddCharTrace
 import SKW.Stickelberger.Factorization

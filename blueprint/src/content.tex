@@ -1148,17 +1148,18 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
 \begin{lemma}
   \label{lem:kw_abelian_kummer}
-  \uses{lem:kummer_abelian_criterion}
-  The Kummer extension $L = F(\sqrt[p]{\mu})$ is abelian over $\QQ$ if
-  and only if for every $\sigma_a \in \Gal(F/\QQ)$ there exists
-  $\xi \in F^\times$ such that $\sigma_a(\mu) = \xi^p \mu^a$.
+  \lean{kw_abelian_kummer}
+  Since $L/\QQ$ is Galois, for every $\sigma_a \in \Gal(F/\QQ)$ there exists
+  $\xi \in F^\times$ and $a \in \ZZ$ such that $\sigma_a(\mu) = \xi^p \mu^a$.
 \end{lemma}
 
 \begin{proof}
+  This is the backward direction of \texttt{isGalois\_iff\_forall\_apply\_eq\_pow\_mul\_zpow}:
+  since $L/\QQ$ is Galois (which holds because $L = KF$ is the compositum of
+  the abelian extensions $K/\QQ$ and $F/\QQ$), the criterion gives the
+  required $\xi$ and $a$ for every $\sigma_a \in \Gal(F/\QQ)$.
 \end{proof}
 
-% This is a general result on Kummer extensions; see Washington, Lemma 14.7
-% or Hilbert, Satz 147. Moved to auxiliary results chapter; proof to be added later.
 
 \begin{lemma}
   \label{lem:kw_split_prime}
@@ -1291,22 +1292,6 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \chapter{Auxiliary results}
 
 
-\begin{lemma}
-  \label{lem:kummer_abelian_criterion}
-  Let $F$ be a number field containing $\mu_p$, let $\mu \in F^\times$, and
-  let $L = F(\sqrt[p]{\mu})$. Let $G_0 \leq \Gal(F/\QQ)$ be a subgroup.
-  Then $L/\QQ$ is Galois with $\Gal(L/\QQ)$ extending $G_0$ if and only if
-  for every $\sigma \in G_0$ there exists $\xi \in F^\times$ such that
-  $\sigma(\mu) = \xi^p \mu^{a(\sigma)}$ for some $a(\sigma) \in \ZZ$.
-  In particular, $L/\QQ$ is abelian if and only if for every
-  $\sigma_a \in \Gal(F/\QQ)$ there exists $\xi \in F^\times$ such that
-  $\sigma_a(\mu) = \xi^p \mu^a$.
-\end{lemma}
-
-\begin{proof}
-\end{proof}
-
-% See Washington, Lemma 14.7 or Hilbert, Satz 147.
 
 \begin{lemma}
   \label{lem:ramificationIdx_eq_p_sub_one}

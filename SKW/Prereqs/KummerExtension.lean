@@ -3,30 +3,12 @@ module
 public import Mathlib.FieldTheory.KummerExtension
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 public import Mathlib.GroupTheory.QuotientGroup.Basic
-public import Mathlib.RingTheory.Adjoin.PowerBasis
+public import SKW.Prereqs.Normal
+public import SKW.PRed2Mathlib.KummerExtension
 
 @[expose] public section
 
 open IntermediateField
-/-- Version of `PowerBasis.ofAdjoinEqTop` for `IntermediateField.adjoin`. -/
-noncomputable def PowerBasis.ofAdjoinSimpleEqTop {K : Type*} [Field K] {L : Type*} [Field L]
-    [Algebra K L] {α : L} (h : IsIntegral K α) (hgen : K⟮α⟯ = ⊤) : PowerBasis K L :=
-  PowerBasis.ofAdjoinEqTop h (by
-    have h := IntermediateField.adjoin_simple_toSubalgebra_of_isAlgebraic h.isAlgebraic
-    rw [hgen, IntermediateField.top_toSubalgebra] at h
-    exact h.symm)
-
-@[simp]
-lemma PowerBasis.ofAdjoinSimpleEqTop_gen {K : Type*} [Field K] {L : Type*} [Field L]
-    [Algebra K L] {α : L} (h : IsIntegral K α) (hgen : K⟮α⟯ = ⊤) :
-    (PowerBasis.ofAdjoinSimpleEqTop h hgen).gen = α := by
-  simp [PowerBasis.ofAdjoinSimpleEqTop, PowerBasis.ofAdjoinEqTop_gen]
-
-@[simp]
-lemma PowerBasis.ofAdjoinSimpleEqTop_dim {K : Type*} [Field K] {L : Type*} [Field L]
-    [Algebra K L] {α : L} (h : IsIntegral K α) (hgen : K⟮α⟯ = ⊤) :
-    (PowerBasis.ofAdjoinSimpleEqTop h hgen).dim = (minpoly K α).natDegree := by
-  simp [PowerBasis.ofAdjoinSimpleEqTop, PowerBasis.ofAdjoinEqTop_dim]
 
 /-!
 # Generalizations of Mathlib.FieldTheory.KummerExtension
@@ -35,45 +17,62 @@ This file contains lemmas that generalize or complement results in Mathlib's
 `KummerExtension` file, intended for eventual upstreaming.
 -/
 
-/-- An arbitrary choice of `ⁿ√a` in a field where `Xⁿ - a` splits. Generalizes
-`rootOfSplitsXPowSubC` which requires `IsSplittingField`. -/
-noncomputable def rootOfSplitsXPowSubC' {K : Type*} [Field K] {n : ℕ} (hn : 0 < n) (a : K)
-    {L : Type*} [Field L] [Algebra K L]
-    (h : ((Polynomial.X ^ n - Polynomial.C a).map (algebraMap K L)).Splits) : L :=
-  Polynomial.rootOfSplits h
-    (by simp [Polynomial.degree_X_pow_sub_C hn, hn.ne'])
+-- /-- An arbitrary choice of `ⁿ√a` in a field where `Xⁿ - a` splits. Generalizes
+-- `rootOfSplitsXPowSubC` which requires `IsSplittingField`. -/
+-- noncomputable def rootOfSplitsXPowSubC' {K : Type*} [Field K] {n : ℕ} (hn : 0 < n) (a : K)
+--     {L : Type*} [Field L] [Algebra K L]
+--     (h : ((Polynomial.X ^ n - Polynomial.C a).map (algebraMap K L)).Splits) : L :=
+--   Polynomial.rootOfSplits h
+--     (by simp [Polynomial.degree_X_pow_sub_C hn, hn.ne'])
 
-/-- The `n`-th power of `rootOfSplitsXPowSubC'` equals `algebraMap K L a`. Generalizes
-`rootOfSplitsXPowSubC_pow` which requires `IsSplittingField`. -/
-lemma rootOfSplitsXPowSubC_pow' {K : Type*} [Field K] {n : ℕ} [NeZero n] (a : K)
-    {L : Type*} [Field L] [Algebra K L]
-    (h : ((Polynomial.X ^ n - Polynomial.C a).map (algebraMap K L)).Splits) :
-    rootOfSplitsXPowSubC' (NeZero.pos n) a h ^ n = algebraMap K L a := by
-  have hd : ((Polynomial.X ^ n - Polynomial.C a).map (algebraMap K L)).degree ≠ 0 := by
-    simp [Polynomial.degree_X_pow_sub_C (NeZero.pos n), NeZero.ne n]
-  have := Polynomial.eval_rootOfSplits h hd
-  simp only [rootOfSplitsXPowSubC', Polynomial.eval_map, Polynomial.eval₂_sub,
-    Polynomial.eval₂_X_pow, Polynomial.eval₂_C, sub_eq_zero] at this ⊢
-  exact this
+-- /-- The `n`-th power of `rootOfSplitsXPowSubC'` equals `algebraMap K L a`. Generalizes
+-- `rootOfSplitsXPowSubC_pow` which requires `IsSplittingField`. -/
+-- lemma rootOfSplitsXPowSubC_pow' {K : Type*} [Field K] {n : ℕ} [NeZero n] (a : K)
+--     {L : Type*} [Field L] [Algebra K L]
+--     (h : ((Polynomial.X ^ n - Polynomial.C a).map (algebraMap K L)).Splits) :
+--     rootOfSplitsXPowSubC' (NeZero.pos n) a h ^ n = algebraMap K L a := by
+--   have hd : ((Polynomial.X ^ n - Polynomial.C a).map (algebraMap K L)).degree ≠ 0 := by
+--     simp [Polynomial.degree_X_pow_sub_C (NeZero.pos n), NeZero.ne n]
+--   have := Polynomial.eval_rootOfSplits h hd
+--   simp only [rootOfSplitsXPowSubC', Polynomial.eval_map, Polynomial.eval₂_sub,
+--     Polynomial.eval₂_X_pow, Polynomial.eval₂_C, sub_eq_zero] at this ⊢
+--   exact this
 
-/-- `rootOfSplitsXPowSubC` is a special case of `rootOfSplitsXPowSubC'` when `L` is a
-splitting field. -/
-lemma rootOfSplitsXPowSubC_eq {K : Type*} [Field K] {n : ℕ} (hn : 0 < n) (a : K)
-    (L : Type*) [Field L] [Algebra K L] [Polynomial.IsSplittingField K L
-      (Polynomial.X ^ n - Polynomial.C a)] :
-    rootOfSplitsXPowSubC hn a L =
-      rootOfSplitsXPowSubC' hn a (Polynomial.IsSplittingField.splits L _) := rfl
+-- /-- `rootOfSplitsXPowSubC` is a special case of `rootOfSplitsXPowSubC'` when `L` is a
+-- splitting field. -/
+-- lemma rootOfSplitsXPowSubC_eq {K : Type*} [Field K] {n : ℕ} (hn : 0 < n) (a : K)
+--     (L : Type*) [Field L] [Algebra K L] [Polynomial.IsSplittingField K L
+--       (Polynomial.X ^ n - Polynomial.C a)] :
+--     rootOfSplitsXPowSubC hn a L =
+--       rootOfSplitsXPowSubC' hn a (Polynomial.IsSplittingField.splits L _) := rfl
 
-/-- `rootOfSplitsXPowSubC_pow` is a special case of `rootOfSplitsXPowSubC_pow'` when `L` is a
-splitting field. -/
-lemma rootOfSplitsXPowSubC_pow_eq {K : Type*} [Field K] {n : ℕ} [NeZero n] (a : K)
-    (L : Type*) [Field L] [Algebra K L] [Polynomial.IsSplittingField K L
-      (Polynomial.X ^ n - Polynomial.C a)] :
-    rootOfSplitsXPowSubC (NeZero.pos n) a L ^ n = algebraMap K L a := by
-  rw [rootOfSplitsXPowSubC_eq]
-  exact rootOfSplitsXPowSubC_pow' a _
+-- /-- `rootOfSplitsXPowSubC_pow` is a special case of `rootOfSplitsXPowSubC_pow'` when `L` is a
+-- splitting field. -/
+-- lemma rootOfSplitsXPowSubC_pow_eq {K : Type*} [Field K] {n : ℕ} [NeZero n] (a : K)
+--     (L : Type*) [Field L] [Algebra K L] [Polynomial.IsSplittingField K L
+--       (Polynomial.X ^ n - Polynomial.C a)] :
+--     rootOfSplitsXPowSubC (NeZero.pos n) a L ^ n = algebraMap K L a := by
+--   rw [rootOfSplitsXPowSubC_eq]
+--   exact rootOfSplitsXPowSubC_pow' a _
 
-section
+open Polynomial in
+theorem rootOfSplitsXPowSubC_minpoly {K : Type*} [Field K] {n : ℕ} [NeZero n] (a : K) (L : Type*)
+    [Field L] [Algebra K L] [Polynomial.IsSplittingField K L (X ^ n - C a)]
+    (H : Irreducible (X ^ n - C a)) :
+    minpoly K (rootOfSplitsXPowSubC (NeZero.pos n) a L) = X ^ n - C a := by
+  refine (minpoly.eq_of_irreducible_of_monic H ?_ (monic_X_pow_sub_C _ (NeZero.ne n))).symm
+  rw [aeval_sub, aeval_X_pow, rootOfSplitsXPowSubC_pow, aeval_C, sub_eq_zero]
+
+open Polynomial in
+theorem rootOfSplitsXPowSubC_isIntegral {K : Type*} [Field K] {n : ℕ} [NeZero n] (a : K) (L : Type*)
+    [Field L] [Algebra K L] [Polynomial.IsSplittingField K L (X ^ n - C a)]
+    (H : Irreducible (X ^ n - C a)) :
+    IsIntegral K (rootOfSplitsXPowSubC (NeZero.pos n) a L) := by
+  sorry
+  -- refine (minpoly.eq_of_irreducible_of_monic H ?_ (monic_X_pow_sub_C _ (NeZero.ne n))).symm
+  -- rw [aeval_sub, aeval_X_pow, rootOfSplitsXPowSubC_pow, aeval_C, sub_eq_zero]
+
+  section
 
 open Polynomial IntermediateField
 
@@ -89,23 +88,25 @@ lemma IsPrimitiveRoot.eq_pow_mul_of_pow_eq {R : Type*} [CommRing R] [IsDomain R]
   exact ⟨j, hj, rfl⟩
 
 /-- Kummer group characterization: let `K` be a field with a primitive `n`-th root of unity `ζ`,
-`a ∈ K×` with `X ^ n - a` irreducible, `α` a root of `X ^ n - a` in `L = K(α)`, and
+`a ∈ Kˣ` with `X ^ n - a` irreducible, `α` a root of `X ^ n - a` in `L = K(α)`, and
 `σ ∈ Gal(L/K)` the automorphism defined by `σ(α) = ζ * α`.
-If `β ∈ L` satisfies `β ^ n ∈ K×`, then `β = λ * α ^ j` for some `λ ∈ K` and `j < n`.
-
-Proof: `σ(β)^n = β^n` (as `β^n ∈ K`), so `σ(β) = ζ^j * β` for some `j` (primitivity of `ζ`).
-Writing `β = Σ k_i α^i` in the basis `{1, α, ..., α^{n-1}}`, comparing `σ(β) = Σ k_i ζ^i α^i`
-with `ζ^j * β = Σ k_i ζ^j α^i` and using linear independence gives `k_i = 0` for `i ≠ j`. -/
+If `β ∈ L` satisfies `β ^ n ∈ Kˣ`, then `β = λ * α ^ j` for some `λ ∈ K` and `j < n`. -/
 theorem exists_eq_algebraMap_mul_pow_of_pow_eq_algebraMap {K : Type*} [Field K] {n : ℕ} [NeZero n]
-    {ζ : K} (hζ : IsPrimitiveRoot ζ n) {L : Type*} [Field L] [Algebra K L] {a : K}
+    (hK : (primitiveRoots n K).Nonempty) {L : Type*} [Field L] [Algebra K L] {a : K}
     (hIrr : Irreducible (X ^ n - C a)) [IsSplittingField K L (X ^ n - C a)] {α : L}
-    (hα : α ^ n = algebraMap K L a) (hgen : K⟮α⟯ = ⊤) {σ : L ≃ₐ[K] L} (hσ : σ α = algebraMap K L ζ * α)
-    {β : L} {b : K} (hβ : β ^ n = algebraMap K L b) :
+    (hα : α ^ n = algebraMap K L a) {β : L} {b : K} (hβ : β ^ n = algebraMap K L b) :
     ∃ (c : K) (j : ℕ), j < n ∧ β = algebraMap K L c * α ^ j := by
   classical
   have hmp : minpoly K α = X ^ n - C a :=
     (minpoly.eq_of_irreducible_of_monic hIrr (by simp [hα]) (monic_X_pow_sub_C a (NeZero.ne n))).symm
   have hint : IsIntegral K α := ⟨X ^ n - C a, monic_X_pow_sub_C a (NeZero.ne n), hmp ▸ minpoly.aeval K α⟩
+  have hgen : K⟮α⟯ = ⊤ := adjoin_root_eq_top_of_isSplittingField hK hIrr hα
+  obtain ⟨ζ, hζ⟩ := hK
+  replace hζ : IsPrimitiveRoot ζ n := isPrimitiveRoot_of_mem_primitiveRoots hζ
+  let σ := (autEquivZmod hIrr L hζ).symm (Multiplicative.ofAdd 1)
+  have hσ : σ α = algebraMap K L ζ * α := by
+    have := autEquivZmod_symm_apply_natCast hIrr L hα hζ 1
+    rwa [pow_one, Algebra.smul_def, Nat.cast_one] at this
   have hζL : IsPrimitiveRoot (algebraMap K L ζ) n := hζ.map_of_injective (algebraMap K L).injective
   have hσβn : (σ β) ^ n = β ^ n := by rw [← map_pow, hβ, AlgEquiv.commutes]
   obtain ⟨j, hj, hσβ⟩ := hζL.eq_pow_mul_of_pow_eq hσβn
@@ -132,25 +133,71 @@ theorem exists_eq_algebraMap_mul_pow_of_pow_eq_algebraMap {K : Type*} [Field K] 
   simp +contextual [j₀, this, Algebra.smul_def, B]
 
 variable {F : Type*} [Field F] {n : ℕ} [NeZero n] {K : Type*} [Field K] [Algebra K F]
-  [IsGalois K F] {μ : F} {Ω : Type*} [Field Ω] [Algebra F Ω] [Algebra K Ω] [IsScalarTower K F Ω]
+  [IsGalois K F] {μ : F} {L : Type*} [Field L] [Algebra F L] [Algebra K L] [IsScalarTower K F L]
 
-/-- A Kummer extension `Ω = F(ⁿ√μ)` (with `X ^ n - μ` irreducible over `F` and `char(F) ∤ n`)
+/-- A Kummer extension `L = F(ⁿ√μ)` (with `X ^ n - μ` irreducible over `F` and `¬ char(F) ∣ n`)
 is Galois over `K` if and only if for every `σ ∈ Gal(F/K)` there exist `ξ ∈ F` and `a : ℤ`
-such that `σ(μ) = ξⁿ * μ^a`. -/
+such that `σ(μ) = ξ ^ n * μ ^ a`. -/
 lemma isGalois_iff_forall_apply_eq_pow_mul_zpow (hμ : μ ≠ 0) (hn : (n : F) ≠ 0)
-    (hF : (primitiveRoots n F).Nonempty) (hIrr : Irreducible (X ^ n - C μ))
-    (hΩ : IsSplittingField F Ω (X ^ n - C μ)) :
-    (∀ σ : F ≃ₐ[K] F, ∃ (ξ : F) (a : ℤ), σ μ = ξ ^ n * μ ^ a) ↔ IsGalois K Ω := by
-  refine ⟨fun h ↦ ?_, ?_⟩
-  ·
-    sorry
-  · intro h σ
-    let τ := σ.liftNormal Ω
-    let α := rootOfSplitsXPowSubC (NeZero.pos n) μ Ω
-    have hα : α ^ n = algebraMap F Ω μ := rootOfSplitsXPowSubC_pow μ Ω
-    have := congr_arg τ hα
-    rw [AlgEquiv.liftNormal_commutes, map_pow] at this
-    sorry
+    [FiniteDimensional K F] (hF : (primitiveRoots n F).Nonempty) (hIrr : Irreducible (X ^ n - C μ))
+    (hL : IsSplittingField F L (X ^ n - C μ)) :
+    (∀ σ : F ≃ₐ[K] F, ∃ (ξ : F) (a : ℕ), σ μ = ξ ^ n * μ ^ a) ↔ IsGalois K L := by
+  let α := rootOfSplitsXPowSubC (NeZero.pos n) μ L
+  have hα : α ^ n = algebraMap F L μ := rootOfSplitsXPowSubC_pow μ L
+  refine ⟨fun h ↦ ?_, fun h σ ↦ ?_⟩
+  · refine { to_isSeparable := ?_, to_normal := ?_ }
+    · have : Algebra.IsSeparable F L :=
+        Algebra.isSeparable_of_separable_splitting_field (separable_X_pow_sub_C μ hn hμ)
+      exact Algebra.IsSeparable.trans K F L
+    · obtain ⟨θ, hθ⟩ := Field.exists_primitive_element K F
+      have : adjoin K {algebraMap F L θ, α} = ⊤ := by
+        rw [← Set.singleton_union, adjoin_union, ← Set.image_singleton, ← IsScalarTower.coe_toAlgHom' K,
+          ← adjoin_map, hθ, ← AlgHom.fieldRange_eq_map, ← restrictScalars_adjoin_eq_sup,
+          IsScalarTower.adjoin_range_toAlgHom']
+        exact congr_arg (restrictScalars K ·) <| adjoin_root_eq_top_of_isSplittingField hF hIrr hα
+      refine Normal.of_adjoin_eq_top this fun x hx ↦ ?_
+      obtain rfl | rfl := hx
+      · refine ⟨(Algebra.IsIntegral.isIntegral θ).algebraMap, ?_⟩
+        rw [minpoly.algebraMap_eq (FaithfulSMul.algebraMap_injective F L) θ,
+          IsScalarTower.algebraMap_eq K F L, ← Polynomial.map_map]
+        exact Polynomial.Splits.map  (IsGalois.splits K θ) _
+      · refine ⟨?_, ?_⟩
+        · have : FiniteDimensional K L := by
+            have : FiniteDimensional F L := IsSplittingField.finiteDimensional L (X ^ n - C μ)
+            exact FiniteDimensional.trans K F L
+          exact Algebra.IsIntegral.isIntegral α
+        · rw [IsScalarTower.algebraMap_eq K F, ← Polynomial.map_map]
+          have := map_dvd (algebraMap F L) <| IsGalois.map_minpoly_dvd_prod_minpoly K F α
+          refine Polynomial.Splits.of_dvd ?_ ?_ this
+          -- have := toto (F := K) (α := α) (E := L) (K := F)
+          -- rw [toto]
+          · have := rootOfSplitsXPowSubC_minpoly μ L hIrr
+            rw [this]
+            simp
+            rw [Polynomial.map_prod]
+            apply Polynomial.Splits.prod
+            intro σ _
+            obtain ⟨ξ, a, h⟩ := h σ
+            rw [h]
+            simp only [Polynomial.map_sub, Polynomial.map_pow, map_X, map_C]
+            obtain ⟨ζ₀, hζ₀⟩ := hF
+            let ζ : L := algebraMap F L ζ₀
+            have hζ : IsPrimitiveRoot ζ n :=
+              (isPrimitiveRoot_of_mem_primitiveRoots hζ₀).map_of_injective
+                (FaithfulSMul.algebraMap_injective F L)
+            refine X_pow_sub_C_splits_of_isPrimitiveRoot (α := (algebraMap F L) ξ * α ^ a) hζ ?_
+            rw [map_mul, map_pow, map_pow, ← hα, pow_right_comm, ← mul_pow]
+          · simp_rw [Polynomial.map_prod, Polynomial.map_map]
+            refine Finset.prod_ne_zero_iff.mpr fun _ _ ↦ ?_
+            refine Polynomial.map_ne_zero ?_
+            refine minpoly.ne_zero ?_
+            exact rootOfSplitsXPowSubC_isIntegral μ L hIrr
+  · have hτα := congr_arg (σ.liftNormal L) hα
+    rw [AlgEquiv.liftNormal_commutes, map_pow] at hτα
+    obtain ⟨ξ, j, _, hj⟩ := exists_eq_algebraMap_mul_pow_of_pow_eq_algebraMap hF hIrr hα hτα
+    refine ⟨ξ, j, ?_⟩
+    apply FaithfulSMul.algebraMap_injective F L
+    rw [← hτα, hj, mul_pow, map_mul, map_pow, pow_right_comm, hα, map_pow]
 
 end
 

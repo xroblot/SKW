@@ -3,29 +3,11 @@ module
 public import Mathlib.FieldTheory.LinearDisjoint
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 
+public import SKW.PRed2Mathlib.IntermediateFields
+
 @[expose] public section
 
 /-! ### Intermediate Fields -/
-
-open Module in
-/-- If `F ≤ E` are two intermediate fields of a finite extension `L / K`,
-then `F = E` iff [F : K] = [E : K]`. -/
-theorem IntermediateField.eq_of_le_iff_finrank_eq {K L : Type*} [Field K] [Field L] [Algebra K L]
-    {F E : IntermediateField K L} [FiniteDimensional K L] (h_le : F ≤ E) :
-    F = E ↔ finrank K F = finrank K E := by
-  refine ⟨fun h ↦ ?_, fun h ↦ eq_of_le_of_finrank_eq h_le h⟩
-  have := (finrank_mul_finrank K F L).trans (finrank_mul_finrank K E L).symm
-  rwa [show finrank F L = finrank E L by rw [h], mul_left_inj' finrank_pos.ne'] at this
-
-open Module in
-/-- If `F ≤ E` are two intermediate fields of a finite extension `L / K`,
-then `F = E` iff [L : F] = [L : E]`. -/
-theorem IntermediateField.eq_of_le_iff_finrank_eq' {K L : Type*} [Field K] [Field L] [Algebra K L]
-    {F E : IntermediateField K L} [FiniteDimensional K L] (h_le : F ≤ E) :
-    F = E ↔ finrank F L = finrank E L := by
-  refine ⟨fun h ↦ ?_, fun h ↦ eq_of_le_of_finrank_eq' h_le h⟩
-  have := (finrank_mul_finrank K F L).trans (finrank_mul_finrank K E L).symm
-  rwa [show finrank K F = finrank K E by rw [h], mul_right_inj' finrank_pos.ne'] at this
 
 open Module in
 lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Field E] [Algebra F E]
