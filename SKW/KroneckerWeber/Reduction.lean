@@ -5,6 +5,9 @@ public import Mathlib.NumberTheory.NumberField.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Basic
 public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
 public import Mathlib.FieldTheory.Galois.Basic
+public import Mathlib.FieldTheory.Galois.IsGaloisGroup
+
+public import SKW.Prereqs.AlgebraMisc
 
 @[expose] public section
 
@@ -25,23 +28,28 @@ This file establishes the reduction steps that allow us to prove Kronecker-Weber
    unramified outside `p`.
 -/
 
-open NumberField Ideal Pointwise
+open NumberField Ideal Pointwise Module
 
 noncomputable section
 
 variable {p : ℕ} [hp : Fact p.Prime]
 
 /-- Two cyclic `p`-extensions of `ℚ` whose compositum is cyclic must be comparable. -/
-lemma kw_cyclic_compositum
-    (K K' : Type*) [Field K] [Field K'] [NumberField K] [NumberField K']
-    [IsGalois ℚ K] [IsGalois ℚ K'] [IsCyclic (K ≃ₐ[ℚ] K)] [IsCyclic (K' ≃ₐ[ℚ] K')]
-    (hK : ∃ n : ℕ, 0 < n ∧ Module.finrank ℚ K = p ^ n)
-    (hK' : ∃ n : ℕ, 0 < n ∧ Module.finrank ℚ K' = p ^ n)
-    (L : Type*) [Field L] [NumberField L] [Algebra ℚ L] [Algebra K L] [Algebra K' L]
-    [IsScalarTower ℚ K L] [IsScalarTower ℚ K' L]
-    [IsGalois ℚ L] [IsCyclic (L ≃ₐ[ℚ] L)] :
-    Nonempty (K →ₐ[ℚ] K') ∨ Nonempty (K' →ₐ[ℚ] K) := by
-  sorry
+lemma kw_cyclic_compositum (L : Type*) [Field L] [NumberField L] (K K' : IntermediateField ℚ L)
+    (h : finrank ℚ K ∣ finrank ℚ K') [IsGalois ℚ L] [hCL : IsCyclic (L ≃ₐ[ℚ] L)] :
+    K ≤ K' := by
+  rw [← IsGaloisGroup.fixedPoints_fixingSubgroup Gal(L/ℚ) ℚ L K,
+    ← IsGaloisGroup.fixedPoints_fixingSubgroup Gal(L/ℚ) ℚ L K']
+  apply IsGaloisGroup.fixedPoints_le_of_le
+  rw [IsCyclic.subgroup_le_subgroup_iff, IsGaloisGroup.card_fixingSubgroup_eq_finrank,
+    IsGaloisGroup.card_fixingSubgroup_eq_finrank]
+  have hd : finrank ℚ K ∣ finrank ℚ L := finrank_mul_finrank ℚ K L ▸ dvd_mul_right _ _
+  have hd' : finrank ℚ K' ∣ finrank ℚ L := finrank_mul_finrank ℚ K' L ▸ dvd_mul_right _ _
+  have he : finrank K L = finrank ℚ L / finrank ℚ K :=
+    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
+  have he' : finrank K' L = finrank ℚ L / finrank ℚ K' :=
+    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
+  rwa [he, he', Nat.dvd_div_dvd_iff finrank_pos finrank_pos hd' hd]
 
 /-- Every non-trivial extension of `ℚ` is ramified at some finite prime (Minkowski). -/
 lemma kw_minkowski

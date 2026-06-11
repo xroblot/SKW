@@ -68,9 +68,8 @@ theorem rootOfSplitsXPowSubC_isIntegral {K : Type*} [Field K] {n : ℕ} [NeZero 
     [Field L] [Algebra K L] [Polynomial.IsSplittingField K L (X ^ n - C a)]
     (H : Irreducible (X ^ n - C a)) :
     IsIntegral K (rootOfSplitsXPowSubC (NeZero.pos n) a L) := by
-  sorry
-  -- refine (minpoly.eq_of_irreducible_of_monic H ?_ (monic_X_pow_sub_C _ (NeZero.ne n))).symm
-  -- rw [aeval_sub, aeval_X_pow, rootOfSplitsXPowSubC_pow, aeval_C, sub_eq_zero]
+  rw [← minpoly.ne_zero_iff, rootOfSplitsXPowSubC_minpoly _ _ H]
+  exact Irreducible.ne_zero H
 
   section
 
@@ -169,8 +168,6 @@ lemma isGalois_iff_forall_apply_eq_pow_mul_zpow (hμ : μ ≠ 0) (hn : (n : F) �
         · rw [IsScalarTower.algebraMap_eq K F, ← Polynomial.map_map]
           have := map_dvd (algebraMap F L) <| IsGalois.map_minpoly_dvd_prod_minpoly K F α
           refine Polynomial.Splits.of_dvd ?_ ?_ this
-          -- have := toto (F := K) (α := α) (E := L) (K := F)
-          -- rw [toto]
           · have := rootOfSplitsXPowSubC_minpoly μ L hIrr
             rw [this]
             simp

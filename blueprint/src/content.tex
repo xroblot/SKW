@@ -1011,14 +1011,19 @@ The goal of this chapter is to prove the following theorem.
 
 \begin{lemma}
   \label{lem:kw_cyclic_compositum}
-  If $K$ and $K'$ are two cyclic $p$-extensions of $\QQ$ and their
-  compositum $KK'$ is cyclic, then $K \subseteq K'$ or $K' \subseteq K$.
+  \lean{kw_cyclic_compositum}
+  \leanok
+  Let $L/\QQ$ be a Galois extension with cyclic Galois group, and let
+  $K, K'$ be intermediate fields with $[K:\QQ] \mid [K':\QQ]$. Then
+  $K \subseteq K'$.
 \end{lemma}
 
 \begin{proof}
-  If $K \not\subseteq K'$ and $K' \not\subseteq K$, then $KK'$ contains
-  a subgroup isomorphic to $(\ZZ/p\ZZ)^2$, contradicting the assumption
-  that $\Gal(KK'/\QQ)$ is cyclic.
+  Via the Galois correspondence, $K \subseteq K'$ is equivalent to
+  $\mathrm{Fix}(K') \leq \mathrm{Fix}(K)$ in $\Gal(L/\QQ)$. In a cyclic
+  group, the subgroup lattice is totally ordered by divisibility of indices,
+  and $[\Gal(L/\QQ) : \mathrm{Fix}(K)] = [K:\QQ]$ divides
+  $[\Gal(L/\QQ) : \mathrm{Fix}(K')] = [K':\QQ]$, so $\mathrm{Fix}(K') \leq \mathrm{Fix}(K)$.
 \end{proof}
 
 \begin{lemma}
@@ -1149,6 +1154,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \begin{lemma}
   \label{lem:kw_abelian_kummer}
   \lean{kw_abelian_kummer}
+  \leanok
   Since $L/\QQ$ is Galois, for every $\sigma_a \in \Gal(F/\QQ)$ there exists
   $\xi \in F^\times$ and $a \in \ZZ$ such that $\sigma_a(\mu) = \xi^p \mu^a$.
 \end{lemma}

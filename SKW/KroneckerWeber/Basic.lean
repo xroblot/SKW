@@ -6,6 +6,7 @@ public import Mathlib.NumberTheory.NumberField.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.RingTheory.RootsOfUnity.Basic
+public import Mathlib.NumberTheory.Cyclotomic.PrimitiveRoots
 
 public import SKW.Prereqs.KummerExtension
 
@@ -32,9 +33,8 @@ noncomputable section
 variable (p : ℕ) [hp : Fact p.Prime]
 variable (F : Type*) [Field F] [NumberField F] [IsCyclotomicExtension {p} ℚ F]
 variable (K : Type*) [Field K] [NumberField K] [IsGalois ℚ K] [IsCyclic (K ≃ₐ[ℚ] K)]
-variable (L : Type*) [Field L] [NumberField L]
-  [Algebra ℚ L] [Algebra F L] [Algebra K L]
-  [IsScalarTower ℚ F L] [IsScalarTower ℚ K L] [IsGalois ℚ L]
+variable (L : Type*) [Field L] [Algebra ℚ L] [Algebra F L] [Algebra K L]
+  [IsScalarTower ℚ F L] [IsScalarTower ℚ K L] [hQL : IsGalois ℚ L]
 
 /-- `K/ℚ` is unramified outside `p`: every prime `q ≠ p` has ramification index 1 in `K`. -/
 def UnramifiedOutside (K : Type*) [Field K] [NumberField K] (p : ℕ) : Prop :=
@@ -44,21 +44,30 @@ def UnramifiedOutside (K : Type*) [Field K] [NumberField K] (p : ℕ) : Prop :=
 
 /-- `L/F` is a Kummer extension: there exists `μ ∈ 𝓞_F` such that `L = F(ᵖ√μ)` and `L/F`
 is unramified outside `p`. -/
-lemma kw_kummer
-    (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
+lemma kw_kummer [NumberField L] (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
     ∃ μ : 𝓞 F, μ ≠ 0 ∧
       IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ)) ∧
       UnramifiedOutside L p := by
   sorry
 
-variable {μ : 𝓞 F} (hμ : μ ≠ 0)
-  (hL : IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ)))
+variable {μ : 𝓞 F} (hμ : μ ≠ 0) (hL : IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ)))
 
+include hμ hL in
 /-- The abelianity criterion for the Kummer extension `L = F(ᵖ√μ)` over `ℚ`. -/
 lemma kw_abelian_kummer :
-    ∀ σ : F ≃ₐ[ℚ] F, ∃ (ξ : F) (a : ℤ),
+    ∀ σ : F ≃ₐ[ℚ] F, ∃ (ξ : F) (a : ℕ),
       σ (algebraMap (𝓞 F) F μ) = ξ ^ p * (algebraMap (𝓞 F) F μ) ^ a := by
-  sorry
+  by_cases hμ' : ∀ (b : F), b ^ p ≠ (algebraMap (𝓞 F) F) μ
+  · have : IsGalois ℚ F := IsCyclotomicExtension.isGalois {p} ℚ F
+    have hIrr := X_pow_sub_C_irreducible_of_prime hp.out hμ'
+    have hF : (primitiveRoots p F).Nonempty := ⟨IsCyclotomicExtension.zeta p ℚ F,
+        (mem_primitiveRoots (NeZero.pos p)).mpr <| IsCyclotomicExtension.zeta_spec p ℚ F⟩
+    exact (isGalois_iff_forall_apply_eq_pow_mul_zpow (n := p) (F := F)
+      (RingOfIntegers.coe_ne_zero_iff.mpr hμ) (Nat.cast_ne_zero.mpr (NeZero.ne p)) hF
+        hIrr hL).mpr hQL
+  · simp only [ne_eq, not_forall, not_not] at hμ'
+    obtain ⟨ν, hν⟩ := hμ'
+    exact fun _ ↦ ⟨_, 0, by rw [← hν, pow_zero, mul_one, map_pow]⟩
 
 /-- If `𝔮` is a prime of `𝓞_F` with `p ∤ v_𝔮(μ)` and `L/ℚ` is abelian, then `𝔮` splits
 completely in `F/ℚ`: every `σ ∈ Gal(F/ℚ)` with `σ • 𝔮 = 𝔮` is the identity. -/
