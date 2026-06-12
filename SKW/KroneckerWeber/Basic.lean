@@ -34,7 +34,7 @@ variable (K : IntermediateField ℚ L)
 /-- `K/ℚ` is unramified outside `p`: every prime `q ≠ p` has ramification index 1 in `K`. -/
 def UnramifiedOutside (K : Type*) [Field K] (p : ℕ) : Prop :=
   ∀ (q : ℕ), q.Prime → q ≠ p →
-    ∀ 𝔮 : Ideal (𝓞 K), 𝔮.IsMaximal → [𝔮.LiesOver (span {(q : ℤ)})] →
+    ∀ 𝔮 : Ideal (𝓞 K), [𝔮.IsMaximal] → [𝔮.LiesOver (span {(q : ℤ)})] →
       Ideal.ramificationIdx (span {(q : ℤ)}) 𝔮 = 1
 
 set_option backward.isDefEq.respectTransparency false in
@@ -65,7 +65,8 @@ lemma kw_kummer' (hKram : UnramifiedOutside K p) (htop : K ⊔ F = ⊤) :
   have := Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 F) 𝔮) (span {(q : ℤ)})
   refine Ideal.ramificationIdx_sup_eq_one htop (p := span {(q : ℤ)})
     (P₁ := under (𝓞 K) 𝔮) (P₂ := under (𝓞 F) 𝔮) ?_ ?_ (by simpa using hq.ne_zero)
-  · exact hKram q hq hqp (under (𝓞 K) 𝔮) (IsMaximal.under (𝓞 K) 𝔮)
+  · have := IsMaximal.under (𝓞 K) 𝔮
+    exact hKram q hq hqp (under (𝓞 K) 𝔮)
   · have : Fact q.Prime := ⟨hq⟩
     have : ¬ q ∣ p := by rwa [Nat.prime_dvd_prime_iff_eq hq hp.out]
     exact Rat.ramificationIdx_eq_of_not_dvd q F (under (𝓞 F) 𝔮) this
@@ -103,11 +104,34 @@ lemma kw_kummer [IsGalois ℚ K] (hK : Module.finrank ℚ K = p) :
       ← pow_succ, hx₁, Nat.sub_add_cancel finrank_pos, mul_pow]
 
 variable [hQL : IsAbelianGalois ℚ L] {μ : 𝓞 F} (hμ : μ ≠ 0)
-  (hL : IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ)))
+  [IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ))]
   (hIrr:  Irreducible (X ^ p - C ((algebraMap (𝓞 F) F) μ)))
 
-include hL hIrr hrF in
+omit hCF hQL [IsGalois F L] in
+include hrF hIrr in
+lemma exists_pth_root :
+    ∃ (α : 𝓞 L), α ≠ 0 ∧ algebraMap (𝓞 F) (𝓞 L) μ = α ^ p := by
+  have hF : (primitiveRoots p F).Nonempty := primitiveRoots_nonempty p ℚ F
+  have hβ := rootOfSplitsXPowSubC_pow (n := p) (algebraMap (𝓞 F) F μ) L
+  obtain ⟨α, hα⟩ : ∃ α : 𝓞 L, (rootOfSplitsXPowSubC (NeZero.pos p) (μ : F) L) =
+      algebraMap (𝓞 L) L α := by
+    refine ⟨⟨rootOfSplitsXPowSubC (NeZero.pos p) (μ : F) L, ?_⟩, rfl⟩
+    rw [mem_integralClosure_iff, ← IsIntegral.pow_iff (NeZero.pos p)]
+    rw [hβ, ← IsScalarTower.algebraMap_apply]
+    exact (isIntegral_algebraMap_iff (FaithfulSMul.algebraMap_injective _ _)).mpr <|
+      RingOfIntegers.isIntegral μ
+  refine ⟨α, ?_, ?_⟩
+  · have := adjoin_root_eq_top_of_isSplittingField hF hIrr hβ
+    contrapose! this
+    rw [hα, this, map_zero, adjoin_zero, Ne.eq_def, bot_eq_top_iff_finrank_eq_one, hrF]
+    exact hp.out.ne_one
+  · apply FaithfulSMul.algebraMap_injective (𝓞 L) L
+    rw [map_pow, ← hα, rootOfSplitsXPowSubC_pow, ← IsScalarTower.algebraMap_apply,
+      ← IsScalarTower.algebraMap_apply]
+
+include hIrr hrF in
 /-- The abelianity criterion for the Kummer extension `L = F(ᵖ√μ)` over `ℚ`. -/
+-- FIXME: see if exists_pth_root can help
 lemma kw_abelian_kummer (σ : F ≃ₐ[ℚ] F) :
     ∃ (ξ : F), ξ ≠ 0 ∧ σ (algebraMap (𝓞 F) F μ) = ξ ^ p * μ ^ (Rat.galEquivZMod p F σ).val.val := by
   have : IsGalois ℚ F := isGalois {p} ℚ F
@@ -149,14 +173,14 @@ lemma kw_abelian_kummer (σ : F ≃ₐ[ℚ] F) :
 
 variable [IsGalois ℚ K] [IsCyclic (K ≃ₐ[ℚ] K)]
 
-include hμ hL hrF hIrr in
+include hμ hrF hIrr in
 /-- If `𝔮` is a prime ideal of `𝓞_F` with `p ∤ v_𝔮(μ)` and `L/ℚ` is abelian, then `𝔮` splits
 completely in `F/ℚ`: every `σ ∈ Gal(F/ℚ)` with `σ • 𝔮 = 𝔮` is the identity. -/
-lemma kw_split_prime (𝔮 : Ideal (𝓞 F)) (h𝔮 : Prime 𝔮) (hv : ¬ p ∣ multiplicity 𝔮 (span {(μ : 𝓞 F)}))
-    (σ : F ≃ₐ[ℚ] F) (hσ : σ • 𝔮 = 𝔮) :
+lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮) (hv : ¬ p ∣ multiplicity 𝔮 (span {(μ : 𝓞 F)}))
+    {σ : Gal(F/ℚ)} (hσ : σ • 𝔮 = 𝔮) :
     σ = 1 := by
   obtain ⟨𝔞, h𝔞⟩ := pow_multiplicity_dvd 𝔮 (span {(μ : 𝓞 F)})
-  obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p L F hrF hL hIrr σ
+  obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p L F hrF hIrr σ
   obtain ⟨d, hd₀, ⟨β, hβ⟩⟩ := exists_integer_multiple ξ
   have hβ₀ : β ≠ 0 := by
     by_contra!
@@ -208,14 +232,48 @@ lemma kw_split_prime (𝔮 : Ideal (𝓞 F)) (h𝔮 : Prime 𝔮) (hv : ¬ p ∣
       · exact FiniteMultiplicity.pow h𝔮 hf𝔮
       · exact FiniteMultiplicity.of_prime_left h𝔮 hσ𝔞₀
 
+attribute [local instance] Ideal.Quotient.field
+
+ omit [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)] in
+include hrF hIrr hμ in
 /-- For every prime `𝔮` of `𝓞_F`, `p ∣ v_𝔮(μ)`. -/
-lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] :
-    (p : ℕ) ∣ multiplicity 𝔮 (span {(μ : 𝓞 F)}) := by
+lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOutside L p) (hp' : Odd p) :
+    p ∣ multiplicity 𝔮 (span {μ}) := by
   let q := absNorm (under ℤ 𝔮)
-  by_cases hpq : p = q
-  · 
-    sorry
-  · sorry
+  have : 𝔮.LiesOver (span {(q : ℤ)}) := Int.liesOver_span_absNorm 𝔮
+  have h𝔮 : Prime 𝔮 := IsDedekindDomain.prime_of_maximal 𝔮
+  have hq : Fact q.Prime := ⟨Nat.absNorm_under_prime 𝔮⟩
+  by_cases hqp : q = p
+  · obtain ⟨σ, hσ, hσ'⟩ : ∃ σ : Gal(F/ℚ), σ • 𝔮 = 𝔮 ∧ σ ≠ 1 := by
+      have : 𝔮.LiesOver (span {(p : ℤ)}) := hqp ▸ Int.liesOver_span_absNorm 𝔮
+      have : IsGalois ℚ F := isGalois {p} ℚ F
+      have : Nontrivial (MulAction.stabilizer Gal(F/ℚ) 𝔮) := by
+        rw [← Finite.one_lt_card_iff_nontrivial, card_stabilizer_eq (span {(p : ℤ)})
+          (by simpa using hp.out.ne_zero) 𝔮, Rat.ramificationIdxIn_eq_of_prime,
+          Rat.inertiaDegIn_eq_of_prime, mul_one]
+        exact Nat.lt_sub_of_add_lt <| (Nat.Prime.odd_iff hp.out).mp hp'
+      rwa [Subgroup.nontrivial_iff_exists_ne_one] at this
+    contrapose! hσ'
+    exact kw_split_prime p L F hrF hμ hIrr h𝔮 hσ' hσ
+  · obtain ⟨𝔔, _, _⟩  := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔮
+    have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
+    have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
+    have h𝔔' : 𝔮.ramificationIdx 𝔔 = 1 := by
+      have := hLRam q hq.out hqp 𝔔
+      rwa [ramificationIdx_algebra_tower' _ 𝔮 _,
+        Rat.ramificationIdx_eq_of_not_dvd q F 𝔮 (m := p), one_mul] at this
+      rwa [Nat.prime_dvd_prime_iff_eq hq.out hp.out]
+    obtain ⟨α, hα₀, hα⟩ := exists_pth_root p L F hrF hIrr
+    have := IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' (span {μ}) h𝔮.irreducible
+      h𝔔.irreducible (IsMaximal.ne_bot_of_isIntegral_int 𝔔)
+    rw [h𝔔', Nat.cast_one, one_mul, FiniteMultiplicity.emultiplicity_eq_multiplicity,
+      FiniteMultiplicity.emultiplicity_eq_multiplicity, Nat.cast_inj, map_span, Set.image_singleton,
+      hα, ← span_singleton_pow, FiniteMultiplicity.multiplicity_pow] at this
+    · exact Dvd.intro _ this
+    · exact h𝔔
+    · exact FiniteMultiplicity.of_prime_left h𝔔 (by simpa)
+    · exact FiniteMultiplicity.of_prime_left h𝔮 (by simpa)
+    · exact FiniteMultiplicity.of_prime_left h𝔔 <| map_ne_bot_of_ne_bot (by simpa)
 
 /-- The ideal `(μ)` is a `p`-th power: `(μ) = 𝔞ᵖ` for some ideal `𝔞` of `𝓞_F`, and moreover
 `(1 - ζ_p) ∤ 𝔞`. -/

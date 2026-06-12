@@ -102,6 +102,11 @@ theorem Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain {R S : Type*} [CommRi
 
 /-! ### Ideal — IsDedekindDomain / emultiplicity -/
 
+theorem Ideal.IsDedekindDomain.prime_of_maximal {R : Type*} [CommRing R] [CharZero R]
+    [Algebra.IsIntegral ℤ R] [IsDedekindDomain R] (I : Ideal R) [I.IsMaximal] :
+    Prime I := by
+  refine (prime_iff_isPrime (IsMaximal.ne_bot_of_isIntegral_int I)).mpr <| IsMaximal.isPrime' I
+
 -- Replace Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul?
 theorem Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' {R : Type*} [CommRing R]
     {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul R S]

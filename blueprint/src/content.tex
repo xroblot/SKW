@@ -1203,6 +1203,8 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \begin{lemma}
   \label{lem:kw_mu_val_p}
   \uses{lem:kw_kummer, lem:kw_split_prime}
+  \lean{kw_mu_val_p}
+  \leanok
   For any prime $\mathfrak{q}$ of $\cO_F$, $p \mid v_{\mathfrak{q}}(\mu)$.
 \end{lemma}
 
@@ -1210,11 +1212,15 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   Write $r = v_{\mathfrak{q}}(\mu)$.
 
   \textbf{Case 1: $\mathfrak{q} \nmid p$.}
-  By \ref{lem:kw_kummer}, $L/F$ is unramified at $\mathfrak{q}$.
-  Since $L = F(\sqrt[p]{\mu})$ is a Kummer extension, the local Kummer
-  ramification criterion gives: $F(\sqrt[p]{\mu})/F$ is unramified at
-  $\mathfrak{q}$ if and only if $p \mid v_{\mathfrak{q}}(\mu)$.
-  Hence $p \mid r$.
+  By \ref{lem:kw_kummer}, $L/F$ is unramified at $\mathfrak{q}$, so
+  $e(\mathfrak{Q}|\mathfrak{q}) = 1$ for any prime $\mathfrak{Q}$ of $L$
+  above $\mathfrak{q}$. Let $\alpha \in L$ satisfy $\alpha^p = \mu$. Then
+  \[
+    p \cdot v_{\mathfrak{Q}}(\alpha) = v_{\mathfrak{Q}}(\alpha^p)
+    = v_{\mathfrak{Q}}(\mu) = e(\mathfrak{Q}|\mathfrak{q})\cdot v_{\mathfrak{q}}(\mu)
+    = v_{\mathfrak{q}}(\mu) = r,
+  \]
+  so $p \mid r$.
 
   \textbf{Case 2: $\mathfrak{q} = \mathfrak{p} = (1-\zeta_p)$.}
   Since $F/\QQ$ is totally ramified at $p$, $\mathfrak{p}$ is the unique prime
