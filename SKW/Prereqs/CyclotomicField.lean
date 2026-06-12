@@ -15,6 +15,11 @@ theorem IsPrimitiveRoot.isIntegral' {n : ℕ} {K L : Type*} [CommRing K] [CommRi
 
 /-! ### IsCyclotomicExtension -/
 
+theorem IsCyclotomicExtension.primitiveRoots_nonempty (n : ℕ) [NeZero n] (A B : Type*) [CommRing A]
+    [CommRing B] [IsDomain B] [Algebra A B] [hC : IsCyclotomicExtension {n} A B] :
+    (primitiveRoots n B).Nonempty :=
+  ⟨hC.zeta, (mem_primitiveRoots (NeZero.pos n)).mpr hC.zeta_spec⟩
+
 open NumberField in
 theorem IsCyclotomicExtension.Rat.discr_coprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂] (K₁ K₂ : Type*)
     [Field K₁] [Field K₂] [NumberField K₁] [NumberField K₂] [IsCyclotomicExtension {n₁} ℚ K₁]

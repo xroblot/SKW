@@ -5,6 +5,7 @@ public import Mathlib.NumberTheory.NumberField.Units.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 public import Mathlib.FieldTheory.LinearDisjoint
+public import Mathlib.RingTheory.RamificationInertia.Ramification
 
 public import SKW.Prereqs.AlgebraMisc
 
@@ -34,6 +35,11 @@ def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike 
   __ := Ideal.mapHom e
   left_inv _ := by simpa using comap_map_of_bijective _ (EquivLike.bijective e)
   right_inv _ := by simpa using Ideal.map_comap_of_surjective _ (EquivLike.surjective e) _
+
+open Pointwise in
+theorem Ideal.pointwise_smul_def' {M R : Type*} [Group M] [CommSemiring R] [MulSemiringAction M R] {a : M}
+    (S : Ideal R) :
+    a • S = mapEquiv (MulSemiringAction.toRingEquiv M R a) S := rfl
 
 theorem Ideal.infinite_of_not_isField {R : Type*} [CommRing R] [Nontrivial R]
     [IsCancelMulZero (Ideal R)] (h : ¬IsField R) :
@@ -86,6 +92,14 @@ theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDede
   rw [Ideal.liesOver_iff, ← Nat.prime_eq_prime_of_dvd_pow (Nat.absNorm_under_prime I)
     hp.out this, Int.ideal_span_absNorm_eq_self]
 
+theorem Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain {R S : Type*} [CommRing R] [CommRing S]
+    [Algebra R S] {p : Ideal S} [p.IsPrime] [IsDedekindDomain S] [Module.Finite R S] [IsDomain R]
+    [Module.IsTorsionFree R S] [Module.Finite ℤ R] [CharZero R] (hp : p ≠ ⊥) :
+    ¬ IsUnramifiedAt R p ↔ 1 < (Ideal.under R p).ramificationIdx p := by
+  rw [isUnramifiedAt_iff_of_isDedekindDomain hp, ne_iff_gt_iff_ge, Order.one_le_iff_pos,
+    Ideal.ramificationIdx_eq_ramificationIdx' _ _ (Ideal.under_ne_bot R hp)]
+  exact Ideal.ramificationIdx'_pos _ _
+
 /-! ### Ideal — IsDedekindDomain / emultiplicity -/
 
 -- Replace Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul?
@@ -134,3 +148,10 @@ open Pointwise in
 theorem Ideal.smul_eq_top_iff {M : Type*} {R : Type*} [Group M] [CommRing R] [MulSemiringAction M R]
     {m : M} {I : Ideal R} : m • I = ⊤ ↔ I = ⊤ := by
   rw [smul_eq_iff_eq_inv_smul, smul_top]
+
+open Pointwise in
+theorem Ideal.smul_span {M : Type*} {R : Type*} [Group M] [Semiring R] [MulSemiringAction M R]
+    {m : M} {r : R} : m • span {r} = span {m • r} := by
+  simp [pointwise_smul_def, map_span]
+
+/-! ### Fractional Ideal -/

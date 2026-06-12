@@ -2,10 +2,20 @@ module
 
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Lemmas
 public import Mathlib.GroupTheory.SpecificGroups.Cyclic
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 
 public import SKW.PRed2Mathlib.AlgebraMisc
 
 @[expose] public section
+
+theorem isPrimitiveRoot_iff_zpowers_eq {R : Type*} [CommRing R] [IsDomain R] {k : ℕ} [NeZero k]
+    {η ζ : Rˣ} (hη : IsPrimitiveRoot η k) :
+    IsPrimitiveRoot ζ k ↔ Subgroup.zpowers ζ = rootsOfUnity k R := by
+  refine ⟨fun h ↦ IsPrimitiveRoot.zpowers_eq h, ?_⟩
+  
+  intro h
+
+  sorry
 
 theorem Int.zmultiples_sup_zmultiples (a b : ℤ) :
     AddSubgroup.zmultiples a ⊔ AddSubgroup.zmultiples b = AddSubgroup.zmultiples (a.gcd b : ℤ) := by

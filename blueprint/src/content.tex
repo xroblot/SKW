@@ -1019,6 +1019,7 @@ The goal of this chapter is to prove the following theorem.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Via the Galois correspondence, $K \subseteq K'$ is equivalent to
   $\mathrm{Fix}(K') \leq \mathrm{Fix}(K)$ in $\Gal(L/\QQ)$. In a cyclic
   group, the subgroup lattice is totally ordered by divisibility of indices,
@@ -1040,11 +1041,14 @@ The goal of this chapter is to prove the following theorem.
 
 \begin{lemma}
   \label{lem:kw_minkowski}
+  \lean{kw_minkowski}
+  \leanok
   Every extension of $\QQ$ of degree greater than $1$ is ramified at some
   finite prime.
 \end{lemma}
 
 \begin{proof}
+  \leanok
 \end{proof}
 
 % Proof uses Minkowski's theorem on discriminants: |d_K| > 1 for any
@@ -1133,11 +1137,14 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \begin{lemma}
   \label{lem:kw_kummer}
   \uses{lem:kw_abelian_kummer}
+  \lean{kw_kummer, kw_kummer'}
+  \leanok
   With the above notation, $L = F(\sqrt[p]{\mu})$ for some nonzero
   $\mu \in \cO_F$, and $L/F$ is unramified outside $p$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Since $[K:\QQ] = p$ and $[F:\QQ] = p-1$ are coprime, $K \cap F = \QQ$,
   so $[L:F] = [KF:F] = [K:\QQ] = p$. The extension $L/F$ is Galois with
   cyclic Galois group of order $p$, and $F$ contains the $p$-th roots of
@@ -1160,6 +1167,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   This is the backward direction of \texttt{isGalois\_iff\_forall\_apply\_eq\_pow\_mul\_zpow}:
   since $L/\QQ$ is Galois (which holds because $L = KF$ is the compositum of
   the abelian extensions $K/\QQ$ and $F/\QQ$), the criterion gives the
@@ -1169,6 +1177,8 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
 \begin{lemma}
   \label{lem:kw_split_prime}
+  \lean{kw_split_prime}
+  \leanok
   \uses{lem:kw_abelian_kummer}
   Let $\mathfrak{q}$ be a prime ideal of $F$ with $(\mu) = \mathfrak{q}^r \mathfrak{a}$
   with $\mathfrak{q} \nmid \mathfrak{a}$. If $p \nmid r$ and $L/\QQ$ is
@@ -1176,6 +1186,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Let $\sigma_a$ be an element of the decomposition group of $\mathfrak{q}$
   in $\Gal(F/\QQ)$, so $\sigma_a(\mathfrak{q}) = \mathfrak{q}$.
   Since $L/\QQ$ is abelian, by \ref{lem:kw_abelian_kummer} there exists
@@ -1296,8 +1307,6 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \end{proof}
 
 \chapter{Auxiliary results}
-
-
 
 \begin{lemma}
   \label{lem:ramificationIdx_eq_p_sub_one}

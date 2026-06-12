@@ -11,7 +11,13 @@ public import SKW.PRed2Mathlib.NumberTheory
 
 open NumberField
 
-/-! ### NumberField.Units -/
+/-! ### NumberField -/
+
+theorem NumberField.exists_integer_multiple {K : Type*} [Field K] [NumberField K] (x : K) :
+    ∃ (d : ℤ), d ≠ 0 ∧ d * x ∈ Set.range (algebraMap (𝓞 K) K) := by
+  obtain ⟨⟨_, ⟨b, hb, rfl⟩⟩, hb'⟩ :=
+    IsLocalization.exists_integer_multiple (Algebra.algebraMapSubmonoid (𝓞 K) (nonZeroDivisors ℤ)) x
+  exact ⟨b, nonZeroDivisors.ne_zero hb, hb'⟩
 
 theorem NumberField.Units.natAbs_norm (K : Type*) [Field K] [NumberField K] (x : (RingOfIntegers K)ˣ) :
     (Algebra.norm ℤ x.val).natAbs = 1 := by

@@ -6,8 +6,10 @@ public import Mathlib.NumberTheory.RamificationInertia.Basic
 public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
 public import Mathlib.FieldTheory.Galois.Basic
 public import Mathlib.FieldTheory.Galois.IsGaloisGroup
+public import Mathlib.NumberTheory.NumberField.ExistsRamified
 
 public import SKW.Prereqs.AlgebraMisc
+public import SKW.Prereqs.Ideals
 
 @[expose] public section
 
@@ -53,12 +55,15 @@ lemma kw_cyclic_compositum (L : Type*) [Field L] [NumberField L] (K K' : Interme
 
 /-- Every non-trivial extension of `ℚ` is ramified at some finite prime (Minkowski). -/
 lemma kw_minkowski
-    (K : Type*) [Field K] [NumberField K] [Algebra ℚ K]
+    (K : Type*) [Field K] [NumberField K]
     (h : Module.finrank ℚ K > 1) :
     ∃ q : ℕ, q.Prime ∧ ∃ 𝔮 : Ideal (𝓞 K), 𝔮.IsMaximal ∧
       𝔮.LiesOver (Ideal.span {(q : ℤ)}) ∧
-      Ideal.ramificationIdx (Ideal.span {(q : ℤ)}) 𝔮 > 1 := by
-  sorry
+      1 < Ideal.ramificationIdx (Ideal.span {(q : ℤ)}) 𝔮 := by
+  obtain ⟨𝔮, hq, hq'⟩ := exists_not_isUnramifiedAt_int (K := K) (𝒪 := 𝓞 K) h.ne'
+  refine ⟨absNorm (Ideal.under ℤ 𝔮), Nat.absNorm_under_prime 𝔮, 𝔮, hq, Int.liesOver_span_absNorm 𝔮, ?_⟩
+  rwa [Int.ideal_span_absNorm_eq_self, ← Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain]
+  exact IsMaximal.ne_bot_of_isIntegral_int 𝔮
 
 /-- Ramification reduction: given `K/ℚ` cyclic of prime power degree `pᵐ` with `q ≠ p` ramified,
 there exists a cyclotomic extension `L/ℚ` such that `KL = FL` for some cyclic `F/ℚ` of degree
