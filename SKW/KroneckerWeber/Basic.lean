@@ -32,7 +32,7 @@ variable (F : IntermediateField ℚ L) [IsCyclotomicExtension {p} ℚ F]
 variable (K : IntermediateField ℚ L)
 
 /-- `K/ℚ` is unramified outside `p`: every prime `q ≠ p` has ramification index 1 in `K`. -/
-def UnramifiedOutside (K : Type*) [Field K] [NumberField K] (p : ℕ) : Prop :=
+def UnramifiedOutside (K : Type*) [Field K] (p : ℕ) : Prop :=
   ∀ (q : ℕ), q.Prime → q ≠ p →
     ∀ 𝔮 : Ideal (𝓞 K), 𝔮.IsMaximal → [𝔮.LiesOver (span {(q : ℤ)})] →
       Ideal.ramificationIdx (span {(q : ℤ)}) 𝔮 = 1
@@ -155,7 +155,6 @@ completely in `F/ℚ`: every `σ ∈ Gal(F/ℚ)` with `σ • 𝔮 = 𝔮` is th
 lemma kw_split_prime (𝔮 : Ideal (𝓞 F)) (h𝔮 : Prime 𝔮) (hv : ¬ p ∣ multiplicity 𝔮 (span {(μ : 𝓞 F)}))
     (σ : F ≃ₐ[ℚ] F) (hσ : σ • 𝔮 = 𝔮) :
     σ = 1 := by
-  let r := multiplicity 𝔮 (span {(μ : 𝓞 F)})
   obtain ⟨𝔞, h𝔞⟩ := pow_multiplicity_dvd 𝔮 (span {(μ : 𝓞 F)})
   obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p L F hrF hL hIrr σ
   obtain ⟨d, hd₀, ⟨β, hβ⟩⟩ := exists_integer_multiple ξ
@@ -211,8 +210,12 @@ lemma kw_split_prime (𝔮 : Ideal (𝓞 F)) (h𝔮 : Prime 𝔮) (hv : ¬ p ∣
 
 /-- For every prime `𝔮` of `𝓞_F`, `p ∣ v_𝔮(μ)`. -/
 lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] :
-    (p : ℕ) ∣ (emultiplicity 𝔮 (span {(μ : 𝓞 F)})).toNat := by
-  sorry
+    (p : ℕ) ∣ multiplicity 𝔮 (span {(μ : 𝓞 F)}) := by
+  let q := absNorm (under ℤ 𝔮)
+  by_cases hpq : p = q
+  · 
+    sorry
+  · sorry
 
 /-- The ideal `(μ)` is a `p`-th power: `(μ) = 𝔞ᵖ` for some ideal `𝔞` of `𝓞_F`, and moreover
 `(1 - ζ_p) ∤ 𝔞`. -/
@@ -222,5 +225,3 @@ lemma kw_mu_pth_power_ideal :
   sorry
 
 end
-
-
