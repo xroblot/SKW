@@ -5,6 +5,8 @@ public import SKW.Prereqs.Ideals
 public import SKW.Prereqs.KummerExtension
 public import SKW.Prereqs.OtherPR
 
+public import Mathlib.Algebra.FiniteSupport.Basic
+
 @[expose] public section
 
 /-!
@@ -275,11 +277,36 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
     · exact FiniteMultiplicity.of_prime_left h𝔮 (by simpa)
     · exact FiniteMultiplicity.of_prime_left h𝔔 <| map_ne_bot_of_ne_bot (by simpa)
 
-/-- The ideal `(μ)` is a `p`-th power: `(μ) = 𝔞ᵖ` for some ideal `𝔞` of `𝓞_F`, and moreover
-`(1 - ζ_p) ∤ 𝔞`. -/
-lemma kw_mu_pth_power_ideal :
-    ∃ 𝔞 : Ideal (𝓞 F), span {(μ : 𝓞 F)} = 𝔞 ^ p ∧
-      ∀ 𝔭 : Ideal (𝓞 F), 𝔭.IsMaximal → 𝔭.LiesOver (span {(p : ℤ)}) → ¬ 𝔭 ∣ 𝔞 := by
+include hrF hμ hIrr in
+/-- The ideal `(μ)` is a `p`-th power: `(μ) = 𝔞ᵖ` for some ideal `𝔞` of `𝓞_F`. -/
+lemma kw_mu_pth_power_ideal (hLram : UnramifiedOutside L p) (hp' : Odd p) :
+    ∃ 𝔞 : Ideal (𝓞 F), 𝔞 ^ p = span {(μ : 𝓞 F)} := by
+  have hsμ : span {μ} ≠ ⊥ := by simpa
+  have := Ideal.finprod_heightOneSpectrum_pow_multiplicity hsμ
+  let v : IsDedekindDomain.HeightOneSpectrum (𝓞 F) → ℕ :=
+    fun w ↦ (kw_mu_val_p p L F hrF hμ hIrr w.asIdeal hLram hp').choose
+  have hv {w} : multiplicity w.asIdeal (span {μ}) = p * v w :=
+    (kw_mu_val_p p L F hrF hμ hIrr w.asIdeal hLram hp').choose_spec
+  have hv' : Function.HasFiniteMulSupport fun w ↦ w.asIdeal ^ v w := by
+    have := Ideal.hasFiniteMulSupport hsμ
+    simp_rw [IsDedekindDomain.HeightOneSpectrum.maxPowDividing_eq_pow_multiplicity hsμ, hv,
+      mul_comm p, pow_mul] at this
+    exact Function.HasFiniteMulSupport.of_comp this (one_pow _) (pow_left_injective hp.out.ne_zero)
+  have := Ideal.finprod_heightOneSpectrum_pow_multiplicity hsμ
+  simp only [hv, mul_comm p, pow_mul, ← finprod_pow hv'] at this
+  exact ⟨_, this⟩
+
+include hrF hμ hIrr in
+/-- One can choose μ such that `¬ (1 - ζ_p) ∣ μ`. -/
+lemma kw_not_dvd_nu {ζ : F} (hζ : IsPrimitiveRoot ζ p) (hLram : UnramifiedOutside L p) (hp' : Odd p) :
+    ∃ ν : 𝓞 F, ν ≠ 0 ∧ IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F ν)) ∧
+      Irreducible (X ^ p - C ((algebraMap (𝓞 F) F) ν)) ∧ ¬ (hζ.toInteger - 1) ∣ ν := by
+  have h𝔭 := hζ.zeta_sub_one_prime'.isMaximal_span_singleton
+  obtain ⟨ν, hν⟩ := pow_multiplicity_dvd (hζ.toInteger - 1) μ
+  obtain ⟨k, hk⟩ := kw_mu_val_p p L F hrF hμ hIrr (span {hζ.toInteger - 1}) hLram hp'
+  refine ⟨ν, ?_, ?_, ?_⟩
+  sorry
+  sorry
   sorry
 
 end

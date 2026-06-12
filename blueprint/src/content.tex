@@ -1111,7 +1111,7 @@ The goal of this chapter is to prove the following theorem.
 \begin{proposition}
   \label{prop:kw_exponent_p}
   \uses{thm:stickelberger, lem:kw_kummer, lem:kw_abelian_kummer,
-        lem:kw_split_prime, lem:kw_mu_pth_power_ideal, lem:kw_class_trivial,
+        lem:kw_split_prime, lem:kw_not_dvd_nu, lem:kw_mu_pth_power_ideal, lem:kw_class_trivial,
         lem:kw_mu_unit, lem:kw_unit_root_of_unity, lem:kw_ramification_reduction}
   Let $p$ be an odd prime. The maximal abelian extension of $\QQ$ of
   exponent $p$ unramified outside $p$ is cyclic of degree $p$: it is
@@ -1209,6 +1209,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Write $r = v_{\mathfrak{q}}(\mu)$.
 
   \textbf{Case 1: $\mathfrak{q} \nmid p$.}
@@ -1231,28 +1232,38 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \end{proof}
 
 \begin{lemma}
+  \label{lem:kw_not_dvd_nu}
+  \uses{lem:kw_kummer, lem:kw_mu_val_p}
+  \lean{kw_not_dvd_nu}
+  There exists $\nu \in \cO_F$, $\nu \neq 0$, such that $L = F(\sqrt[p]{\nu})$,
+  $X^p - \nu$ is irreducible over $F$, and $(1-\zeta_p) \nmid \nu$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:kw_mu_val_p}, $p \mid v_{\mathfrak{p}}(\mu)$; write
+  $v_{\mathfrak{p}}(\mu) = pk$. Set $\nu = \mu / (1-\zeta_p)^{pk} \in \cO_F$.
+  Since $(1-\zeta_p)^k \in F^\times$, we have $F(\sqrt[p]{\nu}) =
+  F(\sqrt[p]{\mu}/(1-\zeta_p)^k) = F(\sqrt[p]{\mu}) = L$
+  (by \ref{lem:kw_kummer}). By construction $v_{\mathfrak{p}}(\nu) = 0$,
+  i.e. $(1-\zeta_p) \nmid \nu$.
+\end{proof}
+
+\begin{lemma}
   \label{lem:kw_mu_pth_power_ideal}
-  \uses{lem:kw_split_prime, lem:kw_abelian_kummer, lem:kw_mu_val_p}
-  With the above notation, $(1 - \zeta_p) \nmid \mu$, and $(\mu) = \mathfrak{a}^p$
-  for some ideal $\mathfrak{a}$ of $\cO_F$.
+  \uses{lem:kw_mu_val_p}
+  \lean{kw_mu_pth_power_ideal}
+  $(\mu) = \mathfrak{a}^p$ for some ideal $\mathfrak{a}$ of $\cO_F$.
 \end{lemma}
 
 \begin{proof}
   By \ref{lem:kw_mu_val_p}, $p \mid v_{\mathfrak{q}}(\mu)$ for every prime
   $\mathfrak{q}$. Therefore $(\mu) = \mathfrak{a}^p$ where
   $\mathfrak{a} = \prod_{\mathfrak{q}} \mathfrak{q}^{v_{\mathfrak{q}}(\mu)/p}$.
-  In particular, $v_{\mathfrak{p}_p}(\mu) \equiv 0 \pmod{p}$, so either
-  $v_{\mathfrak{p}_p}(\mu) = 0$ (i.e. $(1-\zeta_p) \nmid \mu$) or
-  $v_{\mathfrak{p}_p}(\mu) \geq p$. The case $v_{\mathfrak{p}_p}(\mu) \geq p$
-  would mean $(1-\zeta_p)^p \mid \mu$, but since $L/F$ is unramified outside
-  $p$ and $\mu$ generates the Kummer extension, replacing $\mu$ by
-  $\mu/(1-\zeta_p)^p$ (which generates the same extension) we may assume
-  $v_{\mathfrak{p}_p}(\mu) = 0$, i.e. $(1-\zeta_p) \nmid \mu$.
 \end{proof}
 
 \begin{lemma}
   \label{lem:kw_class_trivial}
-  \uses{lem:kw_mu_pth_power_ideal, thm:stickelberger, lem:kw_abelian_kummer}
+  \uses{lem:kw_not_dvd_nu, lem:kw_mu_pth_power_ideal, thm:stickelberger, lem:kw_abelian_kummer}
   The ideal class $[\mathfrak{a}]$ is trivial, i.e., $\mathfrak{a}$ is principal.
 \end{lemma}
 
@@ -1264,7 +1275,8 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   $\sigma_a(\mathfrak{a}) = \mathfrak{a}^a$, hence $\sigma_a([\mathfrak{a}]) =
   [\mathfrak{a}]^a$ for every $1 \leq a < p$.
 
-  Now, $\mathfrak{a}$ is coprime to $p$ by \ref{lem:kw_mu_pth_power_ideal}.
+  Now, $\mathfrak{a}$ is coprime to $p$: by \ref{lem:kw_not_dvd_nu} we may assume
+  $(1-\zeta_p) \nmid \mu$, so $v_{\mathfrak{p}}(\mu) = 0$, hence $v_{\mathfrak{p}}(\mathfrak{a}) = 0$.
   By \ref{thm:stickelberger} applied with $m = p$, the ideal
   $\mathfrak{a}^{\Theta}$ is principal in $\QQ(\zeta_p)$, where
   $\Theta = \sum_{a=1}^{p-1} a\sigma_a^{-1} \in \ZZ[G]$. We compute

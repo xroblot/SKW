@@ -8,6 +8,7 @@ public import Mathlib.FieldTheory.LinearDisjoint
 public import Mathlib.RingTheory.RamificationInertia.Ramification
 
 public import SKW.Prereqs.AlgebraMisc
+public import SKW.PRed2Mathlib.Ideals
 
 @[expose] public section
 
