@@ -160,4 +160,3 @@ theorem Ideal.smul_span {M : Type*} {R : Type*} [Group M] [Semiring R] [MulSemir
     {m : M} {r : R} : m • span {r} = span {m • r} := by
   simp [pointwise_smul_def, map_span]
 
-/-! ### Fractional Ideal -/

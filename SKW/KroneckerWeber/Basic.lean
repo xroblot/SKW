@@ -106,7 +106,7 @@ lemma kw_kummer [IsGalois ℚ K] (hK : Module.finrank ℚ K = p) :
       ← pow_succ, hx₁, Nat.sub_add_cancel finrank_pos, mul_pow]
 
 variable [hQL : IsAbelianGalois ℚ L] {μ : 𝓞 F} (hμ : μ ≠ 0)
-  [IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ))]
+  [hS : IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ))]
   (hIrr:  Irreducible (X ^ p - C ((algebraMap (𝓞 F) F) μ)))
 
 omit hCF hQL [IsGalois F L] in
@@ -297,16 +297,59 @@ lemma kw_mu_pth_power_ideal (hLram : UnramifiedOutside L p) (hp' : Odd p) :
   exact ⟨_, this⟩
 
 include hrF hμ hIrr in
-/-- One can choose μ such that `¬ (1 - ζ_p) ∣ μ`. -/
-lemma kw_not_dvd_nu {ζ : F} (hζ : IsPrimitiveRoot ζ p) (hLram : UnramifiedOutside L p) (hp' : Odd p) :
+/-- One can choose ν such that the prime ideal above `p` does not divide `⟨ν⟩`. -/
+lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (span {(p : ℤ)})]
+    (hLram : UnramifiedOutside L p) (hp' : Odd p) :
     ∃ ν : 𝓞 F, ν ≠ 0 ∧ IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F ν)) ∧
-      Irreducible (X ^ p - C ((algebraMap (𝓞 F) F) ν)) ∧ ¬ (hζ.toInteger - 1) ∣ ν := by
+      Irreducible (X ^ p - C ((algebraMap (𝓞 F) F) ν)) ∧
+      multiplicity 𝔭 (span {ν}) = 0 := by
+  let hζ := IsCyclotomicExtension.zeta_spec p ℚ F
+  have hζ₀ : algebraMap (𝓞 F) F (hζ.toInteger - 1) ≠ 0 := by
+    rw [map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective (𝓞 F) F), sub_ne_zero]
+    exact hζ.toInteger_isPrimitiveRoot.ne_one hp.out.one_lt
   have h𝔭 := hζ.zeta_sub_one_prime'.isMaximal_span_singleton
+  have hζ₁ : Prime (hζ.toInteger - 1) := hζ.zeta_sub_one_prime'
+  have hsζ : Prime (span {hζ.toInteger - 1}) := prime_span_singleton_iff.mpr hζ₁
+  have hF : (primitiveRoots p F).Nonempty := primitiveRoots_nonempty p ℚ F
   obtain ⟨ν, hν⟩ := pow_multiplicity_dvd (hζ.toInteger - 1) μ
   obtain ⟨k, hk⟩ := kw_mu_val_p p L F hrF hμ hIrr (span {hζ.toInteger - 1}) hLram hp'
-  refine ⟨ν, ?_, ?_, ?_⟩
-  sorry
-  sorry
-  sorry
+  let α := rootOfSplitsXPowSubC hp.out.pos (μ : F) L
+  have hα : α ^ p = algebraMap (𝓞 F) L μ := by
+        rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
+  rw [multiplicity_span_span] at hk
+  have hν₀ : ν ≠ 0 := by
+    contrapose! hμ
+    rwa [hμ, mul_zero] at hν
+  refine ⟨ν, hν₀, ?_, ?_, ?_⟩
+  · rw [hk, pow_mul, pow_right_comm] at hν
+    rw [← hrF]
+    apply isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top (hrF ▸ hF)
+      (α := (algebraMap (𝓞 F) L) (hζ.toInteger - 1) ^ (- k : ℤ)  * α)
+    · rw [mul_pow, hrF, rootOfSplitsXPowSubC_pow, ← IsScalarTower.algebraMap_apply,
+        ← IsScalarTower.algebraMap_apply, hν, map_mul, map_pow, map_pow, ← zpow_natCast _ k,
+        ← zpow_natCast _ p, ← zpow_mul, ← zpow_natCast _ p, ← zpow_mul, ← mul_assoc, ← zpow_add₀,
+        neg_mul, neg_add_cancel, zpow_zero, one_mul]
+      rwa [IsScalarTower.algebraMap_apply (𝓞 F) F, _root_.map_ne_zero]
+    · rw [mul_comm, IsScalarTower.algebraMap_apply (𝓞 F) F L, ← map_zpow₀,
+        adjoin_simple_mul _ _ (zpow_ne_zero _ hζ₀)]
+      have hα : α ^ p = algebraMap (𝓞 F) L μ := by
+        rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
+      exact adjoin_root_eq_top_of_isSplittingField (hrF ▸ hF) hIrr hα
+  · rw [hk, pow_mul, pow_right_comm] at hν
+    rw [X_pow_sub_C_irreducible_iff_of_prime hp.out] at hIrr ⊢
+    contrapose! hIrr
+    obtain ⟨b, hb⟩ := hIrr
+    refine ⟨(hζ.toInteger - 1) ^ k * b, by simp [hν, mul_pow, hb, map_mul]⟩
+  · replace hν := congr_arg (span {·}) hν
+    replace hν := congr_arg (emultiplicity (span {hζ.toInteger - 1}) · ) hν
+    rwa [← span_singleton_mul_span_singleton, ← span_singleton_pow,
+      emultiplicity_mul hsζ, emultiplicity_pow_self, emultiplicity_span_span,
+      FiniteMultiplicity.emultiplicity_eq_multiplicity,
+      FiniteMultiplicity.emultiplicity_eq_multiplicity, ← Nat.cast_add, Nat.cast_inj,
+      Nat.left_eq_add, ← Rat.eq_span_zeta_sub_one_of_liesOver' p F hζ 𝔭] at hν
+    · exact FiniteMultiplicity.of_prime_left hsζ (by simpa)
+    · exact FiniteMultiplicity.of_prime_left hζ₁ hμ
+    · simpa using RingOfIntegers.coe_ne_zero_iff.mp hζ₀
+    · exact hsζ.not_unit
 
 end

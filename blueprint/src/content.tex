@@ -1325,11 +1325,13 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   \label{lem:kw_not_dvd_nu}
   \uses{lem:kw_kummer, lem:kw_mu_val_p}
   \lean{kw_not_dvd_nu}
+  \leanok
   There exists $\nu \in \cO_F$, $\nu \neq 0$, such that $L = F(\sqrt[p]{\nu})$,
   $X^p - \nu$ is irreducible over $F$, and $(1-\zeta_p) \nmid \nu$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:kw_mu_val_p}, $p \mid v_{\mathfrak{p}}(\mu)$; write
   $v_{\mathfrak{p}}(\mu) = pk$. Set $\nu = \mu / (1-\zeta_p)^{pk} \in \cO_F$.
   Since $(1-\zeta_p)^k \in F^\times$, we have $F(\sqrt[p]{\nu}) =

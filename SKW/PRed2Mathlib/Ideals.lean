@@ -6,7 +6,7 @@ public import Mathlib.RingTheory.Multiplicity
 @[expose] public section
 
 /-!
-# PRed to Mathlib: `Ideal.span_singleton_dvd_span_singleton_iff_dvd` / `Ideal.emultiplicity_eq_emultiplicity_span`
+# PRed to Mathlib: `Ideal.span_singleton_dvd_span_singleton_iff_dvd` / `Ideal.emultiplicity_eq_emultiplicity_span` / `Ideal.multiplicity_eq_multiplicity_span`
 
 The declarations in this file were extracted from `SKW.Prereqs.Ideals` and submitted
 upstream as Mathlib PR [#40557](https://github.com/leanprover-community/mathlib4/pull/40557).
@@ -26,5 +26,9 @@ theorem Ideal.emultiplicity_span_span {R : Type*} [CommRing R] {a b : R} :
     emultiplicity (Ideal.span {a}) (Ideal.span {b}) = emultiplicity a b := by
   rw [emultiplicity_eq_emultiplicity_iff]
   simp only [Ideal.span_singleton_pow, Ideal.span_singleton_dvd_span_singleton_iff_dvd', implies_true]
+
+theorem Ideal.multiplicity_span_span {R : Type*} [CommRing R] {a b : R} :
+    multiplicity (Ideal.span {a}) (Ideal.span {b}) = multiplicity a b :=
+  multiplicity_eq_of_emultiplicity_eq Ideal.emultiplicity_span_span
 
 end
