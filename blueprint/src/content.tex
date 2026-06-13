@@ -960,6 +960,10 @@ The goal of this chapter is to prove the following theorem.
 \end{theorem}
 
 \begin{proof}
+  By \ref{lem:kw_reduce_to_prime_power}, it suffices to prove that every cyclic
+  extension of $\QQ$ of prime power degree $p^m$ unramified outside $p$ is
+  contained in a cyclotomic field. For odd $p$, this is
+  \ref{prop:kw_odd_prime_power}; for $p = 2$, this is \ref{prop:kw_2_power}.
 \end{proof}
 
 \begin{lemma}
@@ -982,6 +986,19 @@ The goal of this chapter is to prove the following theorem.
 \end{lemma}
 
 \begin{proof}
+  The discriminant of $K$ is a finite integer, so only finitely many primes
+  $q \neq p$ are ramified in $K/\QQ$. We apply \ref{lem:kw_ramification_reduction}
+  iteratively. At each step, given a cyclic degree-$p^m$ extension $K'/\QQ$
+  with some $q \neq p$ ramified, \ref{lem:kw_ramification_reduction} provides
+  a cyclotomic extension $\Lambda/\QQ$ and a cyclic degree-$p^m$ extension
+  $K''/\QQ$ in which $q$ is unramified, such that $K'\Lambda = K''\Lambda$.
+  Since $\Lambda$ is cyclotomic, $K'$ is cyclotomic if and only if $K''$ is
+  (as $K'\Lambda = K''\Lambda$ and $\Lambda$ is cyclotomic).
+  Since $K'' \subseteq K'\Lambda$ and $\Lambda$ is only ramified at $q$, the
+  primes ramified in $K''$ are a subset of those of $K'$ union $\{q\}$, which
+  equals the primes of $K'$. Since $q$ is unramified in $K''$ by construction,
+  the set of primes $\neq p$ ramified in $K''$ is strictly smaller than that of
+  $K'$. The process terminates with the desired $F$.
 \end{proof}
 
 % Strategy: if q \neq p is ramified in K/Q, the ramification group
@@ -1032,11 +1049,51 @@ The goal of this chapter is to prove the following theorem.
   \uses{lem:kw_cyclic_compositum}
   Let $K/\QQ$ be a cyclic extension of prime power degree $p^m$. If
   $q \neq p$ is ramified in $K/\QQ$, then there exists a cyclic cyclotomic
-  extension $L/\QQ$ such that $KL = FL$ for some cyclic extension $F/\QQ$
-  of prime power degree in which $q$ is unramified.
+  extension $\Lambda/\QQ$ and a cyclic extension $F/\QQ$ of degree $p^m$
+  in which $q$ is unramified, such that $K\Lambda = F\Lambda$.
 \end{lemma}
 
 \begin{proof}
+  Since $q \neq p$ and $[K:\QQ] = p^m$, the prime $q$ is tamely ramified in
+  $K/\QQ$. Let $e = p^s$ ($1 \leq s \leq m$) be the ramification index of
+  $q$ in $K/\QQ$; the inertia group $I_q \subseteq \Gal(K/\QQ) \cong
+  \ZZ/p^m\ZZ$ has order $p^s$.
+
+  Since $\phi(q^r) = q^{r-1}(q-1)$ and $\gcd(p,q) = 1$, for large enough $r$
+  we have $p^s \mid \phi(q^r)$, so $\QQ(\zeta_{q^r})$ contains a cyclic
+  subfield $\Lambda$ of degree $p^s$ over $\QQ$. This $\Lambda$ is totally
+  (tamely) ramified at $q$ with ramification index $p^s$.
+
+  We may arrange $K \cap \Lambda = \QQ$ by choosing $r$ large: any nontrivial
+  $K \cap \Lambda$ would be a $p$-extension ramified only at $q$ (as $K$ is
+  a $p$-extension and $\Lambda$ is unramified outside $q$), hence a subfield
+  of the $p$-part of $\QQ(\zeta_{q-1})$. Replacing $\Lambda$ by a cyclic
+  subfield of $\QQ(\zeta_{q^r})$ lying above that $p$-part for large $r$
+  ensures linear disjointness.
+
+  Set $A = K\Lambda$. With $K \cap \Lambda = \QQ$, we have
+  $\Gal(A/\QQ) \cong \ZZ/p^m\ZZ \times \ZZ/p^s\ZZ$. Let $g \in
+  \Gal(A/\QQ)$ be the element whose image in $\Gal(K/\QQ)$ is the generator
+  $\sigma$ of $I_q$ and whose image in $\Gal(\Lambda/\QQ)$ is the generator
+  $\tau$ of $\Gal(\Lambda/\QQ)$. Define $F = A^{\langle g \rangle}$.
+
+  \begin{itemize}
+    \item \emph{Degree}: $[F:\QQ] = |G|/|\langle g \rangle| = p^{m+s}/p^s = p^m$.
+    \item \emph{Cyclic}: $\Gal(F/\QQ) \cong G/\langle g \rangle \cong
+      (\ZZ/p^m\ZZ \times \ZZ/p^s\ZZ)/\langle (1,1) \rangle \cong \ZZ/p^m\ZZ$,
+      where the last isomorphism is $(a,b) \mapsto a - b \bmod p^m$.
+    \item \emph{Compositum}: $\langle g \rangle \cap \ker(G \to \Gal(K/\QQ)) =
+      \{1\}$ because $g \mapsto \sigma$ has order $p^s = |g|$. So
+      $\Gal(A/K)$ and $\Gal(A/F) = \langle g \rangle$ together generate $G$,
+      giving $KF = A$. Since $F \cap \Lambda = \QQ$ ($q$ is unramified in $F$
+      but totally ramified in $\Lambda$), we have $[F\Lambda:\QQ] = p^{m+s} =
+      [A:\QQ]$, so $F\Lambda = A = K\Lambda$.
+    \item \emph{Unramified at $q$}: The inertia group of $A/\QQ$ at $q$
+      equals $\langle g \rangle$ (the ramification index of $A/\QQ$ at $q$
+      is $p^s$, achieved by $g$). Since $g$ fixes $F = A^{\langle g\rangle}$,
+      the inertia group maps trivially to $\Gal(F/\QQ)$, so $q$ is unramified
+      in $F/\QQ$. \qedhere
+  \end{itemize}
 \end{proof}
 
 \begin{lemma}
@@ -1079,16 +1136,27 @@ The goal of this chapter is to prove the following theorem.
 \end{proposition}
 
 \begin{proof}
-  If $m = 1$ we are done by \ref{prop:kw_2_quadratic}. If $m \geq 2$,
-  assume first that $K$ is nonreal. Then $K(i)/K$ is a quadratic extension,
-  and its maximal real subfield $M$ is cyclic of degree $2^m$ over $\QQ$.
-  Since $K/\QQ$ is cyclotomic if and only if $M$ is, we may assume that
-  $K$ is totally real.
+  We proceed by induction on $m$. The base case $m = 1$ is \ref{prop:kw_2_quadratic}.
+  Assume $m \geq 2$ and the result holds for degree $2^{m-1}$.
 
-  Let $K'$ be the maximal real subfield of $\QQ(\zeta_{2^{m+2}})$. If $K'K$
-  is not cyclic, then it contains three real quadratic subfields unramified
-  outside $2$, contradicting \ref{prop:kw_2_quadratic}. Thus $K'K$ is
-  cyclic, and \ref{lem:kw_cyclic_compositum} implies $K = K'$.
+  If $K$ is nonreal, complex conjugation $c \in \Gal(K/\QQ)$ is the unique
+  element of order $2$ in the cyclic group $\Gal(K/\QQ) \cong \ZZ/2^m\ZZ$,
+  and $M = K^c$ is totally real, cyclic of degree $2^{m-1}$ over $\QQ$, and
+  unramified outside $2$. By induction, $M \subseteq \QQ(\zeta_n)$ for some $n$.
+  The extension $K/M$ is quadratic and unramified outside $2$, so $K = M(\sqrt{d})$
+  with $d \in \{-1, \pm 2\}$; in every case $K \subseteq M(\zeta_8) \subseteq
+  \QQ(\zeta_{8n})$, so $K$ is cyclotomic.
+
+  Let $K'$ be the maximal real subfield of $\QQ(\zeta_{2^{m+2}})$; it is
+  cyclic of degree $2^m$ over $\QQ$ and unramified outside $2$. Suppose
+  $K'K/\QQ$ is not cyclic. Then $\Gal(K'K/\QQ)$ is a non-cyclic $2$-group,
+  so it has $(\ZZ/2\ZZ)^2$ as a quotient, giving three distinct quadratic
+  subfields of $K'K$. All are unramified outside $2$. Since $K'K$ is totally
+  real (both $K$ and $K'$ are), all three quadratic subfields are real.
+  But by \ref{prop:kw_2_quadratic} there is only one real quadratic field
+  unramified outside $2$, namely $\QQ(\sqrt{2})$, a contradiction.
+  Therefore $K'K/\QQ$ is cyclic, and \ref{lem:kw_cyclic_compositum} gives
+  $K \subseteq K' \subseteq \QQ(\zeta_{2^{m+2}})$.
 \end{proof}
 
 \begin{proposition}
@@ -1099,11 +1167,16 @@ The goal of this chapter is to prove the following theorem.
 \end{proposition}
 
 \begin{proof}
-  Let $K'$ be the subfield of degree $p^m$ in $\QQ(\zeta_{p^{m+1}})$.
-  If $K'K$ is not cyclic, then it contains a subfield of type $(p, p)$
-  unramified outside $p$, which contradicts \ref{prop:kw_exponent_p}.
-  Thus $K'K$ is cyclic, and \ref{lem:kw_cyclic_compositum} implies
-  $K = K'$.
+  Let $K'$ be the unique subfield of degree $p^m$ in $\QQ(\zeta_{p^{m+1}})$;
+  it is cyclic of degree $p^m$ and unramified outside $p$. Suppose $K'K/\QQ$
+  is not cyclic. Then $\Gal(K'K/\QQ)$ is a non-cyclic $p$-group, so it has
+  $(\ZZ/p\ZZ)^2$ as a quotient, giving a subfield $E \subseteq K'K$ with
+  $\Gal(E/\QQ) \cong (\ZZ/p\ZZ)^2$. Since $K$ and $K'$ are unramified
+  outside $p$, so is $E$. But by \ref{prop:kw_exponent_p} the maximal
+  abelian extension of exponent $p$ unramified outside $p$ is cyclic of
+  degree $p$, so no extension with Galois group $(\ZZ/p\ZZ)^2$ exists.
+  This contradiction shows $K'K/\QQ$ is cyclic, so \ref{lem:kw_cyclic_compositum}
+  gives $K \subseteq K' \subseteq \QQ(\zeta_{p^{m+1}})$.
 \end{proof}
 
 \section{The prime degree case}
@@ -1120,14 +1193,31 @@ The goal of this chapter is to prove the following theorem.
 
 \begin{proof}
   Let $K/\QQ$ be a cyclic extension of prime degree $p$ unramified outside $p$.
-  By the sequence of lemmas below, $L = KF = \QQ(\zeta_{p^2})$
-  (see \ref{lem:kw_unit_root_of_unity}). Therefore $K \subseteq \QQ(\zeta_{p^2})$.
-  Since $[K:\QQ] = p = [\QQ(\zeta_{p^2}):F]$ and $K \cap F = \QQ$, $K$ is
-  the unique subfield of degree $p$ of $\QQ(\zeta_{p^2})$ linearly disjoint
-  from $F$, which is the subfield of degree $p$ of $\QQ(\zeta_{p^2})$ over $\QQ$.
-  Since any two cyclic extensions of degree $p$ unramified outside $p$ are
-  contained in $\QQ(\zeta_{p^2})$, the maximal such extension is exactly this
-  subfield.
+  Set $F = \QQ(\zeta_p)$ and $L = KF$.
+
+  \begin{enumerate}
+    \item By \ref{lem:kw_kummer}, $L = F(\sqrt[p]{\mu})$ for some $\mu \in
+      \cO_F$, $\mu \neq 0$, with $X^p - \mu$ irreducible over $F$.
+    \item By \ref{lem:kw_not_dvd_nu}, we may replace $\mu$ so that additionally
+      $(1 - \zeta_p) \nmid \mu$.
+    \item By \ref{lem:kw_mu_val_p}, $p \mid v_\mathfrak{q}(\mu)$ for every prime
+      $\mathfrak{q}$ of $\cO_F$.
+    \item By \ref{lem:kw_mu_pth_power_ideal}, $(\mu) = \mathfrak{a}^p$ for
+      some ideal $\mathfrak{a}$ of $\cO_F$.
+    \item By \ref{lem:kw_class_trivial}, $\mathfrak{a}$ is principal.
+    \item By \ref{lem:kw_mu_unit}, $\mu = \alpha^p \eta$ for some $\alpha \in
+      \cO_F$ and unit $\eta \in \cO_F^\times$.
+    \item By \ref{lem:kw_unit_root_of_unity}, $L = \QQ(\zeta_{p^2})$.
+  \end{enumerate}
+
+  Therefore $K \subseteq L = \QQ(\zeta_{p^2})$. The Galois group
+  $\Gal(\QQ(\zeta_{p^2})/\QQ) \cong (\ZZ/p^2\ZZ)^\times \cong \ZZ/p\ZZ \times
+  \ZZ/(p-1)\ZZ$ has a unique subgroup of index $p$, giving a unique subfield
+  of degree $p$ over $\QQ$ in $\QQ(\zeta_{p^2})$. Since $K \cap F = \QQ$
+  (as $\gcd([K:\QQ], [F:\QQ]) = \gcd(p, p-1) = 1$) and $[\QQ(\zeta_{p^2}):F] = p$,
+  $K$ is exactly this unique subfield. The same applies to any other cyclic
+  extension of degree $p$ unramified outside $p$, so the maximal such abelian
+  extension of exponent $p$ is cyclic of degree $p$.
 \end{proof}
 
 The proof of \ref{prop:kw_exponent_p} proceeds via the following lemmas.

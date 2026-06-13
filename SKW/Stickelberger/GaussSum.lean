@@ -298,10 +298,11 @@ theorem galLFEquiv_apply_eta (σ : Gal(L/F)) :
   convert RingHom.congr_arg (algebraMap (𝓞 K) (𝓞 L))
     <| IsCyclotomicExtension.Rat.galEquivZMod_smul_of_pow_eq (p ^ f - 1) K
     (AlgEquiv.restrictNormalHom K (AlgEquiv.restrictScalars ℚ σ)) hη.pow_eq_one
-  apply FaithfulSMul.algebraMap_injective (𝓞 L) L
-  rw [algebraMap.smul', AlgEquiv.smul_def, ← IsScalarTower.algebraMap_apply,
-    IsScalarTower.algebraMap_apply (𝓞 K) K L]
-  exact (AlgEquiv.restrictNormalHom_apply K (AlgEquiv.restrictScalars ℚ σ) η).symm
+  · apply FaithfulSMul.algebraMap_injective (𝓞 L) L
+    rw [algebraMap.smul', AlgEquiv.smul_def, ← IsScalarTower.algebraMap_apply,
+      IsScalarTower.algebraMap_apply (𝓞 K) K L]
+    exact (AlgEquiv.restrictNormalHom_apply K (AlgEquiv.restrictScalars ℚ σ) η).symm
+  · rw [map_pow]; congr 2
 
 include hη in
 set_option backward.isDefEq.respectTransparency false in

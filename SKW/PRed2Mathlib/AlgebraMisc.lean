@@ -2,7 +2,6 @@ module
 
 public import Mathlib.Algebra.Algebra.Equiv
 public import Mathlib.Algebra.Algebra.Hom.Rat
-public import Mathlib.FieldTheory.IntermediateField.Basic
 
 @[expose] public section
 
@@ -61,33 +60,5 @@ lemma RingEquiv.toIntAlgEquiv_apply [Ring R] [Ring S] (f : R ≃+* S) (x : R) :
 lemma RingEquiv.toIntAlgEquiv_injective [Ring R] [Ring S] :
     Function.Injective (RingEquiv.toIntAlgEquiv : (R ≃+* S) → _) :=
   fun _ _ e ↦ DFunLike.ext _ _ (fun x ↦ DFunLike.congr_fun e x)
-
-end
-
-/-!
-# PRed to Mathlib: `AlgHom.equivFieldRange`
-
-The declarations in this file were extracted from `SKW.Prereqs.AlgebraMisc` and submitted
-upstream as Mathlib PR [#40333](https://github.com/leanprover-community/mathlib4/pull/40333).
-
-Once that PR is merged and the `lake-manifest.json` pin is bumped past the merge commit,
-these declarations (and the import `public import Mathlib.FieldTheory.IntermediateField.Basic`
-added above) should be deleted, and any usages redirected to the Mathlib versions.
--/
-
-@[expose] public section
-
-noncomputable def AlgHom.equivFieldRange {K L L' : Type*} [Field K] [Field L] [Field L'] [Algebra K L]
-    [Algebra K L'] (f : L →ₐ[K] L') :
-    L ≃ₐ[K] f.fieldRange :=
-  AlgEquiv.ofBijective
-    (f.codRestrict f.range fun x ↦ AlgHom.mem_fieldRange.mpr ⟨x, rfl⟩)
-    ⟨fun _ _ h ↦ f.injective (congr_arg Subtype.val h),
-     fun ⟨_, hy⟩ ↦ (AlgHom.mem_fieldRange.mp hy).imp fun _ hx => Subtype.ext hx⟩
-
-@[simp]
-theorem equivFieldRange_apply {K L L' : Type*} [Field K] [Field L] [Field L'] [Algebra K L]
-    [Algebra K L'] (f : L →ₐ[K] L') (x : L) : f.equivFieldRange x = f x :=
-  rfl
 
 end

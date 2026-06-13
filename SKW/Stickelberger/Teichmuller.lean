@@ -44,7 +44,7 @@ theorem teichmuller_apply_zero (hI : I ≠ ⊤) :
 
 theorem isUnit_teichmuller_zpow_apply [I.IsMaximal] (a : ℤ) (x : (R ⧸ I)ˣ) :
     IsUnit ((teichmuller hbij ^ a) x) := by
-  rw [MulChar.zpow_apply_coe_eq_apply_zpow, teichmuller_apply, dif_pos (Units.isUnit _)]
+  rw [MulChar.zpow_apply_coe, teichmuller_apply, dif_pos (Units.isUnit _)]
   exact Units.isUnit _
 
 theorem teichmuller_zpow_apply_ne_zero [Nontrivial R] [I.IsMaximal] (a : ℤ) (x : (R ⧸ I)ˣ) :

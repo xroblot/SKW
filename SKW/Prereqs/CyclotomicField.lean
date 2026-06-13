@@ -42,7 +42,7 @@ theorem IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (n₁ n₂ : ℕ) [Ne
     [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
     K₁.LinearDisjoint K₂ := by
   have : IsCyclotomicExtension {n₂} ℚ (IsScalarTower.toAlgHom ℚ K₂ E).fieldRange :=
-    .equiv _ ℚ K₂ (AlgHom.equivFieldRange _)
+    .equiv _ ℚ K₂ (IsScalarTower.toAlgHom ℚ K₂ E).equivFieldRange
   have : IsGalois ℚ K₁ := IsCyclotomicExtension.isGalois {n₁} ℚ K₁
   rw [IntermediateField.linearDisjoint_iff'']
   exact NumberField.linearDisjoint_of_isGalois_isCoprime_discr E _ _ <| discr_coprime n₁ n₂ K₁ _ h

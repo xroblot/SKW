@@ -3,7 +3,6 @@ import SKW.Misc
 import SKW.PRed2Mathlib.AlgebraMisc
 import SKW.PRed2Mathlib.IntermediateFields
 import SKW.PRed2Mathlib.KummerExtension
-import SKW.PRed2Mathlib.MulChars
 import SKW.PRed2Mathlib.Ideals
 import SKW.PRed2Mathlib.NumberTheory
 import SKW.Prereqs.AlgebraMisc

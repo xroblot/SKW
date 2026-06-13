@@ -41,8 +41,9 @@ theorem smul_gaussSum_eq_gaussSum' [NeZero f] [NeZero m] [Fact (Odd p)] [IsCyclo
     [Algebra F E] [IsScalarTower F E L] (τ : Gal(L/E)) :
     τ • (GaussSum hbij hζ d ^ m) = GaussSum hbij hζ d ^ m := by
   have : IsGalois ℚ L := IsCyclotomicExtension.isGalois {p * (p ^ f - 1)} ℚ L
-  convert_to (τ.restrictScalars F) • (GaussSum hbij hζ d ^ m) = _
-  rw [smul_pow', gal_gaussSum_eq_gaussSum hbij hζ hη]
+  -- fix for merge: convert_to side goal ordering changed; use explicit rfl step
+  have hτ : τ • (GaussSum hbij hζ d ^ m) = (τ.restrictScalars F) • (GaussSum hbij hζ d ^ m) := rfl
+  rw [hτ, smul_pow', gal_gaussSum_eq_gaussSum hbij hζ hη]
   obtain ⟨k, hk⟩ : ∃ k, (d : ℤ) *
       (galFEquiv p f K (τ.restrictScalars F)).val.val = d + (p ^ f - 1 : ℕ) * k := by
     have t₀ : τ.restrictScalars F • algebraMap (𝓞 K) (𝓞 L) (η ^ d) =
@@ -96,6 +97,7 @@ theorem smul_gaussSum_eq_mul_gaussSum [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ
         monoidHom_comp_addCharTrace_eq_mulShift _ _ _ e]
       · simp [hu]
       · rwa [smul_eq_galRestrict_apply (𝓞 K)] at h
+  · rfl
 
 include hη hdm in
 theorem smul_gaussSum_eq_gaussSum [NeZero m] [P.LiesOver 𝒑] (τ : Gal(L/K)) :
@@ -135,8 +137,10 @@ theorem exists_mem_gaussSum_pow_eq [NeZero f] [NeZero m] [Fact (Odd p)] [Algebra
   have : k = E ⊓ K := by
     have : p.Coprime d := (coprime_pow_sub_one p f).symm.of_dvd_right (Dvd.intro m hdm)
     convert isCyclotomicExtension_eq {m} ℚ L k _
+    -- fix for merge: convert now leaves typeclass diamond goals, closed by rfl
     convert IsCyclotomicExtension.Rat.gcd_inf (m * p) (p ^ f - 1) E K
-    rw [← hdm, mul_comm d, Nat.gcd_mul_left, this, mul_one]
+    · rw [← hdm, mul_comm d, Nat.gcd_mul_left, this, mul_one]
+    all_goals rfl
   rw [this, IntermediateField.mem_inf]
   refine ⟨?_, ?_⟩
   · rw [RingOfIntegers.coe_eq_algebraMap]
