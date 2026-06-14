@@ -111,10 +111,10 @@ theorem Subgroup.zpowers_eq_zpowers_iff' {G : Type*} [Group G] (g : G) (i j : �
   rw [le_antisymm_iff, Subgroup.zpowers_le_zpowers_iff, Subgroup.zpowers_le_zpowers_iff,
     dvd_dvd_iff_associated, associated_iff_eq, eq_comm]
 
-theorem Nat.div_dvd_div_iff {a b d : ℕ} (ha : 0 < a) (hb : 0 < b) (h₁ : b ∣ a) (h₂ : d ∣ a) :
-    a / b ∣ a / d ↔ d ∣ b := by
-  rw [Nat.div_dvd_iff_dvd_mul h₁ hb, ← Nat.mul_div_assoc _ h₂, Nat.dvd_div_iff_mul_dvd (h₂.mul_left b),
-    Nat.mul_dvd_mul_iff_right ha]
+theorem Nat.div_dvd_div_iff {k m n : ℕ} (hk : 0 < k) (hm : 0 < m) (hmk : m ∣ k) (hnk : n ∣ k) :
+    k / m ∣ k / n ↔ n ∣ m := by
+  rw [Nat.div_dvd_iff_dvd_mul hmk hm, ← Nat.mul_div_assoc _ hnk,
+    Nat.dvd_div_iff_mul_dvd (hnk.mul_left m), Nat.mul_dvd_mul_iff_right hk]
 
 @[to_additive]
 theorem Subgroup.map_top {G : Type*} [Group G] {N : Type*} [Group N] (f : G →* N) :
@@ -131,7 +131,7 @@ theorem Subgroup.exists_zpowers_eq_top_of_zpowers_eq_top {G : Type*} [Group G] {
   exact ⟨i, by simpa [Subgroup.map_top] using (congr_arg (Subgroup.map H.subtype) hx')⟩
 
 @[to_additive]
-theorem orderOf_pow_natAbs {G : Type*} [Group G] (n : ℤ) (x : G) :
+theorem orderOf_pow_natAbs {G : Type*} [Group G] {x : G} (n : ℤ) :
     orderOf (x ^ n.natAbs) = orderOf (x ^ n) := by
   obtain ⟨a, (rfl | rfl)⟩ := Int.eq_nat_or_neg n
   · simp
