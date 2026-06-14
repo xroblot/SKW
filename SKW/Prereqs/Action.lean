@@ -45,4 +45,8 @@ instance : MulAction G (nonZeroDivisors M) where
   one_smul m := Subtype.val_injective (by simp)
   mul_smul g h m := Subtype.val_injective (by simp [mul_smul])
 
+instance : MulDistribMulAction G (nonZeroDivisors M) where
+  smul_one g := Subtype.val_injective (by simp)
+  smul_mul g m n := Subtype.val_injective (by simp [smul_mul'])
+
 end
