@@ -1344,10 +1344,12 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   \label{lem:kw_mu_pth_power_ideal}
   \uses{lem:kw_mu_val_p}
   \lean{kw_mu_pth_power_ideal}
+  \leanok
   $(\mu) = \mathfrak{a}^p$ for some ideal $\mathfrak{a}$ of $\cO_F$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:kw_mu_val_p}, $p \mid v_{\mathfrak{q}}(\mu)$ for every prime
   $\mathfrak{q}$. Therefore $(\mu) = \mathfrak{a}^p$ where
   $\mathfrak{a} = \prod_{\mathfrak{q}} \mathfrak{q}^{v_{\mathfrak{q}}(\mu)/p}$.
@@ -1363,9 +1365,9 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   From $(\mu) = \mathfrak{a}^p$ and $\sigma_a(\mu) = \xi^p \mu^a$
   (by \ref{lem:kw_abelian_kummer}), we get
   $\sigma_a(\mathfrak{a})^p = \sigma_a(\mathfrak{a}^p) = \sigma_a((\mu)) =
-  (\xi^p \mu^a) = \mathfrak{a}^{pa}$. Since the ideal monoid is torsion-free,
-  $\sigma_a(\mathfrak{a}) = \mathfrak{a}^a$, hence $\sigma_a([\mathfrak{a}]) =
-  [\mathfrak{a}]^a$ for every $1 \leq a < p$.
+  (\xi^p \mu^a) = (\xi)^p \cdot \mathfrak{a}^{pa}$. Since the ideal monoid is
+  torsion-free, $\sigma_a(\mathfrak{a}) = (\xi) \cdot \mathfrak{a}^a$, hence
+  $\sigma_a([\mathfrak{a}]) = [\mathfrak{a}]^a$ for every $1 \leq a < p$.
 
   Now, $\mathfrak{a}$ is coprime to $p$: by \ref{lem:kw_not_dvd_nu} we may assume
   $(1-\zeta_p) \nmid \mu$, so $v_{\mathfrak{p}}(\mu) = 0$, hence $v_{\mathfrak{p}}(\mathfrak{a}) = 0$.
