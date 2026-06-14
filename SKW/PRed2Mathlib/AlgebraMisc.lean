@@ -116,30 +116,50 @@ theorem Nat.dvd_div_dvd_iff {a b d : ℕ} (ha : 0 < a) (hb : 0 < b) (h₁ : b �
   rw [Nat.div_dvd_iff_dvd_mul h₁ hb, ← Nat.mul_div_assoc _ h₂, Nat.dvd_div_iff_mul_dvd (h₂.mul_left b),
     Nat.mul_dvd_mul_iff_right ha]
 
+@[to_additive]
+theorem Subgroup.map_top {G : Type*} [Group G] {N : Type*} [Group N] (f : G →* N) :
+    Subgroup.map f ⊤ = f.range :=
+  (MonoidHom.range_eq_map f).symm
+
+@[to_additive]
+theorem Subgroup.exists_zpowers_eq_top_of_zpowers_eq_top {G : Type*} [Group G] {g : G}
+    (hg : Subgroup.zpowers g = ⊤) (H : Subgroup G) :
+    ∃ i : ℤ, Subgroup.zpowers (g ^ i) = H := by
+  have : IsCyclic G := isCyclic_iff_exists_zpowers_eq_top.mpr ⟨g, hg⟩
+  obtain ⟨⟨x, hx⟩, hx'⟩ := (isCyclic_iff_exists_zpowers_eq_top (α := H)).mp inferInstance
+  obtain ⟨i, rfl⟩ := (Subgroup.eq_top_iff' _).mp hg x
+  exact ⟨i, by simpa [Subgroup.map_top] using (congr_arg (Subgroup.map H.subtype) hx')⟩
+
+@[to_additive]
+theorem orderOf_pow_natAbs {G : Type*} [Group G] (n : ℤ) (x : G) :
+    orderOf (x ^ n.natAbs) = orderOf (x ^ n) := by
+  obtain ⟨a, (rfl | rfl)⟩ := Int.eq_nat_or_neg n
+  · simp
+  · simp
+
+@[to_additive]
+theorem orderOf_zpow {G : Type*} [Group G] [Finite G] {n : ℤ} (x : G) :
+    orderOf (x ^ n) = orderOf x / (orderOf x).gcd n.natAbs := by
+  rw [← orderOf_pow, orderOf_pow_natAbs]
+
+@[to_additive]
+theorem orderOf_zpow' {G : Type*} [Group G] (x : G) {n : ℤ} (h : n ≠ 0) :
+    orderOf (x ^ n) = orderOf x / (orderOf x).gcd n.natAbs := by
+  rw [← orderOf_pow' _ (Int.natAbs_ne_zero.mpr h), orderOf_pow_natAbs]
+
+@[to_additive]
 theorem IsCyclic.subgroup_le_subgroup_iff {G : Type*} [Group G] [Finite G] [hG : IsCyclic G]
     {H K : Subgroup G} :
     H ≤ K ↔ Nat.card H ∣ Nat.card K := by
-  obtain ⟨g, hg⟩ := IsCyclic.exists_monoid_generator (α := G)
-  obtain ⟨⟨x, _⟩, hx'⟩ := (isCyclic_iff_exists_zpowers_eq_top (α := H)).mp inferInstance
-  obtain ⟨⟨y, _⟩, hy'⟩ := (isCyclic_iff_exists_zpowers_eq_top (α := K)).mp inferInstance
-  obtain ⟨i, rfl⟩ := (Submonoid.mem_powers_iff _ _).mp (hg x)
-  obtain ⟨j, rfl⟩ := (Submonoid.mem_powers_iff _ _).mp (hg y)
-  have Heq : H = Subgroup.zpowers (g ^ i) := by
-    simpa [MonoidHom.map_zpowers, Subgroup.subtype_apply, eq_comm] using
-      congr_arg (Subgroup.map H.subtype) hx'
-  rw [Heq]
-  have Keq : K = Subgroup.zpowers (g ^ j) := by
-    simpa [MonoidHom.map_zpowers, Subgroup.subtype_apply, eq_comm] using
-      congr_arg (Subgroup.map K.subtype) hy'
-  rw [Keq, ← zpow_natCast, ← zpow_natCast, Subgroup.zpowers_le_zpowers_iff,
-    Nat.card_zpowers, zpow_natCast, orderOf_pow, Nat.card_zpowers, zpow_natCast, orderOf_pow]
-  rw [Nat.dvd_div_dvd_iff, Nat.gcd_comm _ i, Nat.gcd_comm _ j]
-  rw [Int.gcd_natCast_natCast, Int.gcd_natCast_natCast]
-  exact orderOf_pos g
-  exact Nat.gcd_pos_of_pos_left i (orderOf_pos g)
-  exact Nat.gcd_dvd_left (orderOf g) i
-  exact Nat.gcd_dvd_left (orderOf g) j
+  obtain ⟨g, hg⟩ := isCyclic_iff_exists_zpowers_eq_top.mp hG
+  obtain ⟨i, rfl⟩ := Subgroup.exists_zpowers_eq_top_of_zpowers_eq_top hg H
+  obtain ⟨j, rfl⟩ := Subgroup.exists_zpowers_eq_top_of_zpowers_eq_top hg K
+  rw [Subgroup.zpowers_le_zpowers_iff, Nat.card_zpowers, orderOf_zpow, Nat.card_zpowers, orderOf_zpow,
+    Nat.dvd_div_dvd_iff (orderOf_pos g) (Nat.gcd_pos_of_pos_left _ (orderOf_pos g))
+    (Nat.gcd_dvd_left (orderOf g) _) (Nat.gcd_dvd_left (orderOf g) _), Int.gcd_eq_natAbs,
+    Int.gcd_eq_natAbs, Int.natAbs_natCast, Nat.gcd_comm, Nat.gcd_comm _ (orderOf g)]
 
+@[to_additive]
 theorem IsCyclic.subgroup_eq_subgroup_iff {G : Type*} [Group G] [Finite G] [hG : IsCyclic G]
     {H K : Subgroup G} :
     H = K ↔ Nat.card H = Nat.card K := by
