@@ -36,7 +36,6 @@ theorem IntermediateField.adjoin_simple_mul {F E : Type*} [Field F] [Field E] [A
     convert IntermediateField.div_mem _ (mem_adjoin_simple_self F _) (algebraMap_mem _ y)
     rw [mul_div_cancel_right₀ x (by rwa [map_ne_zero])]
 
-@[simp]
 theorem Subgroup.map_top {G : Type*} [Group G] {N : Type*} [Group N] (f : G →* N) :
     map f ⊤ = f.range := (MonoidHom.range_eq_map f).symm
 
@@ -46,5 +45,10 @@ theorem Subgroup.map_top {G : Type*} [Group G] {N : Type*} [Group N] (f : G →*
 theorem MulEquiv.ofBijective_symm_apply_apply {M N F : Type*} [Mul M] [Mul N] [FunLike F M N]
     [MulHomClass F M N] (f : F) (hf : Function.Bijective f) (a : M) :
     (ofBijective f hf).symm (f a) = a := (symm_apply_eq (ofBijective f hf)).mpr rfl
+
+
+open nonZeroDivisors in
+example (M : Type*) [M: MonoidWithZero] (G : Type*) [SMul G M] :
+    SMul G M⁰ := by
 
 end
