@@ -51,7 +51,7 @@ lemma kw_cyclic_compositum (L : Type*) [Field L] [NumberField L] (K K' : Interme
     Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
   have he' : finrank K' L = finrank ℚ L / finrank ℚ K' :=
     Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
-  rwa [he, he', Nat.dvd_div_dvd_iff finrank_pos finrank_pos hd' hd]
+  rwa [he, he', Nat.div_dvd_div_iff finrank_pos finrank_pos hd' hd]
 
 /-- Every non-trivial extension of `ℚ` is ramified at some finite prime (Minkowski). -/
 lemma kw_minkowski

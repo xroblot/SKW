@@ -111,7 +111,7 @@ theorem Subgroup.zpowers_eq_zpowers_iff' {G : Type*} [Group G] (g : G) (i j : �
   rw [le_antisymm_iff, Subgroup.zpowers_le_zpowers_iff, Subgroup.zpowers_le_zpowers_iff,
     dvd_dvd_iff_associated, associated_iff_eq, eq_comm]
 
-theorem Nat.dvd_div_dvd_iff {a b d : ℕ} (ha : 0 < a) (hb : 0 < b) (h₁ : b ∣ a) (h₂ : d ∣ a) :
+theorem Nat.div_dvd_div_iff {a b d : ℕ} (ha : 0 < a) (hb : 0 < b) (h₁ : b ∣ a) (h₂ : d ∣ a) :
     a / b ∣ a / d ↔ d ∣ b := by
   rw [Nat.div_dvd_iff_dvd_mul h₁ hb, ← Nat.mul_div_assoc _ h₂, Nat.dvd_div_iff_mul_dvd (h₂.mul_left b),
     Nat.mul_dvd_mul_iff_right ha]
@@ -155,7 +155,7 @@ theorem IsCyclic.subgroup_le_subgroup_iff {G : Type*} [Group G] [Finite G] [hG :
   obtain ⟨i, rfl⟩ := Subgroup.exists_zpowers_eq_top_of_zpowers_eq_top hg H
   obtain ⟨j, rfl⟩ := Subgroup.exists_zpowers_eq_top_of_zpowers_eq_top hg K
   rw [Subgroup.zpowers_le_zpowers_iff, Nat.card_zpowers, orderOf_zpow, Nat.card_zpowers, orderOf_zpow,
-    Nat.dvd_div_dvd_iff (orderOf_pos g) (Nat.gcd_pos_of_pos_left _ (orderOf_pos g))
+    Nat.div_dvd_div_iff (orderOf_pos g) (Nat.gcd_pos_of_pos_left _ (orderOf_pos g))
     (Nat.gcd_dvd_left (orderOf g) _) (Nat.gcd_dvd_left (orderOf g) _), Int.gcd_eq_natAbs,
     Int.gcd_eq_natAbs, Int.natAbs_natCast, Nat.gcd_comm, Nat.gcd_comm _ (orderOf g)]
 
