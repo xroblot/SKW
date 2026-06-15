@@ -5,10 +5,13 @@ import SKW.PRed2Mathlib.IntermediateFields
 import SKW.PRed2Mathlib.KummerExtension
 import SKW.PRed2Mathlib.Ideals
 import SKW.PRed2Mathlib.NumberTheory
+import SKW.PRed2Mathlib.FractionalIdeal
 import SKW.Prereqs.Action
 import SKW.Prereqs.AlgebraMisc
+import SKW.Prereqs.ClassGroup
 import SKW.Prereqs.CyclotomicField
 import SKW.Prereqs.Digits
+import SKW.Prereqs.FractionalIdeal
 import SKW.Prereqs.Ideals
 import SKW.Prereqs.IntermediateFields
 import SKW.Prereqs.KummerExtension
