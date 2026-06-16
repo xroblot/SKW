@@ -280,7 +280,7 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
 include hrF hμ hIrr in
 /-- The ideal `(μ)` is a `p`-th power: `(μ) = 𝔞ᵖ` for some ideal `𝔞` of `𝓞_F`. -/
 lemma kw_mu_pth_power_ideal (hLram : UnramifiedOutside L p) (hp' : Odd p) :
-    ∃ 𝔞 : Ideal (𝓞 F), 𝔞 ^ p = span {(μ : 𝓞 F)} := by
+    ∃ 𝔞 : Ideal (𝓞 F), 𝔞 ≠ ⊥ ∧ 𝔞 ^ p = span {(μ : 𝓞 F)} := by
   have hsμ : span {μ} ≠ ⊥ := by simpa
   have := Ideal.finprod_heightOneSpectrum_pow_multiplicity hsμ
   let v : IsDedekindDomain.HeightOneSpectrum (𝓞 F) → ℕ :=
@@ -294,7 +294,7 @@ lemma kw_mu_pth_power_ideal (hLram : UnramifiedOutside L p) (hp' : Odd p) :
     exact Function.HasFiniteMulSupport.of_comp this (one_pow _) (pow_left_injective hp.out.ne_zero)
   have := Ideal.finprod_heightOneSpectrum_pow_multiplicity hsμ
   simp only [hv, mul_comm p, pow_mul, ← finprod_pow hv'] at this
-  exact ⟨_, this⟩
+  exact ⟨_, by rwa [← zero_eq_bot, ← pow_ne_zero_iff hp.out.ne_zero, this], this⟩
 
 include hrF hμ hIrr in
 /-- One can choose ν such that the prime ideal above `p` does not divide `⟨ν⟩`. -/

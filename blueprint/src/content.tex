@@ -944,6 +944,8 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 
 \begin{corollary}
   \label{cor:stickelberger_annihilates}
+  \lean{Stickelberger}
+  \leanok
   \uses{thm:stickelberger}
   The Stickelberger element $\Theta$ annihilates the ideal class group
   $\mathrm{Cl}(\QQ(\zeta_m))$: for every ideal class $c$,
@@ -953,6 +955,7 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
 \end{corollary}
 
 \begin{proof}
+  \leanok
   Every ideal class of a number field contains an integral ideal whose norm is
   coprime to any prescribed integer, so choose a representative $\mathfrak{b} \in c$ with
   $\gcd(N\mathfrak{b}, 2m) = 1$. Then $N\mathfrak{b}$ is odd and coprime to $m$, so applying
@@ -1383,11 +1386,14 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
 \begin{lemma}
   \label{lem:kw_class_trivial}
+  \lean{kw_class_trivial}
+  \leanok
   \uses{lem:kw_mu_pth_power_ideal, cor:stickelberger_annihilates, lem:kw_abelian_kummer}
   The ideal class $[\mathfrak{a}]$ is trivial, i.e., $\mathfrak{a}$ is principal.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   From $(\mu) = \mathfrak{a}^p$ and $\sigma_a(\mu) = \xi^p \mu^a$
   (by \ref{lem:kw_abelian_kummer}), we get
   $\sigma_a(\mathfrak{a})^p = \sigma_a(\mathfrak{a}^p) = \sigma_a((\mu)) =
@@ -1414,12 +1420,15 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
 \begin{lemma}
   \label{lem:kw_mu_unit}
+  \lean{kw_mu_unit}
+  \leanok
   \uses{lem:kw_class_trivial}
   There exists a unit $\eta \in \cO_F^\times$ such that $\mu = \alpha^p \eta$
   for some $\alpha \in \cO_F$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:kw_class_trivial}, $\mathfrak{a} = (\alpha)$ for some
   $\alpha \in \cO_F$. Then $(\mu) = \mathfrak{a}^p = (\alpha^p)$, so
   $\mu/\alpha^p \in \cO_F^\times$. Setting $\eta = \mu/\alpha^p$ gives
@@ -1434,20 +1443,30 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \end{lemma}
 
 \begin{proof}
-  Write $\eta = \zeta_p^t \varepsilon$ where $\varepsilon$ is a unit in the
-  maximal real subfield of $F$, so $\sigma_{-1}(\varepsilon) = \varepsilon$.
-  Since $L/\QQ$ is abelian, by \ref{lem:kw_abelian_kummer} applied to
-  $\sigma_{-1}$, there exists $\xi \in F^\times$ such that
-  $\sigma_{-1}(\mu) = \xi^p \mu^{-1}$. Since $\mu = \alpha^p \zeta_p^t \varepsilon$,
+  Let $\sigma_{-1}$ denote complex conjugation on $F$, so $\sigma_{-1}(\zeta_p) =
+  \zeta_p^{-1}$. Every unit of the CM field $F$ is a root of unity times a unit of
+  its maximal real subfield, so we may write $\eta = \zeta_p^t \varepsilon$ with
+  $\sigma_{-1}(\varepsilon) = \varepsilon$. Since $L/\QQ$ is abelian,
+  \ref{lem:kw_abelian_kummer} applied to $\sigma_{-1}$ gives $\xi \in F^\times$ with
+  $\sigma_{-1}(\mu) = \xi^p \mu^{-1}$. From $\mu = \alpha^p \zeta_p^t \varepsilon$,
   \[
-    \sigma_{-1}(\mu) = \alpha^p \zeta_p^{-t} \varepsilon
+    \sigma_{-1}(\mu) = \sigma_{-1}(\alpha)^p\, \zeta_p^{-t}\, \varepsilon
     \quad \text{and} \quad
-    \xi^p \mu^{-1} = \xi^p \alpha^{-p} \zeta_p^{-t} \varepsilon^{-1}.
+    \xi^p \mu^{-1} = \xi^p \alpha^{-p}\, \zeta_p^{-t}\, \varepsilon^{-1}.
   \]
-  Equating, $\varepsilon^2 = (\xi/\alpha)^{-p}$, so $\varepsilon$ is a $p$-th
-  power in $F^\times$. Therefore $\mu = \alpha^p \zeta_p^t \varepsilon =
-  (\alpha')^p \zeta_p^t$ for some $\alpha' \in \cO_F$, and
-  $L = F(\sqrt[p]{\mu}) = F(\sqrt[p]{\zeta_p^t}) \subseteq \QQ(\zeta_{p^2})$.
+  Equating and cancelling $\zeta_p^{-t}$ gives $\sigma_{-1}(\alpha)^p \varepsilon =
+  \xi^p \alpha^{-p} \varepsilon^{-1}$, that is,
+  \[
+    \varepsilon^2 = \left(\frac{\xi}{\alpha\, \sigma_{-1}(\alpha)}\right)^{\!p},
+  \]
+  so $\varepsilon^2$ is a $p$-th power in $F^\times$. As $p$ is odd, $\gcd(2,p) = 1$,
+  and writing $1 = 2u + pv$ we get $\varepsilon = (\varepsilon^2)^u (\varepsilon^v)^p$,
+  a $p$-th power; say $\varepsilon = \delta^p$ with $\delta \in \cO_F^\times$ (its
+  $p$-th root is again a unit). Hence $\mu = (\alpha\delta)^p \zeta_p^t$ with
+  $\alpha\delta \in \cO_F$, and
+  \[
+    L = F(\sqrt[p]{\mu}) = F(\sqrt[p]{\zeta_p^t}) \subseteq \QQ(\zeta_{p^2}).
+  \]
   Since $[L:F] = p = [\QQ(\zeta_{p^2}):F]$, we conclude $L = \QQ(\zeta_{p^2})$.
 \end{proof}
 

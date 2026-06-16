@@ -5,6 +5,8 @@ public import Mathlib.NumberTheory.RamificationInertia.Unramified
 public import Mathlib.RingTheory.Ideal.Int
 public import Mathlib.RingTheory.RamificationInertia.Ramification
 
+public import SKW.PRed2Mathlib.Ideals
+
 @[expose] public section
 
 open NumberField

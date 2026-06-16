@@ -44,4 +44,11 @@ theorem MulEquiv.ofBijective_symm_apply_apply {M N F : Type*} [Mul M] [Mul N] [F
     (ofBijective f hf).symm (f a) = a := (symm_apply_eq (ofBijective f hf)).mpr rfl
 
 
+-- @[to_additive (attr := simp) mod_addOrderOf_nsmul]
+-- lemma pow_mod_of_orderOf_dvd (x : G) (n : ℕ) : x ^ (n % orderOf x) = x ^ n :=
+--   calc
+--     x ^ (n % orderOf x) = x ^ (n % orderOf x + orderOf x * (n / orderOf x)) := by
+--         simp [pow_add, pow_mul, pow_orderOf_eq_one]
+--     _ = x ^ n := by rw [Nat.mod_add_div]
+
 end
