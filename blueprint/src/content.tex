@@ -1213,7 +1213,7 @@ The goal of this chapter is to prove the following theorem.
 \begin{proposition}
   \label{prop:kw_exponent_p}
   \uses{thm:stickelberger, lem:kw_kummer, lem:kw_abelian_kummer,
-        lem:kw_split_prime, lem:kw_not_dvd_nu, lem:kw_mu_pth_power_ideal, lem:kw_class_trivial,
+        lem:kw_split_prime, lem:kw_mu_val_p, lem:kw_mu_pth_power_ideal, lem:kw_class_trivial,
         lem:kw_mu_unit, lem:kw_unit_root_of_unity, lem:kw_ramification_reduction}
   Let $p$ be an odd prime. The maximal abelian extension of $\QQ$ of
   exponent $p$ unramified outside $p$ is cyclic of degree $p$: it is
@@ -1227,8 +1227,6 @@ The goal of this chapter is to prove the following theorem.
   \begin{enumerate}
     \item By \ref{lem:kw_kummer}, $L = F(\sqrt[p]{\mu})$ for some $\mu \in
       \cO_F$, $\mu \neq 0$, with $X^p - \mu$ irreducible over $F$.
-    \item By \ref{lem:kw_not_dvd_nu}, we may replace $\mu$ so that additionally
-      $(1 - \zeta_p) \nmid \mu$.
     \item By \ref{lem:kw_mu_val_p}, $p \mid v_{\mathfrak{q}}(\mu)$ for every prime
       $\mathfrak{q}$ of $\cO_F$.
     \item By \ref{lem:kw_mu_pth_power_ideal}, $(\mu) = \mathfrak{a}^p$ for
@@ -1444,28 +1442,29 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
 \begin{proof}
   Let $\sigma_{-1}$ denote complex conjugation on $F$, so $\sigma_{-1}(\zeta_p) =
-  \zeta_p^{-1}$. Every unit of the CM field $F$ is a root of unity times a unit of
-  its maximal real subfield, so we may write $\eta = \zeta_p^t \varepsilon$ with
-  $\sigma_{-1}(\varepsilon) = \varepsilon$. Since $L/\QQ$ is abelian,
-  \ref{lem:kw_abelian_kummer} applied to $\sigma_{-1}$ gives $\xi \in F^\times$ with
-  $\sigma_{-1}(\mu) = \xi^p \mu^{-1}$. From $\mu = \alpha^p \zeta_p^t \varepsilon$,
+  \zeta_p^{-1}$. Every unit of the CM field $F$ is a root of unity times a unit of its
+  maximal real subfield, so write $\eta = \zeta_p^{t_0} \varepsilon$ with
+  $\sigma_{-1}(\varepsilon) = \varepsilon$. With $\mu = \alpha^p \eta$, squaring gives
   \[
-    \sigma_{-1}(\mu) = \sigma_{-1}(\alpha)^p\, \zeta_p^{-t}\, \varepsilon
-    \quad \text{and} \quad
-    \xi^p \mu^{-1} = \xi^p \alpha^{-p}\, \zeta_p^{-t}\, \varepsilon^{-1}.
+    \mu^2 = \alpha^{2p}\, \zeta_p^{t}\, \varepsilon^2, \qquad t := 2t_0 .
   \]
-  Equating and cancelling $\zeta_p^{-t}$ gives $\sigma_{-1}(\alpha)^p \varepsilon =
-  \xi^p \alpha^{-p} \varepsilon^{-1}$, that is,
+  Since $L/\QQ$ is abelian, \ref{lem:kw_abelian_kummer} applied to $\sigma_{-1}$ gives
+  $\xi \in F^\times$ with $\sigma_{-1}(\mu) = \xi^p \mu^{-1}$, hence
+  $\sigma_{-1}(\mu^2) = \xi^{2p} \mu^{-2}$. Applying $\sigma_{-1}$ to the displayed identity,
   \[
-    \varepsilon^2 = \left(\frac{\xi}{\alpha\, \sigma_{-1}(\alpha)}\right)^{\!p},
+    \sigma_{-1}(\alpha)^{2p}\, \zeta_p^{-t}\, \varepsilon^2
+      = \xi^{2p}\, \alpha^{-2p}\, \zeta_p^{-t}\, \varepsilon^{-2}.
   \]
-  so $\varepsilon^2$ is a $p$-th power in $F^\times$. As $p$ is odd, $\gcd(2,p) = 1$,
-  and writing $1 = 2u + pv$ we get $\varepsilon = (\varepsilon^2)^u (\varepsilon^v)^p$,
-  a $p$-th power; say $\varepsilon = \delta^p$ with $\delta \in \cO_F^\times$ (its
-  $p$-th root is again a unit). Hence $\mu = (\alpha\delta)^p \zeta_p^t$ with
+  Cancelling $\zeta_p^{-t}$ gives
+  \[
+    \varepsilon^4 = \left(\frac{\xi}{\alpha\, \sigma_{-1}(\alpha)}\right)^{\!2p},
+  \]
+  so $\varepsilon^4$ is a $p$-th power in $F^\times$. As $p$ is odd, $\gcd(4,p) = 1$, so
+  $\varepsilon$ is a $p$-th power, say $\varepsilon = \delta^p$ with $\delta \in \cO_F^\times$.
+  Hence $\mu = \alpha^p \zeta_p^{t_0} \varepsilon = (\alpha\delta)^p \zeta_p^{t_0}$ with
   $\alpha\delta \in \cO_F$, and
   \[
-    L = F(\sqrt[p]{\mu}) = F(\sqrt[p]{\zeta_p^t}) \subseteq \QQ(\zeta_{p^2}).
+    L = F(\sqrt[p]{\mu}) = F(\sqrt[p]{\zeta_p^{t_0}}) \subseteq \QQ(\zeta_{p^2}).
   \]
   Since $[L:F] = p = [\QQ(\zeta_{p^2}):F]$, we conclude $L = \QQ(\zeta_{p^2})$.
 \end{proof}

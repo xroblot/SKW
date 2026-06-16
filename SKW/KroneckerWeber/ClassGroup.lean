@@ -87,7 +87,7 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGaloi
   have : IsCMField F :=
     IsCyclotomicExtension.Rat.isCMField F (S := {p}) <|
       exists_eq_left.mpr <| (Nat.Prime.odd_iff hp.out).mp hp'
-  
+
   sorry
 
 /-- Every cyclic extension of `ℚ` of prime degree `p` (odd) unramified outside `p` is contained
