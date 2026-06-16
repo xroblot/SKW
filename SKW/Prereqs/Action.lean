@@ -2,12 +2,22 @@ module
 
 public import Mathlib.Algebra.GroupWithZero.NonZeroDivisors
 public import Mathlib.Algebra.Group.Action.Defs
-public import Mathlib.Algebra.SMulWithZero
+public import Mathlib.Algebra.GroupWithZero.Action.Defs
 
 @[expose] public section
 
-variable {G M : Type*} [Group G] [MonoidWithZero M]
-  [MulDistribMulAction G M] [SMulZeroClass G M]
+variable {G M : Type*} [Group G] [MonoidWithZero M] [MulDistribMulAction G M]
+
+/-- For a group acting on a monoid with zero via `MulDistribMulAction`, the action sends zero to
+zero. The proof uses only `smul_mul'`, `smul_inv_smul` (group invertibility), and `mul_zero`. -/
+theorem MulDistribMulAction.smul_zero (g : G) : g • (0 : M) = 0 := by
+  have h : g • (0 : M) = (g • (0 : M)) * 0 := by
+    conv_lhs => rw [show (0 : M) = 0 * (g⁻¹ • (0 : M)) from (zero_mul _).symm]
+    rw [smul_mul', smul_inv_smul]
+  exact h.trans (mul_zero _)
+
+instance MulDistribMulAction.toSMulZeroClass : SMulZeroClass G M where
+  smul_zero g := MulDistribMulAction.smul_zero g
 
 theorem smul_mem_nonZeroDivisorsLeft (g : G) {m : M} (hm : m ∈ nonZeroDivisorsLeft M) :
     g • m ∈ nonZeroDivisorsLeft M := fun y hy => by
@@ -46,7 +56,7 @@ instance : MulAction G (nonZeroDivisors M) where
   mul_smul g h m := Subtype.val_injective (by simp [mul_smul])
 
 instance : MulDistribMulAction G (nonZeroDivisors M) where
-  smul_one g := Subtype.val_injective (by simp)
+  smul_one g := Subtype.val_injective (by simp [MulDistribMulAction.smul_one])
   smul_mul g m n := Subtype.val_injective (by simp [smul_mul'])
 
 end

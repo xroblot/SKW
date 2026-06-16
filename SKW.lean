@@ -9,10 +9,12 @@ import SKW.PRed2Mathlib.FractionalIdeal
 import SKW.Prereqs.Action
 import SKW.Prereqs.AlgebraMisc
 import SKW.Prereqs.ClassGroup
+import SKW.Prereqs.ClassGroupCoprime
 import SKW.Prereqs.CyclotomicField
 import SKW.Prereqs.Digits
 import SKW.Prereqs.FractionalIdeal
 import SKW.Prereqs.Ideals
+import SKW.Prereqs.IdealNorm
 import SKW.Prereqs.IntermediateFields
 import SKW.Prereqs.KummerExtension
 import SKW.Prereqs.MulChars

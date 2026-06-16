@@ -1,14 +1,9 @@
 module
 
-public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
-public import Mathlib.NumberTheory.NumberField.Units.Basic
-public import Mathlib.NumberTheory.RamificationInertia.Ramification
-public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
-public import Mathlib.FieldTheory.LinearDisjoint
+public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.RamificationInertia.Unramified
+public import Mathlib.RingTheory.Ideal.Int
 public import Mathlib.RingTheory.RamificationInertia.Ramification
-
-public import SKW.Prereqs.AlgebraMisc
-public import SKW.PRed2Mathlib.Ideals
 
 @[expose] public section
 
@@ -19,6 +14,16 @@ open NumberField
 theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [IsDedekindDomain S]
     [Module.Free ℤ S] (I : Ideal S) :
     Ideal.absNorm I = Nat.card (S ⧸ I) := rfl
+
+-- theorem Ideal.isCoprime_of_coprime_absNorm {S : Type*} [CommRing S] [IsDedekindDomain S]
+--     [Module.Free ℤ S] {I J : Ideal S} (h : I.absNorm.Coprime J.absNorm) :
+--     IsCoprime I J := by
+--   refine isCoprime_iff_exists.mpr ⟨(absNorm I) * (absNorm I).gcdA (absNorm J), ?_,
+--     (absNorm J) * (absNorm I).gcdB (absNorm J), ?_, ?_⟩
+--   · exact mul_mem_right _ I (absNorm_mem I)
+--   · exact mul_mem_right _ J (absNorm_mem J)
+--   · simp only [← Int.cast_natCast (R := S), ← Int.cast_mul, ← Int.cast_add,
+--       ← Nat.gcd_eq_gcd_ab I.absNorm J.absNorm, h, Nat.cast_one, Int.cast_one]
 
 theorem Ideal.multiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
     multiplicity I ⊤ = 0 := by
@@ -159,4 +164,3 @@ open Pointwise in
 theorem Ideal.smul_span {M : Type*} {R : Type*} [Group M] [Semiring R] [MulSemiringAction M R]
     {m : M} {r : R} : m • span {r} = span {m • r} := by
   simp [pointwise_smul_def, map_span]
-

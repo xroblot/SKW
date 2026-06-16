@@ -2,14 +2,18 @@ module
 
 public import Mathlib.NumberTheory.RamificationInertia.Galois
 public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+public import Mathlib.RingTheory.Ideal.IsPrincipal
 
 public import SKW.Stickelberger.Factorization
+public import SKW.Prereqs.ClassGroup
+public import SKW.Prereqs.ClassGroupCoprime
+public import SKW.Prereqs.IdealNorm
 
 @[expose] public section
 
 open Ideal NumberField IntermediateField Pointwise IsCyclotomicExtension.Rat
 
-variable (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero m]
+variable (m : ℕ) (k : Type*) [Field k] [NumberField k] [NeZero m]
   [IsCyclotomicExtension {m} ℚ k] (p : ℕ) [hp : Fact (p.Prime)] [Fact (Odd p)] (hp' : ¬ p ∣ m)
   (𝔭 : Ideal (𝓞 k)) [𝔭.IsMaximal] [𝔭.LiesOver (span {(p : ℤ)})]
 
@@ -87,7 +91,7 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
   simp_rw [this, Ideal.map_pow]
 
 include hp' in
-theorem Stickelberger :
+theorem Stickelberger'' :
     Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val) := by
   let f := orderOf (p : ZMod m)
   have : NeZero f := ⟨orderOf_ne_zero_iff.mpr <|
@@ -109,4 +113,45 @@ theorem Stickelberger :
     to_finiteDimensional := adjoin.finiteDimensional <| hξ₀.isIntegral' (NeZero.pos _) }
   have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ ℚ⟮ξ₀⟯ :=
     (isCyclotomicExtension_singleton_iff_eq_adjoin _ ℚ (AlgebraicClosure k) ℚ⟮ξ₀⟯ hξ₀).mpr rfl
-  exact Stickelberger_aux k m p 𝔭 f d hdm rfl ℚ⟮ξ₀⟯
+  exact Stickelberger_aux m k p 𝔭 f d hdm rfl ℚ⟮ξ₀⟯
+
+theorem Stickelberger' (I : Ideal (𝓞 k)) (hI₁ : Odd I.absNorm) (hI₂ : m.gcd I.absNorm = 1) :
+    Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • I) ^ a.val.val) := by
+  have hI : I ≠ ⊥ := by
+    contrapose! hI₁
+    simp [hI₁]
+  rw [← Ideal.mem_isPrincipalSubmonoid_iff, ← Ideal.prod_normalizedFactors_eq_self hI]
+  simp_rw  (config := {singlePass := true}) [← smul_pow', ← Multiset.map_id', ← Multiset.prod_map_pow]
+  simp_rw [pointwise_smul_def, ← mapHom_apply, map_multiset_prod, Multiset.map_map]
+  rw [← Multiset.prod_map_prod]
+  refine Submonoid.multiset_prod_mem _ _ (fun f hf ↦ mem_isPrincipalSubmonoid_iff.mp ?_)
+  by_cases hf₀ : f = 0
+  · simpa [hf₀] using! bot_isPrincipal
+  rw [← Subtype.coe_mk f (mem_nonZeroDivisors_of_ne_zero hf₀)]
+  obtain ⟨P, hP, rfl⟩ := Multiset.mem_map.mp hf
+  obtain ⟨hP₁, hP₂⟩ := (UniqueFactorizationMonoid.mem_normalizedFactors_iff hI).mp hP
+  let p := (under ℤ P).absNorm
+  have hI₃ : p ∣ absNorm I := (Int.absNorm_under_dvd_absNorm P).trans <| map_dvd absNorm hP₂
+  have : P.IsMaximal := (isPrime_of_prime hP₁).isMaximal <| Prime.ne_zero hP₁
+  have hp : Fact p.Prime := ⟨Nat.absNorm_under_prime P⟩
+  have : Fact (Odd p) := ⟨by
+    contrapose! hI₁
+    rw [Nat.not_odd_iff_even] at hI₁ ⊢
+    exact hI₁.trans_dvd hI₃⟩
+  simp only [Function.comp_apply, mapHom_apply, map_pow, mem_isPrincipalSubmonoid_iff]
+  refine Stickelberger'' m k p ?_ P
+  contrapose! hI₂
+  exact Nat.not_coprime_of_dvd_of_dvd hp.out.one_lt hI₂ hI₃
+
+theorem Stickelberger (C : ClassGroup (𝓞 k)) :
+    ∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • C) ^ a.val.val = 1 := by
+  obtain ⟨⟨I, hI⟩, rfl, hI'⟩ := ClassGroup.exists_mk0_eq_and_isCoprime C
+    (J := span {(2*m : 𝓞 k)}) (by simpa using NeZero.ne m)
+  simp_rw [ClassGroup.smul_mk0, ← map_pow, ← map_prod]
+  rw [ClassGroup.mk0_eq_one_iff]
+  simp only [SubmonoidClass.coe_finsetProd, SubmonoidClass.coe_pow, nonZeroDivisors.val_smul]
+  have hcop : Nat.Coprime (Ideal.absNorm I) (2 * m) :=
+    Ideal.coprime_absNorm_of_isCoprime_span (by exact_mod_cast hI')
+  apply Stickelberger'
+  · exact Nat.coprime_two_right.mp (hcop.coprime_dvd_right (dvd_mul_right 2 m))
+  · exact (hcop.coprime_dvd_right (dvd_mul_left m 2)).symm

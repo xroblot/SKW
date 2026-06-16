@@ -942,6 +942,32 @@ $\sigma_a(\zeta_m) = \zeta_m^a$. The \emph{Stickelberger element} is
   $(g_d^m) = \tilde{\fp}_0^{\Theta}$.
 \end{proof}
 
+\begin{corollary}
+  \label{cor:stickelberger_annihilates}
+  \uses{thm:stickelberger}
+  The Stickelberger element $\Theta$ annihilates the ideal class group
+  $\mathrm{Cl}(\QQ(\zeta_m))$: for every ideal class $c$,
+  \[
+    c^{\Theta} = \prod_{\substack{a = 1 \\ (a,m) = 1}}^{m} \sigma_a^{-1}(c)^{a} = 1.
+  \]
+\end{corollary}
+
+\begin{proof}
+  Every ideal class of a number field contains an integral ideal whose norm is
+  coprime to any prescribed integer, so choose a representative $\mathfrak{b} \in c$ with
+  $\gcd(N\mathfrak{b}, 2m) = 1$. Then $N\mathfrak{b}$ is odd and coprime to $m$, so applying
+  \ref{thm:stickelberger} to each prime factor of $\mathfrak{b}$ and multiplying shows
+  that $\mathfrak{b}^{\Theta}$ is principal. Hence
+  $c^{\Theta} = [\mathfrak{b}]^{\Theta} = [\mathfrak{b}^{\Theta}] = 1$.
+\end{proof}
+
+\begin{remark}
+  Mathematically, coprimality of the representative to $m$ alone suffices for
+  Stickelberger's theorem. We additionally require the norm to be odd (i.e.\
+  coprimality to $2m$) only because the formalized form of \ref{thm:stickelberger}
+  is proved for primes of odd residue characteristic.
+\end{remark}
+
 \chapter{The Kronecker-Weber theorem}
 
 \section{Reduction to the prime degree case}
@@ -1357,7 +1383,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
 \begin{lemma}
   \label{lem:kw_class_trivial}
-  \uses{lem:kw_not_dvd_nu, lem:kw_mu_pth_power_ideal, thm:stickelberger, lem:kw_abelian_kummer}
+  \uses{lem:kw_mu_pth_power_ideal, cor:stickelberger_annihilates, lem:kw_abelian_kummer}
   The ideal class $[\mathfrak{a}]$ is trivial, i.e., $\mathfrak{a}$ is principal.
 \end{lemma}
 
@@ -1367,25 +1393,23 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
   $\sigma_a(\mathfrak{a})^p = \sigma_a(\mathfrak{a}^p) = \sigma_a((\mu)) =
   (\xi^p \mu^a) = (\xi)^p \cdot \mathfrak{a}^{pa}$. Since the ideal monoid is
   torsion-free, $\sigma_a(\mathfrak{a}) = (\xi) \cdot \mathfrak{a}^a$, hence
-  $\sigma_a([\mathfrak{a}]) = [\mathfrak{a}]^a$ for every $1 \leq a < p$.
+  $\sigma_a(c) = c^a$ for the ideal class $c = [\mathfrak{a}]$ and every
+  $1 \leq a < p$.
 
-  Now, $\mathfrak{a}$ is coprime to $p$: by \ref{lem:kw_not_dvd_nu} we may assume
-  $(1-\zeta_p) \nmid \mu$, so $v_{\mathfrak{p}}(\mu) = 0$, hence $v_{\mathfrak{p}}(\mathfrak{a}) = 0$.
-  By \ref{thm:stickelberger} applied with $m = p$, the ideal
-  $\mathfrak{a}^{\Theta}$ is principal in $\QQ(\zeta_p)$, where
-  $\Theta = \sum_{a=1}^{p-1} a\sigma_a^{-1} \in \ZZ[G]$. We compute
-  $[\mathfrak{a}]^{\Theta}$:
+  Note that we work throughout with the \emph{class} $c$: unlike in the per-ideal
+  form of Stickelberger, we never need $\mathfrak{a}$ itself to be coprime to $p$
+  or to have odd norm. By \ref{cor:stickelberger_annihilates} applied with
+  $m = p$, the class $c$ is annihilated by the Stickelberger element $\Theta =
+  \sum_{a=1}^{p-1} a\sigma_a^{-1} \in \ZZ[G]$. We compute $c^{\Theta}$:
   \[
-    [\mathfrak{a}]^{\Theta} = \prod_{a=1}^{p-1} \sigma_a^{-1}([\mathfrak{a}])^a
-    = \prod_{a=1}^{p-1} [\mathfrak{a}]^{a^{-1} \cdot a} = [\mathfrak{a}]^{p-1},
+    1 = c^{\Theta} = \prod_{a=1}^{p-1} \sigma_a^{-1}(c)^a
+    = \prod_{a=1}^{p-1} c^{a^{-1} \cdot a} = c^{p-1},
   \]
-  where we used $\sigma_a^{-1}([\mathfrak{a}]) = [\mathfrak{a}]^{a^{-1}}$
-  (since $\sigma_{a^{-1}}([\mathfrak{a}]) = [\mathfrak{a}]^{a^{-1}}$).
-  Since $(\mu) = \mathfrak{a}^p$, the ideal $\mathfrak{a}^p$ is principal,
-  so $[\mathfrak{a}]^p = 1$ in the class group. Therefore
-  $[\mathfrak{a}]^{p-1} = [\mathfrak{a}]^{-1}$, and since
-  $[\mathfrak{a}]^{\Theta} = 1$ (as $\mathfrak{a}^{\Theta}$ is principal),
-  we get $[\mathfrak{a}]^{-1} = 1$, i.e. $[\mathfrak{a}] = 1$.
+  where we used $\sigma_a^{-1}(c) = \sigma_{a^{-1}}(c) = c^{a^{-1}}$, with
+  $a^{-1}$ the inverse of $a$ modulo $p$. Since $(\mu) = \mathfrak{a}^p$, the
+  ideal $\mathfrak{a}^p$ is principal, so $c^p = 1$ and hence
+  $c^{p-1} = c^{-1}$. Combining with $c^{\Theta} = 1$ gives $c^{-1} = 1$, i.e.\
+  $c = [\mathfrak{a}] = 1$ and $\mathfrak{a}$ is principal.
 \end{proof}
 
 \begin{lemma}
