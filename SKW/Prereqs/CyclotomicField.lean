@@ -3,8 +3,10 @@ module
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.IntermediateFields
 public import SKW.Prereqs.NumberTheory
+public import SKW.Prereqs.CMField
 
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
+public import Mathlib.NumberTheory.NumberField.CMField
 
 @[expose] public section
 
@@ -12,6 +14,28 @@ theorem IsPrimitiveRoot.isIntegral' {n : ℕ} {K L : Type*} [CommRing K] [CommRi
     {μ : L} (h : IsPrimitiveRoot μ n) (hpos : 0 < n) :
     IsIntegral K μ :=
   IsIntegral.tower_top (h.isIntegral hpos)
+
+/-- Companion to `orderOf_pow'`: if every prime factor of `m` divides `orderOf (y ^ m)`, then
+`orderOf y = m * orderOf (y ^ m)`. -/
+theorem orderOf_eq_mul_orderOf_pow {M : Type*} [Monoid M] {y : M} {m : ℕ} (hm : m ≠ 0)
+    (h : ∀ q, q.Prime → q ∣ m → q ∣ orderOf (y ^ m)) : orderOf y = m * orderOf (y ^ m) := by
+  have h₁ : m / Nat.gcd (orderOf y) m = 1 := by
+    rw [Nat.eq_one_iff_not_exists_prime_dvd]
+    refine fun q hq hqd ↦ hq.one_lt.ne' <| Nat.dvd_one.mp ?_
+    refine (Nat.coprime_div_gcd_div_gcd (Nat.gcd_pos_of_pos_right _ hm.bot_lt)).symm ▸ Nat.dvd_gcd hqd ?_
+    rw [← orderOf_pow' y hm]
+    exact h q hq (hqd.trans (Nat.div_dvd_of_dvd (Nat.gcd_dvd_right _ _)))
+  have h₂ : Nat.gcd (orderOf y) m = m := by
+    conv_rhs => rw [← Nat.mul_div_cancel' (Nat.gcd_dvd_right (orderOf y) m), h₁, mul_one]
+  rw [orderOf_pow' y hm, h₂, Nat.mul_div_cancel' (h₂ ▸ Nat.gcd_dvd_left (orderOf y) m)]
+
+/-- An `m`-th root of a primitive `n`-th root of unity is a primitive `(m * n)`-th root of unity,
+provided every prime factor of `m` divides `n`. -/
+theorem IsPrimitiveRoot.of_pow_eq {M : Type*} [CommMonoid M] {ζ y : M} {m n : ℕ}
+    (h : IsPrimitiveRoot ζ n) (hy : y ^ m = ζ) (hm : m ≠ 0)
+    (hmn : ∀ q, q.Prime → q ∣ m → q ∣ n) : IsPrimitiveRoot y (m * n) := by
+  rw [IsPrimitiveRoot.iff_orderOf, orderOf_eq_mul_orderOf_pow hm
+    (fun q hq hqm => by rw [hy, ← h.eq_orderOf]; exact hmn q hq hqm), hy, ← h.eq_orderOf]
 
 /-! ### IsCyclotomicExtension -/
 
@@ -113,3 +137,37 @@ theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_smul {E F :Type*} [Field 
   rw [← IsFractionRing.map_apply_algebraMap (K := E) hf]
   have := ringHom_galEquivZMod_apply (F := F) (IsFractionRing.map hf) a (algebraMap (𝓞 E) E x)
   rwa [IsFractionRing.map_apply_algebraMap] at this
+
+/-- The automorphism of `ℚ(ζ_n)` corresponding to `a ∈ (ℤ/nℤ)ˣ` under `galEquivZMod` acts on every
+`n`-th root of unity as raising to the `z`-th power, for any integer `z` representing `a`. -/
+theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_apply_of_pow_eq {n : ℕ} [NeZero n]
+    {F : Type*} [Field F] [NumberField F] [IsCyclotomicExtension {n} ℚ F] {a : (ZMod n)ˣ} {z : ℤ}
+    (haz : (z : ZMod n) = a) {x : F} (hx : x ^ n = 1) :
+    (galEquivZMod n F).symm a x = x ^ z := by
+  have hx₀ : x ≠ 0 := fun h ↦ by simp [h, zero_pow (NeZero.ne n)] at hx
+  rw [galEquivZMod_apply_of_pow_eq n F _ hx, MulEquiv.apply_symm_apply]
+  obtain ⟨k, hk⟩ : (n : ℤ) ∣ z - ((a : ZMod n).val : ℤ) := by
+    rw [← ZMod.intCast_zmod_eq_zero_iff_dvd, Int.cast_sub, Int.cast_natCast,
+      ZMod.natCast_zmod_val, haz, sub_self]
+  rw [show z = ((a : ZMod n).val : ℤ) + n * k from by linarith, zpow_add₀ hx₀, zpow_mul,
+    zpow_natCast, zpow_natCast, hx, one_zpow, mul_one]
+
+open NumberField IsCMField in
+/-- For an odd prime `n`, the automorphism of `ℚ(ζ_n)` corresponding to `-1 ∈ (ℤ/nℤ)ˣ` under
+`galEquivZMod` is the complex conjugation of the CM-field `ℚ(ζ_n)`.
+
+This bridges the ad-hoc conjugation `(galEquivZMod p F).symm (-1)` used in the Kummer argument to
+the mathlib `complexConj` API: `ε ∈ realUnits F` is then fixed by it
+(via `Units.complexConj_eq_self_iff`), and a `p`-th root of unity is sent to its inverse. -/
+theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_neg_one_apply {n : ℕ} [NeZero n]
+    {F : Type*} [Field F] [NumberField F] [IsCyclotomicExtension {n} ℚ F] [IsCMField F] (x : F) :
+    (galEquivZMod n F).symm (-1) x = complexConj F x := by
+  have hζ := IsCyclotomicExtension.zeta_spec n ℚ F
+  let φ : F →+* ℂ := Classical.choice (inferInstance : Nonempty _)
+  suffices h : (galEquivZMod n F).symm (-1) = (complexConj F).restrictScalars ℚ by
+    rw [← AlgEquiv.restrictScalars_apply ℚ (complexConj F), ← h]
+  refine AlgEquiv.coe_algHom_injective <| AlgHom.ext_of_adjoin_eq_top
+    (IsCyclotomicExtension.adjoin_primitive_root_eq_top hζ) (Set.eqOn_singleton.mpr ?_)
+  show (galEquivZMod n F).symm (-1) (zeta n ℚ F) = (complexConj F).restrictScalars ℚ (zeta n ℚ F)
+  rw [galEquivZMod_symm_apply_of_pow_eq (z := -1) (by simp) (zeta_pow n ℚ F), zpow_neg_one,
+    AlgEquiv.restrictScalars_apply, (isConj_complexConj F φ).eq_inv_of_isPrimitiveRoot hζ]

@@ -6,6 +6,7 @@ import SKW.PRed2Mathlib.KummerExtension
 import SKW.PRed2Mathlib.Ideals
 import SKW.PRed2Mathlib.NumberTheory
 import SKW.PRed2Mathlib.FractionalIdeal
+import SKW.PRed2Mathlib.MulChars
 import SKW.Prereqs.Action
 import SKW.Prereqs.AlgebraMisc
 import SKW.Prereqs.ClassGroup

@@ -43,12 +43,20 @@ theorem MulEquiv.ofBijective_symm_apply_apply {M N F : Type*} [Mul M] [Mul N] [F
     [MulHomClass F M N] (f : F) (hf : Function.Bijective f) (a : M) :
     (ofBijective f hf).symm (f a) = a := (symm_apply_eq (ofBijective f hf)).mpr rfl
 
+/-! ### Coprime exponent power extraction -/
 
--- @[to_additive (attr := simp) mod_addOrderOf_nsmul]
--- lemma pow_mod_of_orderOf_dvd (x : G) (n : ℕ) : x ^ (n % orderOf x) = x ^ n :=
---   calc
---     x ^ (n % orderOf x) = x ^ (n % orderOf x + orderOf x * (n / orderOf x)) := by
---         simp [pow_add, pow_mul, pow_orderOf_eq_one]
---     _ = x ^ n := by rw [Nat.mod_add_div]
+/-- If `x ^ m = y ^ n` with `m` and `n` coprime and `x ≠ 0`, then `x` is itself an `n`-th power. -/
+theorem exists_eq_pow_of_pow_eq_pow_of_coprime {G : Type*} [CommGroupWithZero G] {m n : ℕ}
+    (hmn : Nat.Coprime m n) {x y : G} (hx : x ≠ 0) (h : x ^ m = y ^ n) :
+    ∃ z : G, z ≠ 0 ∧ x = z ^ n := by
+  obtain rfl | hn := eq_or_ne n 0
+  · rw [(Nat.coprime_zero_right _).mp hmn, pow_one, pow_zero] at h
+    exact ⟨1, one_ne_zero, by rw [pow_zero, h]⟩
+  · have hy : y ≠ 0 := fun hy ↦ pow_ne_zero m hx (by rw [h, hy, zero_pow hn])
+    refine ⟨y ^ Int.gcdA m n * x ^ Int.gcdB m n,
+      mul_ne_zero (zpow_ne_zero _ hy) (zpow_ne_zero _ hx), ?_⟩
+    rw [mul_pow, ← zpow_natCast, zpow_comm, zpow_natCast, ← h, ← zpow_natCast, ← zpow_mul,
+      ← zpow_natCast, ← zpow_mul, ← zpow_add₀ hx, mul_comm _ (n : ℤ), ← Int.gcd_eq_gcd_ab,
+      Int.gcd_natCast_natCast, hmn, Nat.cast_one, zpow_one]
 
 end

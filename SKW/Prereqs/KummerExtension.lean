@@ -8,7 +8,7 @@ public import SKW.PRed2Mathlib.KummerExtension
 
 @[expose] public section
 
-open IntermediateField
+open IntermediateField Polynomial
 
 /-!
 # Generalizations of Mathlib.FieldTheory.KummerExtension
@@ -57,16 +57,14 @@ This file contains lemmas that generalize or complement results in Mathlib's
 
 open Polynomial in
 theorem rootOfSplitsXPowSubC_minpoly {K : Type*} [Field K] {n : ℕ} [NeZero n] (a : K) (L : Type*)
-    [Field L] [Algebra K L] [Polynomial.IsSplittingField K L (X ^ n - C a)]
-    (H : Irreducible (X ^ n - C a)) :
+    [Field L] [Algebra K L] [IsSplittingField K L (X ^ n - C a)] (H : Irreducible (X ^ n - C a)) :
     minpoly K (rootOfSplitsXPowSubC (NeZero.pos n) a L) = X ^ n - C a := by
   refine (minpoly.eq_of_irreducible_of_monic H ?_ (monic_X_pow_sub_C _ (NeZero.ne n))).symm
   rw [aeval_sub, aeval_X_pow, rootOfSplitsXPowSubC_pow, aeval_C, sub_eq_zero]
 
 open Polynomial in
 theorem rootOfSplitsXPowSubC_isIntegral {K : Type*} [Field K] {n : ℕ} [NeZero n] (a : K) (L : Type*)
-    [Field L] [Algebra K L] [Polynomial.IsSplittingField K L (X ^ n - C a)]
-    (H : Irreducible (X ^ n - C a)) :
+    [Field L] [Algebra K L] [IsSplittingField K L (X ^ n - C a)] (H : Irreducible (X ^ n - C a)) :
     IsIntegral K (rootOfSplitsXPowSubC (NeZero.pos n) a L) := by
   rw [← minpoly.ne_zero_iff, rootOfSplitsXPowSubC_minpoly _ _ H]
   exact Irreducible.ne_zero H
@@ -196,6 +194,67 @@ lemma isGalois_iff_forall_apply_eq_pow_mul_zpow (hμ : μ ≠ 0) (hn : (n : F) �
     apply FaithfulSMul.algebraMap_injective F L
     rw [← hτα, hj, mul_pow, map_mul, map_pow, pow_right_comm, hα, map_pow]
 
+#exit
+
+open Module
+
+theorem toto₁ (a : K) (hK : (primitiveRoots n K).Nonempty) {t : ℕ} (ht : t.Coprime n)
+    [hS : IsSplittingField K L (X ^ n - C a)] :
+    IsSplittingField K L (X ^ n - C (a ^ t)) := by
+  sorry
+
+theorem toto₂ (a : K) {x : K} (hx : x ≠ 0) (hK : (primitiveRoots n K).Nonempty)
+    [hS : IsSplittingField K L (X ^ n - C a)] :
+    IsSplittingField K L (X ^ n - C (a * x ^ n)) := by
+  have hrank : finrank K L = n := sorry
+  have : FiniteDimensional K L := sorry
+  apply (hrank ▸ isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top) hK
+  let α := rootOfSplitsXPowSubC (NeZero.pos n) a L
+  sorry
+  sorry
+  sorry
+
 end
 
 end
+
+#exit
+
+let α := rootOfSplitsXPowSubC hp.out.pos (μ : F) L
+  have hα : α ^ p = algebraMap (𝓞 F) L μ := by
+        rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
+  rw [multiplicity_span_span] at hk
+  have hν₀ : ν ≠ 0 := by
+    contrapose! hμ
+    rwa [hμ, mul_zero] at hν
+  refine ⟨ν, hν₀, ?_, ?_, ?_⟩
+  · rw [hk, pow_mul, pow_right_comm] at hν
+    rw [← hrF]
+    apply isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top (hrF ▸ hF)
+      (α := (algebraMap (𝓞 F) L) (hζ.toInteger - 1) ^ (- k : ℤ) * α)
+    · rw [mul_pow, hrF, rootOfSplitsXPowSubC_pow, ← IsScalarTower.algebraMap_apply,
+        ← IsScalarTower.algebraMap_apply, hν, map_mul, map_pow, map_pow, ← zpow_natCast _ k,
+        ← zpow_natCast _ p, ← zpow_mul, ← zpow_natCast _ p, ← zpow_mul, ← mul_assoc, ← zpow_add₀,
+        neg_mul, neg_add_cancel, zpow_zero, one_mul]
+      rwa [IsScalarTower.algebraMap_apply (𝓞 F) F, _root_.map_ne_zero]
+    · rw [mul_comm, IsScalarTower.algebraMap_apply (𝓞 F) F L, ← map_zpow₀,
+        adjoin_simple_mul _ _ (zpow_ne_zero _ hζ₀)]
+      have hα : α ^ p = algebraMap (𝓞 F) L μ := by
+        rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
+      exact adjoin_root_eq_top_of_isSplittingField (hrF ▸ hF) hIrr hα
+  · rw [hk, pow_mul, pow_right_comm] at hν
+    rw [X_pow_sub_C_irreducible_iff_of_prime hp.out] at hIrr ⊢
+    contrapose! hIrr
+    obtain ⟨b, hb⟩ := hIrr
+    refine ⟨(hζ.toInteger - 1) ^ k * b, by simp [hν, mul_pow, hb, map_mul]⟩
+  · replace hν := congr_arg (span {·}) hν
+    replace hν := congr_arg (emultiplicity (span {hζ.toInteger - 1}) · ) hν
+    rwa [← span_singleton_mul_span_singleton, ← span_singleton_pow,
+      emultiplicity_mul hsζ, emultiplicity_pow_self, emultiplicity_span_span,
+      FiniteMultiplicity.emultiplicity_eq_multiplicity,
+      FiniteMultiplicity.emultiplicity_eq_multiplicity, ← Nat.cast_add, Nat.cast_inj,
+      Nat.left_eq_add, ← Rat.eq_span_zeta_sub_one_of_liesOver' p F hζ 𝔭] at hν
+    · exact FiniteMultiplicity.of_prime_left hsζ (by simpa)
+    · exact FiniteMultiplicity.of_prime_left hζ₁ hμ
+    · simpa using RingOfIntegers.coe_ne_zero_iff.mp hζ₀
+    · exact hsζ.not_unit

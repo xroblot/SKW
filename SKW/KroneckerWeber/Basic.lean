@@ -29,7 +29,7 @@ open NumberField Ideal Polynomial Pointwise IntermediateField Module IsCyclotomi
 noncomputable section
 
 variable (p : ℕ) [hp : Fact p.Prime]
-variable (L : Type*) [Field L] [NumberField L]
+variable {L : Type*} [Field L] [NumberField L]
 variable (F : IntermediateField ℚ L) [IsCyclotomicExtension {p} ℚ F]
 variable (K : IntermediateField ℚ L)
 
@@ -182,7 +182,7 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮) (hv : ¬ p ∣
     {σ : Gal(F/ℚ)} (hσ : σ • 𝔮 = 𝔮) :
     σ = 1 := by
   obtain ⟨𝔞, h𝔞⟩ := pow_multiplicity_dvd 𝔮 (span {(μ : 𝓞 F)})
-  obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p L F hrF hIrr σ
+  obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p F hrF hIrr σ
   obtain ⟨d, hd₀, ⟨β, hβ⟩⟩ := exists_integer_multiple ξ
   have hβ₀ : β ≠ 0 := by
     by_contra!
@@ -256,7 +256,7 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
         exact Nat.lt_sub_of_add_lt <| (Nat.Prime.odd_iff hp.out).mp hp'
       rwa [Subgroup.nontrivial_iff_exists_ne_one] at this
     contrapose! hσ'
-    exact kw_split_prime p L F hrF hμ hIrr h𝔮 hσ' hσ
+    exact kw_split_prime p F hrF hμ hIrr h𝔮 hσ' hσ
   · obtain ⟨𝔔, _, _⟩  := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔮
     have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
     have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
@@ -265,7 +265,7 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
       rwa [ramificationIdx_algebra_tower' _ 𝔮 _,
         Rat.ramificationIdx_eq_of_not_dvd q F 𝔮 (m := p), one_mul] at this
       rwa [Nat.prime_dvd_prime_iff_eq hq.out hp.out]
-    obtain ⟨α, hα₀, hα⟩ := exists_pth_root p L F hrF hIrr
+    obtain ⟨α, hα₀, hα⟩ := exists_pth_root p F hrF hIrr
     have := IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' (span {μ}) h𝔮.irreducible
       h𝔔.irreducible (IsMaximal.ne_bot_of_isIntegral_int 𝔔)
     rw [h𝔔', Nat.cast_one, one_mul, FiniteMultiplicity.emultiplicity_eq_multiplicity,
@@ -284,9 +284,9 @@ lemma kw_mu_pth_power_ideal (hLram : UnramifiedOutside L p) (hp' : Odd p) :
   have hsμ : span {μ} ≠ ⊥ := by simpa
   have := Ideal.finprod_heightOneSpectrum_pow_multiplicity hsμ
   let v : IsDedekindDomain.HeightOneSpectrum (𝓞 F) → ℕ :=
-    fun w ↦ (kw_mu_val_p p L F hrF hμ hIrr w.asIdeal hLram hp').choose
+    fun w ↦ (kw_mu_val_p p F hrF hμ hIrr w.asIdeal hLram hp').choose
   have hv {w} : multiplicity w.asIdeal (span {μ}) = p * v w :=
-    (kw_mu_val_p p L F hrF hμ hIrr w.asIdeal hLram hp').choose_spec
+    (kw_mu_val_p p F hrF hμ hIrr w.asIdeal hLram hp').choose_spec
   have hv' : Function.HasFiniteMulSupport fun w ↦ w.asIdeal ^ v w := by
     have := Ideal.hasFiniteMulSupport hsμ
     simp_rw [IsDedekindDomain.HeightOneSpectrum.maxPowDividing_eq_pow_multiplicity hsμ, hv,
@@ -312,7 +312,7 @@ lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (spa
   have hsζ : Prime (span {hζ.toInteger - 1}) := prime_span_singleton_iff.mpr hζ₁
   have hF : (primitiveRoots p F).Nonempty := primitiveRoots_nonempty p ℚ F
   obtain ⟨ν, hν⟩ := pow_multiplicity_dvd (hζ.toInteger - 1) μ
-  obtain ⟨k, hk⟩ := kw_mu_val_p p L F hrF hμ hIrr (span {hζ.toInteger - 1}) hLram hp'
+  obtain ⟨k, hk⟩ := kw_mu_val_p p F hrF hμ hIrr (span {hζ.toInteger - 1}) hLram hp'
   let α := rootOfSplitsXPowSubC hp.out.pos (μ : F) L
   have hα : α ^ p = algebraMap (𝓞 F) L μ := by
         rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
