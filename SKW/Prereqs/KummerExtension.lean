@@ -242,6 +242,26 @@ theorem isSplittingField_X_pow_sub_C_mul_pow (a : K) (hK : (primitiveRoots n K).
   rw [IntermediateField.adjoin_simple_mul α x hx]
   exact IntermediateField.adjoin_root_eq_top_of_isSplittingField hK H hα
 
+/-- Reverse of `isSplittingField_X_pow_sub_C_mul_pow`: if `L` is a splitting field of
+`X ^ n - C (a * x ^ n)` (irreducible) with `x ≠ 0`, then it is also a splitting field of
+`X ^ n - C a`. -/
+theorem isSplittingField_X_pow_sub_C_of_mul_pow (a : K) {x : K} (hx : x ≠ 0)
+    (hK : (primitiveRoots n K).Nonempty) (H : Irreducible (X ^ n - C (a * x ^ n)))
+    [hS : IsSplittingField K L (X ^ n - C (a * x ^ n))] :
+    IsSplittingField K L (X ^ n - C a) := by
+  have : FiniteDimensional K L := IsSplittingField.finiteDimensional L (X ^ n - C (a * x ^ n))
+  have hrank : finrank K L = n := finrank_of_isSplittingField_X_pow_sub_C hK H (L := L)
+  set β := rootOfSplitsXPowSubC (NeZero.pos n) (a * x ^ n) L
+  have hβ : β ^ n = algebraMap K L (a * x ^ n) := rootOfSplitsXPowSubC_pow (a * x ^ n) L
+  have hγ : (β * algebraMap K L x⁻¹) ^ n = algebraMap K L a := by
+    rw [mul_pow, hβ, ← map_pow, ← map_mul, inv_pow, mul_assoc, mul_inv_cancel₀ (pow_ne_zero n hx),
+      mul_one]
+  have htop : K⟮β * algebraMap K L x⁻¹⟯ = ⊤ := by
+    rw [IntermediateField.adjoin_simple_mul β x⁻¹ (inv_ne_zero hx)]
+    exact IntermediateField.adjoin_root_eq_top_of_isSplittingField hK H hβ
+  rw [← hrank] at hK hγ ⊢
+  exact isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top hK hγ htop
+
 end
 
 end
