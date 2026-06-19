@@ -25,6 +25,12 @@ theorem exists_torsion_realunits_pow_two_eq_mul (u : (𝓞 K)ˣ) :
     rw [SubmonoidClass.coe_pow, ← mul_pow, ← h, hi, pow_one]
   · exact ⟨ζ, v, hv, by rwa [← hi]⟩
 
+/-- The `Units.val` of `unitsComplexConj` is `ringOfIntegersComplexConj` of the `Units.val`. -/
+@[simp]
+theorem coe_unitsComplexConj {K : Type*} [Field K] [CharZero K] [IsCMField K]
+    [Algebra.IsIntegral ℚ K] (u : (𝓞 K)ˣ) :
+    (unitsComplexConj K u).val = ringOfIntegersComplexConj K u.val := rfl
+
 end NumberField.IsCMField
 
 /-- A complex-conjugation-type automorphism sends a root of unity to its inverse. -/

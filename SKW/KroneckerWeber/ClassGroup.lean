@@ -10,7 +10,7 @@ public import Mathlib.NumberTheory.NumberField.CMField
 
 public import SKW.KroneckerWeber.Basic
 public import SKW.Stickelberger.Stickelberger
-public import SKW.Prereqs.Action
+public import SKW.PRed2Mathlib.Action
 public import SKW.Prereqs.FractionalIdeal
 public import SKW.Prereqs.CMField
 public import SKW.Prereqs.CyclotomicField
@@ -82,32 +82,63 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
   rwa [← zpow_natCast, ← zpow_natCast, ← orderOf_dvd_sub_iff_zpow_eq_zpow, Nat.cast_sub hp.out.one_le,
     Nat.cast_one, sub_sub_cancel, Int.natCast_dvd_ofNat, Nat.dvd_one, orderOf_eq_one_iff] at h₅
 
-#exit
+include hrF hIrr hμ in
+/-- The product of `η` with its complex conjugate `σ₋₁(η)` is a `p`-th power in `F`: a consequence
+of the Kummer relation `σ₋₁(μ) = ξᵖ · μ⁻¹` together with `μ = αᵖ · η`. -/
+lemma kw_conj_mul_eq_pow {α : 𝓞 F} {η : (𝓞 F)ˣ} (h : μ = α ^ p * η) :
+    ∃ w : F, (η : F) * (galEquivZMod p F).symm (-1) (η : F) = w ^ p := by
+  obtain ⟨ξ, hξ₀, hξ⟩ : ∃ ξ, ξ ≠ 0 ∧
+      (galEquivZMod p F).symm (-1) (μ : F) = ξ ^ p * (μ : F) ^ (-1 : ℤ) := by
+    obtain ⟨ξ', hξ'₀, hξ'⟩ := kw_abelian_kummer p F hrF hIrr ((galEquivZMod p F).symm (-1))
+    refine ⟨ξ' * μ, mul_ne_zero hξ'₀ (by simpa), ?_⟩
+    rw [hξ', mul_pow, ← zpow_natCast (μ : F), ← zpow_natCast (μ : F), mul_assoc, ← zpow_add₀ (by simpa),
+      MulEquiv.apply_symm_apply, show (p : ℤ) + -1 = (p - 1 : ℕ) by
+        rw [Int.add_neg_one, Nat.cast_sub hp.out.one_le, Nat.cast_one],
+      Units.coe_neg_one, ZMod.neg_val, if_neg one_ne_zero, ZMod.val_one]
+  have hα0 : (α : F) ≠ 0 := by
+    have : α ≠ 0 := by rintro rfl; rw [zero_pow hp.out.ne_zero, zero_mul] at h; exact hμ h
+    exact_mod_cast this
+  have hcα0 : (galEquivZMod p F).symm (-1) (α : F) ≠ 0 := by simp [hα0]
+  have hμF : (μ : F) = (α : F) ^ p * (η : F) := by exact_mod_cast h
+  rw [hμF, map_mul, map_pow, zpow_neg_one] at hξ
+  field_simp [hα0, (by simp : (η : F) ≠ 0)] at hξ
+  refine ⟨ξ * ((α : F) * (galEquivZMod p F).symm (-1) (α : F))⁻¹, ?_⟩
+  rw [mul_pow, inv_pow, eq_mul_inv_iff_mul_eq₀ (pow_ne_zero p (mul_ne_zero hα0 hcα0))]
+  linear_combination hξ
 
 include hrF hIrr hμ in
-/-- Refined CM decomposition: in the Kummer setting `μ = αᵖ · η` with `(μ) = 𝔞ᵖ`, the square `η²`
-factors as `ζ · ε` with `ε` a real unit and `ζ` a *primitive* `p`-th root of unity. -/
-lemma kw_exists_primitiveRoot_realUnit [IsCMField F] (hp' : Odd p) (h𝔞₀ : 𝔞 ≠ ⊥)
-    (h𝔞 : 𝔞 ^ p = span {μ}) {α : 𝓞 F} {η : (𝓞 F)ˣ} (hα : α ≠ 0) (h : μ = α ^ p * η) :
-    ∃ (ζ : Units.torsion F) (ε : (𝓞 F)ˣ),
-      ε ∈ IsCMField.realUnits F ∧ η ^ 2 = ζ * ε ∧ IsPrimitiveRoot (ζ.val : 𝓞 F) p := by
-  obtain ⟨α, η, hα, h⟩ := kw_mu_unit p F hμ h𝔞₀ h𝔞 (kw_class_trivial p F hrF hIrr h𝔞₀ h𝔞)
-  obtain ⟨ζ, ε, hε, h'⟩ := IsCMField.exists_torsion_realunits_pow_two_eq_mul η
-  have : ζ ≠ 1 := by
-    by_contra! hζ
-    let a : IsUnit (2 : ZMod p) := sorry
-    obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p F hrF hIrr ((galEquivZMod p F).symm a.unit)
-    rw [MulEquiv.apply_symm_apply, IsUnit.unit_spec,  ZMod.val_ofNat_of_lt, h] at hξ
-    rw [RingOfIntegers.coe_eq_algebraMap, ← map_pow, mul_pow, ← Units.val_pow_eq_pow_val, h'] at hξ
-    rw [hζ, OneMemClass.coe_one, one_mul] at hξ
+/-- In the Kummer setting `μ = αᵖ · η` with `(μ) = 𝔞ᵖ`, the fourth power `η⁴` factors as `ζ · δᵖ`
+with `ζ` a `p`-th root of unity and `δ ∈ F` (a root of unity times a `p`-th power). -/
+lemma kw_exists_realUnit_torsion [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {η : (𝓞 F)ˣ}
+    (h : μ = α ^ p * η) :
+    ∃ (ζ : Units.torsion F) (δ : F), ζ.val.val ^ p = 1 ∧ (η : F) ^ 4 = (ζ.val : F) * δ ^ p := by
+  obtain ⟨ζ, ε, hε, h', hζ⟩ :
+      ∃ (ζ : Units.torsion F) (ε : (𝓞 F)ˣ),
+        ε ∈ IsCMField.realUnits F ∧ η ^ 4 = ζ * ε ∧ ζ.val.val ^ p = 1 := by
+    obtain ⟨ζ, ε, hε, h'⟩ := IsCMField.exists_torsion_realunits_pow_two_eq_mul η
+    have h₁ : Units.torsionOrder F = 2 * p := by
+      rw [torsionOrder_eq (n := p), if_neg (Nat.not_even_iff_odd.mpr hp')]
+    refine ⟨ζ ^ 2, ε ^ 2, pow_mem hε 2, ?_, ?_⟩
+    · rw [SubmonoidClass.coe_pow, ← mul_pow, ← h', ← pow_mul]
+    · rw [← Units.val_pow_eq_pow_val, ← Subgroup.coe_pow, ← pow_mul, ← h₁, Units.torsionOrder,
+        pow_card_eq_one, OneMemClass.coe_one, Units.val_one]
+  have hη4 : (η : F) ^ 4 = (ζ.val : F) * (ε : F) := by exact_mod_cast congrArg Units.val h'
+  have hζ' : ((galEquivZMod p F).symm (-1)) (ζ.val : F) = (ζ.val : F) ^ (-1 : ℤ) :=
+    galEquivZMod_symm_apply_of_pow_eq p F (by simp) (by rw [← map_pow, hζ, map_one])
+  obtain ⟨δ, -, hδ⟩ : ∃ δ : F, δ ≠ 0 ∧ (ε : F) = δ ^ p := by
+    have hε' : (galEquivZMod p F).symm (-1) (ε : F) = (ε : F) := by
+      rwa [galEquivZMod_symm_neg_one_apply p F, ← IsCMField.coe_ringOfIntegersComplexConj,
+        algebraMap.coe_inj, ← IsCMField.coe_unitsComplexConj, ← Units.ext_iff,
+        IsCMField.unitsComplexConj_eq_self_iff]
+    obtain ⟨w, hw⟩ := kw_conj_mul_eq_pow p F hrF hμ hIrr h
+    have hcη4 : (galEquivZMod p F).symm (-1) (η : F) ^ 4 = (ζ.val : F)⁻¹ * (ε : F) := by
+      rw [← map_pow, hη4, map_mul, hζ', zpow_neg_one, hε']
+    have key : (ε : F) ^ 2 = (w ^ 4) ^ p := by
+      rw [(show (ε : F) ^ 2 = ((η : F) * (galEquivZMod p F).symm (-1) (η : F)) ^ 4 by
+        rw [mul_pow, hη4, hcη4]; field_simp), hw, pow_right_comm]
+    exact exists_eq_pow_of_pow_eq_pow_of_coprime (Nat.coprime_two_left.mpr hp') (by simp) key
+  exact ⟨ζ, δ, hζ, by rw [hη4, hδ]⟩
 
-    sorry
-  refine ⟨?_, ?_, ?_⟩
-  sorry
-
-#exit
-
-set_option backward.isDefEq.respectTransparency false in
 open IntermediateField Polynomial in
 include hrF hIrr hμ in
 /-- The unit `η` is a `p`-th power times a root of unity, so `L = F(ᵖ√μ) = ℚ(ζ_{p²})`. -/
@@ -120,35 +151,17 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGaloi
     IsCyclotomicExtension.Rat.isCMField F (S := {p}) <|
       exists_eq_left.mpr <| (Nat.Prime.odd_iff hp.out).mp hp'
   obtain ⟨α, η, hα, h⟩ := kw_mu_unit p F hμ h𝔞₀ h𝔞 (kw_class_trivial p F hrF hIrr h𝔞₀ h𝔞)
-  obtain ⟨ζ, ε, hε, h'⟩ := IsCMField.exists_torsion_realunits_pow_two_eq_mul η
-  have hζ : IsPrimitiveRoot (ζ.val : 𝓞 F) p := sorry
-  have hζ' : ((galEquivZMod p F).symm (-1)) (ζ.val : F) = (ζ.val : F) ^ (-1 : ℤ) :=
-    galEquivZMod_symm_apply_of_pow_eq (by simp) (by rw [← map_pow, hζ.pow_eq_one, map_one])
-  have : ∃ δ : F, δ ≠ 0 ∧ ε = δ ^ p := by
-    set c := (galEquivZMod p F).symm (-1) with hc
-    have hζ0 : (ζ.val : F) ≠ 0 := by simp
-    have hη2 : (η : F) ^ 2 = (ζ.val : F) * (ε : F) := by
-      exact_mod_cast congrArg Units.val h'
-    have hε' : c (ε : F) = (ε : F) := sorry
-    obtain ⟨w, hw⟩ : ∃ w : F, (η : F) * c (η : F) = w ^ p := sorry
-    -- conjugate `η² = ζ·ε`:  `c(η)² = ζ⁻¹·ε`
-    have hcη2 : c (η : F) ^ 2 = (ζ.val : F)⁻¹ * (ε : F) := by
-      rw [← map_pow, hη2, map_mul, hζ', zpow_neg_one, hε']
-    -- multiply: the `ζ`'s cancel, leaving `ε² = (η·c(η))² = (w²)ᵖ`
-    have key : (ε : F) ^ 2 = (w ^ 2) ^ p := by
-      rw [(show (ε : F) ^ 2 = ((η : F) * c (η : F)) ^ 2 by rw [mul_pow, hη2, hcη2]; field_simp; ring),
-        hw, pow_right_comm]
-    exact exists_eq_pow_of_pow_eq_pow_of_coprime (Nat.coprime_two_left.mpr hp') (by simp) key
-  obtain ⟨δ, hδ₀, hδ⟩ := this
+  obtain ⟨ζ, δ, hζ, hηδ⟩ := kw_exists_realUnit_torsion p F hrF hμ hIrr hp' h
   sorry
 
 #exit
+
 
 set_option backward.isDefEq.respectTransparency false in
 open IntermediateField Polynomial in
 include hrF hIrr hμ in
 /-- The unit `η` is a `p`-th power times a root of unity, so `L = F(ᵖ√μ) = ℚ(ζ_{p²})`. -/
-lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGalois ℚ K]
+lemma kw_unit_root_of_unity' (hp' : Odd p) (K : IntermediateField ℚ L) [IsGalois ℚ K]
     [IsCyclic (K ≃ₐ[ℚ] K)] (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p)
     (hL : IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ))) (h𝔞₀ : 𝔞 ≠ ⊥)
     (h𝔞 : 𝔞 ^ p = span {μ}) :

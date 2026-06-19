@@ -140,8 +140,8 @@ theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_smul {E F :Type*} [Field 
 
 /-- The automorphism of `ℚ(ζ_n)` corresponding to `a ∈ (ℤ/nℤ)ˣ` under `galEquivZMod` acts on every
 `n`-th root of unity as raising to the `z`-th power, for any integer `z` representing `a`. -/
-theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_apply_of_pow_eq {n : ℕ} [NeZero n]
-    {F : Type*} [Field F] [NumberField F] [IsCyclotomicExtension {n} ℚ F] {a : (ZMod n)ˣ} {z : ℤ}
+theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_apply_of_pow_eq (n : ℕ) [NeZero n]
+    (F : Type*) [Field F] [NumberField F] [IsCyclotomicExtension {n} ℚ F] {a : (ZMod n)ˣ} {z : ℤ}
     (haz : (z : ZMod n) = a) {x : F} (hx : x ^ n = 1) :
     (galEquivZMod n F).symm a x = x ^ z := by
   have hx₀ : x ≠ 0 := fun h ↦ by simp [h, zero_pow (NeZero.ne n)] at hx
@@ -159,8 +159,8 @@ open NumberField IsCMField in
 This bridges the ad-hoc conjugation `(galEquivZMod p F).symm (-1)` used in the Kummer argument to
 the mathlib `complexConj` API: `ε ∈ realUnits F` is then fixed by it
 (via `Units.complexConj_eq_self_iff`), and a `p`-th root of unity is sent to its inverse. -/
-theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_neg_one_apply {n : ℕ} [NeZero n]
-    {F : Type*} [Field F] [NumberField F] [IsCyclotomicExtension {n} ℚ F] [IsCMField F] (x : F) :
+theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_neg_one_apply (n : ℕ) [NeZero n]
+    (F : Type*) [Field F] [NumberField F] [IsCyclotomicExtension {n} ℚ F] [IsCMField F] (x : F) :
     (galEquivZMod n F).symm (-1) x = complexConj F x := by
   have hζ := IsCyclotomicExtension.zeta_spec n ℚ F
   let φ : F →+* ℂ := Classical.choice (inferInstance : Nonempty _)
@@ -169,5 +169,5 @@ theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_neg_one_apply {n : ℕ} [NeZ
   refine AlgEquiv.coe_algHom_injective <| AlgHom.ext_of_adjoin_eq_top
     (IsCyclotomicExtension.adjoin_primitive_root_eq_top hζ) (Set.eqOn_singleton.mpr ?_)
   show (galEquivZMod n F).symm (-1) (zeta n ℚ F) = (complexConj F).restrictScalars ℚ (zeta n ℚ F)
-  rw [galEquivZMod_symm_apply_of_pow_eq (z := -1) (by simp) (zeta_pow n ℚ F), zpow_neg_one,
+  rw [galEquivZMod_symm_apply_of_pow_eq n F (z := -1) (by simp) (zeta_pow n ℚ F), zpow_neg_one,
     AlgEquiv.restrictScalars_apply, (isConj_complexConj F φ).eq_inv_of_isPrimitiveRoot hζ]
