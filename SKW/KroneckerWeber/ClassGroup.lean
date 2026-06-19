@@ -13,6 +13,7 @@ public import SKW.Stickelberger.Stickelberger
 public import SKW.Prereqs.Action
 public import SKW.Prereqs.FractionalIdeal
 public import SKW.Prereqs.CMField
+public import SKW.Prereqs.CyclotomicField
 
 @[expose] public section
 
@@ -81,6 +82,68 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
   rwa [← zpow_natCast, ← zpow_natCast, ← orderOf_dvd_sub_iff_zpow_eq_zpow, Nat.cast_sub hp.out.one_le,
     Nat.cast_one, sub_sub_cancel, Int.natCast_dvd_ofNat, Nat.dvd_one, orderOf_eq_one_iff] at h₅
 
+#exit
+
+include hrF hIrr hμ in
+/-- Refined CM decomposition: in the Kummer setting `μ = αᵖ · η` with `(μ) = 𝔞ᵖ`, the square `η²`
+factors as `ζ · ε` with `ε` a real unit and `ζ` a *primitive* `p`-th root of unity. -/
+lemma kw_exists_primitiveRoot_realUnit [IsCMField F] (hp' : Odd p) (h𝔞₀ : 𝔞 ≠ ⊥)
+    (h𝔞 : 𝔞 ^ p = span {μ}) {α : 𝓞 F} {η : (𝓞 F)ˣ} (hα : α ≠ 0) (h : μ = α ^ p * η) :
+    ∃ (ζ : Units.torsion F) (ε : (𝓞 F)ˣ),
+      ε ∈ IsCMField.realUnits F ∧ η ^ 2 = ζ * ε ∧ IsPrimitiveRoot (ζ.val : 𝓞 F) p := by
+  obtain ⟨α, η, hα, h⟩ := kw_mu_unit p F hμ h𝔞₀ h𝔞 (kw_class_trivial p F hrF hIrr h𝔞₀ h𝔞)
+  obtain ⟨ζ, ε, hε, h'⟩ := IsCMField.exists_torsion_realunits_pow_two_eq_mul η
+  have : ζ ≠ 1 := by
+    by_contra! hζ
+    let a : IsUnit (2 : ZMod p) := sorry
+    obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p F hrF hIrr ((galEquivZMod p F).symm a.unit)
+    rw [MulEquiv.apply_symm_apply, IsUnit.unit_spec,  ZMod.val_ofNat_of_lt, h] at hξ
+    rw [RingOfIntegers.coe_eq_algebraMap, ← map_pow, mul_pow, ← Units.val_pow_eq_pow_val, h'] at hξ
+    rw [hζ, OneMemClass.coe_one, one_mul] at hξ
+
+    sorry
+  refine ⟨?_, ?_, ?_⟩
+  sorry
+
+#exit
+
+set_option backward.isDefEq.respectTransparency false in
+open IntermediateField Polynomial in
+include hrF hIrr hμ in
+/-- The unit `η` is a `p`-th power times a root of unity, so `L = F(ᵖ√μ) = ℚ(ζ_{p²})`. -/
+lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGalois ℚ K]
+    [IsCyclic (K ≃ₐ[ℚ] K)] (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p)
+    (hL : IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ))) (h𝔞₀ : 𝔞 ≠ ⊥)
+    (h𝔞 : 𝔞 ^ p = span {μ}) :
+    IsCyclotomicExtension {p ^ 2} ℚ L := by
+  have : IsCMField F :=
+    IsCyclotomicExtension.Rat.isCMField F (S := {p}) <|
+      exists_eq_left.mpr <| (Nat.Prime.odd_iff hp.out).mp hp'
+  obtain ⟨α, η, hα, h⟩ := kw_mu_unit p F hμ h𝔞₀ h𝔞 (kw_class_trivial p F hrF hIrr h𝔞₀ h𝔞)
+  obtain ⟨ζ, ε, hε, h'⟩ := IsCMField.exists_torsion_realunits_pow_two_eq_mul η
+  have hζ : IsPrimitiveRoot (ζ.val : 𝓞 F) p := sorry
+  have hζ' : ((galEquivZMod p F).symm (-1)) (ζ.val : F) = (ζ.val : F) ^ (-1 : ℤ) :=
+    galEquivZMod_symm_apply_of_pow_eq (by simp) (by rw [← map_pow, hζ.pow_eq_one, map_one])
+  have : ∃ δ : F, δ ≠ 0 ∧ ε = δ ^ p := by
+    set c := (galEquivZMod p F).symm (-1) with hc
+    have hζ0 : (ζ.val : F) ≠ 0 := by simp
+    have hη2 : (η : F) ^ 2 = (ζ.val : F) * (ε : F) := by
+      exact_mod_cast congrArg Units.val h'
+    have hε' : c (ε : F) = (ε : F) := sorry
+    obtain ⟨w, hw⟩ : ∃ w : F, (η : F) * c (η : F) = w ^ p := sorry
+    -- conjugate `η² = ζ·ε`:  `c(η)² = ζ⁻¹·ε`
+    have hcη2 : c (η : F) ^ 2 = (ζ.val : F)⁻¹ * (ε : F) := by
+      rw [← map_pow, hη2, map_mul, hζ', zpow_neg_one, hε']
+    -- multiply: the `ζ`'s cancel, leaving `ε² = (η·c(η))² = (w²)ᵖ`
+    have key : (ε : F) ^ 2 = (w ^ 2) ^ p := by
+      rw [(show (ε : F) ^ 2 = ((η : F) * c (η : F)) ^ 2 by rw [mul_pow, hη2, hcη2]; field_simp; ring),
+        hw, pow_right_comm]
+    exact exists_eq_pow_of_pow_eq_pow_of_coprime (Nat.coprime_two_left.mpr hp') (by simp) key
+  obtain ⟨δ, hδ₀, hδ⟩ := this
+  sorry
+
+#exit
+
 set_option backward.isDefEq.respectTransparency false in
 open IntermediateField Polynomial in
 include hrF hIrr hμ in
@@ -138,18 +201,18 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGaloi
     · simpa
   obtain ⟨δ, hδ₀, hδ⟩ := this
   sorry
-  
+
 #exit
   have : IsSplittingField F L (X ^ p - C (ζ.val : F)) := by
     have : IsSplittingField F L (X ^ p - C (μ ^ 2 : F)) := by
-      apply toto₁
+      apply isSplittingField_X_pow_sub_C_pow_of_coprime
       exact IsCyclotomicExtension.primitiveRoots_nonempty p ℚ F
       exact Nat.coprime_two_left.mpr hp'
     rw [h] at this
     rw [RingOfIntegers.coe_eq_algebraMap, map_mul, mul_pow, ← map_pow, ← map_pow, pow_right_comm] at this
     rw [← Units.val_pow_eq_pow_val, h', Units.val_mul, map_mul (algebraMap _ _), hδ, map_pow,
       ← mul_assoc, mul_right_comm, ← mul_pow] at this
-    have := toto₂ (L := L) (n := p) (hS := this) (x := ((algebraMap (𝓞 F) F α ^ 2) * δ)⁻¹) _ sorry sorry
+    have := isSplittingField_X_pow_sub_C_mul_pow (L := L) (n := p) (hS := this) (x := ((algebraMap (𝓞 F) F α ^ 2) * δ)⁻¹) _ sorry sorry
     rwa [inv_pow, mul_comm, map_pow, inv_mul_cancel_left₀] at this
     simp [hα, hδ₀]
   let ξ := rootOfSplitsXPowSubC hp.out.pos (ζ.val : F) L
