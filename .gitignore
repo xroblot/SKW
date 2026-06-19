@@ -8,3 +8,4 @@ blueprint/src/print.synctex.gz
 blueprint/src/web.paux
 /.lake
 .vscode/
+.DS_Store
