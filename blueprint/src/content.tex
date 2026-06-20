@@ -1009,17 +1009,17 @@ The goal of this chapter is to prove the following theorem.
 
 \begin{lemma}
   \label{lem:kw_reduce_to_unramified_outside_p}
-  Let $K/\QQ$ be a cyclic extension of prime power degree $p^m$. Then there
-  exists a cyclic extension $F/\QQ$ of prime power degree $p^m$ unramified
+  Let $K/\QQ$ be a cyclic extension of $p$-power degree. Then there
+  exists a cyclic extension $F/\QQ$ of $p$-power degree unramified
   outside $p$ such that $K$ is cyclotomic if and only if $F$ is cyclotomic.
 \end{lemma}
 
 \begin{proof}
   The discriminant of $K$ is a finite integer, so only finitely many primes
   $q \neq p$ are ramified in $K/\QQ$. We apply \ref{lem:kw_ramification_reduction}
-  iteratively. At each step, given a cyclic degree-$p^m$ extension $K'/\QQ$
+  iteratively. At each step, given a cyclic $p$-power-degree extension $K'/\QQ$
   with some $q \neq p$ ramified, \ref{lem:kw_ramification_reduction} provides
-  a cyclotomic extension $\Lambda/\QQ$ and a cyclic degree-$p^m$ extension
+  a cyclotomic extension $\Lambda/\QQ$ and a cyclic $p$-power-degree extension
   $K''/\QQ$ in which $q$ is unramified, such that $K'\Lambda = K''\Lambda$.
   Since $\Lambda$ is cyclotomic, $K'$ is cyclotomic if and only if $K''$ is
   (as $K'\Lambda = K''\Lambda$ and $\Lambda$ is cyclotomic).
@@ -1074,55 +1074,87 @@ The goal of this chapter is to prove the following theorem.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:kw_ramification_reduction}
-  \uses{lem:kw_cyclic_compositum}
-  Let $K/\QQ$ be a cyclic extension of prime power degree $p^m$. If
-  $q \neq p$ is ramified in $K/\QQ$, then there exists a cyclic cyclotomic
-  extension $\Lambda/\QQ$ and a cyclic extension $F/\QQ$ of degree $p^m$
-  in which $q$ is unramified, such that $K\Lambda = F\Lambda$.
+  \label{lem:tame_inertia_cyclic}
+  Let $L/K$ be a finite Galois extension of number fields, and let $\mathfrak{Q}$ be a prime of
+  $L$ above a prime $\mathfrak{p}$ of $K$ whose ramification index $e(\mathfrak{Q}\mid\mathfrak{p})$
+  is prime to the residue characteristic of $\mathfrak{p}$ (tame ramification). Then
+  \[
+    \theta : I(\mathfrak{Q}\mid\mathfrak{p}) \to k(\mathfrak{Q})^\times, \qquad
+    \tau \longmapsto \tau(\pi)/\pi \bmod \mathfrak{Q}
+  \]
+  (for any uniformizer $\pi$ at $\mathfrak{Q}$) is a well-defined injective group homomorphism.
+  In particular the inertia group $I(\mathfrak{Q}\mid\mathfrak{p})$ is cyclic of order
+  $e(\mathfrak{Q}\mid\mathfrak{p})$.
 \end{lemma}
 
 \begin{proof}
-  Since $q \neq p$ and $[K:\QQ] = p^m$, the prime $q$ is tamely ramified in
-  $K/\QQ$. Let $e = p^s$ ($1 \leq s \leq m$) be the ramification index of
-  $q$ in $K/\QQ$; the inertia group $I_q \subseteq \Gal(K/\QQ) \cong
-  \ZZ/p^m\ZZ$ has order $p^s$.
+  Standard tame-ramification theory (the tame character); see e.g.\ Serre, \emph{Local Fields},
+  Ch.~IV, or Marcus, \emph{Number Fields}. Well-definedness and injectivity use that $e$ is
+  prime to the residue characteristic, and the image lies in the group of $e$-th roots of unity
+  of $k(\mathfrak{Q})$.
+\end{proof}
 
-  Since $\phi(q^r) = q^{r-1}(q-1)$ and $\gcd(p,q) = 1$, for large enough $r$
-  we have $p^s \mid \phi(q^r)$, so $\QQ(\zeta_{q^r})$ contains a cyclic
-  subfield $\Lambda$ of degree $p^s$ over $\QQ$. This $\Lambda$ is totally
-  (tamely) ramified at $q$ with ramification index $p^s$.
+\begin{lemma}
+  \label{lem:abelian_tame_ramificationIdx_dvd}
+  \uses{lem:tame_inertia_cyclic}
+  Let $L/K$ be a finite \emph{abelian} extension of number fields and
+  $\mathfrak{Q}\mid\mathfrak{p}$ a tamely ramified prime. Then $e(\mathfrak{Q}\mid\mathfrak{p})$
+  divides $N\mathfrak{p} - 1 = \#k(\mathfrak{p}) - 1$.
+\end{lemma}
 
-  We may arrange $K \cap \Lambda = \QQ$ by choosing $r$ large: any nontrivial
-  $K \cap \Lambda$ would be a $p$-extension ramified only at $q$ (as $K$ is
-  a $p$-extension and $\Lambda$ is unramified outside $q$), hence a subfield
-  of the $p$-part of $\QQ(\zeta_{q-1})$. Replacing $\Lambda$ by a cyclic
-  subfield of $\QQ(\zeta_{q^r})$ lying above that $p$-part for large $r$
-  ensures linear disjointness.
+\begin{proof}
+  Let $\tau$ generate $I = I(\mathfrak{Q}\mid\mathfrak{p})$ and let $\sigma$ in the decomposition
+  group lift the Frobenius $x \mapsto x^{N\mathfrak{p}}$ of $k(\mathfrak{Q})/k(\mathfrak{p})$.
+  The tame character of \ref{lem:tame_inertia_cyclic} satisfies $\theta(\sigma\tau\sigma^{-1}) =
+  \theta(\tau)^{N\mathfrak{p}}$, i.e.\ $\sigma\tau\sigma^{-1} = \tau^{N\mathfrak{p}}$. Since
+  $L/K$ is abelian, $\sigma\tau\sigma^{-1} = \tau$, whence $\tau^{N\mathfrak{p}-1} = 1$ and
+  $e = \operatorname{ord}(\tau)$ divides $N\mathfrak{p} - 1$.
+\end{proof}
 
-  Set $A = K\Lambda$. With $K \cap \Lambda = \QQ$, we have
-  $\Gal(A/\QQ) \cong \ZZ/p^m\ZZ \times \ZZ/p^s\ZZ$. Let $g \in
-  \Gal(A/\QQ)$ be the element whose image in $\Gal(K/\QQ)$ is the generator
-  $\sigma$ of $I_q$ and whose image in $\Gal(\Lambda/\QQ)$ is the generator
-  $\tau$ of $\Gal(\Lambda/\QQ)$. Define $F = A^{\langle g \rangle}$.
+\begin{lemma}
+  \label{lem:kw_ramification_reduction}
+  \uses{lem:tame_inertia_cyclic, lem:abelian_tame_ramificationIdx_dvd}
+  Let $K/\QQ$ be a cyclic extension of $p$-power degree. If $q \neq p$ is ramified in $K/\QQ$,
+  then there exist a cyclic cyclotomic extension $\Lambda/\QQ$ and a cyclic extension $F/\QQ$
+  of $p$-power degree in which $q$ is unramified, such that $K\Lambda = F\Lambda$ and every
+  prime ramified in $F$ is ramified in $K$.
+\end{lemma}
 
+\begin{proof}
+  Write $[K:\QQ] = p^m$. As $q \neq p$, the prime $q$ is tamely ramified in $K/\QQ$; let
+  $p^s = e_q(K)$ be its ramification index, so by \ref{lem:tame_inertia_cyclic} the inertia
+  $I_q(K) \subseteq \Gal(K/\QQ) \cong \ZZ/p^m\ZZ$ is cyclic of order $p^s$. Since $K/\QQ$ is
+  abelian, \ref{lem:abelian_tame_ramificationIdx_dvd} (with $N(q) = q$) gives $p^s \mid q - 1$.
+  As $\Gal(\QQ(\zeta_q)/\QQ) \cong \ZZ/(q-1)\ZZ$ is cyclic, it has a unique subfield $\Lambda$ of
+  degree $p^s$; since $\QQ(\zeta_q)/\QQ$ is totally ramified at $q$, so is $\Lambda$, whence
+  $I_q(\Lambda) = \Gal(\Lambda/\QQ)$.
+
+  Put $A = K\Lambda$ and fix a prime of $A$ above $q$ with inertia $I := I_q(A) \subseteq
+  \Gal(A/\QQ)$. Restriction embeds $\Gal(A/\QQ) \hookrightarrow \Gal(K/\QQ) \times
+  \Gal(\Lambda/\QQ)$ and carries $I$ onto $I_q(K)$ and onto $I_q(\Lambda) = \Gal(\Lambda/\QQ)$
+  (inertia surjects onto the inertia of a sub-extension). So $I$, cyclic by
+  \ref{lem:tame_inertia_cyclic}, embeds into $I_q(K) \times I_q(\Lambda) \cong \ZZ/p^s\ZZ \times
+  \ZZ/p^s\ZZ$ while surjecting onto each factor; a cyclic subgroup of $\ZZ/p^s\ZZ \times
+  \ZZ/p^s\ZZ$ with that property has order exactly $p^s$, so $|I| = p^s$.
+
+  Let $F := A^{I}$ be the inertia field of $q$ in $A/\QQ$; by the defining property of the
+  inertia field, $q$ is unramified in $F/\QQ$. Because $\Lambda$ is totally ramified at $q$, the
+  restriction $I \to \Gal(\Lambda/\QQ)$ is onto, and since $|I| = p^s = |\Gal(\Lambda/\QQ)|$ it
+  is an isomorphism. Hence $I \cap \Gal(A/\Lambda) = 1$ and $|I|\cdot|\Gal(A/\Lambda)| =
+  |\Gal(A/\QQ)|$, so
+  \[
+    \Gal(A/\QQ) = I \times \Gal(A/\Lambda).
+  \]
+  Therefore:
   \begin{itemize}
-    \item \emph{Degree}: $[F:\QQ] = |G|/|\langle g \rangle| = p^{m+s}/p^s = p^m$.
-    \item \emph{Cyclic}: $\Gal(F/\QQ) \cong G/\langle g \rangle \cong
-      (\ZZ/p^m\ZZ \times \ZZ/p^s\ZZ)/\langle (1,1) \rangle \cong \ZZ/p^m\ZZ$,
-      where the last isomorphism is $(a,b) \mapsto a - b \bmod p^m$.
-    \item \emph{Compositum}: $\langle g \rangle \cap \ker(G \to \Gal(K/\QQ)) =
-      \{1\}$ because $g \mapsto \sigma$ has order $p^s = |g|$. So
-      $\Gal(A/K)$ and $\Gal(A/F) = \langle g \rangle$ together generate $G$,
-      giving $KF = A$. Since $F \cap \Lambda = \QQ$ ($q$ is unramified in $F$
-      but totally ramified in $\Lambda$), we have $[F\Lambda:\QQ] = p^{m+s} =
-      [A:\QQ]$, so $F\Lambda = A = K\Lambda$.
-    \item \emph{Unramified at $q$}: The inertia group of $A/\QQ$ at $q$
-      equals $\langle g \rangle$ (the ramification index of $A/\QQ$ at $q$
-      is $p^s$, achieved by $g$). Since $g$ fixes $F = A^{\langle g\rangle}$,
-      the inertia group maps trivially to $\Gal(F/\QQ)$, so $q$ is unramified
-      in $F/\QQ$. \qedhere
+    \item $F\Lambda = A$ (from $I \cap \Gal(A/\Lambda) = 1$), i.e.\ $F\Lambda = K\Lambda$;
+    \item $\Gal(F/\QQ) = \Gal(A/\QQ)/I \cong \Gal(A/\Lambda) \cong \Gal\!\big(K/(K\cap\Lambda)\big)$,
+      which is cyclic of $p$-power degree; so $F/\QQ$ is cyclic of $p$-power degree.
   \end{itemize}
+  Finally $F \subseteq A = K\Lambda$ and $\Lambda$ is ramified only at $q$, so every prime
+  ramified in $F$ is ramified in $K$, while $q$ is unramified in $F$.
+  (When $K \cap \Lambda = \QQ$ — automatic if $s < m$, since the only subfield of $K$ totally
+  ramified at $q$ is $\QQ$ — one gets $[F:\QQ] = p^m$, recovering Lemmermeyer's statement.)
 \end{proof}
 
 \begin{lemma}
@@ -1151,10 +1183,15 @@ The goal of this chapter is to prove the following theorem.
 \end{proposition}
 
 \begin{proof}
-  A quadratic extension of $\QQ$ unramified outside $2$ has discriminant
-  a power of $2$, so it is of the form $\QQ(\sqrt{d})$ with $d \in \{-1, \pm 2\}$.
-  This gives exactly the three fields listed. Among these, only $\QQ(\sqrt{2})$
-  is real.
+  Write a quadratic field as $\QQ(\sqrt{d})$ with $d \neq 1$ squarefree. A prime $\ell$
+  ramifies in $\QQ(\sqrt d)$ iff $\ell \mid \disc$, where $\disc = d$ if $d \equiv 1 \pmod 4$
+  and $\disc = 4d$ otherwise. Hence $\QQ(\sqrt d)$ is unramified outside $2$ iff $\disc$ is
+  (up to sign) a power of $2$, i.e.\ iff $d$ has no odd prime factor, i.e.\ $d \in \{-1, 2, -2\}$.
+  This gives exactly $\QQ(i)$ ($d = -1$), $\QQ(\sqrt 2)$ ($d = 2$), and $\QQ(\sqrt{-2})$
+  ($d = -2$); of these only $\QQ(\sqrt 2)$ is real. Since $\zeta_8 + \zeta_8^{-1} = \sqrt 2$,
+  we have $\QQ(\sqrt 2) = \QQ(\zeta_8)^+$, the degree-$2$ subfield of $\QQ(\zeta_8)$; being the
+  only real quadratic field unramified outside $2$, it is the maximal real abelian extension
+  of exponent $2$ unramified outside $2$.
 \end{proof}
 
 \begin{proposition}
@@ -1165,27 +1202,30 @@ The goal of this chapter is to prove the following theorem.
 \end{proposition}
 
 \begin{proof}
-  We proceed by induction on $m$. The base case $m = 1$ is \ref{prop:kw_2_quadratic}.
-  Assume $m \geq 2$ and the result holds for degree $2^{m-1}$.
+  We proceed by induction on $m$. The base case $m = 1$ is \ref{prop:kw_2_quadratic}: each
+  of $\QQ(i) = \QQ(\zeta_4)$, $\QQ(\sqrt 2)$, $\QQ(\sqrt{-2})$ lies in $\QQ(\zeta_8)$. Assume
+  $m \geq 2$ and the result for degree $2^{m-1}$.
 
-  If $K$ is nonreal, complex conjugation $c \in \Gal(K/\QQ)$ is the unique
-  element of order $2$ in the cyclic group $\Gal(K/\QQ) \cong \ZZ/2^m\ZZ$,
-  and $M = K^c$ is totally real, cyclic of degree $2^{m-1}$ over $\QQ$, and
-  unramified outside $2$. By induction, $M \subseteq \QQ(\zeta_n)$ for some $n$.
-  The extension $K/M$ is quadratic and unramified outside $2$, so $K = M(\sqrt{d})$
-  with $d \in \{-1, \pm 2\}$; in every case $K \subseteq M(\zeta_8) \subseteq
-  \QQ(\zeta_{8n})$, so $K$ is cyclotomic.
-
-  Let $K'$ be the maximal real subfield of $\QQ(\zeta_{2^{m+2}})$; it is
-  cyclic of degree $2^m$ over $\QQ$ and unramified outside $2$. Suppose
-  $K'K/\QQ$ is not cyclic. Then $\Gal(K'K/\QQ)$ is a non-cyclic $2$-group,
-  so it has $(\ZZ/2\ZZ)^2$ as a quotient, giving three distinct quadratic
-  subfields of $K'K$. All are unramified outside $2$. Since $K'K$ is totally
-  real (both $K$ and $K'$ are), all three quadratic subfields are real.
-  But by \ref{prop:kw_2_quadratic} there is only one real quadratic field
-  unramified outside $2$, namely $\QQ(\sqrt{2})$, a contradiction.
-  Therefore $K'K/\QQ$ is cyclic, and \ref{lem:kw_cyclic_compositum} gives
+  \emph{Real case.} Suppose $K$ is totally real. Let $K' = \QQ(\zeta_{2^{m+2}})^+$ be the
+  maximal real subfield of $\QQ(\zeta_{2^{m+2}})$; since $\Gal(\QQ(\zeta_{2^{m+2}})/\QQ) \cong
+  \ZZ/2\ZZ \times \ZZ/2^m\ZZ$ with complex conjugation generating the $\ZZ/2\ZZ$ factor, the
+  quotient $\Gal(K'/\QQ) \cong \ZZ/2^m\ZZ$ is cyclic, and $K'$ is unramified outside $2$. If
+  $K'K/\QQ$ were not cyclic, then $\Gal(K'K/\QQ)$ — an abelian $2$-group, as $K$ and $K'$ are
+  abelian — would have $(\ZZ/2\ZZ)^2$ as a quotient, hence three distinct quadratic subfields
+  of $K'K$; all are unramified outside $2$, and all are real since $K'K$ is totally real. This
+  contradicts \ref{prop:kw_2_quadratic} (a unique real quadratic field unramified outside $2$).
+  Hence $K'K/\QQ$ is cyclic, and \ref{lem:kw_cyclic_compositum} gives
   $K \subseteq K' \subseteq \QQ(\zeta_{2^{m+2}})$.
+
+  \emph{Nonreal case.} Suppose $K$ is not totally real, and let $M$ be the maximal real subfield
+  of $K(i)$. Then $K(i) = K \cdot \QQ(i) = M(i)$, so $K$ is cyclotomic $\iff K(i)$ is cyclotomic
+  $\iff M$ is cyclotomic. Now $K(i)/\QQ$ is abelian (a compositum of the abelian extensions $K$
+  and $\QQ(i)$) and unramified outside $2$, hence so is $M$; moreover $M$ is cyclic: if
+  $i \notin K$ then $\Gal(K(i)/\QQ) \cong \ZZ/2^m\ZZ \times \ZZ/2\ZZ$ with complex conjugation
+  equal to $(2^{m-1}, 1)$, and the quotient by $\langle(2^{m-1},1)\rangle$ is cyclic of order
+  $2^m$; if $i \in K$ then $M = K^+$ is a subfield of the cyclic field $K$. Thus $M$ is real,
+  cyclic of $2$-power degree, and unramified outside $2$, so by the real case $M$ — and hence
+  $K$ — is cyclotomic. (This is Lemmermeyer's argument, Prop.~1.5.)
 \end{proof}
 
 \begin{proposition}
