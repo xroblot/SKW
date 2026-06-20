@@ -187,13 +187,47 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGaloi
     IsCyclotomicExtension.Rat.finrank (p ^ 2) ℚ⟮ξ⟯, Nat.totient_prime_pow hp.out Nat.two_pos,
     Nat.add_one_sub_one, pow_one, mul_comm]
 
+open IntermediateField Polynomial in
 /-- Every cyclic extension of `ℚ` of prime degree `p` (odd) unramified outside `p` is contained
-in the unique subfield of degree `p` of `ℚ(ζ_{p²})`. -/
-theorem prop_kw_exponent_p
-    (K : Type*) [Field K] [NumberField K] [IsGalois ℚ K] [IsCyclic (K ≃ₐ[ℚ] K)]
+in `ℚ(ζ_{p²}) = ℚ⟮ξ⟯`. -/
+theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A]
+    {ξ : A} (hξ : IsPrimitiveRoot ξ (p ^ 2))
+    (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic (K ≃ₐ[ℚ] K)]
     (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
-    Nonempty (K →ₐ[ℚ] CyclotomicField (p ^ 2) ℚ) := by
-  sorry
+    K ≤ ℚ⟮ξ⟯ := by
+  -- `ζ = ξ^p` is a primitive `p`-th root of unity; `ℚ(ζ_p) = ℚ⟮ζ⟯ ≤ ℚ⟮ξ⟯ ≤ A`.
+  set ζ : A := ξ ^ p with hζdef
+  have hζ : IsPrimitiveRoot ζ p := sorry
+  -- Run the abstract Kummer machinery on the *type* `↥M` of the compositum `M = K · ℚ(ζ_p) ≤ A`.
+  set M : IntermediateField ℚ A := K ⊔ ℚ⟮ζ⟯ with hM
+  -- Realize `K` and `F = ℚ(ζ_p)` as intermediate fields of `↥M` (so `Algebra ↥F ↥M` is free).
+  let F : IntermediateField ℚ M := (ℚ⟮ζ⟯).comap M.val
+  let K' : IntermediateField ℚ M := K.comap M.val
+  -- Instances + data feeding `kw_unit_root_of_unity` (the genuine content: assembled from
+  -- `kw_kummer`, `kw_mu_val_p`, `kw_mu_pth_power_ideal`, …).
+  haveI : NumberField M := sorry
+  haveI : IsCyclotomicExtension {p} ℚ F := sorry
+  haveI : IsGalois F M := sorry
+  haveI : IsCyclic (M ≃ₐ[F] M) := sorry
+  haveI : IsAbelianGalois ℚ M := sorry
+  haveI : IsGalois ℚ K' := sorry
+  haveI : IsCyclic (K' ≃ₐ[ℚ] K') := sorry
+  have hrF : Module.finrank F M = p := sorry
+  have hK' : Module.finrank ℚ K' = p := sorry
+  have hK'ram : UnramifiedOutside K' p := sorry
+  -- Kummer descent inside `↥M`: `M = F(ᵖ√μ)`, `(μ) = 𝔞ᵖ`, `X^p - μ` irreducible.
+  obtain ⟨μ, hμ, 𝔞, h𝔞₀, h𝔞, hIrr⟩ :
+      ∃ (μ : 𝓞 F) (_ : μ ≠ 0) (𝔞 : Ideal (𝓞 F)) (_ : 𝔞 ≠ ⊥) (_ : 𝔞 ^ p = span {μ}),
+        Irreducible (X ^ p - C (algebraMap (𝓞 F) F μ)) := sorry
+  haveI hS : IsSplittingField F M (X ^ p - C (algebraMap (𝓞 F) F μ)) := sorry
+  -- `kw_unit_root_of_unity`: the compositum `M` is `{p²}`-cyclotomic over `ℚ`.
+  have hcyc : IsCyclotomicExtension {p ^ 2} ℚ M :=
+    kw_unit_root_of_unity p F hrF hμ hIrr hp' K' hK' hK'ram hS h𝔞₀ h𝔞
+  -- Transport: a `{p²}`-cyclotomic subfield of `A` is `ℚ⟮ξ⟯`.
+  have hMeq : M = ℚ⟮ξ⟯ :=
+    (IntermediateField.isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ A M hξ).mp hcyc
+  -- `K ≤ M = ℚ⟮ξ⟯`.
+  exact le_sup_left.trans hMeq.le
 
 end
 

@@ -1212,12 +1212,15 @@ The goal of this chapter is to prove the following theorem.
 
 \begin{proposition}
   \label{prop:kw_exponent_p}
+  \lean{prop_kw_exponent_p}
   \uses{thm:stickelberger, lem:kw_kummer, lem:kw_abelian_kummer,
         lem:kw_split_prime, lem:kw_mu_val_p, lem:kw_mu_pth_power_ideal, lem:kw_class_trivial,
         lem:kw_mu_unit, lem:kw_unit_root_of_unity, lem:kw_ramification_reduction}
-  Let $p$ be an odd prime. The maximal abelian extension of $\QQ$ of
-  exponent $p$ unramified outside $p$ is cyclic of degree $p$: it is
-  the subfield of degree $p$ of $\QQ(\zeta_{p^2})$.
+  Let $p$ be an odd prime and let $K/\QQ$ be a cyclic extension of degree $p$
+  unramified outside $p$. Then $K$ admits a $\QQ$-algebra embedding into
+  $\QQ(\zeta_{p^2})$. In particular $K$ is the unique subfield of degree $p$ of
+  $\QQ(\zeta_{p^2})$, and the maximal abelian extension of $\QQ$ of exponent $p$
+  unramified outside $p$ is cyclic of degree $p$.
 \end{proposition}
 
 \begin{proof}
@@ -1434,51 +1437,83 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 \end{proof}
 
 \begin{lemma}
+  \label{lem:kw_conj_mul_eq_pow}
+  \lean{kw_conj_mul_eq_pow}
+  \leanok
+  \uses{lem:kw_abelian_kummer}
+  Let $\sigma_{-1}$ denote complex conjugation on $F$. With $\mu = \alpha^p \eta$, the product
+  $\eta\,\sigma_{-1}(\eta)$ is a $p$-th power in $F^\times$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Since $L/\QQ$ is abelian, \ref{lem:kw_abelian_kummer} applied to $\sigma_{-1}$ gives
+  $\xi \in F^\times$ with $\sigma_{-1}(\mu) = \xi^p\, \mu^{-1}$. Substituting $\mu = \alpha^p \eta$
+  and using that $\sigma_{-1}$ is a ring homomorphism,
+  \[
+    \sigma_{-1}(\alpha)^p\, \sigma_{-1}(\eta) = \xi^p\, \alpha^{-p}\, \eta^{-1},
+  \]
+  whence
+  \[
+    \eta\, \sigma_{-1}(\eta)
+      = \xi^p\, \alpha^{-p}\, \sigma_{-1}(\alpha)^{-p}
+      = \bigl(\xi/(\alpha\, \sigma_{-1}(\alpha))\bigr)^p .
+  \]
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_exists_realUnit_torsion}
+  \lean{kw_exists_realUnit_torsion}
+  \leanok
+  \uses{lem:kw_conj_mul_eq_pow}
+  The fourth power $\eta^4$ factors as $\eta^4 = \zeta\, \delta^p$ with $\zeta$ a $p$-th root of
+  unity and $\delta \in F$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Let $\sigma_{-1}$ be complex conjugation on $F = \QQ(\zeta_p)$. For any unit
+  $\eta \in \cO_F^\times$, the ratio $\eta/\sigma_{-1}(\eta)$ has absolute value $1$ at every
+  archimedean place, hence is a root of unity, while $\eta\,\sigma_{-1}(\eta)$ is a real unit;
+  their product being $\eta^2$, we get $\eta^2 = \zeta_0\,\varepsilon_0$ with $\zeta_0$ a root of
+  unity and $\sigma_{-1}(\varepsilon_0) = \varepsilon_0$. Squaring,
+  \[
+    \eta^4 = \zeta\, \varepsilon, \qquad \zeta = \zeta_0^2,\ \varepsilon = \varepsilon_0^2 .
+  \]
+  The roots of unity in $F$ form $\mu_{2p}$, so $\zeta_0^{2p} = 1$ and hence $\zeta^p =
+  \zeta_0^{2p} = 1$: $\zeta$ is a $p$-th root of unity. (Squaring twice lands the torsion factor
+  in $\mu_p$, sidestepping any sign normalization.)
+
+  Now $\sigma_{-1}$ inverts the root of unity $\zeta$ and fixes the real unit $\varepsilon$, so
+  applying it to $\eta^4 = \zeta\,\varepsilon$ gives $\sigma_{-1}(\eta)^4 = \zeta^{-1}\varepsilon$;
+  multiplying the two relations the $\zeta$ cancels:
+  \[
+    \varepsilon^2 = \bigl(\eta\,\sigma_{-1}(\eta)\bigr)^4 .
+  \]
+  By \ref{lem:kw_conj_mul_eq_pow}, $\eta\,\sigma_{-1}(\eta) = w^p$, so $\varepsilon^2 = (w^4)^p$.
+  As $p$ is odd, $\gcd(2,p) = 1$, hence $\varepsilon = \delta^p$ for some $\delta \in F$.
+  Therefore $\eta^4 = \zeta\, \delta^p$.
+\end{proof}
+
+\begin{lemma}
   \label{lem:kw_unit_root_of_unity}
   \lean{kw_unit_root_of_unity}
   \leanok
-  \uses{lem:kw_mu_unit, lem:kw_abelian_kummer}
+  \uses{lem:kw_mu_unit, lem:kw_exists_realUnit_torsion}
   The unit $\eta$ is a $p$-th power times a root of unity. Therefore $L = \QQ(\zeta_{p^2})$.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  Let $\sigma_{-1}$ denote complex conjugation on $F = \QQ(\zeta_p)$, so
-  $\sigma_{-1}(\zeta_p) = \zeta_p^{-1}$. For every unit $\eta \in \cO_F^\times$, the ratio
-  $\eta/\sigma_{-1}(\eta)$ has absolute value $1$ at every archimedean place, hence is a root
-  of unity, while $\eta\,\sigma_{-1}(\eta)$ is a real unit; their product being $\eta^2$, the
-  square of every unit factors as a root of unity times a real unit,
-  $\eta^2 = \zeta\,\varepsilon_0$ with $\sigma_{-1}(\varepsilon_0) = \varepsilon_0$. Squaring
-  once more,
+  By \ref{lem:kw_exists_realUnit_torsion}, $\eta^4 = \zeta\, \delta^p$ with $\zeta$ a $p$-th root
+  of unity and $\delta \in F$. With $\mu = \alpha^p \eta$ (\ref{lem:kw_mu_unit}),
   \[
-    \eta^4 = \zeta^2\, \varepsilon, \qquad \varepsilon = \varepsilon_0^2,\
-    \sigma_{-1}(\varepsilon) = \varepsilon .
-  \]
-  The roots of unity in $F$ form $\mu_{2p}$, so $\zeta^{2p} = 1$ and hence
-  $(\zeta^2)^p = \zeta^{2p} = 1$: the factor $\zeta^2$ is a genuine $p$-th root of unity.
-  (Working with $\eta^4$ rather than $\eta^2$ is exactly what lands the torsion factor in
-  $\mu_p$, sidestepping any sign normalization.)
-
-  Since $L/\QQ$ is abelian, \ref{lem:kw_abelian_kummer} applied to $\sigma_{-1}$, combined with
-  $\mu = \alpha^p \eta$, yields $w \in F^\times$ with $\eta\,\sigma_{-1}(\eta) = w^p$
-  (explicitly $w = \xi/(\alpha\,\sigma_{-1}(\alpha))$, where $\sigma_{-1}(\mu) = \xi^p
-  \mu^{-1}$). Applying $\sigma_{-1}$ to $\eta^4 = \zeta^2 \varepsilon$ gives
-  $\sigma_{-1}(\eta)^4 = \zeta^{-2} \varepsilon$, and multiplying the two relations the factor
-  $\zeta^2$ cancels:
-  \[
-    \varepsilon^2 = \bigl(\eta\,\sigma_{-1}(\eta)\bigr)^4 = w^{4p} = (w^4)^p .
-  \]
-  As $p$ is odd, $\gcd(2,p) = 1$, so $\varepsilon$ is itself a $p$-th power, $\varepsilon =
-  \delta^p$. Hence
-  \[
-    \eta^4 = \zeta^2\, \delta^p, \qquad
-    \mu^4 = \alpha^{4p}\, \zeta^2\, \delta^p = \zeta^2\,(\alpha^4 \delta)^p \in
+    \mu^4 = \alpha^{4p}\, \zeta\, \delta^p = \zeta\,(\alpha^4 \delta)^p \in
     \zeta_p^{\ZZ} (F^\times)^p .
   \]
-  Finally, as $\gcd(4,p) = 1$ we have $F(\sqrt[p]{\mu}) = F(\sqrt[p]{\mu^4})$, and
-  $\mu^4 \in \zeta_p^{\ZZ}(F^\times)^p$ gives $F(\sqrt[p]{\mu^4}) = F(\sqrt[p]{\zeta^2})
-  \subseteq \QQ(\zeta_{p^2})$. Since $[L:F] = p = [\QQ(\zeta_{p^2}):F]$, we conclude
-  $L = \QQ(\zeta_{p^2})$.
+  As $\gcd(4,p) = 1$ we have $F(\sqrt[p]{\mu}) = F(\sqrt[p]{\mu^4})$, and $\mu^4 \in
+  \zeta_p^{\ZZ}(F^\times)^p$ gives $F(\sqrt[p]{\mu^4}) = F(\sqrt[p]{\zeta}) \subseteq
+  \QQ(\zeta_{p^2})$. Since $[L:F] = p = [\QQ(\zeta_{p^2}):F]$, we conclude $L = \QQ(\zeta_{p^2})$.
 \end{proof}
 
 \chapter{Auxiliary results}
