@@ -21,6 +21,7 @@ import SKW.Prereqs.KummerExtension
 import SKW.Prereqs.MulChars
 import SKW.Prereqs.Normal
 import SKW.Prereqs.NumberTheory
+import SKW.Prereqs.TameRamification
 import SKW.Stickelberger.AddCharTrace
 import SKW.Stickelberger.Factorization
 import SKW.Stickelberger.GaussSum

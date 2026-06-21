@@ -1086,6 +1086,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 
 \begin{definition}
   \label{def:tame_character}
+  \lean{Ideal.tameCharacter}
   Fix a uniformizer $\pi$ of $\mathcal{O}$ ($v(\pi) = 1$). The \emph{tame character} is
   \[
     \theta : I \to k^\times, \qquad \theta(\tau) = \overline{\tau(\pi)/\pi}.
@@ -1096,6 +1097,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 
 \begin{lemma}
   \label{lem:tame_character_hom}
+  \lean{Ideal.tameCharacter_eq}
   \uses{def:tame_character}
   $\theta$ does not depend on the choice of uniformizer, and it is a group homomorphism.
 \end{lemma}
@@ -1119,6 +1121,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 
 \begin{lemma}[Rigidity]
   \label{lem:tame_character_rigidity}
+  \lean{Ideal.eq_one_of_tameCharacter_eq_one}
   \uses{def:tame_character}
   If $\tau \in I$ has order coprime to $\ell$ and $\theta(\tau) = 1$, then $\tau = \mathrm{id}$.
 \end{lemma}
@@ -1152,6 +1155,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 
 \begin{lemma}
   \label{lem:tame_inertia_cyclic}
+  \lean{Ideal.isCyclic_inertia}
   \uses{lem:tame_character_hom, lem:tame_character_rigidity}
   If $\mathfrak{Q}\mid\mathfrak{p}$ is tamely ramified (i.e.\ $\ell \nmid e$), then $\theta$ is
   injective; consequently $I(\mathfrak{Q}\mid\mathfrak{p})$ is cyclic of order $e$.
@@ -1167,6 +1171,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 
 \begin{lemma}
   \label{lem:tame_character_frob}
+  \lean{Ideal.tameCharacter_conj}
   \uses{lem:tame_character_hom}
   Let $\sigma$ lie in the decomposition group $D(\mathfrak{Q}\mid\mathfrak{p})$ and reduce to the
   Frobenius $x \mapsto x^{N\mathfrak{p}}$ of $k/k(\mathfrak{p})$. Then for all $\tau \in I$,
@@ -1184,6 +1189,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 
 \begin{lemma}
   \label{lem:abelian_tame_ramificationIdx_dvd}
+  \lean{Ideal.card_inertia_dvd_card_sub_one}
   \uses{lem:tame_inertia_cyclic, lem:tame_character_frob}
   Let $L/K$ be a finite \emph{abelian} extension of number fields and
   $\mathfrak{Q}\mid\mathfrak{p}$ a tamely ramified prime. Then $e(\mathfrak{Q}\mid\mathfrak{p})$
@@ -1346,16 +1352,17 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
   \uses{thm:stickelberger, lem:kw_kummer, lem:kw_abelian_kummer,
         lem:kw_split_prime, lem:kw_mu_val_p, lem:kw_mu_pth_power_ideal, lem:kw_class_trivial,
         lem:kw_mu_unit, lem:kw_unit_root_of_unity, lem:kw_ramification_reduction}
-  Let $p$ be an odd prime and let $K/\QQ$ be a cyclic extension of degree $p$
-  unramified outside $p$. Then $K$ admits a $\QQ$-algebra embedding into
-  $\QQ(\zeta_{p^2})$. In particular $K$ is the unique subfield of degree $p$ of
-  $\QQ(\zeta_{p^2})$, and the maximal abelian extension of $\QQ$ of exponent $p$
+  Let $p$ be an odd prime, $A$ a field of characteristic $0$, and $\xi \in A$ a primitive
+  $p^2$-th root of unity. Let $K \subseteq A$ be a subextension of $A/\QQ$ that is Galois and
+  cyclic of degree $p$ over $\QQ$ and unramified outside $p$. Then $K \subseteq \QQ(\xi)$
+  (the cyclotomic subfield $\QQ(\zeta_{p^2})$ of $A$). In particular $K$ is the unique subfield
+  of degree $p$ of $\QQ(\xi)$, and the maximal abelian extension of $\QQ$ of exponent $p$
   unramified outside $p$ is cyclic of degree $p$.
 \end{proposition}
 
 \begin{proof}
-  Let $K/\QQ$ be a cyclic extension of prime degree $p$ unramified outside $p$.
-  Set $F = \QQ(\zeta_p)$ and $L = KF$.
+  Set $\zeta = \xi^p$, a primitive $p$-th root of unity, $F = \QQ(\zeta) \subseteq A$, and
+  $L = K \cdot F \subseteq A$ the compositum.
 
   \begin{enumerate}
     \item By \ref{lem:kw_kummer}, $L = F(\sqrt[p]{\mu})$ for some $\mu \in
@@ -1367,14 +1374,14 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
     \item By \ref{lem:kw_class_trivial}, $\mathfrak{a}$ is principal.
     \item By \ref{lem:kw_mu_unit}, $\mu = \alpha^p \eta$ for some $\alpha \in
       \cO_F$ and unit $\eta \in \cO_F^\times$.
-    \item By \ref{lem:kw_unit_root_of_unity}, $L = \QQ(\zeta_{p^2})$.
+    \item By \ref{lem:kw_unit_root_of_unity}, $L = \QQ(\xi)$ (the $p^2$-cyclotomic subfield).
   \end{enumerate}
 
-  Therefore $K \subseteq L = \QQ(\zeta_{p^2})$. The Galois group
-  $\Gal(\QQ(\zeta_{p^2})/\QQ) \cong (\ZZ/p^2\ZZ)^\times \cong \ZZ/p\ZZ \times
+  Therefore $K \subseteq L = \QQ(\xi)$. The Galois group
+  $\Gal(\QQ(\xi)/\QQ) \cong (\ZZ/p^2\ZZ)^\times \cong \ZZ/p\ZZ \times
   \ZZ/(p-1)\ZZ$ has a unique subgroup of index $p$, giving a unique subfield
-  of degree $p$ over $\QQ$ in $\QQ(\zeta_{p^2})$. Since $K \cap F = \QQ$
-  (as $\gcd([K:\QQ], [F:\QQ]) = \gcd(p, p-1) = 1$) and $[\QQ(\zeta_{p^2}):F] = p$,
+  of degree $p$ over $\QQ$ in $\QQ(\xi)$. Since $K \cap F = \QQ$
+  (as $\gcd([K:\QQ], [F:\QQ]) = \gcd(p, p-1) = 1$) and $[\QQ(\xi):F] = p$,
   $K$ is exactly this unique subfield. The same applies to any other cyclic
   extension of degree $p$ unramified outside $p$, so the maximal such abelian
   extension of exponent $p$ is cyclic of degree $p$.
