@@ -1088,10 +1088,42 @@ The goal of this chapter is to prove the following theorem.
 \end{lemma}
 
 \begin{proof}
-  Standard tame-ramification theory (the tame character); see e.g.\ Serre, \emph{Local Fields},
-  Ch.~IV, or Marcus, \emph{Number Fields}. Well-definedness and injectivity use that $e$ is
-  prime to the residue characteristic, and the image lies in the group of $e$-th roots of unity
-  of $k(\mathfrak{Q})$.
+  Localize at $\mathfrak{Q}$: write $\mathcal{O} = \mathcal{O}_{L,\mathfrak{Q}}$ for the local
+  ring, $\mathfrak{m} = \mathfrak{Q}\mathcal{O}$ its maximal ideal, $v = v_{\mathfrak{Q}}$ the
+  valuation, $k(\mathfrak{Q}) = \mathcal{O}/\mathfrak{m}$ the residue field of characteristic
+  $\ell$, and $e = e(\mathfrak{Q}\mid\mathfrak{p})$. By definition every $\tau \in I :=
+  I(\mathfrak{Q}\mid\mathfrak{p})$ fixes $\mathfrak{Q}$ (hence $v \circ \tau = v$) and acts
+  trivially on $k(\mathfrak{Q})$.
+
+  \emph{Well-defined.} For $\tau \in I$ and a uniformizer $\pi$ (i.e.\ $v(\pi) = 1$), one has
+  $v(\tau\pi) = v(\pi) = 1$, so $\tau\pi/\pi \in \mathcal{O}^\times$ and its residue
+  $\theta(\tau) \in k(\mathfrak{Q})^\times$ is defined. It does not depend on $\pi$: another
+  uniformizer is $\pi' = u\pi$ with $u \in \mathcal{O}^\times$, and $\tau\pi'/\pi' =
+  (\tau u/u)(\tau\pi/\pi)$; since $\tau$ acts trivially on $k(\mathfrak{Q})$ we have $\tau u
+  \equiv u \pmod{\mathfrak{m}}$, so $\tau u/u \equiv 1$ and the residue is unchanged.
+
+  \emph{Homomorphism.} For $\sigma,\tau \in I$ put $a = \tau\pi/\pi \in \mathcal{O}^\times$, so
+  $\tau\pi = a\pi$ and $\sigma\tau\pi = \sigma(a)\,\sigma\pi$. Reducing modulo $\mathfrak{m}$,
+  \[
+    \theta(\sigma\tau) = \overline{\sigma\tau\pi/\pi}
+      = \overline{\sigma(a)}\cdot\overline{\sigma\pi/\pi}
+      = \bar{a}\cdot\theta(\sigma) = \theta(\tau)\,\theta(\sigma),
+  \]
+  where $\overline{\sigma(a)} = \bar a$ because $\sigma$ is trivial on $k(\mathfrak{Q})$. As
+  $k(\mathfrak{Q})^\times$ is abelian, $\theta(\sigma\tau) = \theta(\sigma)\theta(\tau)$.
+
+  \emph{Kernel and injectivity.} By construction $\tau \in \ker\theta$ iff $\tau\pi \equiv \pi
+  \pmod{\mathfrak{m}^2}$, i.e.\ $\tau$ lies in the first ramification group (in lower numbering)
+  $G_1 = \{\tau \in I : v(\tau x - x) \geq 2 \text{ for all } x \in \mathcal{O}\}$. Hence $\theta$
+  factors through an injection $I/G_1 \hookrightarrow k(\mathfrak{Q})^\times$. Each quotient
+  $G_i/G_{i+1}$ ($i \geq 1$) embeds into the additive group of $k(\mathfrak{Q})$, so $G_1$ is an
+  $\ell$-group. Tameness means $\ell \nmid e = |I|$; since $G_1 \leq I$ is an $\ell$-group, this
+  forces $G_1 = 1$, and $\theta$ is injective.
+
+  \emph{Cyclicity.} The image $\theta(I)$ is a finite subgroup of the multiplicative group of the
+  field $k(\mathfrak{Q})$, hence cyclic. Therefore $I \cong \theta(I)$ is cyclic of order $|I| =
+  e$, with image $\theta(I) = \mu_e\big(k(\mathfrak{Q})\big)$. \emph{(Cf.\ Serre, \emph{Local
+  Fields}, Ch.~IV §1--2.)}
 \end{proof}
 
 \begin{lemma}
