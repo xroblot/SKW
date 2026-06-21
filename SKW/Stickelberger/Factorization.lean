@@ -164,11 +164,16 @@ theorem ramificationIdx_eq_one [NeZero f] [IsCyclotomicExtension {p * (p ^ f - 1
   have hpm : ¬ p ∣ m := hp.out.coprime_iff_not_dvd.mp <|
     (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro_left d hdm
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 𝔓 𝒑
-  have := ramificationIdx_algebra_tower' 𝒑 𝔓 𝓟
-  rw [ramificationIdx_eq (p * (p ^ f - 1)) _ _ (by rw [zero_add, pow_one]) hpq,
-    ramificationIdx_eq (m * p) _ _ (by rw [mul_comm, zero_add, pow_one]) hpm] at this
-  rwa [pow_zero, one_mul, left_eq_mul₀] at this
-  exact Nat.sub_ne_zero_iff_lt.mpr hp.out.one_lt
+  have htower := Ideal.ramificationIdx_algebra_tower' 𝒑 𝔓 𝓟
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝓟 (by simpa using hp.out.ne_zero),
+    @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
+      (by ring) hpq,
+    Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝔓 (by simpa using hp.out.ne_zero),
+    @IsCyclotomicExtension.Rat.ramificationIdx_eq (m * p) m p 0 hp E _ _ 𝔓 _ _ _
+      (by ring) hpm] at htower
+  simp at htower
+  have hne : p - 1 ≠ 0 := Nat.sub_ne_zero_iff_lt.mpr hp.out.one_lt
+  nlinarith [Nat.pos_of_ne_zero hne]
 
 omit [NeZero (p ^ f - 1)] in
 include hdm in
@@ -178,9 +183,14 @@ theorem ramificationIdx_eq_sub_one₀ [NeZero f] [NeZero m] [Algebra k E] [𝔓.
   have hpm : ¬ p ∣ m := hp.out.coprime_iff_not_dvd.mp <|
     (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro_left d hdm
   have : 𝔓.LiesOver 𝒑 := LiesOver.trans 𝔓 𝔭 𝒑
-  have := ramificationIdx_algebra_tower' 𝒑 𝔭 𝔓
-  rwa [ramificationIdx_eq (m * p) _ _ (by rw [mul_comm, zero_add, pow_one]) hpm,
-    ramificationIdx_eq_of_not_dvd p _ _ hpm, pow_zero, one_mul, one_mul, eq_comm] at this
+  have htower := Ideal.ramificationIdx_algebra_tower' 𝒑 𝔭 𝔓
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝔓 (by simpa using hp.out.ne_zero),
+    @IsCyclotomicExtension.Rat.ramificationIdx_eq (m * p) m p 0 hp E _ _ 𝔓 _ _ _
+      (by ring) hpm,
+    Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝔭 (by simpa using hp.out.ne_zero),
+    IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p k 𝔭 hpm,
+    one_mul] at htower
+  simpa using htower.symm
 
 omit [NeZero (p ^ f - 1)] [IsCyclotomicExtension {m * p} ℚ E] in
 include hdm in
@@ -192,9 +202,14 @@ theorem ramificationIdx_eq_sub_one [NeZero f] [NeZero m] [𝔭.LiesOver 𝒑]
   have hpm : ¬ p ∣ m := hp.out.coprime_iff_not_dvd.mp <|
     (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro_left d hdm
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 𝔭 𝒑
-  have := ramificationIdx_algebra_tower' 𝒑 𝔭 𝓟
-  rwa [ramificationIdx_eq (p * (p ^ f - 1)) _ _ (by rw [zero_add, pow_one]) hpq,
-    ramificationIdx_eq_of_not_dvd p _ _ hpm, pow_zero, one_mul, one_mul, eq_comm] at this
+  have htower := Ideal.ramificationIdx_algebra_tower' 𝒑 𝔭 𝓟
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝓟 (by simpa using hp.out.ne_zero),
+    @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
+      (by ring) hpq,
+    Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝔭 (by simpa using hp.out.ne_zero),
+    IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p k 𝔭 hpm,
+    one_mul] at htower
+  simpa using htower.symm
 
 variable (p) in
 theorem galEquivZMod_stabilizer' [IsCyclotomicExtension {m} ℚ k] [NeZero m] [𝔭.IsMaximal] [𝔭.LiesOver 𝒑]

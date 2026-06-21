@@ -117,7 +117,10 @@ theorem valGauss_add_valGauss_sub_self [NeZero f] [𝓟.LiesOver 𝒑] [P.LiesOv
       emultiplicity_mul h𝓟, emultiplicity_of_isUnit_right h𝓟.not_unit, zero_add, ← span_singleton_pow,
       emultiplicity_pow h𝓟, show (p : 𝓞 L) = algebraMap ℤ (𝓞 L) p by simp, ← Set.image_singleton,
       ← map_span, (FiniteMultiplicity.of_not_isUnit h𝓟.not_unit h₁).emultiplicity_eq_multiplicity,
-      ← IsDedekindDomain.ramificationIdx_eq_multiplicity h₁, ramificationIdx_eq_p_sub_one f 𝓟,
+      ← IsDedekindDomain.ramificationIdx_eq_multiplicity h₁,
+      Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝓟 (by simpa using hp.out.ne_zero)]
+    haveI : 𝓟.IsPrime := Ideal.isPrime_of_prime h𝓟
+    rw [ramificationIdx_eq_p_sub_one (p := p) f 𝓟,
       ENat.coe_mul]
     · infer_instance
     · rw [isUnit_iff, span_singleton_eq_top]

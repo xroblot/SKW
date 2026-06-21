@@ -71,6 +71,7 @@ lemma kw_kummer' (hKram : UnramifiedOutside K p) (htop : K ⊔ F = ⊤) :
     exact hKram q hq hqp (under (𝓞 K) 𝔮)
   · have : Fact q.Prime := ⟨hq⟩
     have : ¬ q ∣ p := by rwa [Nat.prime_dvd_prime_iff_eq hq hp.out]
+    rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ (by simpa using hq.ne_zero)]
     exact Rat.ramificationIdx_eq_of_not_dvd q F (under (𝓞 F) 𝔮) this
 
 variable [IsGalois F L] [hCF : IsCyclic Gal(L/F)] (hrF : finrank F L = p)
@@ -250,9 +251,8 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
       have : 𝔮.LiesOver (span {(p : ℤ)}) := hqp ▸ Int.liesOver_span_absNorm 𝔮
       have : IsGalois ℚ F := isGalois {p} ℚ F
       have : Nontrivial (MulAction.stabilizer Gal(F/ℚ) 𝔮) := by
-        rw [← Finite.one_lt_card_iff_nontrivial, card_stabilizer_eq (span {(p : ℤ)})
-          (by simpa using hp.out.ne_zero) 𝔮, Rat.ramificationIdxIn_eq_of_prime,
-          Rat.inertiaDegIn_eq_of_prime, mul_one]
+        rw [← Finite.one_lt_card_iff_nontrivial, card_stabilizer_eq (span {(p : ℤ)}) 𝔮,
+          Rat.ramificationIdxIn_eq_of_prime, Rat.inertiaDegIn_eq_of_prime, mul_one]
         exact Nat.lt_sub_of_add_lt <| (Nat.Prime.odd_iff hp.out).mp hp'
       rwa [Subgroup.nontrivial_iff_exists_ne_one] at this
     contrapose! hσ'
@@ -261,10 +261,13 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
     have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
     have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
     have h𝔔' : 𝔮.ramificationIdx 𝔔 = 1 := by
-      have := hLRam q hq.out hqp 𝔔
-      rwa [ramificationIdx_algebra_tower' _ 𝔮 _,
-        Rat.ramificationIdx_eq_of_not_dvd q F 𝔮 (m := p), one_mul] at this
-      rwa [Nat.prime_dvd_prime_iff_eq hq.out hp.out]
+      have hram := hLRam q hq.out hqp 𝔔
+      have htower := ramificationIdx_algebra_tower' (span {(q : ℤ)}) 𝔮 𝔔
+      rw [hram, Ideal.ramificationIdx_eq_ramificationIdx' _ 𝔮 (by simpa using hq.out.ne_zero),
+        IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd q F 𝔮
+          (by rwa [Nat.prime_dvd_prime_iff_eq hq.out hp.out]),
+        one_mul] at htower
+      linarith
     obtain ⟨α, hα₀, hα⟩ := exists_pth_root p F hrF hIrr
     have := IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' (span {μ}) h𝔮.irreducible
       h𝔔.irreducible (IsMaximal.ne_bot_of_isIntegral_int 𝔔)

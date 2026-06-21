@@ -80,33 +80,46 @@ theorem zeta_sub_one_mem [𝓟.LiesOver 𝒑] : algebraMap (𝓞 F) (𝓞 L) ζ 
 
 variable (f) in
 theorem ramificationIdx_eq_p_sub_one [𝓟.LiesOver 𝒑] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
-    𝒑.ramificationIdx 𝓟 = p - 1 := by
-  rw [IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) L 𝓟 _
-    (not_dvd_pow_self_sub_one p f), pow_zero, one_mul]
-  rw [zero_add, pow_one]
+    𝓟.ramificationIdx' ℤ = p - 1 := by
+  simpa using @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
+    (by ring) (not_dvd_pow_self_sub_one p f)
 
 variable (p f P) in
 theorem ramificationIdx_eq_p_sub_one' [𝓟.LiesOver P] [P.LiesOver 𝒑]
     [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
-    P.ramificationIdx 𝓟 = p - 1 := by
-  have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
-  have := Ideal.ramificationIdx_algebra_tower' 𝒑 P 𝓟
-  rwa [IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p K P (not_dvd_pow_self_sub_one p f),
-    ramificationIdx_eq_p_sub_one f 𝓟, one_mul, eq_comm] at this
+    𝓟.ramificationIdx' (𝓞 K) = p - 1 := by
+  rw [← Ideal.ramificationIdx_eq_ramificationIdx' P 𝓟 (Ideal.IsMaximal.ne_bot_of_isIntegral_int P)]
+  have h𝓟 : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
+  have tower := Ideal.ramificationIdx_algebra_tower' 𝒑 P 𝓟
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝓟 (by simpa using hp.out.ne_zero),
+    @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
+      (by ring) (not_dvd_pow_self_sub_one p f),
+    Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 P (by simpa using hp.out.ne_zero),
+    IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p K P (not_dvd_pow_self_sub_one p f),
+    one_mul] at tower
+  simpa using tower.symm
 
 variable (p f) in
 theorem ramificationIdx_under_eq_one [𝓟.LiesOver 𝒑] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
-    (under (𝓞 F) 𝓟).ramificationIdx 𝓟 = 1 := by
-  have := Ideal.ramificationIdx_algebra_tower' 𝒑 (under (𝓞 F) 𝓟) 𝓟
-  rwa [ramificationIdx_eq_p_sub_one f, IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime,
-    left_eq_mul₀] at this
-  exact Nat.sub_ne_zero_iff_lt.mpr hp.out.one_lt
+    𝓟.ramificationIdx' (𝓞 F) = 1 := by
+  have h𝓟 : 𝓟 ≠ ⊥ := ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using hp.out.ne_zero) 𝓟
+  rw [← Ideal.ramificationIdx_eq_ramificationIdx' (under (𝓞 F) 𝓟) 𝓟
+    (Ideal.under_ne_bot (𝓞 F) h𝓟)]
+  have tower := Ideal.ramificationIdx_algebra_tower' 𝒑 (under (𝓞 F) 𝓟) 𝓟
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝓟 (by simpa using hp.out.ne_zero),
+    @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
+      (by ring) (not_dvd_pow_self_sub_one p f),
+    Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 (under (𝓞 F) 𝓟) (by simpa using hp.out.ne_zero),
+    IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p F _] at tower
+  simp at tower
+  have hne : p - 1 ≠ 0 := Nat.sub_ne_zero_iff_lt.mpr hp.out.one_lt
+  nlinarith [Nat.pos_of_ne_zero hne]
 
 variable (p f P) in
-theorem inertia_deg_eq [NeZero f] [P.LiesOver 𝒑] : 𝒑.inertiaDeg P = f := by
-  rw [IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd (m := p ^ f - 1) p K P]
-  · rw [ZMod.orderOf_mod_self_pow_sub_one _ _ hp.out.one_lt]
-  · exact (Nat.Prime.coprime_iff_not_dvd hp.out).mp (coprime_pow_sub_one p f).symm
+theorem inertia_deg_eq [NeZero f] [P.LiesOver 𝒑] : P.inertiaDeg' ℤ = f := by
+  rw [IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd (m := p ^ f - 1) p K P,
+    ZMod.orderOf_mod_self_pow_sub_one _ _ hp.out.one_lt]
+  exact (Nat.Prime.coprime_iff_not_dvd hp.out).mp (coprime_pow_sub_one p f).symm
 
 include hζ in
 variable (p f P) in
@@ -123,7 +136,10 @@ theorem zeta_sub_one_not_mem_sq [𝓟.LiesOver P] [𝓟.LiesOver 𝒑]
     ← IsDedekindDomain.ramificationIdx_eq_multiplicity h inferInstance,
     show span {ζ - 1} = under (𝓞 F) 𝓟 from
       (IsCyclotomicExtension.Rat.eq_span_zeta_sub_one_of_liesOver' p F
-        (IsPrimitiveRoot.coe_submonoidClass_iff.mpr hζ) (under (𝓞 F) 𝓟)).symm ,
+        (IsPrimitiveRoot.coe_submonoidClass_iff.mpr hζ) (under (𝓞 F) 𝓟)).symm]
+  have h𝓟ne : 𝓟 ≠ ⊥ := ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using hp.out.ne_zero) 𝓟
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' (under (𝓞 F) 𝓟) 𝓟
+      (Ideal.under_ne_bot (𝓞 F) h𝓟ne),
     ramificationIdx_under_eq_one p f]
   exact Nat.not_succ_le_self 1
 
@@ -167,7 +183,8 @@ theorem GaussSum_mul_GaussSum_neg [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : �
     gaussSum_mul_gaussSum_eq_card (teichmuller_pow_comp_algebraMap_ne_one hbij a ha)
     (addCharTrace_isPrimitive P (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) (𝓞 L)))),
     Fintype.card_eq_nat_card, ← absNorm_eq_card, absNorm_eq_pow_inertiaDeg' P hp.out,
-    MulChar.ringHomComp_inv, MulChar.ringHomComp_apply, Nat.cast_pow, inertia_deg_eq p f P]
+    Ideal.inertiaDeg_eq_inertiaDeg', MulChar.ringHomComp_inv, MulChar.ringHomComp_apply,
+    Nat.cast_pow, inertia_deg_eq p f P]
 
 theorem norm_GaussSum [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) :
     ∃ k : ℕ, 1 ≤ k ∧ (Algebra.norm ℤ (GaussSum hbij hζ a)).natAbs = p ^ k := by
@@ -236,7 +253,8 @@ theorem mk_sq_gausssum_eq [hp' : Fact (Odd p)] [𝓟.LiesOver P] [P.LiesOver �
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
   have : (𝓟 ^ 2).LiesOver P := by
     refine pow_liesOver_of_liesOver P 𝓟 ?_
-    rw [ramificationIdx_eq_p_sub_one' p f]
+    rw [Ideal.ramificationIdx_eq_ramificationIdx' P 𝓟 (Ideal.IsMaximal.ne_bot_of_isIntegral_int P),
+      ramificationIdx_eq_p_sub_one' p f P]
     grind
   have : (𝓟 ^ 2).LiesOver 𝒑 := LiesOver.trans (𝓟 ^ 2) P 𝒑
   have h𝓟 := zeta_sub_one_mem hζ 𝓟
@@ -294,7 +312,8 @@ include hη in
 set_option backward.isDefEq.respectTransparency false in
 theorem galLFEquiv_apply_eta (σ : Gal(L/F)) :
     σ • (algebraMap (𝓞 K) (𝓞 L) η) = (algebraMap (𝓞 K) (𝓞 L)) η ^ (galFEquiv p f K σ).val.val := by
-  have : IsGalois ℚ K := IsCyclotomicExtension.isGalois {p ^ f - 1} ℚ K
+  haveI : IsGalois ℚ K := IsCyclotomicExtension.isGalois {p ^ f - 1} ℚ K
+  haveI : Normal ℚ K := inferInstance
   convert RingHom.congr_arg (algebraMap (𝓞 K) (𝓞 L))
     <| IsCyclotomicExtension.Rat.galEquivZMod_smul_of_pow_eq (p ^ f - 1) K
     (AlgEquiv.restrictNormalHom K (AlgEquiv.restrictScalars ℚ σ)) hη.pow_eq_one
