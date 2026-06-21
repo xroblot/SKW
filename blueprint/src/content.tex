@@ -1073,74 +1073,131 @@ The goal of this chapter is to prove the following theorem.
   $[\Gal(L/\QQ) : \mathrm{Fix}(K')] = [K':\QQ]$, so $\mathrm{Fix}(K') \leq \mathrm{Fix}(K)$.
 \end{proof}
 
-\begin{lemma}
-  \label{lem:tame_inertia_cyclic}
-  Let $L/K$ be a finite Galois extension of number fields, and let $\mathfrak{Q}$ be a prime of
-  $L$ above a prime $\mathfrak{p}$ of $K$ whose ramification index $e(\mathfrak{Q}\mid\mathfrak{p})$
-  is prime to the residue characteristic of $\mathfrak{p}$ (tame ramification). Then
+Throughout this subsection we fix the following local data, and develop the tame character
+from scratch (no higher ramification groups). Let $L/K$ be a finite Galois extension of number
+fields, $\mathfrak{Q}$ a prime of $L$ above a prime $\mathfrak{p}$ of $K$. Localize at
+$\mathfrak{Q}$: let $\mathcal{O} = \mathcal{O}_{L,\mathfrak{Q}}$ be the (discrete) valuation ring,
+$\mathfrak{m} = \mathfrak{Q}\mathcal{O}$ its maximal ideal, $v = v_{\mathfrak{Q}}$ the valuation,
+$k = k(\mathfrak{Q}) = \mathcal{O}/\mathfrak{m}$ the residue field of characteristic $\ell$, and
+$e = e(\mathfrak{Q}\mid\mathfrak{p})$. Let $I = I(\mathfrak{Q}\mid\mathfrak{p})$ be the inertia
+group; by definition each $\tau \in I$ fixes $\mathfrak{Q}$ (so $v\circ\tau = v$, i.e.\ $\tau$
+preserves $\mathcal{O}$, $\mathfrak{m}$ and each $\mathfrak{m}^n$) and acts trivially on $k$. For
+$x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
+
+\begin{definition}
+  \label{def:tame_character}
+  Fix a uniformizer $\pi$ of $\mathcal{O}$ ($v(\pi) = 1$). The \emph{tame character} is
   \[
-    \theta : I(\mathfrak{Q}\mid\mathfrak{p}) \to k(\mathfrak{Q})^\times, \qquad
-    \tau \longmapsto \tau(\pi)/\pi \bmod \mathfrak{Q}
+    \theta : I \to k^\times, \qquad \theta(\tau) = \overline{\tau(\pi)/\pi}.
   \]
-  (for any uniformizer $\pi$ at $\mathfrak{Q}$) is a well-defined injective group homomorphism.
-  In particular the inertia group $I(\mathfrak{Q}\mid\mathfrak{p})$ is cyclic of order
-  $e(\mathfrak{Q}\mid\mathfrak{p})$.
+  This is well-defined: $v(\tau\pi) = v(\pi) = 1$, so $\tau\pi/\pi \in \mathcal{O}^\times$ and
+  $\theta(\tau) = \overline{\tau\pi/\pi} \in k^\times$.
+\end{definition}
+
+\begin{lemma}
+  \label{lem:tame_character_hom}
+  \uses{def:tame_character}
+  $\theta$ does not depend on the choice of uniformizer, and it is a group homomorphism.
 \end{lemma}
 
 \begin{proof}
-  Localize at $\mathfrak{Q}$: write $\mathcal{O} = \mathcal{O}_{L,\mathfrak{Q}}$ for the local
-  ring, $\mathfrak{m} = \mathfrak{Q}\mathcal{O}$ its maximal ideal, $v = v_{\mathfrak{Q}}$ the
-  valuation, $k(\mathfrak{Q}) = \mathcal{O}/\mathfrak{m}$ the residue field of characteristic
-  $\ell$, and $e = e(\mathfrak{Q}\mid\mathfrak{p})$. By definition every $\tau \in I :=
-  I(\mathfrak{Q}\mid\mathfrak{p})$ fixes $\mathfrak{Q}$ (hence $v \circ \tau = v$) and acts
-  trivially on $k(\mathfrak{Q})$.
-
-  \emph{Well-defined.} For $\tau \in I$ and a uniformizer $\pi$ (i.e.\ $v(\pi) = 1$), one has
-  $v(\tau\pi) = v(\pi) = 1$, so $\tau\pi/\pi \in \mathcal{O}^\times$ and its residue
-  $\theta(\tau) \in k(\mathfrak{Q})^\times$ is defined. It does not depend on $\pi$: another
-  uniformizer is $\pi' = u\pi$ with $u \in \mathcal{O}^\times$, and $\tau\pi'/\pi' =
-  (\tau u/u)(\tau\pi/\pi)$; since $\tau$ acts trivially on $k(\mathfrak{Q})$ we have $\tau u
-  \equiv u \pmod{\mathfrak{m}}$, so $\tau u/u \equiv 1$ and the residue is unchanged.
+  \emph{Independence of $\pi$.} Another uniformizer is $\pi' = u\pi$ with $u \in
+  \mathcal{O}^\times$; then $\tau\pi'/\pi' = (\tau u/u)(\tau\pi/\pi)$, and since $\tau$ is trivial
+  on $k$ we have $\overline{\tau u} = \bar u$, so $\overline{\tau u/u} = 1$ and the residue is
+  unchanged.
 
   \emph{Homomorphism.} For $\sigma,\tau \in I$ put $a = \tau\pi/\pi \in \mathcal{O}^\times$, so
-  $\tau\pi = a\pi$ and $\sigma\tau\pi = \sigma(a)\,\sigma\pi$. Reducing modulo $\mathfrak{m}$,
+  $\tau\pi = a\pi$ and $\sigma\tau(\pi) = \sigma(a)\,\sigma(\pi)$. Reducing modulo $\mathfrak{m}$
+  and using $\overline{\sigma(a)} = \bar a$ ($\sigma$ trivial on $k$),
   \[
-    \theta(\sigma\tau) = \overline{\sigma\tau\pi/\pi}
-      = \overline{\sigma(a)}\cdot\overline{\sigma\pi/\pi}
-      = \bar{a}\cdot\theta(\sigma) = \theta(\tau)\,\theta(\sigma),
+    \theta(\sigma\tau) = \overline{\sigma\tau(\pi)/\pi}
+      = \overline{\sigma(a)}\cdot\overline{\sigma(\pi)/\pi}
+      = \bar a\cdot\theta(\sigma) = \theta(\tau)\,\theta(\sigma) = \theta(\sigma)\,\theta(\tau),
   \]
-  where $\overline{\sigma(a)} = \bar a$ because $\sigma$ is trivial on $k(\mathfrak{Q})$. As
-  $k(\mathfrak{Q})^\times$ is abelian, $\theta(\sigma\tau) = \theta(\sigma)\theta(\tau)$.
+  the last step since $k^\times$ is abelian.
+\end{proof}
 
-  \emph{Kernel and injectivity.} By construction $\tau \in \ker\theta$ iff $\tau\pi \equiv \pi
-  \pmod{\mathfrak{m}^2}$, i.e.\ $\tau$ lies in the first ramification group (in lower numbering)
-  $G_1 = \{\tau \in I : v(\tau x - x) \geq 2 \text{ for all } x \in \mathcal{O}\}$. Hence $\theta$
-  factors through an injection $I/G_1 \hookrightarrow k(\mathfrak{Q})^\times$. Each quotient
-  $G_i/G_{i+1}$ ($i \geq 1$) embeds into the additive group of $k(\mathfrak{Q})$, so $G_1$ is an
-  $\ell$-group. Tameness means $\ell \nmid e = |I|$; since $G_1 \leq I$ is an $\ell$-group, this
-  forces $G_1 = 1$, and $\theta$ is injective.
+\begin{lemma}[Rigidity]
+  \label{lem:tame_character_rigidity}
+  \uses{def:tame_character}
+  If $\tau \in I$ has order coprime to $\ell$ and $\theta(\tau) = 1$, then $\tau = \mathrm{id}$.
+\end{lemma}
 
-  \emph{Cyclicity.} The image $\theta(I)$ is a finite subgroup of the multiplicative group of the
-  field $k(\mathfrak{Q})$, hence cyclic. Therefore $I \cong \theta(I)$ is cyclic of order $|I| =
-  e$, with image $\theta(I) = \mu_e\big(k(\mathfrak{Q})\big)$. \emph{(Cf.\ Serre, \emph{Local
-  Fields}, Ch.~IV §1--2.)}
+\begin{proof}
+  Let $m = \operatorname{ord}(\tau)$, coprime to $\ell$. We show by induction on $n \geq 1$ that
+  $\tau$ acts trivially on $\mathcal{O}/\mathfrak{m}^n$; since $\bigcap_n \mathfrak{m}^n = 0$
+  (Krull intersection), this forces $\tau = \mathrm{id}$ on $\mathcal{O}$, hence on $L$.
+
+  For $n = 1$, $\tau$ is trivial on $\mathcal{O}/\mathfrak{m} = k$ ($\tau \in I$). For $n = 2$,
+  $\theta(\tau) = 1$ means $\tau(\pi) \equiv \pi \pmod{\mathfrak{m}^2}$; as $\mathcal{O}/\mathfrak{m}^2$
+  is generated as a ring by $k$ and $\bar\pi$, $\tau$ is trivial on $\mathcal{O}/\mathfrak{m}^2$.
+
+  Assume $n \geq 3$ and $\tau \equiv \mathrm{id}$ on $\mathcal{O}/\mathfrak{m}^{n-1}$. Set $R =
+  \mathcal{O}/\mathfrak{m}^n$ and $J = \mathfrak{m}^{n-1}/\mathfrak{m}^n \subseteq R$, a
+  one-dimensional $k$-vector space (spanned by $\bar\pi^{\,n-1}$) with $J^2 = 0$. The hypothesis
+  gives $\delta := \tau - \mathrm{id} : R \to J$. As $\tau$ is a ring homomorphism and $\delta$
+  takes values in the square-zero ideal $J$,
+  \[
+    \delta(xy) = \tau(x)\tau(y) - xy = x\,\delta(y) + y\,\delta(x) + \delta(x)\delta(y)
+      = x\,\delta(y) + y\,\delta(x),
+  \]
+  so $\delta$ is a derivation. Moreover $\tau$ acts on $J$ by multiplication by $\theta(\tau)^{n-1}
+  = 1$ (since $\tau(\pi^{n-1}) = (\tau\pi)^{n-1} \equiv \theta(\tau)^{n-1}\pi^{n-1}
+  \pmod{\mathfrak{m}^n}$), so $\delta|_J = 0$, whence $\delta^2 = 0$. Therefore $\tau^m =
+  (\mathrm{id} + \delta)^m = \mathrm{id} + m\,\delta$. From $\tau^m = \mathrm{id}$ we get
+  $m\,\delta = 0$; as $J$ is a $k$-vector space and $m$ is invertible in $k$ ($m$ coprime to
+  $\ell = \operatorname{char} k$), $\delta = 0$, i.e.\ $\tau \equiv \mathrm{id}$ on
+  $\mathcal{O}/\mathfrak{m}^n$.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:tame_inertia_cyclic}
+  \uses{lem:tame_character_hom, lem:tame_character_rigidity}
+  If $\mathfrak{Q}\mid\mathfrak{p}$ is tamely ramified (i.e.\ $\ell \nmid e$), then $\theta$ is
+  injective; consequently $I(\mathfrak{Q}\mid\mathfrak{p})$ is cyclic of order $e$.
+\end{lemma}
+
+\begin{proof}
+  By \ref{lem:tame_character_hom}, $\theta$ is a homomorphism. Since $\ell \nmid e = |I|$, every
+  $\tau \in I$ has order dividing $e$, hence coprime to $\ell$; so if $\theta(\tau) = 1$ then
+  $\tau = \mathrm{id}$ by \ref{lem:tame_character_rigidity}. Thus $\theta$ is injective and $I$
+  embeds in $k^\times$. A finite subgroup of the multiplicative group of a field is cyclic, so
+  $I \cong \theta(I)$ is cyclic of order $|I| = e$ (with $\theta(I) = \mu_e(k)$).
+\end{proof}
+
+\begin{lemma}
+  \label{lem:tame_character_frob}
+  \uses{lem:tame_character_hom}
+  Let $\sigma$ lie in the decomposition group $D(\mathfrak{Q}\mid\mathfrak{p})$ and reduce to the
+  Frobenius $x \mapsto x^{N\mathfrak{p}}$ of $k/k(\mathfrak{p})$. Then for all $\tau \in I$,
+  $\theta(\sigma\tau\sigma^{-1}) = \theta(\tau)^{N\mathfrak{p}}$.
+\end{lemma}
+
+\begin{proof}
+  Since $\sigma$ preserves $\mathcal{O}$ and $\mathfrak{m}$, $\pi' = \sigma^{-1}(\pi)$ is again a
+  uniformizer; by \ref{lem:tame_character_hom} we may compute $\theta(\tau)$ with $\pi'$, so
+  $\tau(\pi') = a'\pi'$ with $\overline{a'} = \theta(\tau)$. Then $\sigma\tau\sigma^{-1}(\pi) =
+  \sigma(\tau(\pi')) = \sigma(a')\,\sigma(\pi')= \sigma(a')\,\pi$, so $\theta(\sigma\tau\sigma^{-1})
+  = \overline{\sigma(a')} = \overline{a'}^{\,N\mathfrak{p}} = \theta(\tau)^{N\mathfrak{p}}$, using
+  that $\sigma$ induces the $N\mathfrak{p}$-power Frobenius on $k$.
 \end{proof}
 
 \begin{lemma}
   \label{lem:abelian_tame_ramificationIdx_dvd}
-  \uses{lem:tame_inertia_cyclic}
+  \uses{lem:tame_inertia_cyclic, lem:tame_character_frob}
   Let $L/K$ be a finite \emph{abelian} extension of number fields and
   $\mathfrak{Q}\mid\mathfrak{p}$ a tamely ramified prime. Then $e(\mathfrak{Q}\mid\mathfrak{p})$
   divides $N\mathfrak{p} - 1 = \#k(\mathfrak{p}) - 1$.
 \end{lemma}
 
 \begin{proof}
-  Let $\tau$ generate $I = I(\mathfrak{Q}\mid\mathfrak{p})$ and let $\sigma$ in the decomposition
-  group lift the Frobenius $x \mapsto x^{N\mathfrak{p}}$ of $k(\mathfrak{Q})/k(\mathfrak{p})$.
-  The tame character of \ref{lem:tame_inertia_cyclic} satisfies $\theta(\sigma\tau\sigma^{-1}) =
-  \theta(\tau)^{N\mathfrak{p}}$, i.e.\ $\sigma\tau\sigma^{-1} = \tau^{N\mathfrak{p}}$. Since
-  $L/K$ is abelian, $\sigma\tau\sigma^{-1} = \tau$, whence $\tau^{N\mathfrak{p}-1} = 1$ and
-  $e = \operatorname{ord}(\tau)$ divides $N\mathfrak{p} - 1$.
+  Let $\tau$ generate $I$ (cyclic by \ref{lem:tame_inertia_cyclic}) and let $\sigma \in
+  D(\mathfrak{Q}\mid\mathfrak{p})$ reduce to Frobenius. As $\sigma$ normalizes $I$,
+  $\sigma\tau\sigma^{-1} \in I$, and by \ref{lem:tame_character_frob} together with injectivity
+  of $\theta$ (\ref{lem:tame_inertia_cyclic}), $\theta(\sigma\tau\sigma^{-1}) =
+  \theta(\tau)^{N\mathfrak{p}} = \theta(\tau^{N\mathfrak{p}})$ gives $\sigma\tau\sigma^{-1} =
+  \tau^{N\mathfrak{p}}$. Since $L/K$ is abelian, $\sigma\tau\sigma^{-1} = \tau$, so
+  $\tau^{N\mathfrak{p}-1} = 1$ and $e = \operatorname{ord}(\tau)$ divides $N\mathfrak{p} - 1$.
 \end{proof}
 
 \begin{lemma}
