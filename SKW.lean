@@ -8,6 +8,7 @@ import SKW.PRed2Mathlib.NumberTheory
 import SKW.PRed2Mathlib.FractionalIdeal
 import SKW.PRed2Mathlib.MulChars
 import SKW.PRed2Mathlib.Action
+import SKW.PRed2Mathlib.Normal
 import SKW.Prereqs.AlgebraMisc
 import SKW.Prereqs.ClassGroup
 import SKW.Prereqs.ClassGroupCoprime
