@@ -15,7 +15,7 @@ public import Mathlib.Algebra.FiniteSupport.Basic
 Let `p` be an odd prime and `K/ℚ` a cyclic extension of degree `p` unramified outside `p`.
 Set `F = ℚ(ζ_p)` and `L = KF`.
 
-This file establishes:
+This file establishes
 - `kw_kummer`: `L/F` is a Kummer extension `F(ᵖ√μ)` for some `μ ∈ 𝓞_F`, unramified outside `p`.
 - `kw_abelian_kummer`: The Kummer criterion for `L/ℚ` to be abelian.
 - `kw_split_prime`: Primes `𝔮` with `p ∤ v_𝔮(μ)` split completely in `F/ℚ`.
@@ -135,7 +135,7 @@ lemma exists_pth_root :
 include hIrr hrF in
 /-- The abelianity criterion for the Kummer extension `L = F(ᵖ√μ)` over `ℚ`. -/
 -- FIXME: see if exists_pth_root can help
-lemma kw_abelian_kummer (σ : F ≃ₐ[ℚ] F) :
+lemma kw_abelian_kummer (σ : Gal(F/ℚ)) :
     ∃ (ξ : F), ξ ≠ 0 ∧ σ (algebraMap (𝓞 F) F μ) = ξ ^ p * μ ^ (Rat.galEquivZMod p F σ).val.val := by
   have : IsGalois ℚ F := isGalois {p} ℚ F
   have hF : (primitiveRoots p F).Nonempty := primitiveRoots_nonempty p ℚ F
@@ -174,7 +174,7 @@ lemma kw_abelian_kummer (σ : F ≃ₐ[ℚ] F) :
     map_pow, h, mul_pow, pow_right_comm, map_mul, map_pow, map_pow, rootOfSplitsXPowSubC_pow,
     hζ.pow_inj (ZMod.val_lt _) hj hmain]
 
-variable [IsGalois ℚ K] [IsCyclic (K ≃ₐ[ℚ] K)]
+variable [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
 
 include hμ hrF hIrr in
 /-- If `𝔮` is a prime ideal of `𝓞_F` with `p ∤ v_𝔮(μ)` and `L/ℚ` is abelian, then `𝔮` splits

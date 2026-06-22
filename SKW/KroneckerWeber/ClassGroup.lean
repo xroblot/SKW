@@ -14,6 +14,7 @@ public import SKW.PRed2Mathlib.Action
 public import SKW.Prereqs.FractionalIdeal
 public import SKW.Prereqs.CMField
 public import SKW.Prereqs.CyclotomicField
+public import SKW.Prereqs.NumberField
 
 @[expose] public section
 
@@ -143,7 +144,7 @@ open IntermediateField Polynomial in
 include hrF hIrr hμ in
 /-- The unit `η` is a `p`-th power times a root of unity, so `L = F(ᵖ√μ) = ℚ(ζ_{p²})`. -/
 lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGalois ℚ K]
-    [IsCyclic (K ≃ₐ[ℚ] K)] (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p)
+    [IsCyclic Gal(K/ℚ)] (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p)
     (hL : IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ))) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) :
     IsCyclotomicExtension {p ^ 2} ℚ L := by
   have : IsCMField F :=
@@ -187,46 +188,55 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGaloi
     IsCyclotomicExtension.Rat.finrank (p ^ 2) ℚ⟮ξ⟯, Nat.totient_prime_pow hp.out Nat.two_pos,
     Nat.add_one_sub_one, pow_one, mul_comm]
 
+set_option backward.isDefEq.respectTransparency false in
 open IntermediateField Polynomial in
 /-- Every cyclic extension of `ℚ` of prime degree `p` (odd) unramified outside `p` is contained
 in `ℚ(ζ_{p²}) = ℚ⟮ξ⟯`. -/
-theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A]
-    {ξ : A} (hξ : IsPrimitiveRoot ξ (p ^ 2))
-    (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic (K ≃ₐ[ℚ] K)]
-    (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
+theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ : A}
+    (hξ : IsPrimitiveRoot ξ (p ^ 2)) (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K]
+    [hCK : IsCyclic Gal(K/ℚ)] (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
     K ≤ ℚ⟮ξ⟯ := by
-  -- `ζ = ξ^p` is a primitive `p`-th root of unity; `ℚ(ζ_p) = ℚ⟮ζ⟯ ≤ ℚ⟮ξ⟯ ≤ A`.
-  set ζ : A := ξ ^ p with hζdef
-  have hζ : IsPrimitiveRoot ζ p := sorry
-  -- Run the abstract Kummer machinery on the *type* `↥M` of the compositum `M = K · ℚ(ζ_p) ≤ A`.
-  set M : IntermediateField ℚ A := K ⊔ ℚ⟮ζ⟯ with hM
-  -- Realize `K` and `F = ℚ(ζ_p)` as intermediate fields of `↥M` (so `Algebra ↥F ↥M` is free).
-  let F : IntermediateField ℚ M := (ℚ⟮ζ⟯).comap M.val
-  let K' : IntermediateField ℚ M := K.comap M.val
-  -- Instances + data feeding `kw_unit_root_of_unity` (the genuine content: assembled from
-  -- `kw_kummer`, `kw_mu_val_p`, `kw_mu_pth_power_ideal`, …).
-  haveI : NumberField M := sorry
-  haveI : IsCyclotomicExtension {p} ℚ F := sorry
-  haveI : IsGalois F M := sorry
-  haveI : IsCyclic (M ≃ₐ[F] M) := sorry
-  haveI : IsAbelianGalois ℚ M := sorry
-  haveI : IsGalois ℚ K' := sorry
-  haveI : IsCyclic (K' ≃ₐ[ℚ] K') := sorry
-  have hrF : Module.finrank F M = p := sorry
-  have hK' : Module.finrank ℚ K' = p := sorry
+  let ζ : A := ξ ^ p
+  have hζ : IsPrimitiveRoot ζ p := hξ.pow (NeZero.pos _) (by rw [pow_two])
+  have : IsCyclotomicExtension {p} ℚ ℚ⟮ζ⟯ :=
+    (isCyclotomicExtension_singleton_iff_eq_adjoin p ℚ A ℚ⟮ζ⟯ hζ).mpr rfl
+  have : NumberField ℚ⟮ζ⟯ := IsCyclotomicExtension.numberField {p} ℚ ℚ⟮ζ⟯
+  let M : IntermediateField ℚ A := K ⊔ ℚ⟮ζ⟯
+  let F : IntermediateField ℚ M := (ℚ⟮ζ⟯).restrict le_sup_right
+  let K' : IntermediateField ℚ M := K.restrict le_sup_left
+  have : IsCyclotomicExtension {p} ℚ F :=
+    IsCyclotomicExtension.equiv {p} ℚ ℚ⟮ζ⟯ <| restrict_algEquiv le_sup_right
+  have : IsAbelianGalois ℚ F := isAbelianGalois {p} ℚ F
+  have : IsGalois ℚ K' := IsGalois.of_algEquiv <| restrict_algEquiv le_sup_left
+  have : IsCyclic Gal(K'/ℚ) := (AlgEquiv.autCongr (restrict_algEquiv le_sup_left)).isCyclic.mp hCK
+  have : IsAbelianGalois ℚ K' := IsAbelianGalois.of_isCyclic ℚ K'
+  have htop : K' ⊔ F = ⊤ :=
+    lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top])
+  have : IsGalois F M := IsGalois.sup_right (F := ℚ) K' F htop
+  have : IsCyclic Gal(M/F) := by
+    apply isCyclic_of_injective <| restrictRestrictAlgEquivMapHom ℚ K' F M
+    exact restrictRestrictAlgEquivMapHom_injective K' F htop
+  have : IsAbelianGalois ℚ (⊤ : IntermediateField ℚ M) := by
+    rw [← htop]
+    exact IsAbelianGalois.sup K' F
+  have : IsAbelianGalois ℚ M := IsAbelianGalois.of_algHom topEquiv.symm.toAlgHom
+  have hK' : Module.finrank ℚ K' = p := by
+    rw [← hK, ← (restrict_algEquiv le_sup_left).toLinearEquiv.finrank_eq]
+  have hrF : Module.finrank F M = p := (kw_kummer₀ p F K' hK' htop).2.2
   have hK'ram : UnramifiedOutside K' p := sorry
-  -- Kummer descent inside `↥M`: `M = F(ᵖ√μ)`, `(μ) = 𝔞ᵖ`, `X^p - μ` irreducible.
-  obtain ⟨μ, hμ, 𝔞, h𝔞₀, h𝔞, hIrr⟩ :
-      ∃ (μ : 𝓞 F) (_ : μ ≠ 0) (𝔞 : Ideal (𝓞 F)) (_ : 𝔞 ≠ ⊥) (_ : 𝔞 ^ p = span {μ}),
-        Irreducible (X ^ p - C (algebraMap (𝓞 F) F μ)) := sorry
-  haveI hS : IsSplittingField F M (X ^ p - C (algebraMap (𝓞 F) F μ)) := sorry
-  -- `kw_unit_root_of_unity`: the compositum `M` is `{p²}`-cyclotomic over `ℚ`.
+  obtain ⟨μ, hμ, hS⟩ := kw_kummer p F K' hrF hK'
+  have hIrr : Irreducible (X ^ p - C (algebraMap (𝓞 F) F μ)) := by
+    rw [X_pow_sub_C_irreducible_iff_of_prime hp.out]
+    intro b hb
+    have := hS.splits_iff.mp (X_pow_sub_C_splits_of_isPrimitiveRoot (zeta_spec p ℚ F) hb)
+    rw [eq_comm, Subalgebra.bot_eq_top_iff_finrank_eq_one, hrF] at this
+    exact hp.out.ne_one this
+  have hMram : UnramifiedOutside M p := kw_kummer' p F K' hK'ram htop
+  obtain ⟨𝔞, h𝔞₀, h𝔞⟩ := kw_mu_pth_power_ideal p F hrF hμ hIrr hMram hp'
   have hcyc : IsCyclotomicExtension {p ^ 2} ℚ M :=
     kw_unit_root_of_unity p F hrF hμ hIrr hp' K' hK' hK'ram hS h𝔞₀ h𝔞
-  -- Transport: a `{p²}`-cyclotomic subfield of `A` is `ℚ⟮ξ⟯`.
   have hMeq : M = ℚ⟮ξ⟯ :=
     (IntermediateField.isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ A M hξ).mp hcyc
-  -- `K ≤ M = ℚ⟮ξ⟯`.
   exact le_sup_left.trans hMeq.le
 
 end
