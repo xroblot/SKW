@@ -2,7 +2,6 @@ module
 
 public import Mathlib.NumberTheory.MulChar.Basic
 public import Mathlib.NumberTheory.GaussSum
-public import SKW.PRed2Mathlib.MulChars
 
 
 @[expose] public section
