@@ -33,11 +33,9 @@ variable {L : Type*} [Field L] [NumberField L]
 variable (F : IntermediateField ℚ L) [IsCyclotomicExtension {p} ℚ F]
 variable (K : IntermediateField ℚ L)
 
-/-- `K/ℚ` is unramified outside `p`: every prime `q ≠ p` has ramification index 1 in `K`. -/
+/-- `K/ℚ` is unramified outside `p`: every prime `q ≠ p` is unramified in `𝓞 K`. -/
 def UnramifiedOutside (K : Type*) [Field K] (p : ℕ) : Prop :=
-  ∀ (q : ℕ), q.Prime → q ≠ p →
-    ∀ 𝔮 : Ideal (𝓞 K), [𝔮.IsMaximal] → [𝔮.LiesOver (span {(q : ℤ)})] →
-      Ideal.ramificationIdx (span {(q : ℤ)}) 𝔮 = 1
+  ∀ (q : ℕ), q.Prime → q ≠ p → Algebra.IsUnramifiedIn (𝓞 K) (span {(q : ℤ)})
 
 set_option backward.isDefEq.respectTransparency false in
 lemma kw_kummer₀ [IsGalois ℚ K] (hK : Module.finrank ℚ K = p) (htop : K ⊔ F = ⊤) :
@@ -62,16 +60,22 @@ lemma kw_kummer₀ [IsGalois ℚ K] (hK : Module.finrank ℚ K = p) (htop : K �
 /-- `L` is unramified outside `p`. -/
 lemma kw_kummer' (hKram : UnramifiedOutside K p) (htop : K ⊔ F = ⊤) :
     UnramifiedOutside L p := by
-  intro q hq hqp 𝔮 h𝔮 _
+  intro q hq hqp
+  have hq0 : span {(q : ℤ)} ≠ ⊥ := by simpa using hq.ne_zero
+  rw [Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one hq0]
+  intro 𝔮 _ hlo
+  haveI := hlo
+  haveI : 𝔮.IsMaximal := ‹𝔮.IsPrime›.isMaximal (Ideal.ne_bot_of_liesOver_of_ne_bot hq0 𝔮)
   have := Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) (span {(q : ℤ)})
   have := Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 F) 𝔮) (span {(q : ℤ)})
   refine Ideal.ramificationIdx_sup_eq_one htop (p := span {(q : ℤ)})
-    (P₁ := under (𝓞 K) 𝔮) (P₂ := under (𝓞 F) 𝔮) ?_ ?_ (by simpa using hq.ne_zero)
+    (P₁ := under (𝓞 K) 𝔮) (P₂ := under (𝓞 F) 𝔮) ?_ ?_ hq0
   · have := IsMaximal.under (𝓞 K) 𝔮
-    exact hKram q hq hqp (under (𝓞 K) 𝔮)
+    exact (hKram q hq hqp).ramificationIdx_eq_one hq0
+      (Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) (span {(q : ℤ)}))
   · have : Fact q.Prime := ⟨hq⟩
     have : ¬ q ∣ p := by rwa [Nat.prime_dvd_prime_iff_eq hq hp.out]
-    rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ (by simpa using hq.ne_zero)]
+    rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ hq0]
     exact Rat.ramificationIdx_eq_of_not_dvd q F (under (𝓞 F) 𝔮) this
 
 variable [IsGalois F L] [hCF : IsCyclic Gal(L/F)] (hrF : finrank F L = p)
@@ -261,7 +265,8 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
     have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
     have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
     have h𝔔' : 𝔮.ramificationIdx 𝔔 = 1 := by
-      have hram := hLRam q hq.out hqp 𝔔
+      have hram := (hLRam q hq.out hqp).ramificationIdx_eq_one (by simpa using hq.out.ne_zero)
+        ‹𝔔.LiesOver (span {(q : ℤ)})›
       have htower := ramificationIdx_algebra_tower' (span {(q : ℤ)}) 𝔮 𝔔
       rw [hram, Ideal.ramificationIdx_eq_ramificationIdx' _ 𝔮 (by simpa using hq.out.ne_zero),
         IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd q F 𝔮
