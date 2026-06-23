@@ -15,6 +15,7 @@ public import SKW.Prereqs.FractionalIdeal
 public import SKW.Prereqs.CMField
 public import SKW.Prereqs.CyclotomicField
 public import SKW.Prereqs.NumberField
+public import SKW.Prereqs.Unramified
 
 @[expose] public section
 
@@ -223,7 +224,9 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
   have hK' : Module.finrank ℚ K' = p := by
     rw [← hK, ← (restrict_algEquiv le_sup_left).toLinearEquiv.finrank_eq]
   have hrF : Module.finrank F M = p := (kw_kummer₀ p F K' hK' htop).2.2
-  have hK'ram : UnramifiedOutside K' p := sorry
+  have hK'ram : UnramifiedOutside K' p := fun q hq hqp ↦
+    (hKram q hq hqp).of_algEquiv
+      ((RingOfIntegers.mapAlgEquiv (restrict_algEquiv le_sup_left)).restrictScalars ℤ)
   obtain ⟨μ, hμ, hS⟩ := kw_kummer p F K' hrF hK'
   have hIrr : Irreducible (X ^ p - C (algebraMap (𝓞 F) F μ)) := by
     rw [X_pow_sub_C_irreducible_iff_of_prime hp.out]
