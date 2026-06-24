@@ -71,6 +71,25 @@ theorem IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (n₁ n₂ : ℕ) [Ne
   rw [IntermediateField.linearDisjoint_iff'']
   exact NumberField.linearDisjoint_of_isGalois_isCoprime_discr E _ _ <| discr_coprime n₁ n₂ K₁ _ h
 
+theorem IsCyclotomicExtension.finset_lcm_sup {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
+    [IsDomain B] {ι : Type*} (n : ι → ℕ) (C : ι → Subalgebra A B) (s : Finset ι) (hs : s.Nonempty)
+    (hn : ∀ i ∈ s, n i ≠ 0) (hC : ∀ i ∈ s, IsCyclotomicExtension {n i} A (C i)) :
+    IsCyclotomicExtension {s.lcm n} A ↑(⨆ i ∈ s, C i) := by
+  induction hs using Finset.Nonempty.cons_induction with
+  | singleton a =>
+      rw [Finset.lcm_singleton, normalize_eq, Finset.iSup_singleton]
+      exact hC a (Finset.mem_singleton_self a)
+  | cons a s h hs hind =>
+      classical
+      rw [Finset.cons_eq_insert, Finset.lcm_insert, Finset.iSup_insert]
+      have : NeZero (n a) := ⟨hn a (Finset.mem_cons_self a s)⟩
+      have : NeZero (s.lcm n) :=
+        ⟨Finset.lcm_ne_zero_iff.mpr fun i hi ↦ hn i (Finset.mem_cons_of_mem hi)⟩
+      have := hC a (Finset.mem_cons_self a s)
+      have := hind (fun i hi ↦ hn i (Finset.mem_cons_of_mem hi))
+        (fun i hi ↦ hC i (Finset.mem_cons_of_mem hi))
+      exact IsCyclotomicExtension.lcm_sup (n a) (s.lcm n) (C a) ↑(⨆ i ∈ s, C i)
+
 open IntermediateField
 
 set_option backward.isDefEq.respectTransparency false in
@@ -123,7 +142,7 @@ theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_apply {E F :Type*} [Field
     MulEquiv.apply_symm_apply, MulEquiv.apply_symm_apply]
 
 @[simp]
-def IsFractionRing.map_apply_algebraMap {A B K L : Type*} [CommRing A] [CommRing B] [IsDomain B]
+theorem IsFractionRing.map_apply_algebraMap {A B K L : Type*} [CommRing A] [CommRing B] [IsDomain B]
     [CommRing K] [Algebra A K] [IsFractionRing A K] [CommRing L] [Algebra B L] [IsFractionRing B L]
     {j : A →+* B} (hj : Function.Injective j) (x : A) :
     IsFractionRing.map hj (algebraMap A K x) = algebraMap B L (j x) := by simp [map]

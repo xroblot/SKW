@@ -239,9 +239,8 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮) (hv : ¬ p ∣
       · exact FiniteMultiplicity.pow h𝔮 hf𝔮
       · exact FiniteMultiplicity.of_prime_left h𝔮 hσ𝔞₀
 
-attribute [local instance] Ideal.Quotient.field
-
- omit [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)] in
+attribute [local instance] Ideal.Quotient.field in
+omit [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)] in
 include hrF hIrr hμ in
 /-- For every prime `𝔮` of `𝓞_F`, `p ∣ v_𝔮(μ)`. -/
 lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOutside L p) (hp' : Odd p) :
