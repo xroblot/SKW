@@ -44,6 +44,18 @@ def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike 
   left_inv _ := by simpa using comap_map_of_bijective _ (EquivLike.bijective e)
   right_inv _ := by simpa using Ideal.map_comap_of_surjective _ (EquivLike.surjective e) _
 
+/-- The `f`-semilinear map `↥I → ↥(I.map f)`, `x ↦ f x`, induced on the underlying modules by a
+ring homomorphism `f`. The (semi)linear-map analogue of `Ideal.map` (whence the `ₗ`); it is the
+restriction of `f` to `I` corestricted to `I.map f`. -/
+def Ideal.mapₗ {A B : Type*} [CommSemiring A] [CommSemiring B] (f : A →+* B) (I : Ideal A) :
+    I →ₛₗ[f] I.map f :=
+  f.toSemilinearMap.restrict fun x hx => Ideal.mem_map_of_mem f hx
+
+@[simp]
+theorem Ideal.coe_mapₗ_apply {A B : Type*} [CommSemiring A] [CommSemiring B] (f : A →+* B)
+    (I : Ideal A) (x : I) :
+    (I.mapₗ f x : B) = f x := rfl
+
 open Pointwise in
 theorem Ideal.pointwise_smul_def' {M R : Type*} [Group M] [CommSemiring R] [MulSemiringAction M R] {a : M}
     (S : Ideal R) :

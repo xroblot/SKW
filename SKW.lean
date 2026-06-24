@@ -22,6 +22,7 @@ import SKW.Prereqs.MulChars
 import SKW.Prereqs.Normal
 import SKW.Prereqs.Unramified
 import SKW.Prereqs.NumberTheory
+import SKW.Prereqs.Cotangent
 import SKW.Prereqs.TameRamification
 import SKW.Stickelberger.AddCharTrace
 import SKW.Stickelberger.Factorization
