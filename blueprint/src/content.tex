@@ -1087,6 +1087,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{definition}
   \label{def:tame_character}
   \lean{Ideal.tameCharacter}
+  \leanok
   The cotangent space $\mathfrak{m}/\mathfrak{m}^2$ is a one-dimensional $k$-vector space. Each
   $\tau \in I$ preserves $\mathfrak{m}$ and $\mathfrak{m}^2$ and acts trivially on $k$, so it induces
   a $k$-linear automorphism of $\mathfrak{m}/\mathfrak{m}^2$. The \emph{tame character} is its
@@ -1102,11 +1103,13 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{lemma}
   \label{lem:tame_character_smul}
   \lean{Ideal.cotangentInertiaAction_apply_eq_smul}
+  \leanok
   \uses{def:tame_character}
   For $\tau \in I$ and $\bar x \in \mathfrak{m}/\mathfrak{m}^2$ one has $\tau\,\bar x = \theta(\tau)\,\bar x$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   A $k$-linear endomorphism of the one-dimensional $k$-vector space $\mathfrak{m}/\mathfrak{m}^2$ is
   multiplication by its determinant, and that determinant is $\theta(\tau)$ by definition.
 \end{proof}
@@ -1114,11 +1117,13 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{lemma}[Rigidity]
   \label{lem:tame_character_rigidity}
   \lean{Ideal.eq_one_of_tameCharacter_eq_one}
+  \leanok
   \uses{def:tame_character}
   If $\tau \in I$ has order coprime to $\ell$ and $\theta(\tau) = 1$, then $\tau = \mathrm{id}$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Let $m = \operatorname{ord}(\tau)$, coprime to $\ell$. We show by induction on $n \geq 1$ that
   $\tau$ acts trivially on $\mathcal{O}/\mathfrak{m}^n$; since $\bigcap_n \mathfrak{m}^n = 0$
   (Krull intersection), this forces $\tau = \mathrm{id}$ on $\mathcal{O}$, hence on $L$.
@@ -1148,12 +1153,14 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{lemma}
   \label{lem:tame_inertia_cyclic}
   \lean{Ideal.isCyclic_inertia}
+  \leanok
   \uses{def:tame_character, lem:tame_character_rigidity}
   If $\mathfrak{Q}\mid\mathfrak{p}$ is tamely ramified (i.e.\ $\ell \nmid e$), then $\theta$ is
   injective; consequently $I(\mathfrak{Q}\mid\mathfrak{p})$ is cyclic of order $e$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By construction $\theta$ is a homomorphism (\ref{def:tame_character}). Since $\ell \nmid e = |I|$, every
   $\tau \in I$ has order dividing $e$, hence coprime to $\ell$; so if $\theta(\tau) = 1$ then
   $\tau = \mathrm{id}$ by \ref{lem:tame_character_rigidity}. Thus $\theta$ is injective and $I$
@@ -1164,6 +1171,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{lemma}
   \label{lem:tame_character_frob}
   \lean{Ideal.tameCharacter_conj}
+  \leanok
   \uses{def:tame_character, lem:tame_character_smul}
   Let $\sigma$ lie in the decomposition group $D(\mathfrak{Q}\mid\mathfrak{p})$ and reduce to the
   Frobenius $x \mapsto x^{N\mathfrak{p}}$ of $k/k(\mathfrak{p})$. Then for all $\tau \in I$,
@@ -1171,6 +1179,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Write $\rho = \sigma\tau\sigma^{-1} \in I$ (inertia is normal in $D$). The element $\sigma$
   preserves $\mathfrak{m}$ and $\mathfrak{m}^2$, hence acts on $\mathfrak{m}/\mathfrak{m}^2$, but
   $\bar\sigma$-semilinearly: $\sigma(c\,\bar v) = \bar\sigma(c)\,\sigma(\bar v)$ for $c \in k$, where
@@ -1191,6 +1200,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{lemma}
   \label{lem:abelian_tame_ramificationIdx_dvd}
   \lean{Ideal.card_inertia_dvd_card_sub_one}
+  \leanok
   \uses{lem:tame_inertia_cyclic, lem:tame_character_frob}
   Let $L/K$ be a finite \emph{abelian} extension of number fields and
   $\mathfrak{Q}\mid\mathfrak{p}$ a tamely ramified prime. Then $e(\mathfrak{Q}\mid\mathfrak{p})$
@@ -1198,6 +1208,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Let $\tau$ generate $I$ (cyclic by \ref{lem:tame_inertia_cyclic}) and let $\sigma \in
   D(\mathfrak{Q}\mid\mathfrak{p})$ reduce to Frobenius. As $\sigma$ normalizes $I$,
   $\sigma\tau\sigma^{-1} \in I$, and by \ref{lem:tame_character_frob} together with injectivity
