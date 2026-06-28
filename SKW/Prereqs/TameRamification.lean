@@ -9,6 +9,7 @@ public import Mathlib.GroupTheory.GroupAction.ConjAct
 public import Mathlib.RingTheory.DiscreteValuationRing.TFAE
 
 public import SKW.Prereqs.Cotangent
+public import SKW.Prereqs.AlgebraMisc
 
 /-!
 # Tame ramification: the tame character (skeleton)
@@ -48,174 +49,181 @@ open scoped Pointwise
 variable {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
 variable {G : Type*} [Group G] [MulSemiringAction G S] [SMulCommClass G R S]
 
-/-- An element of the stabilizer of `Q` preserves `Q`. -/
-theorem smul_mem_of_mem_stabilizer (Q : Ideal S) (σ : MulAction.stabilizer G Q) {x : S}
-    (hx : x ∈ Q) : σ • x ∈ Q := by
-  nth_rewrite 1 [← (MulAction.mem_stabilizer_iff.mp σ.prop)]
-  exact smul_mem_pointwise_smul σ x Q hx
+/-- An arithmetic Frobenius `σ` acts on the residue ring `S ⧸ Q` as the `N𝔭`-th power map, for any
+action of `σ` on `S ⧸ Q` compatible with its action on `S` (`SMulDistribClass`, giving
+`σ • mk x = mk (σ • x)` via `algebraMap.smul'`). -/
+theorem _root_.IsArithFrobAt.smul_residue {M : Type*} [Monoid M] [MulSemiringAction M S]
+    [SMulCommClass M R S] {Q : Ideal S} [MulDistribMulAction M (S ⧸ Q)]
+    [SMulDistribClass M S (S ⧸ Q)] {σ : M} (H : IsArithFrobAt R σ Q) (c : S ⧸ Q) :
+    σ • c = c ^ Nat.card (R ⧸ Q.under R) := by
+  obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective c
+  rw [← Ideal.Quotient.algebraMap_eq, ← algebraMap.smul']
+  exact H.mk_apply x
 
-variable (G) in
-/-- The `S`-linear map `Q →ₗ[S] Q ⧸ Q ^ 2`, `x ↦ (τ • x)‾`. It is genuinely `S`-linear (not merely
-`R`-linear): for `τ` in the inertia group `τ • s - s ∈ Q`, and the `τ`-semilinearity collapses
-modulo `Q ^ 2`. -/
-@[simps]
-noncomputable def cotangentPreLift (Q : Ideal S) (τ : Q.inertia (MulAction.stabilizer G Q)) :
-    Q →ₗ[S] Q.Cotangent where
-  toFun x := Q.toCotangent ⟨(τ : G) • (x : S), smul_mem_of_mem_stabilizer Q τ.1 x.2⟩
-  map_add' x y := by simp [← map_add]
-  map_smul' s x := by
-    simp only [SetLike.val_smul, smul_eq_mul, smul_mul', RingHom.id_apply, ← map_smul,
-      SetLike.mk_smul_mk, toCotangent_eq]
-    rw [show (τ : G) • s * (τ : G) • x - s * (τ : G) • x = ((τ : G) • s - s) * ((τ : G) • x) by
-      ring]
-    exact pow_two Q ▸ mul_mem_mul (τ.prop s) (smul_mem_of_mem_stabilizer _ _ x.prop)
-
-variable (G) in
-/-- The map `x̄ ↦ mk (τ • x)` on the cotangent space `Q ⧸ Q ^ 2`, as a `S`-linear map. -/
-noncomputable def cotangentLift (Q : Ideal S) (τ : Q.inertia (MulAction.stabilizer G Q)) :
-    Q.Cotangent →ₗ[S] Q.Cotangent :=
-  Cotangent.lift (cotangentPreLift G Q τ) fun x y ↦ by
-    simpa [toCotangent_eq_zero] using
-      pow_two Q ▸ mul_mem_mul (smul_mem_of_mem_stabilizer Q τ.val x.prop)
-        (smul_mem_of_mem_stabilizer Q τ.val y.prop)
-
-@[simp]
-theorem cotangentLift_toCotangent (Q : Ideal S) (τ : Q.inertia (MulAction.stabilizer G Q)) (x : Q) :
-    cotangentLift G Q τ (Q.toCotangent x) = cotangentPreLift G Q τ x :=
-  Ideal.Cotangent.lift_toCotangent _ _ _
-
-@[simp]
-theorem cotangentLift_one (Q : Ideal S) :
-    cotangentLift G Q 1 = 1 := by
-  ext z
-  obtain ⟨x, rfl⟩ := Q.toCotangent_surjective z
-  simp
-
-theorem cotangentLift_mul_apply (Q : Ideal S) (σ τ : Q.inertia (MulAction.stabilizer G Q))
-    (z : Q.Cotangent) :
-    cotangentLift G Q (σ * τ) z = cotangentLift G Q σ (cotangentLift G Q τ z) := by
-  obtain ⟨x, rfl⟩ := Q.toCotangent_surjective z
-  simp [mul_smul]
-
-variable (G) in
-/-- The cotangent action of an inertia element as a `S`-linear equivalence; the inverse
-is the action of `τ⁻¹`. -/
-noncomputable def cotangentEquiv (Q : Ideal S)
-    (τ : Q.inertia (MulAction.stabilizer G Q)) : Q.Cotangent ≃ₗ[S] Q.Cotangent where
-  __ := cotangentLift G Q τ
-  invFun := cotangentLift G Q τ⁻¹
-  left_inv x := by simp [← cotangentLift_mul_apply]
-  right_inv z := by simp [← cotangentLift_mul_apply]
-
-variable (G) in
-/-- The natural `S ⧸ Q`-linear action of an inertia element on the cotangent space `Q ⧸ Q ^ 2`,
-obtained from the `S`-linear action by extending scalars along `S → S ⧸ Q`. -/
-noncomputable def cotangentEquivOfInertia (Q : Ideal S)
-    (τ : Q.inertia (MulAction.stabilizer G Q)) : Q.Cotangent ≃ₗ[S ⧸ Q] Q.Cotangent :=
-  LinearEquiv.extendScalarsOfSurjective Quotient.mk_surjective (cotangentEquiv G Q τ)
-
-@[simp]
-theorem cotangentEquivOfInertia_apply (Q : Ideal S) (τ : Q.inertia (MulAction.stabilizer G Q))
-    (z : Q.Cotangent) : cotangentEquivOfInertia G Q τ z = cotangentLift G Q τ z := rfl
-
-variable (G) in
-/-- The natural `S ⧸ Q`-linear action of inertia on the cotangent space `Q ⧸ Q ^ 2`. -/
-@[simps]
-noncomputable def cotangentInertiaAction (Q : Ideal S) :
-    Q.inertia (MulAction.stabilizer G Q) →* (Q.Cotangent ≃ₗ[S ⧸ Q] Q.Cotangent) where
-  toFun := cotangentEquivOfInertia G Q
-  map_one' := by ext; simp
-  map_mul' _ _ := by ext; simp [cotangentLift_mul_apply]
+/-- A subgroup element is an arithmetic Frobenius if its image in `G` is (the subgroup acts via the
+inclusion, so the actions agree definitionally). -/
+theorem _root_.IsArithFrobAt.of_coe {H : Subgroup G} {σ : H} {Q : Ideal S}
+    (h : IsArithFrobAt R (σ : G) Q) : IsArithFrobAt R σ Q := h
 
 variable (G) in
 /-- The **tame character** `θ : I(Q) → (S ⧸ Q)ˣ`, the determinant of the `S ⧸ Q`-linear action of an
 inertia element on the cotangent space `Q ⧸ Q ^ 2`. -/
 noncomputable def tameCharacter (Q : Ideal S) :
     Q.inertia (MulAction.stabilizer G Q) →* (S ⧸ Q)ˣ :=
-  LinearEquiv.det.comp (cotangentInertiaAction G Q)
+  LinearEquiv.det.comp (DistribMulAction.toModuleAut (S ⧸ Q) Q.Cotangent)
 
-theorem tameCharacter_def (Q : Ideal S) (τ : Q.inertia (MulAction.stabilizer G Q)) :
-    tameCharacter G Q τ = (cotangentInertiaAction G Q τ).det := rfl
+theorem tameCharacter_apply (Q : Ideal S) (τ : Q.inertia (MulAction.stabilizer G Q)) :
+    tameCharacter G Q τ = (DistribMulAction.toLinearEquiv (S ⧸ Q) Q.Cotangent τ).det := rfl
 
 open Module
 
-variable [IsDedekindDomain S]
-
-/-- (Rigidity, L1) If `θ(τ) = 1` then `τ` fixes the cotangent line `Q ⧸ Q ^ 2`: for `x ∈ Q`,
-`τ • x ≡ x mod Q ^ 2`. Uses that `Q ⧸ Q ^ 2` is one-dimensional over the field `S ⧸ Q`, so
-`det = 1` forces the action to be the identity. -/
-theorem sub_mem_sq_of_tameCharacter_eq_one (Q : Ideal S) [Q.IsMaximal]
-    (τ : Q.inertia (MulAction.stabilizer G Q)) (h : tameCharacter G Q τ = 1) {x : S} (hx : x ∈ Q) :
-    (τ : G) • x - x ∈ Q ^ 2 := by
-  let := Ideal.Quotient.field Q
-  have : finrank (S ⧸ Q) Q.Cotangent = 1 := by
-
-    sorry
-  have : cotangentInertiaAction G Q τ = 1 := by
-    rw [tameCharacter_def, Units.ext_iff, LinearEquiv.coe_det ] at h
-    have := (LinearMap.det_eq_one_iff_eq_id this (cotangentInertiaAction G Q τ)).mp h
-    rwa [← LinearEquiv.toLinearMap_inj]
-  simpa [toCotangent_eq] using LinearEquiv.congr_fun this (Q.toCotangent ⟨x, hx⟩)
-
 /-- (Rigidity, L2) Multiplicativity of `τ` propagates the order-two vanishing along the `Q`-adic
 filtration: from `τ • x ≡ x mod Q ^ 2` on `Q`, one gets `τ • x ≡ x mod Q ^ (n + 2)` on `Q ^ (n+1)`. -/
-theorem sub_mem_pow_succ_of_sub_mem_sq (Q : Ideal S)
-    (τ : Q.inertia (MulAction.stabilizer G Q)) (h : ∀ x ∈ Q, (τ : G) • x - x ∈ Q ^ 2)
-    (n : ℕ) {x : S} (hx : x ∈ Q ^ (n + 1)) : (τ : G) • x - x ∈ Q ^ (n + 2) :=
-  sorry
+theorem sub_mem_pow_of_sub_mem (Q : Ideal S) (τ : Q.inertia (MulAction.stabilizer G Q))
+    (h : ∀ x ∈ Q, τ • x - x ∈ Q ^ 2) (n : ℕ) {x : S} (hx : x ∈ Q ^ n) :
+    τ • x - x ∈ Q ^ (n + 1) := by
+  induction n generalizing x with
+  | zero =>
+    simp_all
+    exact τ.prop x
+  | succ n hind =>
+      rw [pow_succ] at hx
+      refine Submodule.mul_induction_on hx (fun x hx y hy ↦ ?_) fun x y hx hy ↦ ?_
+      · rw [show τ • (x * y) - x * y = (τ • x - x) * τ • y + x * (τ • y - y)
+          by rw [MulSemiringAction.smul_mul]; ring]
+        refine Submodule.add_mem _ ?_ ?_
+        · rw [add_right_comm, pow_add, pow_one]
+          exact Submodule.mul_mem_mul (hind hx) (smul_mem_of_mem_stabilizer _ _ hy)
+        · rw [show n + 1 + 1 = n + 2 by ring, pow_add]
+          exact Submodule.mul_mem_mul hx (h _ hy)
+      · rw [smul_add, add_sub_add_comm]
+        exact Submodule.add_mem _ hx hy
 
 /-- (Rigidity, L3) If `τ` is inertia, fixes every graded piece, and has order prime to the residue
 characteristic, then `τ • x ≡ x` modulo every power of `Q`. Proof: `τ ^ m = id + m·δ + …` with
 `δ = τ - id`; since `m` is a unit in `S ⧸ Q`, the bound on `δ` improves by one at each power. -/
 theorem sub_mem_pow_of_coprime (Q : Ideal S) [Q.IsMaximal]
-    (τ : Q.inertia (MulAction.stabilizer G Q)) (hbase : ∀ x : S, (τ : G) • x - x ∈ Q)
-    (hstep : ∀ n : ℕ, ∀ x ∈ Q ^ (n + 1), (τ : G) • x - x ∈ Q ^ (n + 2))
-    (hord : (orderOf τ).Coprime (ringChar (S ⧸ Q))) (n : ℕ) (x : S) :
-    (τ : G) • x - x ∈ Q ^ n :=
-  sorry
+    (τ : Q.inertia (MulAction.stabilizer G Q))
+    (hstep : ∀ ⦃n : ℕ⦄, ∀ x ∈ Q ^ n, τ • x - x ∈ Q ^ (n + 1))
+    (hord : ↑(orderOf τ) ∉ Q) (n : ℕ) (x : S) :
+    τ • x - x ∈ Q ^ n := by
+  set δ := τ • x - x with δ_def
+  induction n with
+  | zero => simp
+  | succ n hind =>
+      have h₁ {k : ℕ} : (τ ^ k • δ) - δ ∈ Q ^ (n + 1) := by
+        induction k with
+        | zero => simp
+        | succ k hind' =>
+            have : τ ^ k • (τ • δ - δ) + (τ ^ k • δ - δ) = τ ^ k • τ • δ - δ := by
+              calc
+                _ = τ ^ k • τ • δ - τ ^ k • δ + (τ ^k • δ - δ) := by rw [smul_sub]
+                _ = τ ^ k • τ • δ - δ := by ring
+            rw [pow_succ τ, ← smul_smul, ← this]
+            exact Ideal.add_mem _ (smul_mem_pow_of_mem_stabilizer _ _ (hstep _ hind)) hind'
+      simp_rw [← Quotient.mk_eq_mk_iff_sub_mem] at h₁
+      have h₂ : ∑ k ∈ Finset.range (orderOf τ), Ideal.Quotient.mk (Q ^ (n + 1)) (τ ^ k • δ) = 0 := by
+        simp only [δ_def, smul_sub, smul_smul, ← pow_succ]
+        rw [← map_sum, Finset.sum_range_sub (fun k ↦ τ ^ k • x), pow_orderOf_eq_one τ, pow_zero,
+          sub_self, map_zero]
+      simp_rw [h₁, Finset.sum_const, Finset.card_range, nsmul_eq_mul] at h₂
+      rwa [IsUnit.mul_right_eq_zero, Quotient.eq_zero_iff_mem] at h₂
+      exact Quotient.isUnit_mk_pow_of_notMem _ hord
+
+variable [IsDedekindDomain S]
+
+/-- In dimension one, the cotangent action of an inertia element is the homothety by its tame
+character: `cotangentInertiaAction G Q τ = θ(τ) • id`. -/
+theorem cotangentInertiaAction_apply_eq_smul (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+    (τ : Q.inertia (MulAction.stabilizer G Q)) (v : Q.Cotangent) :
+    τ • v = (tameCharacter G Q τ).val • v := by
+  let := Ideal.Quotient.field Q
+  rw [tameCharacter_apply, LinearEquiv.coe_det]
+  exact LinearMap.apply_eq_det_smul_of_finrank_eq_one Q.finrank_cotangent_eq_one
+    (DistribMulAction.toLinearEquiv (S ⧸ Q) Q.Cotangent τ) v
+
+/-- (Rigidity, L1) If `θ(τ) = 1` then `τ` fixes the cotangent line `Q ⧸ Q ^ 2`: for `x ∈ Q`,
+`τ • x ≡ x mod Q ^ 2`. Uses that `Q ⧸ Q ^ 2` is one-dimensional over the field `S ⧸ Q`, so
+`det = 1` forces the action to be the identity. -/
+theorem sub_mem_sq_of_tameCharacter_eq_one (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+    (τ : Q.inertia (MulAction.stabilizer G Q)) (h : tameCharacter G Q τ = 1) {x : S} (hx : x ∈ Q) :
+    τ • x - x ∈ Q ^ 2 := by
+  let := Ideal.Quotient.field Q
+  have : DistribMulAction.toLinearEquiv (S ⧸ Q) Q.Cotangent τ = 1 := by
+    rw [← LinearEquiv.toLinearMap_inj, LinearEquiv.coe_toLinearMap_one,
+      ← LinearMap.det_eq_one_iff_eq_id Q.finrank_cotangent_eq_one, ← LinearEquiv.coe_det,
+      ← tameCharacter_apply, h, Units.val_one]
+  simpa [DistribMulAction.toLinearEquiv_apply, MulAction.subgroup_smul_def,
+    smul_toCotangent, toCotangent_eq] using LinearEquiv.congr_fun this (Q.toCotangent ⟨x, hx⟩)
 
 /-- (Rigidity, L4) An inertia element acting trivially on `S` is trivial. Uses Krull's intersection
 theorem (`⋂ₙ Q ^ n = ⊥`) to pass from "trivial modulo every power" to "trivial", and faithfulness
 of the action to conclude `τ = 1`. -/
-theorem eq_one_of_forall_sub_mem_pow [FaithfulSMul G S] (Q : Ideal S) [Q.IsMaximal]
+theorem eq_one_of_forall_sub_mem_pow [FaithfulSMul G S] (Q : Ideal S) [hQ : Q.IsMaximal]
     (τ : Q.inertia (MulAction.stabilizer G Q))
-    (h : ∀ (n : ℕ) (x : S), (τ : G) • x - x ∈ Q ^ n) : τ = 1 :=
-  sorry
+    (h : ∀ (n : ℕ) (x : S), τ • x - x ∈ Q ^ n) : τ = 1 := by
+  refine FaithfulSMul.eq_of_smul_eq_smul (α := S) fun x ↦ ?_
+  simpa [iInf_pow_eq_bot_of_isDomain _ hQ.ne_top, sub_eq_zero] using mem_iInf.mpr fun i ↦ h i x
 
 /-- **Rigidity** (filtration-free): an inertia element of order prime to the residue
 characteristic on which the tame character vanishes is trivial. -/
-theorem eq_one_of_tameCharacter_eq_one [FaithfulSMul G S] (Q : Ideal S) [Q.IsMaximal]
-    (τ : Q.inertia (MulAction.stabilizer G Q)) (hord : (orderOf τ).Coprime (ringChar (S ⧸ Q)))
+theorem eq_one_of_tameCharacter_eq_one [FaithfulSMul G S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+    (τ : Q.inertia (MulAction.stabilizer G Q)) (hord : ↑(orderOf τ) ∉ Q)
     (h : tameCharacter G Q τ = 1) : τ = 1 := by
-  have hbase : ∀ x : S, (τ : G) • x - x ∈ Q := fun x => by
-    simpa [MulAction.subgroup_smul_def] using AddSubgroup.mem_inertia.mp τ.2 x
-  have hstep : ∀ n : ℕ, ∀ x ∈ Q ^ (n + 1), (τ : G) • x - x ∈ Q ^ (n + 2) :=
-    fun n _ hx => sub_mem_pow_succ_of_sub_mem_sq Q τ
-      (fun _ hy => sub_mem_sq_of_tameCharacter_eq_one Q τ h hy) n hx
-  exact eq_one_of_forall_sub_mem_pow Q τ (sub_mem_pow_of_coprime Q τ hbase hstep hord)
+  apply eq_one_of_forall_sub_mem_pow
+  apply sub_mem_pow_of_coprime
+  apply sub_mem_pow_of_sub_mem
+  · exact fun x a ↦ sub_mem_sq_of_tameCharacter_eq_one Q τ h a
+  · exact hord
 
+variable (G) in
+theorem tameCharacter_injective [FaithfulSMul G S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+    (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
+    Function.Injective (tameCharacter G Q) := by
+  refine (injective_iff_map_eq_one _).mpr fun τ hτ ↦ eq_one_of_tameCharacter_eq_one _ _ ?_ hτ
+  contrapose! htame
+  obtain ⟨q, hq⟩ := Nat.cast_dvd_cast (α := S) <| orderOf_dvd_natCard τ
+  exact hq ▸ Ideal.mul_mem_right _ _ htame
+
+attribute [local instance] Ideal.Quotient.field in
 /-- **Frobenius equivariance**: conjugating an inertia element by an arithmetic Frobenius
 raises the tame character to the `N 𝔭`-th power. (Conjugation lands back in inertia by
 normality, via `MulAut.conjNormal`.) -/
-theorem tameCharacter_conj (Q : Ideal S) [Q.IsMaximal] (σ : MulAction.stabilizer G Q)
-    (hσ : IsArithFrobAt R (σ : G) Q) (τ : Q.inertia (MulAction.stabilizer G Q)) :
+theorem tameCharacter_conj (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+    (σ : MulAction.stabilizer G Q) (hσ : IsArithFrobAt R σ Q)
+    (τ : Q.inertia (MulAction.stabilizer G Q)) :
     tameCharacter G Q (MulAut.conjNormal σ τ) = tameCharacter G Q τ ^ Nat.card (R ⧸ Q.under R) := by
-  sorry
+  suffices DistribSMul.toLinearMap (S ⧸ Q) Q.Cotangent (MulAut.conjNormal σ τ) =
+      (σ • (tameCharacter G Q τ).val) • LinearMap.id by
+    rw [Units.ext_iff, tameCharacter_apply, LinearEquiv.coe_det,
+      DistribMulAction.coe_toLinearEquiv, congr_arg (LinearMap.det · ) this, hσ.smul_residue,
+      LinearMap.det_smul, Q.finrank_cotangent_eq_one, pow_one, LinearMap.det_id, mul_one,
+      Units.val_pow_eq_pow_val]
+  ext v
+  rw [DistribSMul.toLinearMap_apply, LinearMap.smul_apply, LinearMap.id_coe, id_eq,
+    show v = σ • (σ⁻¹ • v) by rw [smul_inv_smul], MulAction.subgroup_smul_def,
+    MulAut.conjNormal_apply, ← smul_smul, inv_smul_smul, ← smul_smul,
+    ← MulAction.subgroup_smul_def, cotangentInertiaAction_apply_eq_smul, stabilizer_smul_smul]
 
 /-- **Tame inertia is cyclic**: if the order of the inertia group is prime to the residue
 characteristic (tame ramification), the inertia group is cyclic. -/
-theorem isCyclic_inertia (Q : Ideal S) [Q.IsMaximal]
-    (htame : (Nat.card (Q.inertia (MulAction.stabilizer G Q))).Coprime (ringChar (S ⧸ Q))) :
-    IsCyclic (Q.inertia (MulAction.stabilizer G Q)) := by
-  sorry
+theorem isCyclic_inertia (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Finite (S ⧸ Q)] [FaithfulSMul G S]
+    (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
+    IsCyclic (Q.inertia (MulAction.stabilizer G Q)) :=
+  isCyclic_of_injective _ (tameCharacter_injective G Q htame)
 
 /-- **Abelian tame ramification**: for an abelian action, the order of the inertia group
 (the ramification index) divides `N𝔭 - 1`. -/
-theorem card_inertia_dvd_card_sub_one (Q : Ideal S) [Q.IsMaximal] [Finite G]
-    [Algebra.IsInvariant R S G] [Finite (S ⧸ Q)] [IsMulCommutative G]
-    (htame : (Nat.card (Q.inertia (MulAction.stabilizer G Q))).Coprime (ringChar (S ⧸ Q))) :
+theorem card_inertia_dvd_card_sub_one (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [FaithfulSMul G S]
+    [Finite G] [Algebra.IsInvariant R S G] [Finite (S ⧸ Q)] [IsMulCommutative G]
+    (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
     Nat.card (Q.inertia (MulAction.stabilizer G Q)) ∣ Nat.card (R ⧸ Q.under R) - 1 := by
-  sorry
+  obtain ⟨τ, hτ⟩ := isCyclic_iff_exists_orderOf_eq_natCard.mp <| isCyclic_inertia Q htame
+  obtain ⟨σ, hσ⟩ := IsArithFrobAt.exists_of_isInvariant R G Q
+  rw [← hτ, ← orderOf_injective _ (tameCharacter_injective G Q htame), ← Int.natCast_dvd_natCast,
+    orderOf_dvd_iff_zpow_eq_one, Nat.cast_sub hσ.card_pos, Nat.cast_one, zpow_sub_one,
+    zpow_natCast, ← tameCharacter_conj Q ⟨σ, hσ.mem_stabilizer⟩ hσ.of_coe τ,
+    MulAut.conjNormal_apply_of_isMulCommutative, mul_inv_cancel]
 
 end Ideal
 

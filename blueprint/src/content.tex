@@ -1087,36 +1087,28 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{definition}
   \label{def:tame_character}
   \lean{Ideal.tameCharacter}
-  Fix a uniformizer $\pi$ of $\mathcal{O}$ ($v(\pi) = 1$). The \emph{tame character} is
+  The cotangent space $\mathfrak{m}/\mathfrak{m}^2$ is a one-dimensional $k$-vector space. Each
+  $\tau \in I$ preserves $\mathfrak{m}$ and $\mathfrak{m}^2$ and acts trivially on $k$, so it induces
+  a $k$-linear automorphism of $\mathfrak{m}/\mathfrak{m}^2$. The \emph{tame character} is its
+  determinant,
   \[
-    \theta : I \to k^\times, \qquad \theta(\tau) = \overline{\tau(\pi)/\pi}.
+    \theta : I \to k^\times, \qquad \theta(\tau) = \det\!\big(\tau \mid \mathfrak{m}/\mathfrak{m}^2\big).
   \]
-  This is well-defined: $v(\tau\pi) = v(\pi) = 1$, so $\tau\pi/\pi \in \mathcal{O}^\times$ and
-  $\theta(\tau) = \overline{\tau\pi/\pi} \in k^\times$.
+  Being a determinant, $\theta$ is a group homomorphism by construction. Since
+  $\mathfrak{m}/\mathfrak{m}^2$ is one-dimensional, $\theta(\tau)$ is the scalar by which $\tau$ acts;
+  for a uniformizer $\pi$ this recovers $\theta(\tau) = \overline{\tau(\pi)/\pi}$.
 \end{definition}
 
 \begin{lemma}
-  \label{lem:tame_character_hom}
-  \lean{Ideal.tameCharacter_eq}
+  \label{lem:tame_character_smul}
+  \lean{Ideal.cotangentInertiaAction_apply_eq_smul}
   \uses{def:tame_character}
-  $\theta$ does not depend on the choice of uniformizer, and it is a group homomorphism.
+  For $\tau \in I$ and $\bar x \in \mathfrak{m}/\mathfrak{m}^2$ one has $\tau\,\bar x = \theta(\tau)\,\bar x$.
 \end{lemma}
 
 \begin{proof}
-  \emph{Independence of $\pi$.} Another uniformizer is $\pi' = u\pi$ with $u \in
-  \mathcal{O}^\times$; then $\tau\pi'/\pi' = (\tau u/u)(\tau\pi/\pi)$, and since $\tau$ is trivial
-  on $k$ we have $\overline{\tau u} = \bar u$, so $\overline{\tau u/u} = 1$ and the residue is
-  unchanged.
-
-  \emph{Homomorphism.} For $\sigma,\tau \in I$ put $a = \tau\pi/\pi \in \mathcal{O}^\times$, so
-  $\tau\pi = a\pi$ and $\sigma\tau(\pi) = \sigma(a)\,\sigma(\pi)$. Reducing modulo $\mathfrak{m}$
-  and using $\overline{\sigma(a)} = \bar a$ ($\sigma$ trivial on $k$),
-  \[
-    \theta(\sigma\tau) = \overline{\sigma\tau(\pi)/\pi}
-      = \overline{\sigma(a)}\cdot\overline{\sigma(\pi)/\pi}
-      = \bar a\cdot\theta(\sigma) = \theta(\tau)\,\theta(\sigma) = \theta(\sigma)\,\theta(\tau),
-  \]
-  the last step since $k^\times$ is abelian.
+  A $k$-linear endomorphism of the one-dimensional $k$-vector space $\mathfrak{m}/\mathfrak{m}^2$ is
+  multiplication by its determinant, and that determinant is $\theta(\tau)$ by definition.
 \end{proof}
 
 \begin{lemma}[Rigidity]
@@ -1156,13 +1148,13 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{lemma}
   \label{lem:tame_inertia_cyclic}
   \lean{Ideal.isCyclic_inertia}
-  \uses{lem:tame_character_hom, lem:tame_character_rigidity}
+  \uses{def:tame_character, lem:tame_character_rigidity}
   If $\mathfrak{Q}\mid\mathfrak{p}$ is tamely ramified (i.e.\ $\ell \nmid e$), then $\theta$ is
   injective; consequently $I(\mathfrak{Q}\mid\mathfrak{p})$ is cyclic of order $e$.
 \end{lemma}
 
 \begin{proof}
-  By \ref{lem:tame_character_hom}, $\theta$ is a homomorphism. Since $\ell \nmid e = |I|$, every
+  By construction $\theta$ is a homomorphism (\ref{def:tame_character}). Since $\ell \nmid e = |I|$, every
   $\tau \in I$ has order dividing $e$, hence coprime to $\ell$; so if $\theta(\tau) = 1$ then
   $\tau = \mathrm{id}$ by \ref{lem:tame_character_rigidity}. Thus $\theta$ is injective and $I$
   embeds in $k^\times$. A finite subgroup of the multiplicative group of a field is cyclic, so
@@ -1172,19 +1164,28 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{lemma}
   \label{lem:tame_character_frob}
   \lean{Ideal.tameCharacter_conj}
-  \uses{lem:tame_character_hom}
+  \uses{def:tame_character, lem:tame_character_smul}
   Let $\sigma$ lie in the decomposition group $D(\mathfrak{Q}\mid\mathfrak{p})$ and reduce to the
   Frobenius $x \mapsto x^{N\mathfrak{p}}$ of $k/k(\mathfrak{p})$. Then for all $\tau \in I$,
   $\theta(\sigma\tau\sigma^{-1}) = \theta(\tau)^{N\mathfrak{p}}$.
 \end{lemma}
 
 \begin{proof}
-  Since $\sigma$ preserves $\mathcal{O}$ and $\mathfrak{m}$, $\pi' = \sigma^{-1}(\pi)$ is again a
-  uniformizer; by \ref{lem:tame_character_hom} we may compute $\theta(\tau)$ with $\pi'$, so
-  $\tau(\pi') = a'\pi'$ with $\overline{a'} = \theta(\tau)$. Then $\sigma\tau\sigma^{-1}(\pi) =
-  \sigma(\tau(\pi')) = \sigma(a')\,\sigma(\pi')= \sigma(a')\,\pi$, so $\theta(\sigma\tau\sigma^{-1})
-  = \overline{\sigma(a')} = \overline{a'}^{\,N\mathfrak{p}} = \theta(\tau)^{N\mathfrak{p}}$, using
-  that $\sigma$ induces the $N\mathfrak{p}$-power Frobenius on $k$.
+  Write $\rho = \sigma\tau\sigma^{-1} \in I$ (inertia is normal in $D$). The element $\sigma$
+  preserves $\mathfrak{m}$ and $\mathfrak{m}^2$, hence acts on $\mathfrak{m}/\mathfrak{m}^2$, but
+  $\bar\sigma$-semilinearly: $\sigma(c\,\bar v) = \bar\sigma(c)\,\sigma(\bar v)$ for $c \in k$, where
+  $\bar\sigma$ is the action of $\sigma$ on $k$, namely the $N\mathfrak{p}$-power Frobenius. Using
+  \ref{lem:tame_character_smul} (that $\tau$ acts by the scalar $\theta(\tau)$) and writing
+  $\rho = \sigma \circ \tau \circ \sigma^{-1}$ on $\mathfrak{m}/\mathfrak{m}^2$, for any
+  $\bar v$ we get
+  \[
+    \rho\,\bar v = \sigma\big(\tau(\sigma^{-1}\bar v)\big)
+      = \sigma\big(\theta(\tau)\,\sigma^{-1}\bar v\big)
+      = \bar\sigma(\theta(\tau))\,\bar v .
+  \]
+  Thus $\rho$ acts on the one-dimensional space $\mathfrak{m}/\mathfrak{m}^2$ by the scalar
+  $\bar\sigma(\theta(\tau))$, so $\theta(\sigma\tau\sigma^{-1}) = \bar\sigma(\theta(\tau)) =
+  \theta(\tau)^{N\mathfrak{p}}$.
 \end{proof}
 
 \begin{lemma}

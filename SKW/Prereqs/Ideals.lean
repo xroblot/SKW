@@ -4,6 +4,7 @@ public import Mathlib.NumberTheory.NumberField.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Unramified
 public import Mathlib.RingTheory.Ideal.Int
 public import Mathlib.RingTheory.RamificationInertia.Ramification
+public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 
 public import SKW.PRed2Mathlib.Ideals
 
@@ -44,17 +45,21 @@ def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike 
   left_inv _ := by simpa using comap_map_of_bijective _ (EquivLike.bijective e)
   right_inv _ := by simpa using Ideal.map_comap_of_surjective _ (EquivLike.surjective e) _
 
-/-- The `f`-semilinear map `↥I → ↥(I.map f)`, `x ↦ f x`, induced on the underlying modules by a
-ring homomorphism `f`. The (semi)linear-map analogue of `Ideal.map` (whence the `ₗ`); it is the
-restriction of `f` to `I` corestricted to `I.map f`. -/
-def Ideal.mapₗ {A B : Type*} [CommSemiring A] [CommSemiring B] (f : A →+* B) (I : Ideal A) :
-    I →ₛₗ[f] I.map f :=
-  f.toSemilinearMap.restrict fun x hx => Ideal.mem_map_of_mem f hx
+/-- For a maximal ideal `I`, `R ⧸ I` is already its own fraction field, so the canonical map to
+the residue field `κ(I) = ResidueField R_I` of the localization is an isomorphism. -/
+noncomputable def Ideal.residueFieldEquiv {R : Type*} [CommRing R] (I : Ideal R) [I.IsMaximal] :
+    R ⧸ I ≃+* I.ResidueField :=
+  RingEquiv.ofBijective _ I.bijective_algebraMap_quotient_residueField
 
 @[simp]
-theorem Ideal.coe_mapₗ_apply {A B : Type*} [CommSemiring A] [CommSemiring B] (f : A →+* B)
-    (I : Ideal A) (x : I) :
-    (I.mapₗ f x : B) = f x := rfl
+theorem Ideal.residueFieldEquiv_mk {R : Type*} [CommRing R] (I : Ideal R) [I.IsMaximal] (x : R) :
+    I.residueFieldEquiv (Ideal.Quotient.mk I x) = algebraMap R I.ResidueField x := rfl
+
+@[simp]
+theorem Ideal.residueFieldEquiv_symm_algebraMap {R : Type*} [CommRing R] (I : Ideal R)
+    [I.IsMaximal] (x : R) :
+    I.residueFieldEquiv.symm (algebraMap R I.ResidueField x) = Ideal.Quotient.mk I x := by
+  rw [← residueFieldEquiv_mk, RingEquiv.symm_apply_apply]
 
 open Pointwise in
 theorem Ideal.pointwise_smul_def' {M R : Type*} [Group M] [CommSemiring R] [MulSemiringAction M R] {a : M}
@@ -178,3 +183,18 @@ open Pointwise in
 theorem Ideal.smul_span {M : Type*} {R : Type*} [Group M] [Semiring R] [MulSemiringAction M R]
     {m : M} {r : R} : m • span {r} = span {m • r} := by
   simp [pointwise_smul_def, map_span]
+
+open Pointwise in
+/-- An element of the stabilizer of `I` preserves `I`. -/
+theorem Ideal.smul_mem_of_mem_stabilizer {M R : Type*} [Group M] [CommRing R] [MulSemiringAction M R]
+    (I : Ideal R) (σ : MulAction.stabilizer M I) {x : R} (hx : x ∈ I) : σ • x ∈ I := by
+  nth_rewrite 1 [← MulAction.mem_stabilizer_iff.mp σ.prop]
+  exact smul_mem_pointwise_smul σ x I hx
+
+open Pointwise in
+/-- An element of the stabilizer of `I` preserves `I ^ k`. -/
+theorem Ideal.smul_mem_pow_of_mem_stabilizer {M R : Type*} [Group M] [CommRing R]
+    [MulSemiringAction M R] (I : Ideal R) (σ : MulAction.stabilizer M I) {x : R} {k : ℕ}
+    (hx : x ∈ I ^ k) : σ • x ∈ I ^ k := by
+  nth_rewrite 1 [← MulAction.mem_stabilizer_iff.mp σ.prop, ← smul_pow']
+  exact smul_mem_pointwise_smul σ x _ hx

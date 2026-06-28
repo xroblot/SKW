@@ -59,4 +59,18 @@ theorem exists_eq_pow_of_pow_eq_pow_of_coprime {G : Type*} [CommGroupWithZero G]
       ← zpow_natCast, ← zpow_mul, ← zpow_add₀ hx, mul_comm _ (n : ℤ), ← Int.gcd_eq_gcd_ab,
       Int.gcd_natCast_natCast, hmn, Nat.cast_one, zpow_one]
 
+/-! ### MISC -/
+
+@[simp]
+theorem MulAut.conjNormal_apply_of_isMulCommutative {G : Type*} [Group G] [IsMulCommutative G]
+    {H : Subgroup G} [H.Normal] (g : G) (h : H) :
+    conjNormal g h = h := by
+  rw [Subtype.ext_iff, conjNormal_apply, mul_comm', inv_mul_cancel_left]
+
+@[simp]
+theorem MulAut.conjNormal_symm_apply_of_isMulCommutative {G : Type*} [Group G] [IsMulCommutative G]
+    {H : Subgroup G} [H.Normal] (g : G) (h : H) :
+    (MulAut.conjNormal g).symm h = h := by
+  rw [MulEquiv.symm_apply_eq, conjNormal_apply_of_isMulCommutative]
+
 end
