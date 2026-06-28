@@ -6,6 +6,7 @@ public import Mathlib.NumberTheory.RamificationInertia.Basic
 public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
 public import Mathlib.FieldTheory.Galois.Basic
 public import Mathlib.FieldTheory.Galois.IsGaloisGroup
+public import Mathlib.FieldTheory.Galois.Abelian
 public import Mathlib.NumberTheory.NumberField.ExistsRamified
 
 public import SKW.Prereqs.AlgebraMisc
@@ -26,13 +27,27 @@ This file establishes the reduction steps that allow us to prove Kronecker-Weber
 4. `kw_ramification_reduction`: Given `K/ℚ` cyclic of prime power degree with `q ≠ p` ramified,
    there exists a cyclotomic `L/ℚ` such that `KL = FL` for `F/ℚ` cyclic of prime power degree
    with `q` unramified.
-5. `kw_reduce_to_prime_power`: It suffices to prove KW for cyclic prime power degree extensions
-   unramified outside `p`.
+
+The reduction of the general (abelian) case to the cyclic prime power case
+(`kw_reduce_to_prime_power`) lives in `KroneckerWeber.lean`, in `IntermediateField ℚ A` currency.
 -/
 
-open NumberField Ideal Pointwise Module
+open NumberField Ideal Pointwise Module IntermediateField
 
 noncomputable section
+
+/-- `K/ℚ` is a cyclic Galois extension of prime power degree (`> 1`). -/
+def IsCyclicOfPrimePowerDegree (K : Type*) [Field K] [Algebra ℚ K] : Prop :=
+  IsGalois ℚ K ∧ IsCyclic Gal(K/ℚ) ∧ ∃ p m : ℕ, p.Prime ∧ 0 < m ∧ Module.finrank ℚ K = p ^ m
+
+/-- Every finite abelian extension of `ℚ` is the compositum of cyclic subextensions of prime power
+degree (the primary decomposition of the abelian Galois group, transported through the Galois
+correspondence). -/
+lemma kw_abelian_cyclic_decomp {A : Type*} [Field A] [CharZero A]
+    (K : IntermediateField ℚ A) [NumberField K] [IsAbelianGalois ℚ K] :
+    ∃ (ι : Type) (_ : Fintype ι) (C : ι → IntermediateField ℚ A),
+      (∀ i, C i ≤ K ∧ IsCyclicOfPrimePowerDegree (C i)) ∧ ⨆ i, C i = K := by
+  sorry
 
 variable {p : ℕ} [hp : Fact p.Prime]
 
@@ -66,37 +81,21 @@ lemma kw_minkowski
   exact IsMaximal.ne_bot_of_isIntegral_int 𝔮
 
 /-- Ramification reduction: given `K/ℚ` cyclic of prime power degree `pᵐ` with `q ≠ p` ramified,
-there exists a cyclotomic extension `L/ℚ` such that `KL = FL` for some cyclic `F/ℚ` of degree
-`pᵐ` in which `q` is unramified. -/
-lemma kw_ramification_reduction
-    (K : Type*) [Field K] [NumberField K]
-    [IsGalois ℚ K] [IsCyclic (K ≃ₐ[ℚ] K)]
+there exist `r > 0` and a cyclic `F/ℚ` of degree `pᵐ` (in the same ambient field `A`), unramified
+at `q` and not ramified at any prime where `K` is unramified, such that `K · ℚ(ζ_{qʳ}) = F · ℚ(ζ_{qʳ})`.
+This removes `q` from the set of ramified primes at the cost of a `q`-power cyclotomic factor. -/
+lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] (ξ : ℕ → A)
+    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n)
+    (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
     (m : ℕ) (hm : 0 < m) (hK : Module.finrank ℚ K = p ^ m)
-    (q : ℕ) [hq : Fact q.Prime] (hqp : q ≠ p)
-    (hram : ∃ 𝔮 : Ideal (𝓞 K), 𝔮.IsMaximal ∧ 𝔮.LiesOver (Ideal.span {(q : ℤ)}) ∧
-      Ideal.ramificationIdx (Ideal.span {(q : ℤ)}) 𝔮 > 1) :
-    ∃ (F : Type*) (_ : Field F) (_ : NumberField F) (_ : IsGalois ℚ F) (_ : IsCyclic (F ≃ₐ[ℚ] F))
-      (_ : Module.finrank ℚ F = p ^ m)
-      (hFram : ∀ 𝔮 : Ideal (𝓞 F), 𝔮.IsMaximal → 𝔮.LiesOver (Ideal.span {(q : ℤ)}) →
-        Ideal.ramificationIdx (Ideal.span {(q : ℤ)}) 𝔮 = 1)
-      (r : ℕ) (hr : 0 < r) (Λ : Type*) (_ : Field Λ) (_ : NumberField Λ)
-      (_ : IsCyclotomicExtension {q ^ r} ℚ Λ),
-      True := by -- placeholder; compositum KΛ = FΛ
-  sorry
-
-/-- Main reduction: it suffices to prove KW for cyclic prime power degree extensions of `ℚ`
-unramified outside `p`. -/
-theorem kw_reduce_to_prime_power :
-    (∀ (p : ℕ) [Fact p.Prime] (m : ℕ) (hm : 0 < m)
-      (K : Type*) [Field K] [NumberField K] [IsGalois ℚ K] [IsCyclic (K ≃ₐ[ℚ] K)]
-      (hK : Module.finrank ℚ K = p ^ m)
-      (hram : ∀ q : ℕ, q.Prime → q ≠ p →
-        ∀ 𝔮 : Ideal (𝓞 K), 𝔮.IsMaximal → 𝔮.LiesOver (Ideal.span {(q : ℤ)}) →
-        Ideal.ramificationIdx (Ideal.span {(q : ℤ)}) 𝔮 = 1),
-      ∃ r : ℕ, Nonempty (K →ₐ[ℚ] CyclotomicField (p ^ r) ℚ)) →
-    ∀ (K : Type*) [Field K] [NumberField K] [IsGalois ℚ K] [Fintype (K ≃ₐ[ℚ] K)]
-      [∀ σ τ : K ≃ₐ[ℚ] K, Decidable (σ * τ = τ * σ)],
-      ∃ n : ℕ, Nonempty (K →ₐ[ℚ] CyclotomicField n ℚ) := by
+    (q : ℕ) (hq : q.Prime) (hqp : q ≠ p)
+    (hram : ¬ Algebra.IsUnramifiedIn (𝓞 K) (Ideal.span {(q : ℤ)})) :
+    ∃ (F : IntermediateField ℚ A) (_ : NumberField F) (r : ℕ),
+      0 < r ∧ IsGalois ℚ F ∧ IsCyclic Gal(F/ℚ) ∧ Module.finrank ℚ F = p ^ m ∧
+      Algebra.IsUnramifiedIn (𝓞 F) (Ideal.span {(q : ℤ)}) ∧
+      (∀ q' : ℕ, q'.Prime → Algebra.IsUnramifiedIn (𝓞 K) (Ideal.span {(q' : ℤ)}) →
+        Algebra.IsUnramifiedIn (𝓞 F) (Ideal.span {(q' : ℤ)})) ∧
+      K ⊔ ℚ⟮ξ (q ^ r)⟯ = F ⊔ ℚ⟮ξ (q ^ r)⟯ := by
   sorry
 
 end

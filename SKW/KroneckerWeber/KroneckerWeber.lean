@@ -24,20 +24,41 @@ Every abelian extension of `ℚ` is contained in a cyclotomic field.
 
 open NumberField IntermediateField
 
-def IsCyclicOfPrimeOrder (K : Type*) [Field K] [NumberField K] : Prop :=
-  IsAbelianGalois ℚ K ∧ ∃ p k : ℕ, p.Prime ∧ Nat.card Gal(K/ℚ) = p ^ k
-
-example {A : Type*} [Field A] [CharZero A] (ξ : ℕ → A) (hξ : ∀ n, IsPrimitiveRoot (ξ n) n)
+/-- Reduction of Kronecker-Weber to the cyclic prime power case (in `IntermediateField ℚ A`
+currency): if every cyclic subextension of `K` of prime power degree lies in a cyclotomic field
+`ℚ⟮ξ n⟯` (with `n > 0`), then so does `K`. The proof decomposes `K` as a compositum of such
+subextensions (`kw_abelian_cyclic_decomp`) and recombines the cyclotomic fields, using that
+`ℚ⟮ξ m⟯ ≤ ℚ⟮ξ n⟯` whenever `m ∣ n`. -/
+lemma kw_reduce_to_prime_power {A : Type*} [Field A] [CharZero A] (ξ : ℕ → A)
+    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n)
     (K : IntermediateField ℚ A) [NumberField K] [IsAbelianGalois ℚ K]
-    (hK : ∀ (L : IntermediateField ℚ A), [NumberField L] → (hL : L ≤ K) → IsCyclicOfPrimeOrder L
-      → ∃ (n : ℕ), L ≤ ℚ⟮ξ n⟯) :
-    ∃ (n : ℕ), K ≤ ℚ⟮ξ n⟯ := by
-  let : CommGroup Gal(K/ℚ) := IsMulCommutative.instCommGroup
-  obtain ⟨ι, j, _, _, fp, hp, fk, ⟨e⟩⟩ := CommGroup.equiv_free_prod_prod_multiplicative_zmod Gal(K/ℚ)
-  refine ⟨∏ i : ι, fp i ^ fk i, ?_⟩
-  
+    (hK : ∀ (L : IntermediateField ℚ A), [NumberField L] → L ≤ K → IsCyclicOfPrimePowerDegree L
+      → ∃ n : ℕ, 0 < n ∧ L ≤ ℚ⟮ξ n⟯) :
+    ∃ n : ℕ, 0 < n ∧ K ≤ ℚ⟮ξ n⟯ := by
+  obtain ⟨ι, _, C, hC, hsup⟩ := kw_abelian_cyclic_decomp K
+  have mono : ∀ {m n : ℕ}, n ≠ 0 → m ∣ n → (ℚ⟮ξ m⟯ : IntermediateField ℚ A) ≤ ℚ⟮ξ n⟯ := by
+    intro m n hn hmn
+    haveI : NeZero n := ⟨hn⟩
+    rw [IntermediateField.adjoin_le_iff, Set.singleton_subset_iff]
+    have hpow : ξ m ^ n = 1 := by
+      obtain ⟨k, rfl⟩ := hmn
+      rw [pow_mul, (hξ m).pow_eq_one, one_pow]
+    obtain ⟨k, -, hk⟩ := (hξ n).eq_pow_of_pow_eq_one hpow
+    rw [← hk]
+    exact pow_mem (IntermediateField.subset_adjoin ℚ {ξ n} rfl) k
+  have key : ∀ i, ∃ n : ℕ, 0 < n ∧ C i ≤ ℚ⟮ξ n⟯ := by
+    intro i
+    haveI : FiniteDimensional ℚ (C i) :=
+      .of_injective (IntermediateField.inclusion (hC i).1).toLinearMap
+        (IntermediateField.inclusion_injective (hC i).1)
+    haveI : NumberField (C i) := ⟨⟩
+    exact hK (C i) (hC i).1 (hC i).2
+  choose f hf0 hf using key
+  refine ⟨∏ i, f i, Finset.prod_pos fun i _ => hf0 i, ?_⟩
+  rw [← hsup, iSup_le_iff]
+  exact fun i => (hf i).trans
+    (mono (Finset.prod_pos fun j _ => hf0 j).ne' (Finset.dvd_prod_of_mem f (Finset.mem_univ i)))
 
-  sorry
 
 /-- **Kronecker-Weber theorem**: every abelian extension of `ℚ` is contained in a cyclotomic
 field. -/
