@@ -12,10 +12,10 @@ public import SKW.Prereqs.Cotangent
 public import SKW.Prereqs.AlgebraMisc
 
 /-!
-# Tame ramification: the tame character (skeleton)
+# Tame ramification: the tame character
 
 Filtration-free construction and properties of the tame character of a prime, following the
-blueprint section "Tame ramification". Statements only; proofs are `sorry`.
+blueprint section "Tame ramification".
 
 The setting is the one of `Mathlib.RingTheory.Frobenius` / `Mathlib.RingTheory.Invariant.Basic`: a
 group `G` acting on `S` over a base ring `R` (`[MulSemiringAction G S] [SMulCommClass G R S]`) and an
@@ -131,6 +131,12 @@ theorem sub_mem_pow_of_coprime (Q : Ideal S) [Q.IsMaximal]
       exact Quotient.isUnit_mk_pow_of_notMem _ hord
 
 variable [IsDedekindDomain S]
+
+/-- The localization of a Dedekind domain at a nonzero maximal ideal is a discrete valuation ring.
+A local instance so that `Ideal.finrank_cotangent_eq_one` applies to the cotangent line `Q ⧸ Q ^ 2`. -/
+private instance (Q : Ideal S) [Q.IsMaximal] [NeZero Q] :
+    IsDiscreteValuationRing (Localization.AtPrime Q) :=
+  IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain S (NeZero.ne Q) _
 
 /-- In dimension one, the cotangent action of an inertia element is the homothety by its tame
 character: `cotangentInertiaAction G Q τ = θ(τ) • id`. -/

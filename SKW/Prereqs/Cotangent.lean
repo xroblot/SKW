@@ -99,13 +99,11 @@ theorem Ideal.cotangentEquivCotangentSpace_smul (c : R ⧸ I) (x : I.Cotangent) 
   simp only [cotangentEquivCotangentSpace_apply, cotangentMap_mk_smul, residueFieldEquiv_mk,
     IsScalarTower.algebraMap_apply R R_I I.ResidueField, algebraMap_smul]
 
-/-- For a maximal ideal `I ≠ ⊥` of a Dedekind domain, the cotangent space `I ⧸ I ^ 2` is a
-one-dimensional vector space over the residue field `R ⧸ I`. (Locally at `I` the ring is a
-discrete valuation ring, and this is its cotangent line.) -/
-theorem Ideal.finrank_cotangent_eq_one [IsDedekindDomain R] [NeZero I] :
+/-- If the localization `R_I` of `R` at a maximal ideal `I` is a discrete valuation ring, then the
+cotangent space `I ⧸ I ^ 2` is a one-dimensional vector space over the residue field `R ⧸ I` (its
+cotangent line). This is a local statement: only the local ring at `I` matters. -/
+theorem Ideal.finrank_cotangent_eq_one [IsDomain R] [IsDiscreteValuationRing R_I] :
     finrank (R ⧸ I) I.Cotangent = 1 := by
-  have : IsDiscreteValuationRing R_I :=
-    IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain R (NeZero.ne I) R_I
   rw [finrank_eq_of_equiv_equiv I.residueFieldEquiv I.cotangentEquivCotangentSpace
     I.residueFieldEquiv.bijective I.cotangentEquivCotangentSpace_smul]
   exact IsLocalRing.finrank_CotangentSpace_eq_one R_I
