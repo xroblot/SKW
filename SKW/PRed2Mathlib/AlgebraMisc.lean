@@ -111,6 +111,22 @@ theorem Subgroup.zpowers_eq_zpowers_iff' {G : Type*} [Group G] (g : G) (i j : �
   rw [le_antisymm_iff, Subgroup.zpowers_le_zpowers_iff, Subgroup.zpowers_le_zpowers_iff,
     dvd_dvd_iff_associated, associated_iff_eq, eq_comm]
 
+theorem Subgroup.zpowers_zpow_sup {G : Type*} [Group G] (g : G) (i j : ℤ) :
+    Subgroup.zpowers (g ^ i) ⊔ Subgroup.zpowers (g ^ j) = Subgroup.zpowers (g ^ (i.gcd j : ℤ)) := by
+  refine le_antisymm (sup_le ?_ ?_) ?_
+  · rw [Subgroup.zpowers_le]
+    exact Subgroup.mem_zpowers_iff.2 ⟨i / (i.gcd j : ℤ),
+      by rw [← zpow_mul, Int.mul_ediv_cancel' (Int.gcd_dvd_left ..)]⟩
+  · rw [Subgroup.zpowers_le]
+    exact Subgroup.mem_zpowers_iff.2 ⟨j / (i.gcd j : ℤ),
+      by rw [← zpow_mul, Int.mul_ediv_cancel' (Int.gcd_dvd_right ..)]⟩
+  · rw [Subgroup.zpowers_le]
+    have h : (g ^ i) ^ Int.gcdA i j * (g ^ j) ^ Int.gcdB i j = g ^ (i.gcd j : ℤ) := by
+      rw [← zpow_mul, ← zpow_mul, ← zpow_add, ← Int.gcd_eq_gcd_ab]
+    rw [← h]
+    exact Subgroup.mul_mem_sup (Subgroup.mem_zpowers_iff.2 ⟨_, rfl⟩)
+      (Subgroup.mem_zpowers_iff.2 ⟨_, rfl⟩)
+
 theorem Nat.div_dvd_div_iff {k m n : ℕ} (hk : 0 < k) (hm : 0 < m) (hmk : m ∣ k) (hnk : n ∣ k) :
     k / m ∣ k / n ↔ n ∣ m := by
   rw [Nat.div_dvd_iff_dvd_mul hmk hm, ← Nat.mul_div_assoc _ hnk,
