@@ -11,6 +11,7 @@ public import Mathlib.Algebra.IsPrimePow
 
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.Ideals
+public import SKW.Prereqs.CyclotomicField
 
 @[expose] public section
 
@@ -73,7 +74,7 @@ there is a cyclic `F/ℚ` of degree `pᵐ` (in the same ambient field `A`), unra
 ramified at any prime where `K` is unramified, such that `K · ℚ(ζ_q) = F · ℚ(ζ_q)`. This removes `q`
 from the set of ramified primes at the cost of the `q`-th cyclotomic factor. (`ℚ(ζ_q)` already
 suffices, since for the abelian `K` the tame inertia order at `q` divides `q - 1`.) -/
-lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] (ξ : ℕ → A)
+lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K]
     [IsCyclic Gal(K/ℚ)] (m : ℕ) (hm : 0 < m) (hK : Module.finrank ℚ K = p ^ m) (q : ℕ)
     (hq : q.Prime) (hqp : q ≠ p) (hram : ¬ Algebra.IsUnramifiedIn (𝓞 K) (Ideal.span {(q : ℤ)})) :
@@ -118,24 +119,42 @@ lemma kw_reduce_to_unramified_outside_p_aux {A : Type*} [Field A] [CharZero A] (
     (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (m : ℕ) (hm : 0 < m) (S : Finset ℕ)
     (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
     (hK : Module.finrank ℚ K = p ^ m)
-    (hram : ∀ ⦃q : ℕ⦄, q.Prime → q ≠ p → q ∉ S → Algebra.IsUnramifiedIn (𝓞 K) (span {(q : ℤ)})) :
-    ∃ (F : IntermediateField ℚ A) (n : ℕ), [NumberField F] →
-      [IsGalois ℚ F] → [IsCyclic Gal(F/ℚ)] → Module.finrank ℚ F = p ^ m ∧
+    (hram : ∀ q : ℕ, q.Prime → q ≠ p → q ∉ S → Algebra.IsUnramifiedIn (𝓞 K) (span {(q : ℤ)})) :
+      ∃ (F : IntermediateField ℚ A) (_ : NumberField F) (_ : IsGalois ℚ F) (_ : IsCyclic Gal(F/ℚ))
+        (n : ℕ), 0 < n ∧ Module.finrank ℚ F = p ^ m ∧
         (∀ q : ℕ, q.Prime → q ≠ p → Algebra.IsUnramifiedIn (𝓞 F) (span {(q : ℤ)})) ∧
-          K ⊔ ℚ⟮ξ n⟯ = F ⊔ ℚ⟮ξ n⟯ := by
-  induction S using Finset.induction with
-  | empty => exact ⟨K, 1, hK, fun q hq hqp ↦ hram hq hqp (by simp), rfl⟩
-  | insert q S' hq ih =>
-
-      -- If `q` is a ramified prime `≠ p`: peel it with `kw_ramification_reduction` to get `F'`
-      --   (unramified at `q`, cyclic of degree `pᵐ`, `K ⊔ ℚ⟮ξ q⟯ = F' ⊔ ℚ⟮ξ q⟯`). Then `F'` is
-      --   unramified outside `S' ∪ {p}` (at `q` by construction, elsewhere by the preservation
-      --   conjunct), so `ih` gives `F''` unramified outside `p` with `F' ⊔ ℚ⟮ξ n'⟯ = F'' ⊔ ℚ⟮ξ n'⟯`.
-      --   Combine via `ℚ⟮ξ q⟯ ⊔ ℚ⟮ξ n'⟯ = ℚ⟮ξ (q.lcm n')⟯` (compositum of cyclotomic fields) to get
-      --   `K ⊔ ℚ⟮ξ (q.lcm n')⟯ = F'' ⊔ ℚ⟮ξ (q.lcm n')⟯`.
-      -- Otherwise (`q` not prime, `q = p`, or `q` unramified in `K`): `K` is already unramified
-      --   outside `S' ∪ {p}`, so apply `ih` to `K` directly.
-      sorry
+        K ⊔ ℚ⟮ξ n⟯ = F ⊔ ℚ⟮ξ n⟯ := by
+  induction S using Finset.induction generalizing K with
+  | empty => exact ⟨K, ‹_›, ‹_›, ‹_›, 1, Nat.one_pos, hK, by simpa using hram, rfl⟩
+  | insert r S' hq ih =>
+      by_cases hr₁ : r.Prime ∧ r ≠ p
+      · by_cases hr₂ : Algebra.IsUnramifiedIn (𝓞 K) (span {(r : ℤ)})
+        · refine ih K hK fun q hq₁ hq₂ hq₃ ↦ ?_
+          by_cases hq : q = r
+          · rwa [hq]
+          · exact hram q hq₁ hq₂ (by grind)
+        · obtain ⟨E, _, _, _, hE₁, hE₂, hE₃, hE₄⟩ :=
+            kw_ramification_reduction hξ K m hm hK r hr₁.1 hr₁.2 hr₂
+          have hunram (q : ℕ) (hq : Nat.Prime q) (hqp : q ≠ p)(hqS' :q ∉ S') :
+              Algebra.IsUnramifiedIn (𝓞 E) (span {(q : ℤ)}) := by
+            by_cases hqr : q = r
+            · rwa [hqr]
+            · exact hE₃ q hq (hram q hq hqp (by grind))
+          obtain ⟨F, _, _, _, n, hn, hF₁, hF₂, hF₃⟩ := ih E hE₁ hunram
+          have : NeZero n := NeZero.of_gt hn
+          have : Fact r.Prime := ⟨hr₁.1⟩
+          have : NeZero (n.lcm r) := ⟨Nat.lcm_ne_zero (NeZero.ne _) (NeZero.ne _)⟩
+          refine ⟨F, ‹_›, ‹_›, ‹_›, n.lcm r, NeZero.pos _, hF₁, fun q hq hqp ↦  hF₂ q hq hqp, ?_⟩
+          have : ℚ⟮ξ (n.lcm r)⟯ = ℚ⟮ξ n⟯ ⊔ ℚ⟮ξ r⟯ := by
+            have := (hξ n).adjoinSimple_isCyclotomicExtension n ℚ A
+            have := (hξ r).adjoinSimple_isCyclotomicExtension r ℚ A
+            have := isCyclotomicExtension_lcm_sup ℚ A n r ℚ⟮ξ n⟯ ℚ⟮ξ r⟯
+            have := (hξ (n.lcm r)).adjoinSimple_isCyclotomicExtension (n.lcm r) ℚ A
+            exact IntermediateField.isCyclotomicExtension_eq {n.lcm r} ℚ A _ _
+          rw [this, ← sup_assoc, sup_right_comm, hE₄, sup_right_comm, hF₃, sup_assoc]
+      · refine ih K hK fun q hq₁ hq₂ hq₃ ↦ hram _ hq₁ hq₂ ?_
+        rw [Finset.mem_insert, not_or]
+        exact ⟨by grind, hq₃⟩
 
 /-- Consumer of `kw_ramification_reduction`: iterating it over the finitely many primes `q ≠ p`
 ramified in `K`, one obtains a cyclic `F/ℚ` of the same prime power degree, unramified outside `p`,
@@ -144,15 +163,18 @@ outside `p`" condition is spelled out inline as `∀ q ≠ p prime, Algebra.IsUn
 lemma kw_reduce_to_unramified_outside_p {A : Type*} [Field A] [CharZero A] (ξ : ℕ → A)
     (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K]
     [IsCyclic Gal(K/ℚ)] (m : ℕ) (hm : 0 < m) (hK : Module.finrank ℚ K = p ^ m) :
-    ∃ (F : IntermediateField ℚ A) (n : ℕ), [NumberField F] → [IsGalois ℚ F] →
-      [IsCyclic Gal(F/ℚ)] → Module.finrank ℚ F = p ^ m ∧
+    ∃ (F : IntermediateField ℚ A) (_ : NumberField F) (_ : IsGalois ℚ F) (_ : IsCyclic Gal(F/ℚ))
+      (n : ℕ), 0 < n ∧ Module.finrank ℚ F = p ^ m ∧
       (∀ q : ℕ, q.Prime → q ≠ p → Algebra.IsUnramifiedIn (𝓞 F) (Ideal.span {(q : ℤ)})) ∧
       K ⊔ ℚ⟮ξ n⟯ = F ⊔ ℚ⟮ξ n⟯ := by
   obtain ⟨S, hS⟩ : ∃ S : Finset ℕ, ∀ q : ℕ, q.Prime → q ≠ p → q ∉ S →
       Algebra.IsUnramifiedIn (𝓞 K) (Ideal.span {(q : ℤ)}) := by
     refine ⟨(discr K).natAbs.primeFactors, fun q hq hpq hD ↦ ?_⟩
-    sorry
-  exact kw_reduce_to_unramified_outside_p_aux (K := K) ξ hξ _ hm S hK hS
+    refine (not_dvd_discr_iff_isUnramifiedIn K (𝓞 K) (Nat.prime_iff_prime_int.mp hq)).mp ?_
+    contrapose! hD
+    exact hq.mem_primeFactors (by rwa [← Int.natCast_dvd])
+      (Int.natAbs_ne_zero.mpr <| discr_ne_zero K)
+  exact kw_reduce_to_unramified_outside_p_aux ξ hξ m hm S K hK hS
 
 end
 

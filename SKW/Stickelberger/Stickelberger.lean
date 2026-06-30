@@ -112,7 +112,7 @@ theorem Stickelberger'' :
   have : NumberField ℚ⟮ξ₀⟯ := {
     to_finiteDimensional := adjoin.finiteDimensional <| hξ₀.isIntegral' (NeZero.pos _) }
   have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ ℚ⟮ξ₀⟯ :=
-    (isCyclotomicExtension_singleton_iff_eq_adjoin _ ℚ (AlgebraicClosure k) ℚ⟮ξ₀⟯ hξ₀).mpr rfl
+    hξ₀.adjoinSimple_isCyclotomicExtension _ ℚ (AlgebraicClosure k)
   exact Stickelberger_aux m k p 𝔭 f d hdm rfl ℚ⟮ξ₀⟯
 
 theorem Stickelberger' (I : Ideal (𝓞 k)) (hI₁ : Odd I.absNorm) (hI₂ : m.gcd I.absNorm = 1) :

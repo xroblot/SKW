@@ -200,7 +200,7 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
   let ζ : A := ξ ^ p
   have hζ : IsPrimitiveRoot ζ p := hξ.pow (NeZero.pos _) (by rw [pow_two])
   have : IsCyclotomicExtension {p} ℚ ℚ⟮ζ⟯ :=
-    (isCyclotomicExtension_singleton_iff_eq_adjoin p ℚ A ℚ⟮ζ⟯ hζ).mpr rfl
+    hζ.adjoinSimple_isCyclotomicExtension p ℚ A
   have : NumberField ℚ⟮ζ⟯ := IsCyclotomicExtension.numberField {p} ℚ ℚ⟮ζ⟯
   let M : IntermediateField ℚ A := K ⊔ ℚ⟮ζ⟯
   let F : IntermediateField ℚ M := (ℚ⟮ζ⟯).restrict le_sup_right

@@ -39,6 +39,17 @@ theorem IsPrimitiveRoot.of_pow_eq {M : Type*} [CommMonoid M] {ζ y : M} {m n : �
 
 /-! ### IsCyclotomicExtension -/
 
+open IntermediateField in
+/-- `E⟮ζ⟯` is a cyclotomic extension of `E` for `ζ` a primitive `n`-th root of unity.
+
+This should replace the existing `IsPrimitiveRoot.intermediateField_adjoin_isCyclotomicExtension`
+in Mathlib: it is more general, dropping the `[Algebra.IsIntegral E F]` hypothesis (`E⟮ζ⟯` only
+involves the algebraic element `ζ`, so integrality of the whole `F/E` is irrelevant). -/
+theorem IsPrimitiveRoot.adjoinSimple_isCyclotomicExtension (n : ℕ) [NeZero n] (E F : Type*)
+    [Field E] [Field F] [Algebra E F] {ζ : F} (hζ : IsPrimitiveRoot ζ n) :
+    IsCyclotomicExtension {n} E E⟮ζ⟯ :=
+  (isCyclotomicExtension_singleton_iff_eq_adjoin n E F E⟮ζ⟯ hζ).mpr rfl
+
 theorem IsCyclotomicExtension.primitiveRoots_nonempty (n : ℕ) [NeZero n] (A B : Type*) [CommRing A]
     [CommRing B] [IsDomain B] [Algebra A B] [hC : IsCyclotomicExtension {n} A B] :
     (primitiveRoots n B).Nonempty :=
