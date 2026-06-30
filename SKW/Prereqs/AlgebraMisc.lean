@@ -3,6 +3,7 @@ module
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Lemmas
 public import Mathlib.GroupTheory.SpecificGroups.Cyclic
 public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Mathlib.RingTheory.IntegralDomain
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 
 public import SKW.PRed2Mathlib.AlgebraMisc
@@ -87,5 +88,30 @@ theorem MulAut.conjNormal_symm_apply_of_isMulCommutative {G : Type*} [Group G] [
     {H : Subgroup G} [H.Normal] (g : G) (h : H) :
     (MulAut.conjNormal g).symm h = h := by
   rw [MulEquiv.symm_apply_eq, conjNormal_apply_of_isMulCommutative]
+
+/-! ### Characters: order and quotient by the kernel -/
+
+section
+variable {G R : Type*} [CommGroup G] [Finite G] [CommRing R] [IsDomain R]
+
+instance (φ : G →* Rˣ) : IsCyclic (G ⧸ φ.ker) :=
+  haveI : Finite φ.range := Finite.Set.finite_range _
+  isCyclic_of_injective (QuotientGroup.quotientKerEquivRange φ).toMonoidHom (MulEquiv.injective _)
+
+/-- The order of a character `φ : G →* Rˣ` (`R` a domain) equals the cardinality of the quotient of
+`G` by its kernel (equivalently, of its cyclic image). -/
+theorem MonoidHom.card_quotient_ker_eq_orderOf (φ : G →* Rˣ) :
+    Nat.card (G ⧸ φ.ker) = orderOf φ := by
+  have : Finite φ.range := Finite.Set.finite_range _
+  rw [Nat.card_congr (QuotientGroup.quotientKerEquivRange φ).toEquiv, ← IsCyclic.exponent_eq_card]
+  refine dvd_antisymm (Monoid.exponent_dvd_of_forall_pow_eq_one ?_)
+    (orderOf_dvd_iff_pow_eq_one.mpr ?_)
+  · rintro ⟨_, ⟨g, rfl⟩⟩
+    simp [Subtype.ext_iff, ← MonoidHom.pow_apply]
+  · ext g
+    simpa [Subtype.ext_iff, Units.ext_iff] using
+      Monoid.pow_exponent_eq_one (G := φ.range) ⟨φ g, ⟨g, rfl⟩⟩
+
+end
 
 end

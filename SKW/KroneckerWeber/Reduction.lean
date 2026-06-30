@@ -6,15 +6,11 @@ public import Mathlib.NumberTheory.RamificationInertia.Basic
 public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
 public import Mathlib.FieldTheory.Galois.Basic
 public import Mathlib.FieldTheory.Galois.IsGaloisGroup
-public import Mathlib.FieldTheory.Galois.Abelian
 public import Mathlib.NumberTheory.NumberField.ExistsRamified
-public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
-public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
-public import Mathlib.GroupTheory.FiniteAbelian.Duality
+public import Mathlib.Algebra.IsPrimePow
 
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.Ideals
-public import SKW.Prereqs.Torsion
 
 @[expose] public section
 
@@ -23,18 +19,20 @@ public import SKW.Prereqs.Torsion
 
 This file establishes the reduction steps that allow us to prove Kronecker-Weber by induction:
 
-1. `kw_abelian_cyclic_decomp`: Every finite abelian extension of `ℚ` is the compositum of cyclic
-   extensions of prime power degree.
-2. `kw_cyclic_compositum`: If two cyclic `p`-extensions have cyclic compositum, one contains the
+1. `kw_cyclic_compositum`: If two cyclic `p`-extensions have cyclic compositum, one contains the
    other.
-3. `kw_minkowski`: Every non-trivial extension of `ℚ` is ramified at some finite prime.
-4. `kw_ramification_reduction`: Given `K/ℚ` cyclic of prime power degree with `q ≠ p` ramified,
+2. `kw_minkowski`: Every non-trivial extension of `ℚ` is ramified at some finite prime.
+3. `kw_ramification_reduction`: Given `K/ℚ` cyclic of prime power degree with `q ≠ p` ramified,
    there exists a cyclotomic `L/ℚ` such that `KL = FL` for `F/ℚ` cyclic of prime power degree
    with `q` unramified.
 
+The decomposition of a finite abelian extension into cyclic prime power subextensions is
+`IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top` (in `SKW/Prereqs/IntermediateFields.lean`).
 The reduction of the general (abelian) case to the cyclic prime power case
 (`kw_reduce_to_prime_power`) lives in `KroneckerWeber.lean`, in `IntermediateField ℚ A` currency.
 -/
+
+
 
 open NumberField Ideal Pointwise Module IntermediateField
 
@@ -43,40 +41,6 @@ noncomputable section
 /-- `K/ℚ` is a cyclic Galois extension of prime power degree (`> 1`). -/
 def IsCyclicOfPrimePowDegree (K : Type*) [Field K] [Algebra ℚ K] : Prop :=
   IsGalois ℚ K ∧ IsCyclic Gal(K/ℚ) ∧ IsPrimePow (Module.finrank ℚ K)
-
-/-- Every finite abelian extension of `ℚ` is the compositum of cyclic subextensions of prime power
-degree. -/
-lemma kw_abelian_cyclic_decomp (K : Type u) [Field K] [NumberField K] [IsAbelianGalois ℚ K] :
-    ∃ (ι : Type u) (_ : Fintype ι) (C : ι → IntermediateField ℚ K),
-      (∀ i, IsCyclicOfPrimePowDegree (C i)) ∧ ⨆ i, C i = ⊤ := by
-  classical
-  letI : CommGroup (K ≃ₐ[ℚ] K) := IsMulCommutative.instCommGroup
-  -- Character codomain: the algebraic closure of `ℚ` (it has enough roots of unity for any
-  -- exponent). The character group `Ĝ := G →* (AlgebraicClosure ℚ)ˣ` of `G := Gal(K/ℚ)` is finite
-  -- abelian and Pontryagin-dual to `G`. Index the decomposition by the characters of prime power
-  -- order; for such a `χ`, `C χ := fixedField (ker χ)`.
-  refine ⟨{χ : Gal(K/ℚ) →* (AlgebraicClosure ℚ)ˣ // IsPrimePow (orderOf χ)}, ?_,
-    fun χ => IntermediateField.fixedField χ.1.ker, ?_, ?_⟩
-  · -- `G →* (AlgebraicClosure ℚ)ˣ` is finite (it is `MulEquiv` to the finite `G` by
-    -- `CommGroup.monoidHom_mulEquiv_of_hasEnoughRootsOfUnity`), so this subtype is a `Fintype`.
-    exact Fintype.ofFinite _
-  · -- Each `C χ` is cyclic of prime power degree.
-    -- `ker χ` is normal (kernel of a hom), so `Gal((C χ)/ℚ) ≃ G ⧸ ker χ`; the latter embeds into
-    -- `(AlgebraicClosure ℚ)ˣ` via `χ`, hence is cyclic, of order `orderOf χ` (a prime power, `hχ`);
-    -- and `[C χ : ℚ] = Nat.card (Gal((C χ)/ℚ)) = orderOf χ`.
-    rintro ⟨χ, hχ⟩
-    dsimp
-    refine ⟨IsGalois.of_fixedField_normal_subgroup χ.ker, ?_, ?_⟩
-    sorry
-    rw?
-    sorry
-  · -- `⨆ χ, fixedField (ker χ) = ⊤`. Through the Galois correspondence
-    -- (`IsGalois.intermediateFieldEquivSubgroup`, order-reversing) this is `⨅ χ, ker χ = ⊥`, i.e.
-    -- the prime-power-order characters separate `G`. They do: they generate `Ĝ`
-    -- (`CommGroup.closure_isPrimePow_orderOf_eq_top` applied to `Ĝ`), and `Ĝ` separates `G`
-    -- (`CommGroup.exists_apply_ne_one_of_hasEnoughRootsOfUnity`).
-
-    sorry
 
 variable {p : ℕ} [hp : Fact p.Prime]
 

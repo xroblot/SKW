@@ -2,8 +2,14 @@ module
 
 public import Mathlib.FieldTheory.LinearDisjoint
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
+public import Mathlib.FieldTheory.Galois.Abelian
+public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+public import Mathlib.GroupTheory.FiniteAbelian.Duality
 
 public import SKW.PRed2Mathlib.IntermediateFields
+public import SKW.Prereqs.AlgebraMisc
+public import SKW.Prereqs.Torsion
 
 @[expose] public section
 
@@ -61,3 +67,43 @@ theorem IntermediateField.finrank_sup_mul_finrank_inf_eq {k L : Type*} [Field k]
     _ = finrank ↑(E ⊓ F) E * finrank ↑(E ⊓ F) F := by rw [f'.toLinearEquiv.finrank_eq]
   · rw [LinearEquiv.finrank_eq (M := ↑(E ⊔ F)) (N := ↑(E' ⊔ F'))]
     exact (LinearEquiv.refl ↑(E ⊓ F) ↑(E ⊔ F)).trans h.symm
+
+open IntermediateField in
+/-- Every finite-dimensional abelian Galois extension `K/F` is the compositum of cyclic
+subextensions of prime power degree. (The character codomain is `AlgebraicClosure ℚ`, which has
+enough roots of unity for the finite group `Gal(K/F)` regardless of the characteristic of `F`.) -/
+lemma IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top
+    (F : Type*) (K : Type u) [Field F] [Field K] [Algebra F K]
+    [FiniteDimensional F K] [IsAbelianGalois F K] :
+    ∃ (ι : Type u) (_ : Fintype ι) (C : ι → IntermediateField F K),
+      (∀ i, IsGalois F (C i) ∧ IsCyclic Gal((C i)/F) ∧ IsPrimePow (Module.finrank F (C i))) ∧
+        ⨆ i, C i = ⊤ := by
+  classical
+  let : CommGroup (K ≃ₐ[F] K) := IsMulCommutative.instCommGroup
+  refine ⟨{χ : Gal(K/F) →* (AlgebraicClosure ℚ)ˣ // IsPrimePow (orderOf χ)}, Fintype.ofFinite _,
+    fun χ ↦ IntermediateField.fixedField χ.1.ker, fun ⟨χ, hχ⟩ ↦ ?_, ?_⟩
+  · refine ⟨IsGalois.of_fixedField_normal_subgroup χ.ker, ?_, ?_⟩
+    · exact isCyclic_of_injective (IsGalois.normalAutEquivQuotient χ.ker).symm.toMonoidHom
+        (MulEquiv.injective _)
+    · have : IsGalois F (fixedField χ.ker) := IsGalois.of_fixedField_normal_subgroup χ.ker
+      rw [← IsGalois.card_aut_eq_finrank]
+      erw [Nat.card_congr (IsGalois.normalAutEquivQuotient χ.ker).symm.toEquiv]
+      rwa [MonoidHom.card_quotient_ker_eq_orderOf χ]
+  · simp only [← IsGalois.intermediateFieldEquivSubgroup.apply_eq_iff_eq, OrderIso.map_iSup,
+      IsGalois.intermediateFieldEquivSubgroup_apply, fixingSubgroup_fixedField, OrderIso.map_top,
+      ← toDual_iInf, OrderDual.toDual_eq_top]
+    refine (Subgroup.eq_bot_iff_forall _).mpr fun g hg ↦ ?_
+    by_contra! h
+    have h_eq_one {ψ : Gal(K/F) →* (AlgebraicClosure ℚ)ˣ} : ψ g = 1 := by
+      have : ψ ∈ Subgroup.closure
+          {χ : Gal(K/F) →* (AlgebraicClosure ℚ)ˣ| IsPrimePow (orderOf χ)} := by
+        rw [CommGroup.closure_isPrimePow_orderOf_eq_top isTorsion_of_finite]
+        exact Subgroup.mem_top ψ
+      induction this using Subgroup.closure_induction with
+      | mem η hη => exact Subgroup.mem_iInf.mp hg ⟨η, hη⟩
+      | one => simp
+      | mul η₁ η₂ _ _ h₁ h₂ => rw [MonoidHom.mul_apply, h₁, h₂, one_mul]
+      | inv η _ hη => rw [MonoidHom.inv_apply, hη, inv_eq_one]
+    obtain ⟨ψ, hψ⟩ := CommGroup.exists_apply_ne_one_of_hasEnoughRootsOfUnity Gal(K/F)
+      (AlgebraicClosure ℚ) h
+    exact hψ h_eq_one
