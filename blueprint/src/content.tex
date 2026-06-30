@@ -1009,6 +1009,8 @@ The goal of this chapter is to prove the following theorem.
 
 \begin{lemma}
   \label{lem:kw_reduce_to_unramified_outside_p}
+  \lean{kw_reduce_to_unramified_outside_p}
+  \uses{lem:kw_ramification_reduction}
   Let $K/\QQ$ be a cyclic extension of $p$-power degree. Then there
   exists a cyclic extension $F/\QQ$ of $p$-power degree unramified
   outside $p$ such that $K$ is cyclotomic if and only if $F$ is cyclotomic.
@@ -1220,6 +1222,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 
 \begin{lemma}
   \label{lem:kw_ramification_reduction}
+  \lean{kw_ramification_reduction}
   \uses{lem:tame_inertia_cyclic, lem:abelian_tame_ramificationIdx_dvd}
   Let $K/\QQ$ be a cyclic extension of $p$-power degree. If $q \neq p$ is ramified in $K/\QQ$,
   then there exist a cyclic cyclotomic extension $\Lambda/\QQ$ and a cyclic extension $F/\QQ$
