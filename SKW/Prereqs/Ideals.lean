@@ -121,9 +121,10 @@ theorem Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain {R S : Type*} [CommRi
     [Algebra R S] {p : Ideal S} [p.IsPrime] [IsDedekindDomain S] [Module.Finite R S] [IsDomain R]
     [Module.IsTorsionFree R S] [Module.Finite ℤ R] [CharZero R] (hp : p ≠ ⊥) :
     ¬ IsUnramifiedAt R p ↔ 1 < (Ideal.under R p).ramificationIdx p := by
-  rw [isUnramifiedAt_iff_of_isDedekindDomain hp, ne_iff_gt_iff_ge, Order.one_le_iff_pos,
-    Ideal.ramificationIdx_eq_ramificationIdx' _ _ (Ideal.under_ne_bot R hp)]
-  exact Ideal.ramificationIdx'_pos _ _
+  rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ (Ideal.under_ne_bot R hp),
+    ← Ideal.ramificationIdx'_eq_one_iff]
+  have hpos : 0 < p.ramificationIdx' R := Ideal.ramificationIdx'_pos p R
+  omega
 
 /-! ### Ideal — IsDedekindDomain / emultiplicity -/
 

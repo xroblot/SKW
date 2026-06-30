@@ -62,16 +62,18 @@ lemma kw_kummer' (hKram : UnramifiedOutside K p) (htop : K ⊔ F = ⊤) :
     UnramifiedOutside L p := by
   intro q hq hqp
   have hq0 : span {(q : ℤ)} ≠ ⊥ := by simpa using hq.ne_zero
-  rw [Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one hq0]
+  rw [Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one]
   intro 𝔮 _ hlo
   haveI := hlo
   haveI : 𝔮.IsMaximal := ‹𝔮.IsPrime›.isMaximal (Ideal.ne_bot_of_liesOver_of_ne_bot hq0 𝔮)
   have := Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) (span {(q : ℤ)})
   have := Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 F) 𝔮) (span {(q : ℤ)})
+  rw [← Ideal.ramificationIdx_eq_ramificationIdx' (span {(q : ℤ)}) 𝔮 hq0]
   refine Ideal.ramificationIdx_sup_eq_one htop (p := span {(q : ℤ)})
     (P₁ := under (𝓞 K) 𝔮) (P₂ := under (𝓞 F) 𝔮) ?_ ?_ hq0
   · have := IsMaximal.under (𝓞 K) 𝔮
-    exact (hKram q hq hqp).ramificationIdx_eq_one hq0
+    rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ hq0]
+    exact (hKram q hq hqp).ramificationIdx_eq_one
       (Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) (span {(q : ℤ)}))
   · have : Fact q.Prime := ⟨hq⟩
     have : ¬ q ∣ p := by rwa [Nat.prime_dvd_prime_iff_eq hq hp.out]
@@ -264,8 +266,9 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
     have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
     have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
     have h𝔔' : 𝔮.ramificationIdx 𝔔 = 1 := by
-      have hram := (hLRam q hq.out hqp).ramificationIdx_eq_one (by simpa using hq.out.ne_zero)
-        ‹𝔔.LiesOver (span {(q : ℤ)})›
+      have hram : (span {(q : ℤ)}).ramificationIdx 𝔔 = 1 := by
+        rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ (by simpa using hq.out.ne_zero)]
+        exact (hLRam q hq.out hqp).ramificationIdx_eq_one ‹𝔔.LiesOver (span {(q : ℤ)})›
       have htower := ramificationIdx_algebra_tower' (span {(q : ℤ)}) 𝔮 𝔔
       rw [hram, Ideal.ramificationIdx_eq_ramificationIdx' _ 𝔮 (by simpa using hq.out.ne_zero),
         IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd q F 𝔮
