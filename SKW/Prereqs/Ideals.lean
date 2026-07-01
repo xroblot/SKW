@@ -199,3 +199,9 @@ theorem Ideal.smul_mem_pow_of_mem_stabilizer {M R : Type*} [Group M] [CommRing R
     (hx : x ∈ I ^ k) : σ • x ∈ I ^ k := by
   nth_rewrite 1 [← MulAction.mem_stabilizer_iff.mp σ.prop, ← smul_pow']
   exact smul_mem_pointwise_smul σ x _ hx
+
+/-- Ideal version of `AddSubgroup.subgroupOf_inertia`: the inertia of `I` in a subgroup `H ≤ G` is
+the restriction to `H` of the inertia in `G`. -/
+theorem Ideal.subgroupOf_inertia {R : Type*} [Ring R] (I : Ideal R) {G : Type*} [Group G]
+    [MulAction G R] (H : Subgroup G) : (I.inertia G).subgroupOf H = I.inertia H :=
+  AddSubgroup.subgroupOf_inertia I.toAddSubgroup H

@@ -75,6 +75,57 @@ theorem orderOf_zpow_dvd {G : Type*} [Group G] (x : G) (n : ℤ) :
   rw [← orderOf_pow_natAbs]
   exact orderOf_pow_dvd _
 
+/-! ### Cyclic groups in a product -/
+
+/-- The group-theoretic heart of the tame Abhyankar lemma: a cyclic group that embeds into a product
+`A × B` of finite groups has order dividing `Nat.lcm (Nat.card A) (Nat.card B)`. (A generator maps to
+some `(a, b)` of order `lcm (orderOf a) (orderOf b)`, and each component order divides the
+corresponding cardinality.) -/
+theorem card_dvd_lcm_of_isCyclic_of_injective {G A B : Type*} [Group G] [Group A] [Group B]
+    [IsCyclic G] {f : G →* A × B} (hf : Function.Injective f) :
+    Nat.card G ∣ Nat.lcm (Nat.card A) (Nat.card B) := by
+  obtain ⟨g, hg⟩ := IsCyclic.exists_generator (α := G)
+  rw [← Subgroup.card_top, ← (Subgroup.eq_top_iff' _).mpr hg, Nat.card_zpowers g,
+    ← orderOf_injective f hf g, Prod.orderOf]
+  exact Nat.lcm_dvd ((orderOf_dvd_natCard _).trans (Nat.dvd_lcm_left _ _))
+      ((orderOf_dvd_natCard _).trans (Nat.dvd_lcm_right _ _))
+
+/-- Subgroup form of `card_dvd_lcm_of_isCyclic_of_injective`: a cyclic group with two normal
+subgroups of trivial intersection has order dividing the lcm of the two quotient orders. -/
+theorem card_dvd_lcm_of_isCyclic_of_inf_eq_bot {G : Type*} [Group G] [IsCyclic G]
+    {H₁ H₂ : Subgroup G} [H₁.Normal] [H₂.Normal] (h : H₁ ⊓ H₂ = ⊥) :
+    Nat.card G ∣ Nat.lcm H₁.index H₂.index :=
+  card_dvd_lcm_of_isCyclic_of_injective (f := (QuotientGroup.mk' H₁).prod (QuotientGroup.mk' H₂))
+    (by rw [← MonoidHom.ker_eq_bot_iff, MonoidHom.ker_prod, QuotientGroup.ker_mk',
+      QuotientGroup.ker_mk', h])
+
+/-- `subgroupOf` distributes over `⊓` (the general case of `inf_subgroupOf_left`/`_right`); this is
+`Subgroup.comap_inf` for the inclusion `C.subtype`. -/
+@[to_additive /-- `addSubgroupOf` distributes over `⊓`; this is `AddSubgroup.comap_inf` for the
+inclusion `C.subtype`. -/]
+theorem Subgroup.subgroupOf_inf {G : Type*} [Group G] (A B C : Subgroup G) :
+    (A ⊓ B).subgroupOf C = A.subgroupOf C ⊓ B.subgroupOf C :=
+  Subgroup.comap_inf A B C.subtype
+
+/-- `A.subgroupOf B` and `B.subgroupOf A` are isomorphic (both realize `A ⊓ B`). Mathlib only has
+`subgroupOfEquivOfLe`; this composes two copies of it through `↥(A ⊓ B)`. -/
+@[to_additive /-- `A.addSubgroupOf B` and `B.addSubgroupOf A` are isomorphic (both realize `A ⊓ B`). -/]
+def Subgroup.subgroupOfEquivComm {G : Type*} [Group G] (A B : Subgroup G) :
+    A.subgroupOf B ≃* B.subgroupOf A :=
+  ((MulEquiv.subgroupCongr (Subgroup.inf_subgroupOf_right A B).symm).trans
+      (Subgroup.subgroupOfEquivOfLe inf_le_right)).trans
+    ((MulEquiv.subgroupCongr (Subgroup.inf_subgroupOf_left B A).symm).trans
+      (Subgroup.subgroupOfEquivOfLe inf_le_left)).symm
+
+/-- Division-free companion to `Subgroup.card_mul_index`: `d` is the index of `H` iff
+`Nat.card H * d = Nat.card G`. -/
+@[to_additive AddSubgroup.index_eq_iff_card_mul_eq_card /-- Division-free companion to
+`AddSubgroup.card_mul_index`: `d` is the index of `H` iff `Nat.card H * d = Nat.card G`. -/]
+theorem Subgroup.index_eq_iff_card_mul_eq_card {G : Type*} [Group G] [Finite G] (H : Subgroup G)
+    {d : ℕ} : H.index = d ↔ Nat.card H * d = Nat.card G :=
+  ⟨fun h ↦ h ▸ H.card_mul_index,
+    fun h ↦ Nat.eq_of_mul_eq_mul_left Nat.card_pos (H.card_mul_index.trans h.symm)⟩
+
 /-! ### MISC -/
 
 @[simp]

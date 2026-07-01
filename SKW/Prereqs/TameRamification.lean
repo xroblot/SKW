@@ -231,6 +231,70 @@ theorem card_inertia_dvd_card_sub_one (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Fa
     zpow_natCast, ← tameCharacter_conj Q ⟨σ, hσ.mem_stabilizer⟩ hσ.of_coe τ,
     MulAut.conjNormal_apply_of_isMulCommutative, mul_inv_cancel]
 
+variable (G) in
+/-- Inertia computed inside the full group `G` agrees with inertia computed inside the decomposition
+group `MulAction.stabilizer G Q`: every inertia element fixes `Q` (`inertia_le_stabilizer`), so the
+inclusion of the decomposition group restricts to an isomorphism of inertia groups. -/
+def inertiaStabilizerEquiv (Q : Ideal S) :
+    Q.inertia (MulAction.stabilizer G Q) ≃* Q.inertia G :=
+  Subgroup.subgroupOfEquivOfLe Q.inertia_le_stabilizer
+
+/-- **Rigidity, full-group form** of `isCyclic_inertia`: tame inertia inside the full group `G`
+(not merely inside the decomposition group) is cyclic. -/
+theorem isCyclic_inertia' (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Finite (S ⧸ Q)] [FaithfulSMul G S]
+    (htame : ↑(Nat.card (Q.inertia G)) ∉ Q) : IsCyclic (Q.inertia G) :=
+  (inertiaStabilizerEquiv G Q).isCyclic.mp <|
+    isCyclic_inertia Q (by rwa [Nat.card_congr (inertiaStabilizerEquiv G Q).toEquiv])
+
+/-- **Abelian tame ramification, full-group form** of `card_inertia_dvd_card_sub_one`: for an abelian
+action the order of the full-group inertia (the ramification index) divides `N𝔭 - 1`. -/
+theorem card_inertia_dvd_card_sub_one' (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [FaithfulSMul G S]
+    [Finite G] [Algebra.IsInvariant R S G] [Finite (S ⧸ Q)] [IsMulCommutative G]
+    (htame : ↑(Nat.card (Q.inertia G)) ∉ Q) :
+    Nat.card (Q.inertia G) ∣ Nat.card (R ⧸ Q.under R) - 1 := by
+  rw [← Nat.card_congr (inertiaStabilizerEquiv G Q).toEquiv]
+  exact card_inertia_dvd_card_sub_one Q
+    (by rwa [Nat.card_congr (inertiaStabilizerEquiv G Q).toEquiv])
+
+/-- **Tame Abhyankar (inertia form).** In the tame setting the inertia at `Q` is cyclic, so whenever
+it embeds into a product `A × B` of finite groups its order divides `Nat.lcm (Nat.card A)
+(Nat.card B)`. The intended use: `A` and `B` are the Galois groups (or inertia groups) of two
+subextensions whose compositum is the whole field, and `f` is the pair of restriction maps; with
+`Nat.card (inertia) = e` for the top field and each subextension, this gives the weak Abhyankar
+bound `e(KΛ) ∣ Nat.lcm (e(K)) (e(Λ))`.
+
+Note: this is a thin adapter over `card_dvd_lcm_of_isCyclic_of_injective` (establish `IsCyclic` via
+`isCyclic_inertia`, then apply it), not general enough to reuse elsewhere. If a caller appears,
+inline it at the use site; if none does, delete it and call the general lemma directly. -/
+theorem card_inertia_dvd_lcm (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Finite (S ⧸ Q)]
+    [FaithfulSMul G S] (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q)
+    {A B : Type*} [Group A] [Group B] {f : Q.inertia (MulAction.stabilizer G Q) →* A × B}
+    (hf : Function.Injective f) :
+    Nat.card (Q.inertia (MulAction.stabilizer G Q)) ∣ Nat.lcm (Nat.card A) (Nat.card B) :=
+  haveI := isCyclic_inertia Q htame
+  card_dvd_lcm_of_isCyclic_of_injective hf
+
+omit [IsDedekindDomain S] in
+/-- **Tame Abhyankar (index form).** If the inertia of `Q` in `G` is cyclic, then for two subgroups
+`H₁ H₂ ≤ G` with `H₁ ⊓ H₂ = ⊥`, the order of the inertia divides the lcm of the indices, *inside the
+inertia*, of `H₁` and `H₂`. Intended use: `G = Gal(L/F)`, `H₁ = Gal(L/K₁)`, `H₂ = Gal(L/K₂)` with
+`K₁ ⊔ K₂ = ⊤`; these indices are then the ramification indices `e(K₁)`, `e(K₂)`, giving the weak
+Abhyankar bound `e(L) ∣ Nat.lcm (e K₁) (e K₂)`.
+
+Note: this is a thin adapter over `card_dvd_lcm_of_isCyclic_of_inf_eq_bot`, not general enough to
+reuse elsewhere. If a caller appears, inline it at the use site; if none does, delete it and call the
+general lemma directly. -/
+theorem card_inertia_dvd_lcm_index (Q : Ideal S) (hI : IsCyclic (Q.inertia G))
+    {H₁ H₂ : Subgroup G} (h : H₁ ⊓ H₂ = ⊥) :
+    Nat.card (Q.inertia G) ∣
+      Nat.lcm (H₁.subgroupOf (Q.inertia G)).index (H₂.subgroupOf (Q.inertia G)).index := by
+  refine card_dvd_lcm_of_isCyclic_of_inf_eq_bot (eq_bot_iff.mpr fun x hx ↦ ?_)
+  obtain ⟨h1, h2⟩ := Subgroup.mem_inf.mp hx
+  have hx' : (x : G) ∈ H₁ ⊓ H₂ :=
+    Subgroup.mem_inf.mpr ⟨Subgroup.mem_subgroupOf.mp h1, Subgroup.mem_subgroupOf.mp h2⟩
+  rw [h, Subgroup.mem_bot] at hx'
+  exact Subgroup.mem_bot.mpr <| Subtype.ext hx'
+
 end Ideal
 
 end

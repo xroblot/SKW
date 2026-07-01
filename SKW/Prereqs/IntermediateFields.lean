@@ -3,6 +3,7 @@ module
 public import Mathlib.FieldTheory.LinearDisjoint
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 public import Mathlib.FieldTheory.Galois.Abelian
+public import Mathlib.FieldTheory.Galois.IsGaloisGroup
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import Mathlib.GroupTheory.FiniteAbelian.Duality
@@ -14,6 +15,25 @@ public import SKW.Prereqs.Torsion
 @[expose] public section
 
 /-! ### Intermediate Fields -/
+
+/-- The fixing subgroup of an intermediate field `F` is a Galois group of `L / F`. This bridges
+`IntermediateField.fixingSubgroup` to `IsGaloisGroup.intermediateField`, which is stated on the raw
+`fixingSubgroup Gal(L/K) (↑F)`; instance search does not unfold the `IntermediateField.fixingSubgroup`
+wrapper on its own, so without this the instance is not found for the `IntermediateField` form. -/
+instance {K L : Type*} [Field K] [Field L] [Algebra K L] [FiniteDimensional K L] [IsGalois K L]
+    (F : IntermediateField K L) : IsGaloisGroup F.fixingSubgroup F L :=
+  inferInstanceAs (IsGaloisGroup (fixingSubgroup Gal(L/K) (F : Set L)) F L)
+
+open scoped NumberField in
+/-- Ring-of-integers form of the previous instance. The generic `IsGaloisGroup G (𝓞 K) (𝓞 L)`
+instance does not fire for `G = F.fixingSubgroup` on its own, so we bridge it explicitly (its body,
+`IsGaloisGroup.of_isFractionRing`, uses the field instance above). Keying on `F.fixingSubgroup` (as
+opposed to an arbitrary `G`) is essential: it pins the intermediate field `F`, which otherwise would
+only be recoverable from `𝓞 ↑F` and hence left undetermined by instance search. -/
+instance {K L : Type*} [Field K] [Field L] [NumberField K] [NumberField L] [Algebra K L]
+    [FiniteDimensional K L] [IsGalois K L] (F : IntermediateField K L) :
+    IsGaloisGroup F.fixingSubgroup (𝓞 F) (𝓞 L) :=
+  IsGaloisGroup.of_isFractionRing _ (𝓞 F) (𝓞 L) F L
 
 open Module in
 lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Field E] [Algebra F E]

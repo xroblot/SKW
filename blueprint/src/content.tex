@@ -1222,10 +1222,35 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
   $\tau^{N\mathfrak{p}-1} = 1$ and $e = \operatorname{ord}(\tau)$ divides $N\mathfrak{p} - 1$.
 \end{proof}
 
+\begin{lemma}[Tame Abhyankar]
+  \label{lem:ramificationIdx_sup_dvd_lcm}
+  \lean{ramificationIdx_sup_dvd_lcm}
+  \leanok
+  \uses{lem:tame_inertia_cyclic}
+  Let $K/\QQ$ be a finite Galois extension, $E, F$ two Galois intermediate fields with $EF = K$,
+  and $\mathfrak{P}$ a prime of $K$ above a rational prime $p$ that is tame in $K$
+  (i.e.\ $p \nmid [K:\QQ]$). Then
+  \[
+    e(\mathfrak{P}\mid p) \ \big|\ \operatorname{lcm}\big(e(\mathfrak{P}\cap E\mid p),\ e(\mathfrak{P}\cap F\mid p)\big).
+  \]
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  Let $G = \Gal(K/\QQ)$ and $I = I(\mathfrak{P}\mid p) \subseteq G$ the inertia group. As
+  $p \nmid [K:\QQ]$, the prime is tame, so $I$ is cyclic by \ref{lem:tame_inertia_cyclic} and
+  $|I| = e(\mathfrak{P}\mid p)$. Write $H_E = \Gal(K/E)$ and $H_F = \Gal(K/F)$. Under the inclusion,
+  $I \cap H_E$ is the inertia of $\mathfrak{P}$ in $\Gal(K/E)$, so the ramification tower for
+  $\QQ \subseteq E \subseteq K$ gives $\#(I\cap H_E)\cdot e(\mathfrak{P}\cap E\mid p) = |I|$, i.e.\
+  $[I : I\cap H_E] = e(\mathfrak{P}\cap E\mid p)$; likewise for $F$. Since $EF = K$ we have
+  $H_E \cap H_F = 1$, so the subgroups $I\cap H_E$ and $I\cap H_F$ of the cyclic group $I$ meet
+  trivially, whence $|I|$ divides $\operatorname{lcm}$ of their indices.
+\end{proof}
+
 \begin{lemma}
   \label{lem:kw_ramification_reduction}
   \lean{kw_ramification_reduction}
-  \uses{lem:tame_inertia_cyclic, lem:abelian_tame_ramificationIdx_dvd}
+  \uses{lem:tame_inertia_cyclic, lem:abelian_tame_ramificationIdx_dvd, lem:ramificationIdx_sup_dvd_lcm}
   Let $K/\QQ$ be a cyclic extension of $p$-power degree. If $q \neq p$ is ramified in $K/\QQ$,
   then there exist a cyclic cyclotomic extension $\Lambda/\QQ$ and a cyclic extension $F/\QQ$
   of $p$-power degree in which $q$ is unramified, such that $K\Lambda = F\Lambda$ and every
