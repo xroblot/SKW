@@ -2,6 +2,7 @@ module
 
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Lemmas
 public import Mathlib.GroupTheory.SpecificGroups.Cyclic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
 public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 public import Mathlib.RingTheory.IntegralDomain
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
@@ -162,6 +163,42 @@ theorem MonoidHom.card_quotient_ker_eq_orderOf (φ : G →* Rˣ) :
   · ext g
     simpa [Subtype.ext_iff, Units.ext_iff] using
       Monoid.pow_exponent_eq_one (G := φ.range) ⟨φ g, ⟨g, rfl⟩⟩
+
+/-- A finite non-cyclic abelian `p`-group has two distinct subgroups of index `p`. -/
+theorem exists_index_eq_prime_ne_of_not_isCyclic' {G : Type*} [CommGroup G] [Finite G] {p : ℕ}
+    [Fact p.Prime] (hG : IsPGroup p G) (hnc : ¬ IsCyclic G) :
+  Nonempty ({f : G →* Multiplicative ((ZMod p) × (ZMod p)) // Function.Surjective f}) := by
+  classical
+  obtain ⟨ι, hι, n, hn, ⟨e⟩⟩ := CommGroup.equiv_prod_multiplicative_zmod_of_finite G
+  have : Nonempty ι := by
+    contrapose! hnc
+    exact e.isCyclic.mpr inferInstance
+  have : Nontrivial ι := by
+    contrapose! hnc
+    have : Unique ι := uniqueOfSubsingleton Classical.ofNonempty
+    exact e.isCyclic.mpr <| (MulEquiv.piUnique _).isCyclic.mpr inferInstance
+  have hpn {i} : p ∣ n i := by
+    rsuffices ⟨k, hk⟩ : ∃ k, n i = p ^ k := by
+      let g := Pi.evalAddMonoidHom (fun i ↦ ZMod (n i)) i
+      have hg : Function.Surjective g := fun x ↦ ⟨Pi.single i x, by simp [g]⟩
+      have := Subgroup.index_ker <| g.toMultiplicative.comp e.toMonoidHom
+      rw [MonoidHom.range_eq_top_of_surjective _ (hg.comp e.surjective), Subgroup.card_top,
+        ← Nat.card_congr Multiplicative.ofAdd, Nat.card_zmod] at this
+      exact this ▸ IsPGroup.index hG _
+    have : k ≠ 0 := fun h ↦ (hn i).ne' <| (by rwa [h, pow_zero] at hk)
+    simp [hk, this]
+  obtain ⟨j, k, hij⟩ := exists_pair_ne ι
+  let g₁ : ((i : ι) → ZMod (n i)) →+ ZMod (n j) × ZMod (n k) :=
+    AddMonoidHom.prod (Pi.evalAddMonoidHom _ j) (Pi.evalAddMonoidHom _ k)
+  have hg₁ : Function.Surjective g₁ :=
+    fun x ↦ ⟨Pi.single j x.1 + Pi.single k x.2, by ext <;> simp [g₁, hij]⟩
+  let g₂ (i) : ZMod (n i) →+ ZMod p := (ZMod.castHom hpn (ZMod p)).toAddMonoidHom
+  have hg₂ (i) : Function.Surjective (g₂ i) := ZMod.castHom_surjective hpn
+  let g₃ : ((i : ι) → ZMod (n i)) →+ ZMod p × ZMod p := ((g₂ j).prodMap (g₂ k)).comp g₁
+  have hg₃ : Function.Surjective g₃ := ((hg₂ j).prodMap (hg₂ k)).comp hg₁
+  refine ⟨g₃.toMultiplicative.comp e.toMonoidHom, ?_⟩
+  simp only [MulEquiv.toMonoidHom_eq_coe, MonoidHom.coe_comp]
+  exact hg₃.comp e.surjective
 
 end
 

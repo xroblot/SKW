@@ -1043,9 +1043,25 @@ The goal of this chapter is to prove the following theorem.
 % See Marcus, Number Fields, Theorem 21.
 
 \begin{lemma}
+  \label{lem:kw_cyclic_primePow_le_cyclotomic}
+  \lean{kw_cyclic_primePow_le_cyclotomic}
+  \leanok
+  \uses{lem:kw_reduce_to_unramified_outside_p, prop:kw_odd_prime_power, prop:kw_2_power}
+  Every cyclic extension of $\QQ$ of prime power degree $p^m$ is contained in a cyclotomic field.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  By \ref{lem:kw_reduce_to_unramified_outside_p} there is a cyclic $p$-power extension $F$
+  unramified outside $p$ with $K\,\QQ(\zeta_n) = F\,\QQ(\zeta_n)$ for some $n > 0$. By
+  \ref{prop:kw_odd_prime_power} (odd $p$) or \ref{prop:kw_2_power} ($p = 2$), $F$ is cyclotomic,
+  say $F \subseteq \QQ(\zeta_c)$. Then $K \subseteq K\,\QQ(\zeta_n) = F\,\QQ(\zeta_n) \subseteq
+  \QQ(\zeta_{\operatorname{lcm}(c,n)})$.
+\end{proof}
+
+\begin{lemma}
   \label{lem:kw_reduce_to_prime_power}
-  \uses{lem:kw_abelian_cyclic_decomp, lem:kw_reduce_to_unramified_outside_p,
-        prop:kw_odd_prime_power, prop:kw_2_power}
+  \uses{lem:kw_abelian_cyclic_decomp, lem:kw_cyclic_primePow_le_cyclotomic}
   It suffices to prove that every cyclic extension of $\QQ$ of prime power
   degree unramified outside $p$ is cyclotomic.
 \end{lemma}
@@ -1053,10 +1069,8 @@ The goal of this chapter is to prove the following theorem.
 \begin{proof}
   By \ref{lem:kw_abelian_cyclic_decomp}, any finite abelian extension of
   $\QQ$ is a compositum of cyclic extensions of prime power degree. By
-  \ref{lem:kw_reduce_to_unramified_outside_p}, each such extension can be
-  replaced by a cyclotomic extension times a cyclic extension of prime power
-  degree unramified outside $p$. By \ref{prop:kw_odd_prime_power} and
-  \ref{prop:kw_2_power}, the latter is cyclotomic.
+  \ref{lem:kw_cyclic_primePow_le_cyclotomic}, each such extension is cyclotomic, and a
+  compositum of cyclotomic fields is cyclotomic.
 \end{proof}
 
 \begin{lemma}

@@ -146,7 +146,7 @@ theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_apply {E F :Type*} [Field
   suffices f.toRatAlgHom.comp ((galEquivZMod n E).symm a) =
     ((galEquivZMod n F).symm a).toAlgHom.comp f.toRatAlgHom from AlgHom.congr_fun this x
   refine AlgHom.ext_of_adjoin_eq_top (IsCyclotomicExtension.adjoin_primitive_root_eq_top hζ) ?_
-  simp only [Set.eqOn_singleton, AlgHom.coe_comp, AlgEquiv.coe_algHom, RingHom.toRatAlgHom_apply,
+  simp only [Set.eqOn_singleton, AlgHom.coe_comp, AlgEquiv.coe_toAlgHom, RingHom.toRatAlgHom_apply,
     Function.comp_apply]
   rw [galEquivZMod_apply_of_pow_eq n _ _ hζp,
     galEquivZMod_apply_of_pow_eq n _ _ (by rw [← map_pow, hζp, map_one]), map_pow,
@@ -196,7 +196,7 @@ theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_neg_one_apply (n : ℕ) [NeZ
   let φ : F →+* ℂ := Classical.choice (inferInstance : Nonempty _)
   suffices h : (galEquivZMod n F).symm (-1) = (complexConj F).restrictScalars ℚ by
     rw [← AlgEquiv.restrictScalars_apply ℚ (complexConj F), ← h]
-  refine AlgEquiv.coe_algHom_injective <| AlgHom.ext_of_adjoin_eq_top
+  refine AlgEquiv.coe_toAlgHom_injective <| AlgHom.ext_of_adjoin_eq_top
     (IsCyclotomicExtension.adjoin_primitive_root_eq_top hζ) (Set.eqOn_singleton.mpr ?_)
   show (galEquivZMod n F).symm (-1) (zeta n ℚ F) = (complexConj F).restrictScalars ℚ (zeta n ℚ F)
   rw [galEquivZMod_symm_apply_of_pow_eq n F (z := -1) (by simp) (zeta_pow n ℚ F), zpow_neg_one,

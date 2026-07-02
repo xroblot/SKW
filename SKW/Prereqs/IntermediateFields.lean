@@ -35,6 +35,76 @@ instance {K L : Type*} [Field K] [Field L] [NumberField K] [NumberField L] [Alge
     IsGaloisGroup F.fixingSubgroup (𝓞 F) (𝓞 L) :=
   IsGaloisGroup.of_isFractionRing _ (𝓞 F) (𝓞 L) F L
 
+open IntermediateField in
+/-- `lift` preserves the rank over the base field. -/
+theorem IntermediateField.rank_lift {K L : Type*} [Field K] [Field L] [Algebra K L]
+    {F : IntermediateField K L} (E : IntermediateField K F) :
+    Module.rank K (lift E) = Module.rank K E :=
+  (liftAlgEquiv E).toLinearEquiv.rank_eq.symm
+
+open IntermediateField in
+/-- `lift` preserves the degree over the base field: `[lift E : K] = [E : K]`. -/
+theorem IntermediateField.finrank_lift {K L : Type*} [Field K] [Field L] [Algebra K L]
+    {F : IntermediateField K L} (E : IntermediateField K F) :
+    Module.finrank K (lift E) = Module.finrank K E :=
+  (liftAlgEquiv E).toLinearEquiv.finrank_eq.symm
+
+open IntermediateField in
+/-- `lift` preserves finite-dimensionality over the base field. -/
+instance IntermediateField.finiteDimensional_lift {K L : Type*} [Field K] [Field L] [Algebra K L]
+    {F : IntermediateField K L} {E : IntermediateField K F} [FiniteDimensional K E] :
+    FiniteDimensional K (lift E) :=
+  Module.Finite.equiv (liftAlgEquiv E).toLinearEquiv
+
+open IntermediateField in
+/-- `restrict` preserves the rank over the base field. -/
+theorem IntermediateField.rank_restrict {K L : Type*} [Field K] [Field L] [Algebra K L]
+    {F E : IntermediateField K L} (h : F ≤ E) :
+    Module.rank K (restrict h) = Module.rank K F :=
+  (restrict_algEquiv h).toLinearEquiv.rank_eq.symm
+
+open IntermediateField in
+/-- `restrict` preserves the degree over the base field: `[restrict h : K] = [F : K]`. -/
+theorem IntermediateField.finrank_restrict {K L : Type*} [Field K] [Field L] [Algebra K L]
+    {F E : IntermediateField K L} (h : F ≤ E) :
+    Module.finrank K (restrict h) = Module.finrank K F :=
+  (restrict_algEquiv h).toLinearEquiv.finrank_eq.symm
+
+open IntermediateField in
+/-- `restrict` preserves finite-dimensionality over the base field. -/
+instance IntermediateField.finiteDimensional_restrict {K L : Type*} [Field K] [Field L]
+    [Algebra K L] {F E : IntermediateField K L} {h : F ≤ E} [FiniteDimensional K F] :
+    FiniteDimensional K (restrict h) :=
+  Module.Finite.equiv (restrict_algEquiv h).toLinearEquiv
+
+open IntermediateField in
+/-- `restrict` is order-reflecting in the restricted field: for `F₁, F₂ ≤ E`, one has
+`restrict h₁ ≤ restrict h₂` iff `F₁ ≤ F₂`. -/
+theorem IntermediateField.restrict_le_restrict_iff {K L : Type*} [Field K] [Field L] [Algebra K L]
+    {F₁ F₂ E : IntermediateField K L} (h₁ : F₁ ≤ E) (h₂ : F₂ ≤ E) :
+    restrict h₁ ≤ restrict h₂ ↔ F₁ ≤ F₂ :=
+  ⟨fun hle x hx ↦ (mem_restrict h₂ ⟨x, h₁ hx⟩).1 (hle ((mem_restrict h₁ ⟨x, h₁ hx⟩).2 hx)),
+   fun hF x hx ↦ (mem_restrict h₂ x).2 (hF ((mem_restrict h₁ x).1 hx))⟩
+
+open IntermediateField in
+/-- `lift` is order-reflecting: `lift E₁ ≤ lift E₂` iff `E₁ ≤ E₂`. -/
+theorem IntermediateField.lift_le_lift_iff {K L : Type*} [Field K] [Field L] [Algebra K L]
+    {F : IntermediateField K L} {E₁ E₂ : IntermediateField K F} :
+    lift E₁ ≤ lift E₂ ↔ E₁ ≤ E₂ :=
+  ⟨fun hle x hx ↦ (mem_lift x).1 (hle ((mem_lift x).2 hx)),
+   fun hE _ hx ↦ by obtain ⟨y, hy, rfl⟩ := hx; exact ⟨y, hE hy, rfl⟩⟩
+
+@[simp]
+theorem IsGaloisGroup.finrank_fixedPoints_eq_index_subgroup (G K L : Type*) [Group G] [Field K]
+    [Field L] [Algebra K L] [MulSemiringAction G L] (H : Subgroup G) [Finite H]
+    [IsGaloisGroup G K L] :
+    Module.finrank K ↑(FixedPoints.intermediateField H : IntermediateField K L) = H.index := by
+  have : Module.finrank ↑(FixedPoints.intermediateField H : IntermediateField K L) L ≠ 0 := by
+    rw [finrank_fixedPoints_eq_card_subgroup]
+    exact Nat.card_pos.ne'
+  rw [← mul_left_inj' this, Module.finrank_mul_finrank, finrank_fixedPoints_eq_card_subgroup,
+    Subgroup.index_mul_card, card_eq_finrank G K L]
+
 open Module in
 lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Field E] [Algebra F E]
     (K L : IntermediateField F E) [IsGalois F K] [FiniteDimensional F K] [FiniteDimensional F L]

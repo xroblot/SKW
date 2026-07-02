@@ -7,6 +7,7 @@ public import Mathlib.RingTheory.Ideal.Cotangent
 public import Mathlib.LinearAlgebra.Determinant
 public import Mathlib.GroupTheory.GroupAction.ConjAct
 public import Mathlib.RingTheory.DiscreteValuationRing.TFAE
+public import Mathlib.NumberTheory.RamificationInertia.Galois
 
 public import SKW.Prereqs.Cotangent
 public import SKW.Prereqs.AlgebraMisc
@@ -130,18 +131,16 @@ theorem sub_mem_pow_of_coprime (Q : Ideal S) [Q.IsMaximal]
       rwa [IsUnit.mul_right_eq_zero, Quotient.eq_zero_iff_mem] at h₂
       exact Quotient.isUnit_mk_pow_of_notMem _ hord
 
-variable [IsDedekindDomain S]
-
 /-- The localization of a Dedekind domain at a nonzero maximal ideal is a discrete valuation ring.
 A local instance so that `Ideal.finrank_cotangent_eq_one` applies to the cotangent line `Q ⧸ Q ^ 2`. -/
-private instance (Q : Ideal S) [Q.IsMaximal] [NeZero Q] :
+private instance [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q] :
     IsDiscreteValuationRing (Localization.AtPrime Q) :=
   IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain S (NeZero.ne Q) _
 
 /-- In dimension one, the cotangent action of an inertia element is the homothety by its tame
 character: `cotangentInertiaAction G Q τ = θ(τ) • id`. -/
-theorem cotangentInertiaAction_apply_eq_smul (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
-    (τ : Q.inertia (MulAction.stabilizer G Q)) (v : Q.Cotangent) :
+theorem cotangentInertiaAction_apply_eq_smul [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal]
+    [NeZero Q] (τ : Q.inertia (MulAction.stabilizer G Q)) (v : Q.Cotangent) :
     τ • v = (tameCharacter G Q τ).val • v := by
   let := Ideal.Quotient.field Q
   rw [tameCharacter_apply, LinearEquiv.coe_det]
@@ -151,7 +150,7 @@ theorem cotangentInertiaAction_apply_eq_smul (Q : Ideal S) [Q.IsMaximal] [NeZero
 /-- (Rigidity, L1) If `θ(τ) = 1` then `τ` fixes the cotangent line `Q ⧸ Q ^ 2`: for `x ∈ Q`,
 `τ • x ≡ x mod Q ^ 2`. Uses that `Q ⧸ Q ^ 2` is one-dimensional over the field `S ⧸ Q`, so
 `det = 1` forces the action to be the identity. -/
-theorem sub_mem_sq_of_tameCharacter_eq_one (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+theorem sub_mem_sq_of_tameCharacter_eq_one [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
     (τ : Q.inertia (MulAction.stabilizer G Q)) (h : tameCharacter G Q τ = 1) {x : S} (hx : x ∈ Q) :
     τ • x - x ∈ Q ^ 2 := by
   let := Ideal.Quotient.field Q
@@ -165,16 +164,16 @@ theorem sub_mem_sq_of_tameCharacter_eq_one (Q : Ideal S) [Q.IsMaximal] [NeZero Q
 /-- (Rigidity, L4) An inertia element acting trivially on `S` is trivial. Uses Krull's intersection
 theorem (`⋂ₙ Q ^ n = ⊥`) to pass from "trivial modulo every power" to "trivial", and faithfulness
 of the action to conclude `τ = 1`. -/
-theorem eq_one_of_forall_sub_mem_pow [FaithfulSMul G S] (Q : Ideal S) [hQ : Q.IsMaximal]
-    (τ : Q.inertia (MulAction.stabilizer G Q))
+theorem eq_one_of_forall_sub_mem_pow [IsDedekindDomain S] [FaithfulSMul G S] (Q : Ideal S)
+    [hQ : Q.IsMaximal] (τ : Q.inertia (MulAction.stabilizer G Q))
     (h : ∀ (n : ℕ) (x : S), τ • x - x ∈ Q ^ n) : τ = 1 := by
   refine FaithfulSMul.eq_of_smul_eq_smul (α := S) fun x ↦ ?_
   simpa [iInf_pow_eq_bot_of_isDomain _ hQ.ne_top, sub_eq_zero] using mem_iInf.mpr fun i ↦ h i x
 
 /-- **Rigidity** (filtration-free): an inertia element of order prime to the residue
 characteristic on which the tame character vanishes is trivial. -/
-theorem eq_one_of_tameCharacter_eq_one [FaithfulSMul G S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
-    (τ : Q.inertia (MulAction.stabilizer G Q)) (hord : ↑(orderOf τ) ∉ Q)
+theorem eq_one_of_tameCharacter_eq_one [IsDedekindDomain S] [FaithfulSMul G S] (Q : Ideal S)
+    [Q.IsMaximal] [NeZero Q] (τ : Q.inertia (MulAction.stabilizer G Q)) (hord : ↑(orderOf τ) ∉ Q)
     (h : tameCharacter G Q τ = 1) : τ = 1 := by
   apply eq_one_of_forall_sub_mem_pow
   apply sub_mem_pow_of_coprime
@@ -183,8 +182,8 @@ theorem eq_one_of_tameCharacter_eq_one [FaithfulSMul G S] (Q : Ideal S) [Q.IsMax
   · exact hord
 
 variable (G) in
-theorem tameCharacter_injective [FaithfulSMul G S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
-    (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
+theorem tameCharacter_injective [IsDedekindDomain S] [FaithfulSMul G S] (Q : Ideal S) [Q.IsMaximal]
+    [NeZero Q] (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
     Function.Injective (tameCharacter G Q) := by
   refine (injective_iff_map_eq_one _).mpr fun τ hτ ↦ eq_one_of_tameCharacter_eq_one _ _ ?_ hτ
   contrapose! htame
@@ -195,7 +194,7 @@ attribute [local instance] Ideal.Quotient.field in
 /-- **Frobenius equivariance**: conjugating an inertia element by an arithmetic Frobenius
 raises the tame character to the `N 𝔭`-th power. (Conjugation lands back in inertia by
 normality, via `MulAut.conjNormal`.) -/
-theorem tameCharacter_conj (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+theorem tameCharacter_conj [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
     (σ : MulAction.stabilizer G Q) (hσ : IsArithFrobAt R σ Q)
     (τ : Q.inertia (MulAction.stabilizer G Q)) :
     tameCharacter G Q (MulAut.conjNormal σ τ) = tameCharacter G Q τ ^ Nat.card (R ⧸ Q.under R) := by
@@ -213,15 +212,15 @@ theorem tameCharacter_conj (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
 
 /-- **Tame inertia is cyclic**: if the order of the inertia group is prime to the residue
 characteristic (tame ramification), the inertia group is cyclic. -/
-theorem isCyclic_inertia (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Finite (S ⧸ Q)] [FaithfulSMul G S]
+theorem isCyclic_inertia [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Finite (S ⧸ Q)] [FaithfulSMul G S]
     (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
     IsCyclic (Q.inertia (MulAction.stabilizer G Q)) :=
   isCyclic_of_injective _ (tameCharacter_injective G Q htame)
 
 /-- **Abelian tame ramification**: for an abelian action, the order of the inertia group
 (the ramification index) divides `N𝔭 - 1`. -/
-theorem card_inertia_dvd_card_sub_one (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [FaithfulSMul G S]
-    [Finite G] [Algebra.IsInvariant R S G] [Finite (S ⧸ Q)] [IsMulCommutative G]
+theorem card_inertia_dvd_card_sub_one [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+    [FaithfulSMul G S] [Finite G] [Algebra.IsInvariant R S G] [Finite (S ⧸ Q)] [IsMulCommutative G]
     (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
     Nat.card (Q.inertia (MulAction.stabilizer G Q)) ∣ Nat.card (R ⧸ Q.under R) - 1 := by
   obtain ⟨τ, hτ⟩ := isCyclic_iff_exists_orderOf_eq_natCard.mp <| isCyclic_inertia Q htame
@@ -241,15 +240,31 @@ def inertiaStabilizerEquiv (Q : Ideal S) :
 
 /-- **Rigidity, full-group form** of `isCyclic_inertia`: tame inertia inside the full group `G`
 (not merely inside the decomposition group) is cyclic. -/
-theorem isCyclic_inertia' (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Finite (S ⧸ Q)] [FaithfulSMul G S]
-    (htame : ↑(Nat.card (Q.inertia G)) ∉ Q) : IsCyclic (Q.inertia G) :=
+theorem isCyclic_inertia' [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+    [Finite (S ⧸ Q)] [FaithfulSMul G S] (htame : ↑(Nat.card (Q.inertia G)) ∉ Q) :
+      IsCyclic (Q.inertia G) :=
   (inertiaStabilizerEquiv G Q).isCyclic.mp <|
     isCyclic_inertia Q (by rwa [Nat.card_congr (inertiaStabilizerEquiv G Q).toEquiv])
 
+/-- The tameness hypothesis `↑(Nat.card (Q.inertia G)) ∉ Q` used by `isCyclic_inertia'` is exactly
+the classical tameness condition: the residue characteristic (`absNorm` of the prime `Q ∩ ℤ`) does
+not divide the ramification index `e(Q)`. -/
+theorem card_inertia_notMem_iff [IsDomain S] (Q : Ideal S) [Q.IsPrime] [Module.Finite ℤ S]
+    [Module.Flat ℤ S] [IsGaloisGroup G ℤ S] [Finite G] :
+    ↑(Nat.card (Q.inertia G)) ∉ Q ↔ ¬ (under ℤ Q).absNorm ∣ ramificationIdx' Q ℤ := by
+  rw [← Int.cast_natCast, Int.cast_mem_ideal_iff, Int.natCast_dvd_natCast,
+    card_inertia_eq_ramificationIdxIn (under ℤ Q), ramificationIdxIn_eq_ramificationIdx _ Q G]
+
+theorem card_inertia_notMem_of_not_dvd (Q : Ideal S) (h : ¬ (under ℤ Q).absNorm ∣ Nat.card G) :
+    ↑(Nat.card (Q.inertia G)) ∉ Q := by
+  rw [← Int.cast_natCast, Int.cast_mem_ideal_iff, Int.natCast_dvd_natCast]
+  contrapose! h
+  exact dvd_trans h <| Subgroup.card_subgroup_dvd_card _
+
 /-- **Abelian tame ramification, full-group form** of `card_inertia_dvd_card_sub_one`: for an abelian
 action the order of the full-group inertia (the ramification index) divides `N𝔭 - 1`. -/
-theorem card_inertia_dvd_card_sub_one' (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [FaithfulSMul G S]
-    [Finite G] [Algebra.IsInvariant R S G] [Finite (S ⧸ Q)] [IsMulCommutative G]
+theorem card_inertia_dvd_card_sub_one' [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+    [FaithfulSMul G S] [Finite G] [Algebra.IsInvariant R S G] [Finite (S ⧸ Q)] [IsMulCommutative G]
     (htame : ↑(Nat.card (Q.inertia G)) ∉ Q) :
     Nat.card (Q.inertia G) ∣ Nat.card (R ⧸ Q.under R) - 1 := by
   rw [← Nat.card_congr (inertiaStabilizerEquiv G Q).toEquiv]
@@ -266,15 +281,15 @@ bound `e(KΛ) ∣ Nat.lcm (e(K)) (e(Λ))`.
 Note: this is a thin adapter over `card_dvd_lcm_of_isCyclic_of_injective` (establish `IsCyclic` via
 `isCyclic_inertia`, then apply it), not general enough to reuse elsewhere. If a caller appears,
 inline it at the use site; if none does, delete it and call the general lemma directly. -/
-theorem card_inertia_dvd_lcm (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Finite (S ⧸ Q)]
-    [FaithfulSMul G S] (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q)
+theorem card_inertia_dvd_lcm [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+    [Finite (S ⧸ Q)] [FaithfulSMul G S]
+    (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q)
     {A B : Type*} [Group A] [Group B] {f : Q.inertia (MulAction.stabilizer G Q) →* A × B}
     (hf : Function.Injective f) :
     Nat.card (Q.inertia (MulAction.stabilizer G Q)) ∣ Nat.lcm (Nat.card A) (Nat.card B) :=
   haveI := isCyclic_inertia Q htame
   card_dvd_lcm_of_isCyclic_of_injective hf
 
-omit [IsDedekindDomain S] in
 /-- **Tame Abhyankar (index form).** If the inertia of `Q` in `G` is cyclic, then for two subgroups
 `H₁ H₂ ≤ G` with `H₁ ⊓ H₂ = ⊥`, the order of the inertia divides the lcm of the indices, *inside the
 inertia*, of `H₁` and `H₂`. Intended use: `G = Gal(L/F)`, `H₁ = Gal(L/K₁)`, `H₂ = Gal(L/K₂)` with

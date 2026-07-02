@@ -28,24 +28,25 @@ open NumberField Ideal
 
 noncomputable section
 
+open IntermediateField in
 /-- The only quadratic extensions of `ℚ` unramified outside `2` are `ℚ(i)`, `ℚ(√-2)`, `ℚ(√2)`.
 In particular the maximal real abelian `2`-extension of `ℚ` with exponent `2` unramified outside
-`2` is `ℚ(√2)`, which is the subfield of degree `2` of `ℚ(ζ_8)`. -/
-theorem prop_kw_2_quadratic
-    (K : Type*) [Field K] [NumberField K]
-    [IsGalois ℚ K] (hK : Module.finrank ℚ K = 2)
+`2` is `ℚ(√2)`, which is the subfield of degree `2` of `ℚ(ζ_8)`; so `K ≤ ℚ⟮ξ 8⟯` inside `A`. -/
+theorem prop_kw_2_quadratic {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
+    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n)
+    (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] (hK : Module.finrank ℚ K = 2)
     (hKram : UnramifiedOutside K 2) :
-    Nonempty (K →ₐ[ℚ] CyclotomicField 8 ℚ) := by
+    K ≤ ℚ⟮ξ 8⟯ := by
   sorry
 
-/-- Every cyclic extension of `ℚ` of degree `2ᵐ` unramified outside `2` is cyclotomic
-(contained in `ℚ(ζ_{2^{m+2}})`). -/
-theorem prop_kw_2_power (m : ℕ) (hm : 0 < m)
-    (K : Type*) [Field K] [NumberField K]
-    [IsGalois ℚ K] [IsCyclic (K ≃ₐ[ℚ] K)]
-    (hK : Module.finrank ℚ K = 2 ^ m)
-    (hKram : UnramifiedOutside K 2) :
-    Nonempty (K →ₐ[ℚ] CyclotomicField (2 ^ (m + 2)) ℚ) := by
+open IntermediateField in
+/-- Every cyclic extension of `ℚ` of degree `2ᵐ` unramified outside `2` is cyclotomic:
+contained in `ℚ(ζ_{2^{m+2}}) = ℚ⟮ξ (2^(m+2))⟯` inside the ambient field `A`. -/
+theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
+    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (m : ℕ) (hm : 0 < m)
+    (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
+    (hK : Module.finrank ℚ K = 2 ^ m) (hKram : UnramifiedOutside K 2) :
+    K ≤ ℚ⟮ξ (2 ^ (m + 2))⟯ := by
   sorry
 
 end

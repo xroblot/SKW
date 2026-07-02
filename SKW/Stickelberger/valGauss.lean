@@ -83,7 +83,7 @@ theorem emultiplicity_smul_GaussSum [NeZero f] [IsCyclotomicExtension {p} ℚ F]
   erw [← pointwise_smul_def]
   rw [inv_smul_smul, valGauss]
   have := gal_gaussSum_eq_gaussSum hbij hζ hη σ⁻¹ a
-  rw [← this, map_span, Set.image_singleton, MulSemiringAction.toRingEquiv_apply]
+  rw [← this, map_span, Set.image_singleton, MulSemiringAction.toRingEquiv_apply_apply]
 
 variable [𝓟.IsPrime]
 
