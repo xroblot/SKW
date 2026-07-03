@@ -83,7 +83,7 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
         Ideal.map e (((galEquivZMod m ↥k₀).symm a)⁻¹ • 𝔭₀) := by
     ext x
     rw [← comap_symm e, pointwise_smul_eq_comap 𝔭₀, def_p₀, map_symm, mem_comap, mem_comap, mem_comap]
-    rw [MulSemiringAction.toRingAut_apply, MulSemiringAction.toRingEquiv_symm_apply, inv_inv]
+    rw [MulSemiringAction.toRingAut_apply, MulSemiringAction.toRingEquiv_apply_symm_apply, inv_inv]
     rw [mem_inv_pointwise_smul_iff]
     change _ ↔ e.toRingHom _ ∈ _
     rw [IsCyclotomicExtension.Rat.ringHom_galEquivZMod_smul (by exact e.injective),

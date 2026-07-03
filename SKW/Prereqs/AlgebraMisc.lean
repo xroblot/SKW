@@ -165,9 +165,9 @@ theorem MonoidHom.card_quotient_ker_eq_orderOf (φ : G →* Rˣ) :
       Monoid.pow_exponent_eq_one (G := φ.range) ⟨φ g, ⟨g, rfl⟩⟩
 
 /-- A finite non-cyclic abelian `p`-group has two distinct subgroups of index `p`. -/
-theorem exists_index_eq_prime_ne_of_not_isCyclic' {G : Type*} [CommGroup G] [Finite G] {p : ℕ}
+theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [CommGroup G] [Finite G] {p : ℕ}
     [Fact p.Prime] (hG : IsPGroup p G) (hnc : ¬ IsCyclic G) :
-  Nonempty ({f : G →* Multiplicative ((ZMod p) × (ZMod p)) // Function.Surjective f}) := by
+  ∃ H₁ H₂ : Subgroup G, H₁.index = p ∧ H₂.index = p ∧ H₁ ≠ H₂ := by
   classical
   obtain ⟨ι, hι, n, hn, ⟨e⟩⟩ := CommGroup.equiv_prod_multiplicative_zmod_of_finite G
   have : Nonempty ι := by
@@ -196,9 +196,19 @@ theorem exists_index_eq_prime_ne_of_not_isCyclic' {G : Type*} [CommGroup G] [Fin
   have hg₂ (i) : Function.Surjective (g₂ i) := ZMod.castHom_surjective hpn
   let g₃ : ((i : ι) → ZMod (n i)) →+ ZMod p × ZMod p := ((g₂ j).prodMap (g₂ k)).comp g₁
   have hg₃ : Function.Surjective g₃ := ((hg₂ j).prodMap (hg₂ k)).comp hg₁
-  refine ⟨g₃.toMultiplicative.comp e.toMonoidHom, ?_⟩
-  simp only [MulEquiv.toMonoidHom_eq_coe, MonoidHom.coe_comp]
-  exact hg₃.comp e.surjective
+  let g := g₃.toMultiplicative.comp e.toMonoidHom
+  have hg : Function.Surjective g := by
+    simp only [g, MulEquiv.toMonoidHom_eq_coe, MonoidHom.coe_comp]
+    exact hg₃.comp e.surjective
+  refine ⟨((AddMonoidHom.fst _ _).toMultiplicative.comp g).ker,
+    ((AddMonoidHom.snd _ _).toMultiplicative.comp g).ker, ?_, ?_, ?_⟩
+  · simp [g]
+    sorry
+  · sorry
+  · sorry
+--  refine ⟨g₃.toMultiplicative.comp e.toMonoidHom, ?_⟩
+--  simp only [MulEquiv.toMonoidHom_eq_coe, MonoidHom.coe_comp]
+--  exact hg₃.comp e.surjective
 
 end
 

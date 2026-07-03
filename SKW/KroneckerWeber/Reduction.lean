@@ -14,6 +14,7 @@ public import Mathlib.NumberTheory.RamificationInertia.HilbertTheory
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.Ideals
 public import SKW.Prereqs.CyclotomicField
+public import SKW.Prereqs.Instances
 public import SKW.Prereqs.IntermediateFields
 public import SKW.Prereqs.TameRamification
 
@@ -195,11 +196,10 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   let F : IntermediateField ℚ L := fixedField (inertia G 𝔔)
   have hF : IsGaloisGroup (inertia G 𝔔) F L := .of_fixedPoints_eq G ℚ L (inertia G 𝔔) _ rfl
   refine ⟨lift (fixedField (𝔔.inertia G)), ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · exact .of_ringEquiv (fixedField (inertia G 𝔔)) _ (liftAlgEquiv _).toRingEquiv
-  · exact IsGalois.of_algEquiv (liftAlgEquiv _)
-  · 
-    -- MulEquiv.isCyclic
-    sorry
+  · infer_instance
+  · infer_instance
+  · have : IsCyclic Gal(fixedField (inertia G 𝔔)/ℚ) := sorry
+    infer_instance
   ·
     sorry
   · have : IsInertiaField ℚ L 𝔔 (fixedField (inertia G 𝔔)) := (isInertiaField_iff ℚ _ 𝔔 _).mpr hF

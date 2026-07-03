@@ -262,7 +262,7 @@ theorem gaFEquiv_symm_smul_algebraMap_eq [NeZero f] [NeZero m] [IsCyclotomicExte
   let ε : k := IsCyclotomicExtension.zeta m ℚ k
   have hε : IsPrimitiveRoot ε m := IsCyclotomicExtension.zeta_spec m ℚ k
   apply AlgHom.ext_of_adjoin_eq_top (adjoin_singleton_eq_top hε)
-  simp only [Set.eqOn_singleton, AlgHom.coe_comp, AlgHom.coe_restrictScalars', AlgEquiv.coe_algHom,
+  simp only [Set.eqOn_singleton, AlgHom.coe_comp, AlgHom.coe_restrictScalars', AlgEquiv.coe_toAlgHom,
     IsScalarTower.coe_toAlgHom', Function.comp_apply, ← smul_eq_galRestrict_apply (𝓞 F),
     ← smul_eq_galRestrict_apply ℤ]
   rw [galEquivZMod_smul_of_pow_eq m, MulEquiv.apply_symm_apply, galLFEquiv_apply_of_pow_eq_one p f hη,

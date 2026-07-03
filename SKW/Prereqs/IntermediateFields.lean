@@ -197,3 +197,37 @@ lemma IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top
     obtain ⟨ψ, hψ⟩ := CommGroup.exists_apply_ne_one_of_hasEnoughRootsOfUnity Gal(K/F)
       (AlgebraicClosure ℚ) h
     exact hψ h_eq_one
+
+open IntermediateField Module in
+/-- If `B / F` is a finite Galois extension and the compositum `A ⊔ B` is all of `E`, then the
+relative degree `[E : A]` divides `[B : F]`. This is the ⊤-case: here `E` is genuinely an
+`↥A`-algebra, so the divisibility can be stated directly (unlike the general compositum form
+`finrank_sup_dvd_mul_of_isGalois`). It follows from the injection `Gal(E/A) ↪ Gal(B/F)` induced by
+restriction and Lagrange's theorem. -/
+theorem IntermediateField.finrank_dvd_finrank_of_isGalois_of_sup_eq_top {F E : Type*} [Field F]
+    [Field E] [Algebra F E] (A B : IntermediateField F E)
+    [FiniteDimensional A E] [FiniteDimensional F B] [IsGalois F B] (h : B ⊔ A = ⊤) :
+    finrank A E ∣ finrank F B := by
+  have : IsGalois A E := IsGalois.sup_right B A h
+  rw [← IsGalois.card_aut_eq_finrank, ← IsGalois.card_aut_eq_finrank]
+  exact Subgroup.card_dvd_of_injective _ <| restrictRestrictAlgEquivMapHom_injective B A h
+
+open Module in
+/-- If `B / F` is a finite Galois extension, then for any finite `A`, the degree of the compositum
+`A ⊔ B` over `F` divides `[A : F] * [B : F]`. (Equivalently, `[A ⊔ B : A] ∣ [B : F]`, which fails
+without the Galois hypothesis on `B`.)
+
+Remark: we cannot state this as `finrank A ↥(A ⊔ B) ∣ finrank F ↥B` since `↥(A ⊔ B)` is not, by
+default, an `↥A`-algebra; hence the product form `[A ⊔ B : F] ∣ [A : F] * [B : F]`. The ⊤-case
+`finrank_dvd_finrank_of_isGalois_of_sup_eq_top` does not have this obstruction. -/
+theorem IntermediateField.finrank_sup_dvd_mul_of_isGalois {F E : Type*} [Field F] [Field E]
+    [Algebra F E] (A B : IntermediateField F E) [FiniteDimensional F A] [IsGalois F B]
+    [FiniteDimensional F B] :
+    finrank F ↑(A ⊔ B) ∣ finrank F A * finrank F B := by
+  let A' : IntermediateField F ↥(A ⊔ B) := A.restrict le_sup_left
+  let B' : IntermediateField F ↥(A ⊔ B) := B.restrict le_sup_right
+  have : IsGalois F B' := IsGalois.of_algEquiv (restrict_algEquiv le_sup_right)
+  have : B' ⊔ A' = ⊤ :=
+    lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top, sup_comm])
+  have := mul_dvd_mul_left (finrank F A') <| finrank_dvd_finrank_of_isGalois_of_sup_eq_top A' B' this
+  rwa [finrank_mul_finrank, finrank_restrict, finrank_restrict] at this
