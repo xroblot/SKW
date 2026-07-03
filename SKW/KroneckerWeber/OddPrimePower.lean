@@ -33,6 +33,25 @@ noncomputable section
 variable (p : ℕ) [hp : Fact p.Prime]
 
 set_option backward.isDefEq.respectTransparency false in
+open IntermediateField in
+/-- Ambient (`IntermediateField ℚ A`) form of `kw_kummer'`: if `K` is unramified outside `p` and `F`
+is cyclotomic (`ℚ(ζ_p)`, ramified only at `p`), then the compositum `K ⊔ F` is unramified outside
+`p`. Keeps `K`, `F` in the ambient `A`, restricting into `↥(K ⊔ F)` only internally. -/
+lemma unramifiedOutside_sup {A : Type*} [Field A] [CharZero A] (K F : IntermediateField ℚ A)
+    [NumberField K] [IsCyclotomicExtension {p} ℚ F] (hKram : UnramifiedOutside K p) :
+    UnramifiedOutside ↥(K ⊔ F) p := by
+  haveI : NumberField F := IsCyclotomicExtension.numberField {p} ℚ F
+  let F' : IntermediateField ℚ ↥(K ⊔ F) := F.restrict le_sup_right
+  let K' : IntermediateField ℚ ↥(K ⊔ F) := K.restrict le_sup_left
+  have : IsCyclotomicExtension {p} ℚ F' :=
+    IsCyclotomicExtension.equiv {p} ℚ F <| restrict_algEquiv le_sup_right
+  have hK'ram : UnramifiedOutside K' p := fun q hq hqp ↦
+    (hKram q hq hqp).of_algEquiv
+      ((RingOfIntegers.mapAlgEquiv (restrict_algEquiv le_sup_left)).restrictScalars ℤ)
+  exact kw_kummer' p F' K' hK'ram
+    (lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top]))
+
+set_option backward.isDefEq.respectTransparency false in
 open IntermediateField Polynomial in
 /-- Every cyclic extension of `ℚ` of prime degree `p` (odd) unramified outside `p` is contained
 in `ℚ(ζ_{p²}) = ℚ⟮ξ⟯`. -/
@@ -81,6 +100,52 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
   obtain ⟨𝔞, h𝔞₀, h𝔞⟩ := kw_mu_pth_power_ideal p F hrF hμ hIrr hMram hp'
   have hcyc : IsCyclotomicExtension {p ^ 2} ℚ M :=
     kw_unit_root_of_unity p F hrF hμ hIrr hp' K' hK' hK'ram hS h𝔞₀ h𝔞
+  have hMeq : M = ℚ⟮ξ⟯ :=
+    (IntermediateField.isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ A M hξ).mp hcyc
+  exact le_sup_left.trans hMeq.le
+
+set_option backward.isDefEq.respectTransparency false in
+open IntermediateField Polynomial in
+/-- Tower-chain version of `prop_kw_exponent_p`: `K`, `ℚ⟮ζ⟯` stay in `A`; the Kummer/class-group
+work runs on the tower `ℚ → ↥ℚ⟮ζ⟯ → ↥(K ⊔ ℚ⟮ζ⟯)` via the `'₁` lemmas, with no restriction of `K`. -/
+theorem prop_kw_exponent_p'₁ (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ : A}
+    (hξ : IsPrimitiveRoot ξ (p ^ 2)) (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K]
+    [hCK : IsCyclic Gal(K/ℚ)] (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
+    K ≤ ℚ⟮ξ⟯ := by
+  let ζ : A := ξ ^ p
+  have hζ : IsPrimitiveRoot ζ p := hξ.pow (NeZero.pos _) (by rw [pow_two])
+  have : IsCyclotomicExtension {p} ℚ ℚ⟮ζ⟯ := hζ.adjoinSimple_isCyclotomicExtension p ℚ A
+  have : NumberField ℚ⟮ζ⟯ := IsCyclotomicExtension.numberField {p} ℚ ℚ⟮ζ⟯
+  have : IsAbelianGalois ℚ K := IsAbelianGalois.of_isCyclic ℚ K
+  have : IsAbelianGalois ℚ ℚ⟮ζ⟯ := isAbelianGalois {p} ℚ ℚ⟮ζ⟯
+  let M : IntermediateField ℚ A := K ⊔ ℚ⟮ζ⟯
+  letI : Algebra ↥ℚ⟮ζ⟯ ↥M := (inclusion (le_sup_right : ℚ⟮ζ⟯ ≤ M)).toAlgebra
+  haveI : IsScalarTower ℚ ↥ℚ⟮ζ⟯ ↥M :=
+    IsScalarTower.of_algebraMap_eq fun x => ((inclusion (le_sup_right : ℚ⟮ζ⟯ ≤ M)).commutes x).symm
+  have hMram : UnramifiedOutside ↥M p := unramifiedOutside_sup p K ℚ⟮ζ⟯ hKram
+  have hζdeg : Module.finrank ℚ ℚ⟮ζ⟯ = p - 1 :=
+    Nat.totient_prime hp.out ▸ IsCyclotomicExtension.Rat.finrank p ℚ⟮ζ⟯
+  have hMdeg : Module.finrank ℚ ↥M = p * (p - 1) := by
+    have hinf : Module.finrank ℚ ↥(K ⊓ ℚ⟮ζ⟯) = 1 := by
+      have hc : p.Coprime (p - 1) := by have := hp.out.one_le; aesop
+      have h₁ : Module.finrank ℚ ↑(K ⊓ ℚ⟮ζ⟯) ∣ p := by
+        rw [← hK]; exact finrank_dvd_of_le_right inf_le_left
+      have h₂ : Module.finrank ℚ ↑(K ⊓ ℚ⟮ζ⟯) ∣ p - 1 := by
+        rw [← hζdeg]; exact finrank_dvd_of_le_right inf_le_right
+      exact Nat.dvd_one.mp (hc ▸ Nat.dvd_gcd h₁ h₂)
+    have := finrank_sup_mul_finrank_inf_eq K ℚ⟮ζ⟯
+    rwa [hinf, mul_one, hK, hζdeg] at this
+  obtain ⟨hGal, hCyc, hrF⟩ := kw_kummer₀'₁ p (F := ↥ℚ⟮ζ⟯) (L := ↥M) hMdeg
+  obtain ⟨μ, hμ, hS⟩ := kw_kummer'₁ p ↥ℚ⟮ζ⟯ hrF
+  have hIrr : Irreducible (X ^ p - C (algebraMap (𝓞 ↥ℚ⟮ζ⟯) ↥ℚ⟮ζ⟯ μ)) := by
+    rw [X_pow_sub_C_irreducible_iff_of_prime hp.out]
+    intro b hb
+    have := hS.splits_iff.mp (X_pow_sub_C_splits_of_isPrimitiveRoot (zeta_spec p ℚ ↥ℚ⟮ζ⟯) hb)
+    rw [eq_comm, Subalgebra.bot_eq_top_iff_finrank_eq_one, hrF] at this
+    exact hp.out.ne_one this
+  obtain ⟨𝔞, h𝔞₀, h𝔞⟩ := kw_mu_pth_power_ideal'₁ p ↥ℚ⟮ζ⟯ hrF hμ hIrr hMram hp'
+  have hcyc : IsCyclotomicExtension {p ^ 2} ℚ ↥M :=
+    kw_unit_root_of_unity'₁ p ↥ℚ⟮ζ⟯ hrF hμ hIrr hp' h𝔞₀ h𝔞
   have hMeq : M = ℚ⟮ξ⟯ :=
     (IntermediateField.isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ A M hξ).mp hcyc
   exact le_sup_left.trans hMeq.le
