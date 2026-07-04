@@ -6,6 +6,10 @@ public import Mathlib.RingTheory.Localization.AtPrime.Basic
 public import Mathlib.RingTheory.RamificationInertia.Ramification
 public import Mathlib.NumberTheory.RamificationInertia.Unramified
 public import Mathlib.RingTheory.Flat.FaithfullyFlat.Algebra
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
+
+public import SKW.Prereqs.OtherPR
+public import SKW.Prereqs.NumberField
 
 /-!
 # Transfer of `Algebra.IsUnramifiedIn` along an algebra isomorphism
@@ -56,5 +60,69 @@ theorem IsUnramifiedIn.tower_top {R S T : Type*} [CommRing R] [CommRing S] [Comm
   exact Algebra.IsUnramifiedAt.of_restrictScalars R Q
 
 end Algebra
+
+open NumberField Ideal IntermediateField
+
+/-- `K/ℚ` is unramified outside `p`: every prime `q ≠ p` is unramified in `𝓞 K`. -/
+def UnramifiedOutside (K : Type*) [Field K] (p : ℕ) : Prop :=
+  ∀ (q : ℕ), q.Prime → q ≠ p → Algebra.IsUnramifiedIn (𝓞 K) (span {(q : ℤ)})
+
+variable (p : ℕ)
+
+open NumberField in
+/-- `UnramifiedOutside` transfers along a `ℚ`-algebra isomorphism of number fields. -/
+lemma UnramifiedOutside.of_algEquiv {K K' : Type*} [Field K] [Field K'] [NumberField K]
+    [NumberField K'] (e : K ≃ₐ[ℚ] K') (h : UnramifiedOutside K p) : UnramifiedOutside K' p :=
+  fun q hq hqp ↦ (h q hq hqp).of_algEquiv ((RingOfIntegers.mapAlgEquiv e).restrictScalars ℤ)
+
+open NumberField in
+/-- The bottom of a tower `ℚ → K → L` inherits unramifiedness: if `L` is unramified outside `p`, so
+is the subfield `K` (a sub-extension of an unramified-outside-`p` extension is unramified outside
+`p`). -/
+lemma UnramifiedOutside.tower_bot {K L : Type*} [Field K] [Field L] [NumberField K] [NumberField L]
+    [Algebra K L] [IsScalarTower ℚ K L] (h : UnramifiedOutside L p) : UnramifiedOutside K p :=
+  fun q hq hqp ↦ (h q hq hqp).tower_bot
+
+open NumberField in
+/-- A cyclotomic extension `ℚ(ζ_p)` is unramified outside `p`. -/
+lemma unramifiedOutside_of_isCyclotomicExtension {K : Type*} [Field K] [NumberField K]
+    [hp : Fact p.Prime] [IsCyclotomicExtension {p} ℚ K] : UnramifiedOutside K p := by
+  intro q hq hqp
+  have : Fact q.Prime := ⟨hq⟩
+  refine Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one.mpr fun 𝔓 _ h𝔓 ↦ ?_
+  exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd q K 𝔓
+    (by rwa [Nat.prime_dvd_prime_iff_eq hq hp.out])
+
+open NumberField IntermediateField in
+/-- Top-field version of `unramifiedOutside_sup`: if `K` and `F` are both unramified outside `p` and
+together generate the whole field (`K ⊔ F = ⊤`), then `L` itself is unramified outside `p`. The
+general form `unramifiedOutside_sup` (compositum inside an arbitrary ambient) reduces to this. -/
+lemma unramifiedOutside_sup' {L : Type*} [Field L] [NumberField L] (K F : IntermediateField ℚ L)
+    (hKram : UnramifiedOutside K p) (hFram : UnramifiedOutside F p) (htop : K ⊔ F = ⊤) :
+    UnramifiedOutside L p := by
+  intro q hq hqp
+  have hq₀ : span {(q : ℤ)} ≠ ⊥ := by simpa using hq.ne_zero
+  refine Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one.mpr fun 𝔮 _ h𝔮 ↦ ?_
+  have hK := LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) (span {(q : ℤ)})
+  have hF := LiesOver.tower_bot 𝔮 (under (𝓞 F) 𝔮) (span {(q : ℤ)})
+  exact ramificationIdx_sup_eq_one htop (p := span {(q : ℤ)})
+    (ramificationIdx'_eq_one_iff.mpr (hKram q hq hqp _ (IsPrime.under (𝓞 K) 𝔮) hK))
+    (ramificationIdx'_eq_one_iff.mpr (hFram q hq hqp _ (IsPrime.under (𝓞 F) 𝔮) hF)) hq₀
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The compositum `K ⊔ F` of two number fields, each unramified outside `p`, is itself unramified
+outside `p`. -/
+lemma unramifiedOutside_sup {A : Type*} [Field A] [CharZero A] (K F : IntermediateField ℚ A)
+    [NumberField K] [NumberField F] (hKram : UnramifiedOutside K p)
+    (hFram : UnramifiedOutside F p) :
+    UnramifiedOutside ↑(K ⊔ F) p := by
+  let F' : IntermediateField ℚ ↑(K ⊔ F) := F.restrict le_sup_right
+  let K' : IntermediateField ℚ ↑(K ⊔ F) := K.restrict le_sup_left
+  refine unramifiedOutside_sup' p K' F' ?_ ?_
+    (lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top]))
+  · exact fun q hq hqp ↦ (hKram q hq hqp).of_algEquiv
+      ((RingOfIntegers.mapAlgEquiv (restrict_algEquiv le_sup_left)).restrictScalars ℤ)
+  · exact fun q hq hqp ↦ (hFram q hq hqp).of_algEquiv
+      ((RingOfIntegers.mapAlgEquiv (restrict_algEquiv le_sup_right)).restrictScalars ℤ)
 
 end

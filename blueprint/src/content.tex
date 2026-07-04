@@ -1382,12 +1382,15 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 
 \begin{proposition}
   \label{prop:kw_odd_prime_power}
+  \lean{prop_kw_odd_prime_power}
+  \leanok
   \uses{prop:kw_exponent_p, lem:kw_cyclic_compositum, lem:kw_minkowski}
   Let $K/\QQ$ be a cyclic extension of odd prime power degree $p^m$
   unramified outside $p$. Then $K$ is cyclotomic.
 \end{proposition}
 
 \begin{proof}
+  \leanok
   Let $K'$ be the unique subfield of degree $p^m$ in $\QQ(\zeta_{p^{m+1}})$;
   it is cyclic of degree $p^m$ and unramified outside $p$. Suppose $K'K/\QQ$
   is not cyclic. Then $\Gal(K'K/\QQ)$ is a non-cyclic $p$-group, so it has
@@ -1405,6 +1408,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{proposition}
   \label{prop:kw_exponent_p}
   \lean{prop_kw_exponent_p}
+  \leanok
   \uses{thm:stickelberger, lem:kw_kummer, lem:kw_abelian_kummer,
         lem:kw_split_prime, lem:kw_mu_val_p, lem:kw_mu_pth_power_ideal, lem:kw_class_trivial,
         lem:kw_mu_unit, lem:kw_unit_root_of_unity, lem:kw_ramification_reduction}
@@ -1417,6 +1421,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \end{proposition}
 
 \begin{proof}
+  \leanok
   Set $\zeta = \xi^p$, a primitive $p$-th root of unity, $F = \QQ(\zeta) \subseteq A$, and
   $L = K \cdot F \subseteq A$ the compositum.
 
