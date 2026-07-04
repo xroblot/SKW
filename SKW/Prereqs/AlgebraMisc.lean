@@ -164,6 +164,44 @@ theorem MonoidHom.card_quotient_ker_eq_orderOf (φ : G →* Rˣ) :
     simpa [Subtype.ext_iff, Units.ext_iff] using
       Monoid.pow_exponent_eq_one (G := φ.range) ⟨φ g, ⟨g, rfl⟩⟩
 
+@[to_additive]
+theorem Subgroup.index_ker_of_surjective {G H : Type*} [Group G] [Group H] (f : G →* H)
+    (hf : Function.Surjective f) :
+    f.ker.index = Nat.card H := by
+  have := Subgroup.index_ker f
+  rwa [MonoidHom.range_eq_top_of_surjective _ hf, Subgroup.card_top] at this
+
+open Finset Subgroup in
+theorem isCyclic_of_subgroup_card_injective {G : Type*} [Group G] [Finite G]
+    (h : ∀ H K : Subgroup G, Nat.card H = Nat.card K → H = K) :
+    IsCyclic G := by
+  classical
+  have : Fintype G := Fintype.ofFinite G
+  have key (d : ℕ) : Finset.card {x : G | orderOf x = d} ≤ d.totient := by
+    obtain h | ⟨x, hx⟩  := (univ.filter fun a : G ↦ orderOf a = d).eq_empty_or_nonempty
+    · simp [h]
+    · obtain ⟨-, hxd⟩ := mem_filter.mp hx
+      have h' {y} (hy : orderOf y = d) : y ∈ zpowers x := by
+        rw [← zpowers_le]
+        exact le_of_eq <| h _ _ (by rw [Nat.card_zpowers, Nat.card_zpowers, hxd, hy])
+      rw [← IsCyclic.card_orderOf_eq_totient (α := zpowers x) (by rw [Fintype.card_zpowers, hxd]),
+        ← Finset.card_image_of_injective _ Subtype.val_injective]
+      apply Finset.card_mono <|
+        fun y hy ↦ mem_image.mpr ⟨⟨y, h' (by simpa using hy)⟩, by simpa using hy, rfl⟩
+  refine isCyclic_of_card_pow_eq_one_le fun n hn ↦ ?_
+  calc
+    _ = ∑ d ∈ n.divisors, (univ.filter fun a ↦ orderOf a = d).card :=
+        (sum_card_orderOf_eq_card_pow_eq_one hn.ne').symm
+    _ ≤ ∑ d ∈ n.divisors, d.totient := Finset.sum_le_sum fun d _ ↦ key d
+    _ = n := Nat.sum_totient n
+
+/-- A finite group is cyclic iff its subgroups are determined by their cardinality. The forward
+direction is `IsCyclic.subgroup_eq_subgroup_iff`; the converse is
+`isCyclic_of_subgroup_card_injective`. -/
+theorem isCyclic_iff_subgroup_card_injective {G : Type*} [Group G] [Finite G] :
+    IsCyclic G ↔ ∀ H K : Subgroup G, Nat.card H = Nat.card K → H = K :=
+  ⟨fun _ _ _ => IsCyclic.subgroup_eq_subgroup_iff.mpr, isCyclic_of_subgroup_card_injective⟩
+
 /-- A finite non-cyclic abelian `p`-group has two distinct subgroups of index `p`. -/
 theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [CommGroup G] [Finite G] {p : ℕ}
     [Fact p.Prime] (hG : IsPGroup p G) (hnc : ¬ IsCyclic G) :
@@ -181,9 +219,8 @@ theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [CommGroup
     rsuffices ⟨k, hk⟩ : ∃ k, n i = p ^ k := by
       let g := Pi.evalAddMonoidHom (fun i ↦ ZMod (n i)) i
       have hg : Function.Surjective g := fun x ↦ ⟨Pi.single i x, by simp [g]⟩
-      have := Subgroup.index_ker <| g.toMultiplicative.comp e.toMonoidHom
-      rw [MonoidHom.range_eq_top_of_surjective _ (hg.comp e.surjective), Subgroup.card_top,
-        ← Nat.card_congr Multiplicative.ofAdd, Nat.card_zmod] at this
+      have := Subgroup.index_ker_of_surjective (g.toMultiplicative.comp e.toMonoidHom) (hg.comp e.surjective)
+      rw [← Nat.card_congr Multiplicative.ofAdd, Nat.card_zmod] at this
       exact this ▸ IsPGroup.index hG _
     have : k ≠ 0 := fun h ↦ (hn i).ne' <| (by rwa [h, pow_zero] at hk)
     simp [hk, this]
@@ -202,13 +239,12 @@ theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [CommGroup
     exact hg₃.comp e.surjective
   refine ⟨((AddMonoidHom.fst _ _).toMultiplicative.comp g).ker,
     ((AddMonoidHom.snd _ _).toMultiplicative.comp g).ker, ?_, ?_, ?_⟩
-  · simp [g]
-    sorry
-  · sorry
-  · sorry
---  refine ⟨g₃.toMultiplicative.comp e.toMonoidHom, ?_⟩
---  simp only [MulEquiv.toMonoidHom_eq_coe, MonoidHom.coe_comp]
---  exact hg₃.comp e.surjective
+  · rw [Subgroup.index_ker_of_surjective, ← Nat.card_congr Multiplicative.ofAdd, Nat.card_zmod]
+    exact Prod.fst_surjective.comp hg
+  · rw [Subgroup.index_ker_of_surjective, ← Nat.card_congr Multiplicative.ofAdd, Nat.card_zmod]
+    exact Prod.snd_surjective.comp hg
+  · obtain ⟨y, hy⟩ := hg <| Multiplicative.ofAdd (0, 1)
+    exact ne_of_mem_of_not_mem' (a := y) (by simp [hy]) (by simp [hy])
 
 end
 
