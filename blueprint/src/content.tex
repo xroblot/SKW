@@ -1061,12 +1061,15 @@ The goal of this chapter is to prove the following theorem.
 
 \begin{lemma}
   \label{lem:kw_reduce_to_prime_power}
+  \lean{kw_reduce_to_prime_power}
+  \leanok
   \uses{lem:kw_abelian_cyclic_decomp, lem:kw_cyclic_primePow_le_cyclotomic}
   It suffices to prove that every cyclic extension of $\QQ$ of prime power
   degree unramified outside $p$ is cyclotomic.
 \end{lemma}
 
 \begin{proof}
+  \leanok
   By \ref{lem:kw_abelian_cyclic_decomp}, any finite abelian extension of
   $\QQ$ is a compositum of cyclic extensions of prime power degree. By
   \ref{lem:kw_cyclic_primePow_le_cyclotomic}, each such extension is cyclotomic, and a

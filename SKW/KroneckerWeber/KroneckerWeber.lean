@@ -3,6 +3,8 @@ module
 public import SKW.KroneckerWeber.OddPrimePower
 public import SKW.KroneckerWeber.TwoPower
 
+public import SKW.Prereqs.Instances
+
 @[expose] public section
 
 /-!
@@ -63,23 +65,56 @@ lemma kw_cyclic_primePow_le_cyclotomic {p : ℕ} (hp : p.Prime) {A : Type*} [Fie
   rw [this, hKF]
   exact sup_le_sup_right hF₃ _
 
+set_option backward.isDefEq.respectTransparency false in
+lemma kw_reduce_to_prime_power_aux {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
+    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K]
+    [IsAbelianGalois ℚ K] {ι : Type*} (S : Finset ι) (C : ι → IntermediateField ℚ A)
+    (hC : ∀ i, ∃ n, 0 < n ∧ C i ≤ ℚ⟮ξ n⟯) (htop : ⨆ i ∈ S, C i = K):
+    ∃ n : ℕ, 0 < n ∧ K ≤ ℚ⟮ξ n⟯ := by
+  classical
+  induction S using Finset.induction generalizing K with
+  | empty =>
+      refine ⟨1, zero_lt_one, ?_⟩
+      simp only [Finset.notMem_empty, not_false_eq_true, iSup_neg, iSup_bot] at htop
+      simp [← htop]
+  | insert i S _ hi =>
+      rw [Finset.iSup_insert] at htop
+      obtain ⟨n, hn₀, hn₁⟩ := hC i
+      let : Algebra ↑(⨆ i ∈ S, C i) K := (inclusion (htop ▸ le_sup_right)).toAlgebra
+      have : NumberField ↑(⨆ i ∈ S, C i) := NumberField.of_tower ℚ K _
+      have : IsAbelianGalois ℚ ↑(⨆ i ∈ S, C i) :=  IsAbelianGalois.tower_bot ℚ _ K
+      obtain ⟨m, hm₀, hm₁⟩ := hi (⨆ i ∈ S, C i) rfl
+      have : NeZero n := ⟨hn₀.ne'⟩
+      have : NeZero m := ⟨hm₀.ne'⟩
+      have : NeZero (n.lcm m) := ⟨(Nat.lcm_pos hn₀ hm₀).ne'⟩
+      refine ⟨n.lcm m, NeZero.pos _, (htop ▸ sup_le_sup hn₁ hm₁).trans ?_⟩
+      have : IsCyclotomicExtension {n.lcm m} ℚ ↑(ℚ⟮ξ n⟯ ⊔ ℚ⟮ξ m⟯) := by
+        have : IsCyclotomicExtension {n} ℚ ℚ⟮ξ n⟯ := (hξ n).adjoinSimple_isCyclotomicExtension n ℚ A
+        have : IsCyclotomicExtension {m} ℚ ℚ⟮ξ m⟯ := (hξ m).adjoinSimple_isCyclotomicExtension m ℚ A
+        exact isCyclotomicExtension_lcm_sup _ _ _ _ _ _
+      have : IsCyclotomicExtension {n.lcm m} ℚ ℚ⟮ξ (n.lcm m)⟯ :=
+        (hξ (n.lcm m)).adjoinSimple_isCyclotomicExtension (n.lcm m) ℚ A
+      exact isCyclotomicExtension_le_of_dvd _ _ (n.lcm m) (n.lcm m) _ _ dvd_rfl
+
+set_option backward.isDefEq.respectTransparency false in
 /-- Reduction of Kronecker-Weber to the cyclic prime power case (in `IntermediateField ℚ A`
 currency): if every cyclic subextension of `K` of prime power degree lies in a cyclotomic field
 `ℚ⟮ξ n⟯` (with `n > 0`), then so does `K`. The proof decomposes `K` as a compositum of such
 subextensions (`IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top`) and recombines the cyclotomic fields, using that
 `ℚ⟮ξ m⟯ ≤ ℚ⟮ξ n⟯` whenever `m ∣ n`. -/
-lemma kw_reduce_to_prime_power {A : Type*} [Field A] [CharZero A] (ξ : ℕ → A)
-    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n)
-    (K : IntermediateField ℚ A) [NumberField K] [IsAbelianGalois ℚ K]
-    (hK : ∀ (L : IntermediateField ℚ A), [NumberField L] → L ≤ K → IsCyclicOfPrimePowDegree L
-      → ∃ n : ℕ, 0 < n ∧ L ≤ ℚ⟮ξ n⟯) :
+lemma kw_reduce_to_prime_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
+    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K]
+    [IsAbelianGalois ℚ K] :
     ∃ n : ℕ, 0 < n ∧ K ≤ ℚ⟮ξ n⟯ := by
-  -- TODO: `IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top ℚ ↥K` now decomposes `K` intrinsically, as `C : ι →
-  -- IntermediateField ℚ ↥K` with `⨆ i, C i = ⊤`. Bridge each `C i` up to `IntermediateField ℚ A`
-  -- via `IntermediateField.lift` , apply `hK` to get `nᵢ` with `C i ≤ ℚ⟮ξ nᵢ⟯`, then take
-  -- `n = ∏ fᵢ` and recombine using `ℚ⟮ξ m⟯ ≤ ℚ⟮ξ n⟯` for `m ∣ n` (proof in git, commit ad678c0).
-  sorry
-
+  obtain ⟨ι, _, C, hC, htop⟩ := IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top ℚ K
+  apply kw_reduce_to_prime_power_aux hξ _ Finset.univ (fun i ↦ lift (C i)) ?_ ?_
+  · intro i
+    obtain ⟨_, _, ⟨p, k, hp, _, hrC⟩⟩ := hC i
+    rw [← Nat.prime_iff] at hp
+    exact kw_cyclic_primePow_le_cyclotomic hp hξ _ k (by rwa [finrank_lift, eq_comm])
+  · have := (lift_inj _ _).mpr htop
+    rwa [← iSup_univ, ← Finset.coe_univ, Finset.iSup_coe, lift_iSup _ _ _ Finset.univ,
+      lift_top] at this
 
 /-- **Kronecker-Weber theorem**: every abelian extension of `ℚ` is contained in a cyclotomic
 field. -/
