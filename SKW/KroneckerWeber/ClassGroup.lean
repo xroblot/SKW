@@ -36,6 +36,7 @@ variable {L : Type*} [Field L] [NumberField L]
 variable (F : IntermediateField ℚ L)
 variable {𝔞 : Ideal (𝓞 F)} {μ : 𝓞 F}
 
+/- Original (IntermediateField ℚ L) versions, superseded by the tower forms below:
 /-- If `𝔞` is principal, `μ = αᵖ · η` for some `α ∈ 𝓞_F` and unit `η ∈ 𝓞_F×`. -/
 lemma kw_mu_unit (hμ : μ ≠ 0) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) (hcl : 𝔞.IsPrincipal) :
     ∃ (α : 𝓞 F) (η : (𝓞 F)ˣ), α ≠ 0 ∧ μ = α ^ p * η := by
@@ -188,6 +189,7 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGaloi
   rw [finrank_top', ← finrank_mul_finrank ℚ F L, finrank p F, Nat.totient_prime hp.out, hrF,
     IsCyclotomicExtension.Rat.finrank (p ^ 2) ℚ⟮ξ⟯, Nat.totient_prime_pow hp.out Nat.two_pos,
     Nat.add_one_sub_one, pow_one, mul_comm]
+-/
 
 end
 
@@ -206,7 +208,7 @@ variable {𝔞 : Ideal (𝓞 F)} {μ : 𝓞 F} (hμ : μ ≠ 0)
 omit [NumberField F] [IsCyclotomicExtension {p} ℚ F] in
 include hμ in
 /-- Tower form of `kw_mu_unit`. -/
-lemma kw_mu_unit'₁ (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) (hcl : 𝔞.IsPrincipal) :
+lemma kw_mu_unit (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) (hcl : 𝔞.IsPrincipal) :
     ∃ (α : 𝓞 F) (η : (𝓞 F)ˣ), α ≠ 0 ∧ μ = α ^ p * η := by
   obtain ⟨α, rfl⟩ := hcl
   rw [span_singleton_pow, span_singleton_eq_span_singleton] at h𝔞
@@ -218,7 +220,7 @@ lemma kw_mu_unit'₁ (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) (h
 include hrF hIrr in
 open Pointwise nonZeroDivisors FractionalIdeal in
 /-- Tower form of `kw_class_trivial`. -/
-lemma kw_class_trivial'₁ (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) : 𝔞.IsPrincipal := by
+lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) : 𝔞.IsPrincipal := by
   have : IsGalois ℚ F := IsCyclotomicExtension.isGalois {p} ℚ F
   let 𝔞₀ : (Ideal (𝓞 F))⁰ := ⟨𝔞, mem_nonZeroDivisors_of_ne_zero h𝔞₀⟩
   rw [← ClassGroup.mk0_eq_one_iff (mem_nonZeroDivisors_of_ne_zero h𝔞₀)]
@@ -226,7 +228,7 @@ lemma kw_class_trivial'₁ (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {�
   have h₁ {a : (ZMod p)ˣ} : ClassGroup.mk0 ((galEquivZMod p F).symm a • 𝔞₀) =
       ClassGroup.mk0 (𝔞₀ ^ a.val.val) := by
     rw [eq_comm, ClassGroup.mk0_eq_mk0_iff_exists_fraction_ring F]
-    obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer'₁ p F hrF hIrr ((galEquivZMod p F).symm a)
+    obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p F hrF hIrr ((galEquivZMod p F).symm a)
     rw [MulEquiv.apply_symm_apply] at hξ
     refine ⟨ξ, hξ₀, ?_⟩
     rw [← (IsMulTorsionFree.pow_left_injective hp.out.ne_zero).eq_iff, mul_pow]
@@ -249,11 +251,11 @@ lemma kw_class_trivial'₁ (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {�
 
 include hrF hIrr hμ in
 /-- Tower form of `kw_conj_mul_eq_pow`. -/
-lemma kw_conj_mul_eq_pow'₁ {α : 𝓞 F} {η : (𝓞 F)ˣ} (h : μ = α ^ p * η) :
+lemma kw_conj_mul_eq_pow {α : 𝓞 F} {η : (𝓞 F)ˣ} (h : μ = α ^ p * η) :
     ∃ w : F, (η : F) * (galEquivZMod p F).symm (-1) (η : F) = w ^ p := by
   obtain ⟨ξ, hξ₀, hξ⟩ : ∃ ξ, ξ ≠ 0 ∧
       (galEquivZMod p F).symm (-1) (μ : F) = ξ ^ p * (μ : F) ^ (-1 : ℤ) := by
-    obtain ⟨ξ', hξ'₀, hξ'⟩ := kw_abelian_kummer'₁ p F hrF hIrr ((galEquivZMod p F).symm (-1))
+    obtain ⟨ξ', hξ'₀, hξ'⟩ := kw_abelian_kummer p F hrF hIrr ((galEquivZMod p F).symm (-1))
     refine ⟨ξ' * μ, mul_ne_zero hξ'₀ (by simpa), ?_⟩
     rw [hξ', mul_pow, ← zpow_natCast (μ : F), ← zpow_natCast (μ : F), mul_assoc, ← zpow_add₀ (by simpa),
       MulEquiv.apply_symm_apply, show (p : ℤ) + -1 = (p - 1 : ℕ) by
@@ -272,7 +274,7 @@ lemma kw_conj_mul_eq_pow'₁ {α : 𝓞 F} {η : (𝓞 F)ˣ} (h : μ = α ^ p * 
 
 include hrF hIrr hμ in
 /-- Tower form of `kw_exists_realUnit_torsion`. -/
-lemma kw_exists_realUnit_torsion'₁ [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {η : (𝓞 F)ˣ}
+lemma kw_exists_realUnit_torsion [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {η : (𝓞 F)ˣ}
     (h : μ = α ^ p * η) :
     ∃ (ζ : Units.torsion F) (δ : F), ζ.val.val ^ p = 1 ∧ δ ≠ 0 ∧ (η : F) ^ 4 = (ζ.val : F) * δ ^ p := by
   obtain ⟨ζ, ε, hε, h', hζ⟩ :
@@ -293,7 +295,7 @@ lemma kw_exists_realUnit_torsion'₁ [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {
       rwa [galEquivZMod_symm_neg_one_apply p F, ← IsCMField.coe_ringOfIntegersComplexConj,
         algebraMap.coe_inj, ← IsCMField.coe_unitsComplexConj, ← Units.ext_iff,
         IsCMField.unitsComplexConj_eq_self_iff]
-    obtain ⟨w, hw⟩ := kw_conj_mul_eq_pow'₁ p F hrF hμ hIrr h
+    obtain ⟨w, hw⟩ := kw_conj_mul_eq_pow p F hrF hμ hIrr h
     have hcη4 : (galEquivZMod p F).symm (-1) (η : F) ^ 4 = (ζ.val : F)⁻¹ * (ε : F) := by
       rw [← map_pow, hη4, map_mul, hζ', zpow_neg_one, hε']
     have key : (ε : F) ^ 2 = (w ^ 4) ^ p := by
@@ -305,14 +307,14 @@ lemma kw_exists_realUnit_torsion'₁ [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {
 open IntermediateField Polynomial in
 include hrF hIrr hμ in
 /-- Tower form of `kw_unit_root_of_unity`: the vestigial `K`/`hL` hypotheses are dropped. -/
-lemma kw_unit_root_of_unity'₁ (hp' : Odd p) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) :
+lemma kw_unit_root_of_unity (hp' : Odd p) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) :
     IsCyclotomicExtension {p ^ 2} ℚ L := by
   have : IsCMField F :=
     IsCyclotomicExtension.Rat.isCMField F (S := {p}) <|
       exists_eq_left.mpr <| (Nat.Prime.odd_iff hp.out).mp hp'
   have hF : (primitiveRoots p F).Nonempty := IsCyclotomicExtension.primitiveRoots_nonempty p ℚ F
-  obtain ⟨α, η, hα, h⟩ := kw_mu_unit'₁ p F hμ h𝔞₀ h𝔞 (kw_class_trivial'₁ p F hrF hIrr h𝔞₀ h𝔞)
-  obtain ⟨ζ, δ, hζ, hδ₀, hηδ⟩ := kw_exists_realUnit_torsion'₁ p F hrF hμ hIrr hp' h
+  obtain ⟨α, η, hα, h⟩ := kw_mu_unit p F hμ h𝔞₀ h𝔞 (kw_class_trivial p F hrF hIrr h𝔞₀ h𝔞)
+  obtain ⟨ζ, δ, hζ, hδ₀, hηδ⟩ := kw_exists_realUnit_torsion p F hrF hμ hIrr hp' h
   have h₁ : IsSplittingField F L (X ^ p - C (μ ^ 4 : F)) :=
     isSplittingField_X_pow_sub_C_pow_of_coprime _ hF hIrr <| hp'.coprime_two_left.pow_left 2
   have h₂ : Irreducible (X ^ p - C (μ ^ 4 : F)) := by

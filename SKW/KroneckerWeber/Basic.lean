@@ -37,6 +37,7 @@ variable (K : IntermediateField ℚ L)
 def UnramifiedOutside (K : Type*) [Field K] (p : ℕ) : Prop :=
   ∀ (q : ℕ), q.Prime → q ≠ p → Algebra.IsUnramifiedIn (𝓞 K) (span {(q : ℤ)})
 
+/- Superseded by the tower form `kw_kummer₀` (in section `ScalarTowerBridge` below):
 set_option backward.isDefEq.respectTransparency false in
 lemma kw_kummer₀ [IsGalois ℚ K] (hK : Module.finrank ℚ K = p) (htop : K ⊔ F = ⊤) :
     IsGalois F L ∧ IsCyclic Gal(L/F) ∧ finrank F L = p := by
@@ -56,6 +57,7 @@ lemma kw_kummer₀ [IsGalois ℚ K] (hK : Module.finrank ℚ K = p) (htop : K �
   have hCL : IsCyclic Gal(L/F) :=
     isCyclic_of_prime_card <| hrF ▸ IsGalois.card_aut_eq_finrank F L
   exact ⟨hFL, ⟨hCL, hrF⟩⟩
+-/
 
 /-- `L` is unramified outside `p`. -/
 lemma kw_kummer' (hKram : UnramifiedOutside K p) (htop : K ⊔ F = ⊤) :
@@ -80,6 +82,7 @@ lemma kw_kummer' (hKram : UnramifiedOutside K p) (htop : K ⊔ F = ⊤) :
     rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ hq0]
     exact Rat.ramificationIdx_eq_of_not_dvd q F (under (𝓞 F) 𝔮) this
 
+/- Original lattice versions, superseded by the tower forms (sections below):
 variable [IsGalois F L] [hCF : IsCyclic Gal(L/F)] (hrF : finrank F L = p)
 
 include hrF in
@@ -361,6 +364,7 @@ lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (spa
     · exact FiniteMultiplicity.of_prime_left hζ₁ hμ
     · simpa using RingOfIntegers.coe_ne_zero_iff.mp hζ₀
     · exact hsζ.not_unit
+-/
 
 end
 
@@ -383,7 +387,7 @@ variable {L : Type*} [Field L] [NumberField L] [Algebra F L] [FiniteDimensional 
 include hrF in
 /-- Tower form of `kw_kummer`: `L/F` is a Kummer extension `F(ᵖ√μ)` for some `μ ∈ 𝓞_F`. The
 ambient-field hypotheses `K`/`hK` of `kw_kummer` were unused, so they are dropped here. -/
-lemma kw_kummer'₁ :
+lemma kw_kummer :
     ∃ μ : 𝓞 F, μ ≠ 0 ∧
       IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ)) := by
   have hne : (primitiveRoots (Module.finrank F L) F).Nonempty :=
@@ -419,7 +423,7 @@ variable {μ : 𝓞 F} (hμ : μ ≠ 0)
 omit hCF [IsGalois F L] [IsAbelianGalois ℚ L] [NumberField L] [FiniteDimensional F L] in
 include hrF hIrr in
 /-- Tower form of `exists_pth_root`. -/
-lemma exists_pth_root'₁ :
+lemma exists_pth_root :
     ∃ (α : 𝓞 L), α ≠ 0 ∧ algebraMap (𝓞 F) (𝓞 L) μ = α ^ p := by
   have hF : (primitiveRoots p F).Nonempty := primitiveRoots_nonempty p ℚ F
   have hβ := rootOfSplitsXPowSubC_pow (n := p) (algebraMap (𝓞 F) F μ) L
@@ -441,7 +445,7 @@ lemma exists_pth_root'₁ :
 
 include hIrr hrF in
 /-- Tower form of `kw_abelian_kummer`: the abelianity criterion for `L = F(ᵖ√μ)` over `ℚ`. -/
-lemma kw_abelian_kummer'₁ (σ : Gal(F/ℚ)) :
+lemma kw_abelian_kummer (σ : Gal(F/ℚ)) :
     ∃ (ξ : F), ξ ≠ 0 ∧ σ (algebraMap (𝓞 F) F μ) = ξ ^ p * μ ^ (Rat.galEquivZMod p F σ).val.val := by
   have : IsGalois ℚ F := isGalois {p} ℚ F
   have hF : (primitiveRoots p F).Nonempty := primitiveRoots_nonempty p ℚ F
@@ -482,11 +486,11 @@ lemma kw_abelian_kummer'₁ (σ : Gal(F/ℚ)) :
 
 include hμ hrF hIrr in
 /-- Tower form of `kw_split_prime`. -/
-lemma kw_split_prime'₁ {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮)
+lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮)
     (hv : ¬ p ∣ multiplicity 𝔮 (span {(μ : 𝓞 F)})) {σ : Gal(F/ℚ)} (hσ : σ • 𝔮 = 𝔮) :
     σ = 1 := by
   obtain ⟨𝔞, h𝔞⟩ := pow_multiplicity_dvd 𝔮 (span {(μ : 𝓞 F)})
-  obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer'₁ p F hrF hIrr σ
+  obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p F hrF hIrr σ
   obtain ⟨d, hd₀, ⟨β, hβ⟩⟩ := exists_integer_multiple ξ
   have hβ₀ : β ≠ 0 := by
     by_contra!
@@ -541,7 +545,7 @@ lemma kw_split_prime'₁ {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮)
 attribute [local instance] Ideal.Quotient.field in
 include hrF hIrr hμ in
 /-- Tower form of `kw_mu_val_p`. -/
-lemma kw_mu_val_p'₁ (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOutside L p) (hp' : Odd p) :
+lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOutside L p) (hp' : Odd p) :
     p ∣ multiplicity 𝔮 (span {μ}) := by
   let q := absNorm (under ℤ 𝔮)
   have : 𝔮.LiesOver (span {(q : ℤ)}) := Int.liesOver_span_absNorm 𝔮
@@ -557,7 +561,7 @@ lemma kw_mu_val_p'₁ (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : Unramifi
         exact Nat.lt_sub_of_add_lt <| (Nat.Prime.odd_iff hp.out).mp hp'
       rwa [Subgroup.nontrivial_iff_exists_ne_one] at this
     contrapose! hσ'
-    exact kw_split_prime'₁ p F hrF hμ hIrr h𝔮 hσ' hσ
+    exact kw_split_prime p F hrF hμ hIrr h𝔮 hσ' hσ
   · obtain ⟨𝔔, _, _⟩  := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔮
     have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
     have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
@@ -571,7 +575,7 @@ lemma kw_mu_val_p'₁ (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : Unramifi
           (by rwa [Nat.prime_dvd_prime_iff_eq hq.out hp.out]),
         one_mul] at htower
       linarith
-    obtain ⟨α, hα₀, hα⟩ := exists_pth_root'₁ p F hrF hIrr
+    obtain ⟨α, hα₀, hα⟩ := exists_pth_root p F hrF hIrr
     have := IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' (span {μ}) h𝔮.irreducible
       h𝔔.irreducible (IsMaximal.ne_bot_of_isIntegral_int 𝔔)
     rw [h𝔔', Nat.cast_one, one_mul, FiniteMultiplicity.emultiplicity_eq_multiplicity,
@@ -585,14 +589,14 @@ lemma kw_mu_val_p'₁ (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : Unramifi
 
 include hrF hμ hIrr in
 /-- Tower form of `kw_mu_pth_power_ideal`. -/
-lemma kw_mu_pth_power_ideal'₁ (hLram : UnramifiedOutside L p) (hp' : Odd p) :
+lemma kw_mu_pth_power_ideal (hLram : UnramifiedOutside L p) (hp' : Odd p) :
     ∃ 𝔞 : Ideal (𝓞 F), 𝔞 ≠ ⊥ ∧ 𝔞 ^ p = span {(μ : 𝓞 F)} := by
   have hsμ : span {μ} ≠ ⊥ := by simpa
   have := Ideal.finprod_heightOneSpectrum_pow_multiplicity hsμ
   let v : IsDedekindDomain.HeightOneSpectrum (𝓞 F) → ℕ :=
-    fun w ↦ (kw_mu_val_p'₁ p F hrF hμ hIrr w.asIdeal hLram hp').choose
+    fun w ↦ (kw_mu_val_p p F hrF hμ hIrr w.asIdeal hLram hp').choose
   have hv {w} : multiplicity w.asIdeal (span {μ}) = p * v w :=
-    (kw_mu_val_p'₁ p F hrF hμ hIrr w.asIdeal hLram hp').choose_spec
+    (kw_mu_val_p p F hrF hμ hIrr w.asIdeal hLram hp').choose_spec
   have hv' : Function.HasFiniteMulSupport fun w ↦ w.asIdeal ^ v w := by
     have := Ideal.hasFiniteMulSupport hsμ
     simp_rw [IsDedekindDomain.HeightOneSpectrum.maxPowDividing_eq_pow_multiplicity hsμ, hv,
@@ -604,7 +608,7 @@ lemma kw_mu_pth_power_ideal'₁ (hLram : UnramifiedOutside L p) (hp' : Odd p) :
 
 include hrF hμ hIrr in
 /-- Tower form of `kw_not_dvd_nu`. -/
-lemma kw_not_dvd_nu'₁ (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (span {(p : ℤ)})]
+lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (span {(p : ℤ)})]
     (hLram : UnramifiedOutside L p) (hp' : Odd p) :
     ∃ ν : 𝓞 F, ν ≠ 0 ∧ IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F ν)) ∧
       Irreducible (X ^ p - C ((algebraMap (𝓞 F) F) ν)) ∧
@@ -618,7 +622,7 @@ lemma kw_not_dvd_nu'₁ (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver 
   have hsζ : Prime (span {hζ.toInteger - 1}) := prime_span_singleton_iff.mpr hζ₁
   have hF : (primitiveRoots p F).Nonempty := primitiveRoots_nonempty p ℚ F
   obtain ⟨ν, hν⟩ := pow_multiplicity_dvd (hζ.toInteger - 1) μ
-  obtain ⟨k, hk⟩ := kw_mu_val_p'₁ p F hrF hμ hIrr (span {hζ.toInteger - 1}) hLram hp'
+  obtain ⟨k, hk⟩ := kw_mu_val_p p F hrF hμ hIrr (span {hζ.toInteger - 1}) hLram hp'
   let α := rootOfSplitsXPowSubC hp.out.pos (μ : F) L
   have hα : α ^ p = algebraMap (𝓞 F) L μ := by
         rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
@@ -676,7 +680,7 @@ variable {F L : Type*} [Field F] [NumberField F] [Field L] [NumberField L] [Alge
 
 /-- Tower form of `kw_kummer₀`: with `finrank ℚ L = p * (p - 1)` and `L / ℚ` Galois, the relative
 extension `L / F` is cyclic Galois of degree `p`. -/
-lemma kw_kummer₀'₁ (hL : Module.finrank ℚ L = p * (p - 1)) :
+lemma kw_kummer₀ (hL : Module.finrank ℚ L = p * (p - 1)) :
     IsGalois F L ∧ IsCyclic Gal(L/F) ∧ finrank F L = p := by
   have hF : finrank ℚ F = p - 1 := Nat.totient_prime hp.out ▸ IsCyclotomicExtension.Rat.finrank p F
   have hrF : finrank F L = p := by
