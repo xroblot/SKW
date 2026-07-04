@@ -231,3 +231,21 @@ theorem IntermediateField.finrank_sup_dvd_mul_of_isGalois {F E : Type*} [Field F
     lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top, sup_comm])
   have := mul_dvd_mul_left (finrank F A') <| finrank_dvd_finrank_of_isGalois_of_sup_eq_top A' B' this
   rwa [finrank_mul_finrank, finrank_restrict, finrank_restrict] at this
+
+theorem IntermediateField.lift_iInf {F E : Type*} [Field F] [Field E] [Algebra F E]
+    (K : IntermediateField F E) {ι : Type*} (S : Finset ι) (hS : S.Nonempty)
+    (L : ι → IntermediateField F K) :
+    lift (⨅ i ∈ S, L i) = ⨅ i ∈ S, lift (L i) := by
+  classical
+  induction hS using Finset.Nonempty.cons_induction with
+  | singleton i => simp
+  | cons i s h hs hi =>
+      rw [Finset.cons_eq_insert, Finset.iInf_insert, Finset.iInf_insert, lift_inf, hi]
+
+theorem IntermediateField.lift_iSup (F E : Type*) [Field F] [Field E] [Algebra F E]
+    (K : IntermediateField F E) {ι : Type*} (S : Finset ι) (L : ι → IntermediateField F K) :
+    lift (⨆ i ∈ S, L i) = ⨆ i ∈ S, lift (L i) := by
+  classical
+  induction S using Finset.induction with
+  | empty => simp
+  | insert i s _ hi => rw [Finset.iSup_insert, Finset.iSup_insert, lift_sup, hi]

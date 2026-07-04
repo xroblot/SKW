@@ -7,12 +7,12 @@ public import Mathlib.FieldTheory.IntermediateField.Algebraic
 /-!
 # PRed to Mathlib: `IntermediateField.eq_of_le_iff_finrank_eq` / `_eq'`
 
-The declarations in this file were extracted from `SKW.Prereqs.IntermediateFields` and
+The declarations in this file were extracted from `SKW.Prereqs.IntermediateField` and
 submitted upstream as Mathlib PR
 [#40300](https://github.com/leanprover-community/mathlib4/pull/40300).
 
 Once that PR is merged and the `lake-manifest.json` pin is bumped past the merge commit,
-this file (and its import in `SKW.Prereqs.IntermediateFields`) should be deleted, and any
+this file (and its import in `SKW.Prereqs.IntermediateField`) should be deleted, and any
 usages redirected to the Mathlib versions.
 -/
 

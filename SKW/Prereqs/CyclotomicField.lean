@@ -1,7 +1,7 @@
 module
 
 public import SKW.Prereqs.AlgebraMisc
-public import SKW.Prereqs.IntermediateFields
+public import SKW.Prereqs.IntermediateField
 public import SKW.Prereqs.NumberTheory
 public import SKW.Prereqs.CMField
 

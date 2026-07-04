@@ -10,7 +10,7 @@ public import SKW.KroneckerWeber.ClassGroup
 public import SKW.KroneckerWeber.Reduction
 public import SKW.Prereqs.Unramified
 public import SKW.Prereqs.NumberField
-public import SKW.Prereqs.IntermediateFields
+public import SKW.Prereqs.IntermediateField
 
 @[expose] public section
 

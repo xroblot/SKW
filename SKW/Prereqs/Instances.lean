@@ -1,6 +1,6 @@
 module
 
-public import SKW.Prereqs.IntermediateFields
+public import SKW.Prereqs.IntermediateField
 
 @[expose] public section
 

@@ -17,7 +17,7 @@ import SKW.Prereqs.FractionalIdeal
 import SKW.Prereqs.Ideals
 import SKW.Prereqs.IdealNorm
 import SKW.Prereqs.Instances
-import SKW.Prereqs.IntermediateFields
+import SKW.Prereqs.IntermediateField
 import SKW.Prereqs.KummerExtension
 import SKW.Prereqs.MulChars
 import SKW.Prereqs.Normal

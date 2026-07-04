@@ -1,6 +1,6 @@
 module
 
-public import SKW.Prereqs.IntermediateFields
+public import SKW.Prereqs.IntermediateField
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.MulChars
 public import SKW.Prereqs.Ideals

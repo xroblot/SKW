@@ -15,7 +15,7 @@ public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.Ideals
 public import SKW.Prereqs.CyclotomicField
 public import SKW.Prereqs.Instances
-public import SKW.Prereqs.IntermediateFields
+public import SKW.Prereqs.IntermediateField
 public import SKW.Prereqs.TameRamification
 
 @[expose] public section
@@ -33,7 +33,7 @@ This file establishes the reduction steps that allow us to prove Kronecker-Weber
    with `q` unramified.
 
 The decomposition of a finite abelian extension into cyclic prime power subextensions is
-`IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top` (in `SKW/Prereqs/IntermediateFields.lean`).
+`IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top` (in `SKW/Prereqs/IntermediateField.lean`).
 The reduction of the general (abelian) case to the cyclic prime power case
 (`kw_reduce_to_prime_power`) lives in `KroneckerWeber.lean`, in `IntermediateField ℚ A` currency.
 -/
