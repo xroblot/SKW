@@ -1329,8 +1329,9 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 
 \begin{proposition}
   \label{prop:kw_2_quadratic}
+  \lean{prop_kw_2_quadratic}
   The only quadratic extensions of $\QQ$ unramified outside $2$ are
-  $\QQ(i)$, $\QQ(\sqrt{-2})$, and $\QQ(\sqrt{2})$. In particular, the
+  $\QQ(i)$, $\QQ(\sqrt{-2})$, and $\QQ(\sqrt{2})$; all three lie in $\QQ(\zeta_8)$. In particular, the
   maximal real abelian $2$-extension of $\QQ$ with exponent $2$ and
   unramified outside $2$ is $\QQ(\sqrt{2})$, which is the subfield of
   $\QQ(\zeta_8)$ of degree $2$.
@@ -1350,37 +1351,55 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \end{proof}
 
 \begin{proposition}
+  \label{prop:kw_2_quadratic_real_unique}
+  \lean{prop_kw_2_quadratic_real_unique}
+  \uses{prop:kw_2_quadratic}
+  Any two totally real quadratic extensions of $\QQ$ unramified outside $2$ coincide (both equal
+  $\QQ(\sqrt 2) = \QQ(\zeta_8)^+$).
+\end{proposition}
+
+\begin{proof}
+  By \ref{prop:kw_2_quadratic} each lies in $\QQ(\zeta_8)$ and, being real of degree $2$, equals its
+  unique real quadratic subfield $\QQ(\sqrt 2)$.
+\end{proof}
+
+\begin{proposition}
+  \label{prop:kw_2_power_real}
+  \lean{prop_kw_2_power_real}
+  \uses{prop:kw_2_quadratic_real_unique, lem:kw_cyclic_compositum}
+  Let $K/\QQ$ be a totally real cyclic extension of degree $2^m$ unramified outside $2$. Then
+  $K \subseteq \QQ(\zeta_{2^{m+2}})$.
+\end{proposition}
+
+\begin{proof}
+  Let $K' = \QQ(\zeta_{2^{m+2}})^+$ be the maximal real subfield of $\QQ(\zeta_{2^{m+2}})$; since
+  $\Gal(\QQ(\zeta_{2^{m+2}})/\QQ) \cong \ZZ/2\ZZ \times \ZZ/2^m\ZZ$ with complex conjugation
+  generating the $\ZZ/2\ZZ$ factor, the quotient $\Gal(K'/\QQ) \cong \ZZ/2^m\ZZ$ is cyclic, and
+  $K'$ is unramified outside $2$. If $K'K/\QQ$ were not cyclic, then $\Gal(K'K/\QQ)$ — a non-cyclic
+  finite abelian $2$-group — would have two distinct subgroups of index $2$, hence two distinct
+  quadratic subfields of $K'K$; both are unramified outside $2$ and real (as $K'K$ is totally
+  real), contradicting \ref{prop:kw_2_quadratic_real_unique}. Hence $K'K/\QQ$ is cyclic, and
+  \ref{lem:kw_cyclic_compositum} gives $K \subseteq K' \subseteq \QQ(\zeta_{2^{m+2}})$.
+\end{proof}
+
+\begin{proposition}
   \label{prop:kw_2_power}
-  \uses{prop:kw_2_quadratic, lem:kw_cyclic_compositum, prop:kw_exponent_p}
+  \lean{prop_kw_2_power}
+  \uses{prop:kw_2_power_real, prop:kw_2_quadratic}
   Let $K/\QQ$ be a cyclic extension of degree $2^m$ unramified outside $2$.
   Then $K$ is cyclotomic.
 \end{proposition}
 
 \begin{proof}
-  We proceed by induction on $m$. The base case $m = 1$ is \ref{prop:kw_2_quadratic}: each
-  of $\QQ(i) = \QQ(\zeta_4)$, $\QQ(\sqrt 2)$, $\QQ(\sqrt{-2})$ lies in $\QQ(\zeta_8)$. Assume
-  $m \geq 2$ and the result for degree $2^{m-1}$.
-
-  \emph{Real case.} Suppose $K$ is totally real. Let $K' = \QQ(\zeta_{2^{m+2}})^+$ be the
-  maximal real subfield of $\QQ(\zeta_{2^{m+2}})$; since $\Gal(\QQ(\zeta_{2^{m+2}})/\QQ) \cong
-  \ZZ/2\ZZ \times \ZZ/2^m\ZZ$ with complex conjugation generating the $\ZZ/2\ZZ$ factor, the
-  quotient $\Gal(K'/\QQ) \cong \ZZ/2^m\ZZ$ is cyclic, and $K'$ is unramified outside $2$. If
-  $K'K/\QQ$ were not cyclic, then $\Gal(K'K/\QQ)$ — an abelian $2$-group, as $K$ and $K'$ are
-  abelian — would have $(\ZZ/2\ZZ)^2$ as a quotient, hence three distinct quadratic subfields
-  of $K'K$; all are unramified outside $2$, and all are real since $K'K$ is totally real. This
-  contradicts \ref{prop:kw_2_quadratic} (a unique real quadratic field unramified outside $2$).
-  Hence $K'K/\QQ$ is cyclic, and \ref{lem:kw_cyclic_compositum} gives
-  $K \subseteq K' \subseteq \QQ(\zeta_{2^{m+2}})$.
-
-  \emph{Nonreal case.} Suppose $K$ is not totally real, and let $M$ be the maximal real subfield
-  of $K(i)$. Then $K(i) = K \cdot \QQ(i) = M(i)$, so $K$ is cyclotomic $\iff K(i)$ is cyclotomic
-  $\iff M$ is cyclotomic. Now $K(i)/\QQ$ is abelian (a compositum of the abelian extensions $K$
-  and $\QQ(i)$) and unramified outside $2$, hence so is $M$; moreover $M$ is cyclic: if
-  $i \notin K$ then $\Gal(K(i)/\QQ) \cong \ZZ/2^m\ZZ \times \ZZ/2\ZZ$ with complex conjugation
-  equal to $(2^{m-1}, 1)$, and the quotient by $\langle(2^{m-1},1)\rangle$ is cyclic of order
-  $2^m$; if $i \in K$ then $M = K^+$ is a subfield of the cyclic field $K$. Thus $M$ is real,
-  cyclic of $2$-power degree, and unramified outside $2$, so by the real case $M$ — and hence
-  $K$ — is cyclotomic. (This is Lemmermeyer's argument, Prop.~1.5.)
+  If $K$ is totally real this is \ref{prop:kw_2_power_real}. Otherwise let $M$ be the maximal real
+  subfield of $K(i)$. Then $K(i) = K \cdot \QQ(i) = M(i)$, so $K$ is cyclotomic $\iff K(i)$ is
+  cyclotomic $\iff M$ is cyclotomic. Now $K(i)/\QQ$ is abelian (a compositum of the abelian
+  extensions $K$ and $\QQ(i)$) and unramified outside $2$, hence so is $M$; moreover $M$ is cyclic:
+  if $i \notin K$ then $\Gal(K(i)/\QQ) \cong \ZZ/2^m\ZZ \times \ZZ/2\ZZ$ with complex conjugation
+  equal to $(2^{m-1}, 1)$, and the quotient by $\langle(2^{m-1},1)\rangle$ is cyclic of order $2^m$;
+  if $i \in K$ then $M = K^+$ is a subfield of the cyclic field $K$. Thus $M$ is real, cyclic of
+  $2$-power degree, and unramified outside $2$, so \ref{prop:kw_2_power_real} makes $M$ — and hence
+  $K$ — cyclotomic. (This is Lemmermeyer's argument, Prop.~1.5.)
 \end{proof}
 
 \begin{proposition}
