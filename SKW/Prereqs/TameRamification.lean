@@ -251,7 +251,7 @@ the classical tameness condition: the residue characteristic (`absNorm` of the p
 not divide the ramification index `e(Q)`. -/
 theorem card_inertia_notMem_iff [IsDomain S] (Q : Ideal S) [Q.IsPrime] [Module.Finite ℤ S]
     [Module.Flat ℤ S] [IsGaloisGroup G ℤ S] [Finite G] :
-    ↑(Nat.card (Q.inertia G)) ∉ Q ↔ ¬ (under ℤ Q).absNorm ∣ ramificationIdx' Q ℤ := by
+    ↑(Nat.card (Q.inertia G)) ∉ Q ↔ ¬ (under ℤ Q).absNorm ∣ ramificationIdx Q ℤ := by
   rw [← Int.cast_natCast, Int.cast_mem_ideal_iff, Int.natCast_dvd_natCast,
     card_inertia_eq_ramificationIdxIn (under ℤ Q), ramificationIdxIn_eq_ramificationIdx _ Q G]
 

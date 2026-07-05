@@ -216,12 +216,12 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
   · obtain ⟨𝔔, _, _⟩  := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔮
     have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
     have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
-    have h𝔔' : 𝔮.ramificationIdx 𝔔 = 1 := by
-      have hram : (span {(q : ℤ)}).ramificationIdx 𝔔 = 1 := by
-        rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ (by simpa using hq.out.ne_zero)]
+    have h𝔔' : 𝔮.ramificationIdx' 𝔔 = 1 := by
+      have hram : (span {(q : ℤ)}).ramificationIdx' 𝔔 = 1 := by
+        rw [Ideal.ramificationIdx'_eq_ramificationIdx _ _ (by simpa using hq.out.ne_zero)]
         exact (hLRam q hq.out hqp).ramificationIdx_eq_one ‹𝔔.LiesOver (span {(q : ℤ)})›
-      have htower := ramificationIdx_algebra_tower' (span {(q : ℤ)}) 𝔮 𝔔
-      rw [hram, Ideal.ramificationIdx_eq_ramificationIdx' _ 𝔮 (by simpa using hq.out.ne_zero),
+      have htower := ramificationIdx'_algebra_tower' (span {(q : ℤ)}) 𝔮 𝔔
+      rw [hram, Ideal.ramificationIdx'_eq_ramificationIdx _ 𝔮 (by simpa using hq.out.ne_zero),
         IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd q F 𝔮
           (by rwa [Nat.prime_dvd_prime_iff_eq hq.out hp.out]),
         one_mul] at htower
@@ -388,16 +388,16 @@ end ScalarTowerBridge
 --   haveI : 𝔮.IsMaximal := ‹𝔮.IsPrime›.isMaximal (Ideal.ne_bot_of_liesOver_of_ne_bot hq0 𝔮)
 --   have := Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) (span {(q : ℤ)})
 --   have := Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 F) 𝔮) (span {(q : ℤ)})
---   rw [← Ideal.ramificationIdx_eq_ramificationIdx' (span {(q : ℤ)}) 𝔮 hq0]
+--   rw [← Ideal.ramificationIdx_eq_ramificationIdx (span {(q : ℤ)}) 𝔮 hq0]
 --   refine Ideal.ramificationIdx_sup_eq_one htop (p := span {(q : ℤ)})
 --     (P₁ := under (𝓞 K) 𝔮) (P₂ := under (𝓞 F) 𝔮) ?_ ?_ hq0
 --   · have := IsMaximal.under (𝓞 K) 𝔮
---     rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ hq0]
+--     rw [Ideal.ramificationIdx_eq_ramificationIdx _ _ hq0]
 --     exact (hKram q hq hqp).ramificationIdx_eq_one
 --       (Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) (span {(q : ℤ)}))
 --   · have : Fact q.Prime := ⟨hq⟩
 --     have : ¬ q ∣ p := by rwa [Nat.prime_dvd_prime_iff_eq hq hp.out]
---     rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ hq0]
+--     rw [Ideal.ramificationIdx_eq_ramificationIdx _ _ hq0]
 --     exact Rat.ramificationIdx_eq_of_not_dvd q F (under (𝓞 F) 𝔮) this
 
 /- Original lattice versions, superseded by the tower forms (sections below):
@@ -588,10 +588,10 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
     have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
     have h𝔔' : 𝔮.ramificationIdx 𝔔 = 1 := by
       have hram : (span {(q : ℤ)}).ramificationIdx 𝔔 = 1 := by
-        rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ (by simpa using hq.out.ne_zero)]
+        rw [Ideal.ramificationIdx_eq_ramificationIdx _ _ (by simpa using hq.out.ne_zero)]
         exact (hLRam q hq.out hqp).ramificationIdx_eq_one ‹𝔔.LiesOver (span {(q : ℤ)})›
       have htower := ramificationIdx_algebra_tower' (span {(q : ℤ)}) 𝔮 𝔔
-      rw [hram, Ideal.ramificationIdx_eq_ramificationIdx' _ 𝔮 (by simpa using hq.out.ne_zero),
+      rw [hram, Ideal.ramificationIdx_eq_ramificationIdx _ 𝔮 (by simpa using hq.out.ne_zero),
         IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd q F 𝔮
           (by rwa [Nat.prime_dvd_prime_iff_eq hq.out hp.out]),
         one_mul] at htower

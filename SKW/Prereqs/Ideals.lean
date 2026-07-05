@@ -89,11 +89,11 @@ instance (K : Type*) [Field K] [NumberField K] :
 /-! ### Ideal — LiesOver / ramification -/
 
 theorem Ideal.pow_liesOver_of_liesOver {R S : Type*} [CommRing R] [CommRing S] [Algebra R S] (p : Ideal R) (P : Ideal S) [P.LiesOver p]
-    {i : ℕ} (hi : i + 1 ≤ Ideal.ramificationIdx p P) :
+    {i : ℕ} (hi : i + 1 ≤ Ideal.ramificationIdx' p P) :
     (P ^ (i + 1)).LiesOver p := by
   rw [liesOver_iff]
   apply le_antisymm
-  · exact le_trans le_comap_pow_ramificationIdx <| comap_mono (pow_le_pow_right hi)
+  · exact le_trans le_comap_pow_ramificationIdx' <| comap_mono (pow_le_pow_right hi)
   · refine le_trans (comap_mono <| pow_le_pow_right (Nat.le_add_left 1 i)) ?_
     rw [pow_one, ← Ideal.under_def, ← Ideal.over_def P p]
 
@@ -120,10 +120,10 @@ theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDede
 theorem Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain {R S : Type*} [CommRing R] [CommRing S]
     [Algebra R S] {p : Ideal S} [p.IsPrime] [IsDedekindDomain S] [Module.Finite R S] [IsDomain R]
     [Module.IsTorsionFree R S] [Module.Finite ℤ R] [CharZero R] (hp : p ≠ ⊥) :
-    ¬ IsUnramifiedAt R p ↔ 1 < (Ideal.under R p).ramificationIdx p := by
-  rw [Ideal.ramificationIdx_eq_ramificationIdx' _ _ (Ideal.under_ne_bot R hp),
-    ← Ideal.ramificationIdx'_eq_one_iff]
-  have hpos : 0 < p.ramificationIdx' R := Ideal.ramificationIdx'_pos p R
+    ¬ IsUnramifiedAt R p ↔ 1 < (Ideal.under R p).ramificationIdx' p := by
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx _ _ (Ideal.under_ne_bot R hp),
+    ← Ideal.ramificationIdx_eq_one_iff]
+  have hpos : 0 < p.ramificationIdx R := Ideal.ramificationIdx_pos p R
   omega
 
 /-! ### Ideal — IsDedekindDomain / emultiplicity -/
@@ -138,18 +138,18 @@ theorem Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' {R : Ty
     {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul R S]
     {v : Ideal R} {w : Ideal S} (I : Ideal R) (hv : Irreducible v) (hw : Irreducible w)
     (hw_bot : w ≠ ⊥) [w.LiesOver v] :
-    emultiplicity w (map (algebraMap R S) I) = v.ramificationIdx w * emultiplicity v I := by
+    emultiplicity w (map (algebraMap R S) I) = v.ramificationIdx' w * emultiplicity v I := by
   by_cases hI : I = ⊥
   · rw [hI, map_bot, ← zero_eq_bot, ← zero_eq_bot, emultiplicity_zero, emultiplicity_zero, ENat.mul_top]
     simp only [ne_eq, Nat.cast_eq_zero]
-    apply ramificationIdx_ne_zero (map_ne_bot_of_ne_bot <| hv.ne_zero) (isPrime_of_prime hw.prime)
+    apply ramificationIdx'_ne_zero (map_ne_bot_of_ne_bot <| hv.ne_zero) (isPrime_of_prime hw.prime)
     rw [map_le_iff_le_comap, over_def w v]
-  · exact emultiplicity_map_eq_ramificationIdx_mul hI hv hw hw_bot
+  · exact emultiplicity_map_eq_ramificationIdx'_mul hI hv hw hw_bot
 
 theorem Ideal.IsDedekindDomain.ramificationIdx_mul_emultiplicity_under_eq {R : Type*} [CommRing R]
     {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul R S]
     [Algebra.IsIntegral R S] {w : Ideal S} (hw : Irreducible w) (hw_bot : w ≠ ⊥) {I : Ideal R} :
-    (under R w).ramificationIdx w * emultiplicity (under R w) I =
+    (under R w).ramificationIdx' w * emultiplicity (under R w) I =
         emultiplicity w (map (algebraMap R S) I) := by
   have : w.IsPrime := (prime_iff_isPrime hw_bot).mp hw.prime
   have : Irreducible (comap (algebraMap R S) w) :=

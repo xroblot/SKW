@@ -147,7 +147,7 @@ theorem prop_kw_odd_prime_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
       apply Algebra.IsUnramifiedIn.of_algEquiv <|
         RingOfIntegers.mapIntAlgEquiv (liftAlgEquiv _).toRingEquiv
       refine Algebra.IsUnramifiedIn.tower_bot (T := 𝓞 C) fun Q hQ₁ hQ₂ ↦
-        ramificationIdx'_eq_one_iff.mp ?_
+        ramificationIdx_eq_one_iff.mp ?_
       rw [Rat.ramificationIdx_eq_of_not_dvd q (m := p ^ (m + 1))]
       intro h
       exact hqp <| (Nat.prime_dvd_prime_iff_eq hq hp.out).mp <| hq.dvd_of_dvd_pow h

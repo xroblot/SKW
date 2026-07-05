@@ -106,8 +106,8 @@ lemma unramifiedOutside_sup' {L : Type*} [Field L] [NumberField L] (K F : Interm
   have hK := LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) (span {(q : ℤ)})
   have hF := LiesOver.tower_bot 𝔮 (under (𝓞 F) 𝔮) (span {(q : ℤ)})
   exact ramificationIdx_sup_eq_one htop (p := span {(q : ℤ)})
-    (ramificationIdx'_eq_one_iff.mpr (hKram q hq hqp _ (IsPrime.under (𝓞 K) 𝔮) hK))
-    (ramificationIdx'_eq_one_iff.mpr (hFram q hq hqp _ (IsPrime.under (𝓞 F) 𝔮) hF)) hq₀
+    (ramificationIdx_eq_one_iff.mpr (hKram q hq hqp _ (IsPrime.under (𝓞 K) 𝔮) hK))
+    (ramificationIdx_eq_one_iff.mpr (hFram q hq hqp _ (IsPrime.under (𝓞 F) 𝔮) hF)) hq₀
 
 set_option backward.isDefEq.respectTransparency false in
 /-- The compositum `K ⊔ F` of two number fields, each unramified outside `p`, is itself unramified

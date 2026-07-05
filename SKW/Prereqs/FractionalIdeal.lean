@@ -143,7 +143,7 @@ noncomputable instance fractionRingMulSemiringAction : MulSemiringAction G (Frac
           (MulSemiringAction.toRingEquiv G R g) : FractionRing R →+* FractionRing R).comp
           (IsFractionRing.ringEquivOfRingEquiv (K := FractionRing R) (L := FractionRing R)
             (MulSemiringAction.toRingEquiv G R h)) :=
-      IsLocalization.ringHom_ext R⁰ (by ext r; simp [mul_smul])
+      IsLocalization.ringHom_ext R⁰ (by ext r; simp)
     exact RingHom.congr_fun this x
   smul_zero g := map_zero _
   smul_add g := map_add _

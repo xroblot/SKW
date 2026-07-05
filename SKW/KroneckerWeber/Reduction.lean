@@ -71,7 +71,7 @@ lemma kw_cyclic_compositum (L : Type*) [Field L] [NumberField L] (K K' : Interme
 /-- Every non-trivial extension of `ℚ` is ramified at some finite prime (Minkowski). -/
 lemma kw_minkowski (K : Type*) [Field K] [NumberField K] (h : Module.finrank ℚ K > 1) :
     ∃ q : ℕ, q.Prime ∧ ∃ 𝔮 : Ideal (𝓞 K), 𝔮.IsMaximal ∧ 𝔮.LiesOver (Ideal.span {(q : ℤ)}) ∧
-      1 < Ideal.ramificationIdx (Ideal.span {(q : ℤ)}) 𝔮 := by
+      1 < Ideal.ramificationIdx' (Ideal.span {(q : ℤ)}) 𝔮 := by
   obtain ⟨𝔮, hq, hq'⟩ := exists_not_isUnramifiedAt_int (K := K) (𝒪 := 𝓞 K) h.ne'
   refine ⟨absNorm (Ideal.under ℤ 𝔮), Nat.absNorm_under_prime 𝔮, 𝔮, hq, Int.liesOver_span_absNorm 𝔮, ?_⟩
   rwa [Int.ideal_span_absNorm_eq_self, ← Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain]
@@ -86,8 +86,8 @@ theorem ramificationIdx_sup_dvd_lcm {K : Type*} [Field K] [NumberField K] [IsGal
     (E F : IntermediateField ℚ K) [IsGalois ℚ E] [IsGalois ℚ F] (hEF : E ⊔ F = ⊤) {p : ℕ}
     (htame : ¬ p ∣ Module.finrank ℚ K) (𝔓 : Ideal (𝓞 K)) [𝔓.IsMaximal]
     [hPp : 𝔓.LiesOver (span {(p : ℤ)})] :
-    𝔓.ramificationIdx' ℤ ∣
-      Nat.lcm ((under (𝓞 E) 𝔓).ramificationIdx' ℤ) ((under (𝓞 F) 𝔓).ramificationIdx' ℤ) := by
+    𝔓.ramificationIdx ℤ ∣
+      Nat.lcm ((under (𝓞 E) 𝔓).ramificationIdx ℤ) ((under (𝓞 F) 𝔓).ramificationIdx ℤ) := by
   let 𝔭 : Ideal ℤ := span {(p : ℤ)}
   have : 𝔭.IsPrime := isPrime_of_liesOver 𝔓 𝔭
   have : IsCyclic (inertia Gal(K/ℚ) 𝔓) := by
@@ -149,7 +149,7 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   have hq₁ : ¬ q ∣ finrank ℚ L := sorry
   obtain ⟨𝔔, _, h𝔔⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral 𝔮 (S := 𝓞 L)
   have h₁ : IsCyclic (Ideal.inertia G 𝔔) ∧
-      Nat.card (Ideal.inertia G 𝔔) = ramificationIdx' 𝔔 ℤ := by
+      Nat.card (Ideal.inertia G 𝔔) = ramificationIdx 𝔔 ℤ := by
     refine ⟨?_, ?_⟩
     · have : ↑(Nat.card (inertia G 𝔔)) ∉ 𝔔 := sorry
       exact isCyclic_inertia' 𝔔 this
@@ -157,7 +157,7 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   let E' : IntermediateField ℚ L := E.restrict le_sup_right
   have : IsCyclotomicExtension {q} ℚ E' := sorry
   have : IsGalois ℚ E' := sorry
-  have h₂ : 𝔔.ramificationIdx' ℤ = q - 1 := by
+  have h₂ : 𝔔.ramificationIdx ℤ = q - 1 := by
     apply dvd_antisymm
     · let K' : IntermediateField ℚ L := K.restrict le_sup_left
       have : IsAbelianGalois ℚ K' := sorry
@@ -179,11 +179,11 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
       · exact lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top])
       exact hq₁
     · have : IsCyclotomicExtension {q} ℚ E' := sorry
-      rw [ramificationIdx'_tower (R := ℤ) (under (𝓞 E') 𝔔),
+      rw [ramificationIdx_tower (R := ℤ) (under (𝓞 E') 𝔔),
         IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime q E']
       exact dvd_mul_right (q - 1) _
-  have h₃ : 𝔔.ramificationIdx' (𝓞 E') = 1 := by
-    have := ramificationIdx'_tower (R := ℤ) (under (𝓞 E') 𝔔) 𝔔
+  have h₃ : 𝔔.ramificationIdx (𝓞 E') = 1 := by
+    have := ramificationIdx_tower (R := ℤ) (under (𝓞 E') 𝔔) 𝔔
     rwa [h₂, IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime q E',
       left_eq_mul₀ (by grind [hq.one_lt])] at this
   have h₄ : 𝔔.inertia G ⊓ E'.fixingSubgroup = ⊥ := by
@@ -229,14 +229,14 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   --   Since `q ≠ p` and `q ∤ [L:ℚ]` (because `[L:ℚ] ∣ pᵐ·(q-1)`, coprime to `q`), `q` is tame, so:
   --     · `I` is cyclic (`isCyclic_inertia'`, the full-`G` form);
   --     · `Nat.card I = e(𝔔 ∣ q) = e(L)` (Mathlib `card_inertia_eq_ramificationIdxIn`, bridged to
-  --       `𝔔.ramificationIdx' ℤ` via `ramificationIdxIn_eq_ramificationIdx`).
+  --       `𝔔.ramificationIdx ℤ` via `ramificationIdxIn_eq_ramificationIdx`).
   --
   -- Step 2 (Abhyankar: `q` unramified in `L/E`).  Viewing `K`, `E` as intermediate fields of `L`
   --   (`K ⊔ E = ⊤` in `L`), `ramificationIdx_sup_dvd_lcm` applied to `𝔔` gives
   --   `e(L) ∣ Nat.lcm (e K) (e E)` directly -- this stays inside `G ↷ 𝓞 L` (index form, via
   --   `coe_mem_inertia` + tower), so NO cross-ring inertia functoriality is needed.  Now `e K = p^a`
   --   and `card_inertia_dvd_card_sub_one'` gives `p^a ∣ q - 1 = e E`, so `lcm (e K) (e E) = q - 1`;
-  --   with `e E ∣ e L` (tower `E ⊆ L`, `ramificationIdx'_tower`) we conclude `e L = q - 1 = e E`.
+  --   with `e E ∣ e L` (tower `E ⊆ L`, `ramificationIdx_tower`) we conclude `e L = q - 1 = e E`.
   --   Hence `e(L/E) = e L / e E = 1`, i.e. **`I ⊓ Gal(L/E) = ⊥`** (`q` unramified in `L/E`).
   --
   -- Step 3 (direct product).  `G` abelian, `I ⊓ Gal(L/E) = ⊥`, and
@@ -256,11 +256,11 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   -- Sub-lemmas to discharge:
   --   (i)   instances `NumberField L`, `IsGalois ℚ L`, `IsMulCommutative Gal(L/ℚ)`;
   --   (ii)  `E` totally ramified at `q`, `e E = q - 1`;
-  --   (iii) view `K`, `E` as `IntermediateField ℚ L` with `K ⊔ E = ⊤`, matching `ramificationIdx'`
+  --   (iii) view `K`, `E` as `IntermediateField ℚ L` with `K ⊔ E = ⊤`, matching `ramificationIdx`
   --         across the `A`- and `L`-currencies (same rings of integers), to apply
   --         `ramificationIdx_sup_dvd_lcm` -- routine bookkeeping, NOT inertia functoriality;
   --   (iv)  `Nat.card I = e L` (`card_inertia_eq_ramificationIdxIn`, bridged) and the tower
-  --         `e L = e(L/E) · e E` (`ramificationIdx'_tower`);
+  --         `e L = e(L/E) · e E` (`ramificationIdx_tower`);
   --   (v)   `G = I × Gal(L/E)`; for `F = fixedField I`: degree, cyclicity, `F ⊔ E = L`, unramified at `q`.
 
 

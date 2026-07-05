@@ -159,16 +159,16 @@ omit [NeZero (p ^ f - 1)] in
 include hdm in
 theorem ramificationIdx_eq_one [NeZero f] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
     [𝓟.LiesOver 𝔓] [𝔓.LiesOver 𝒑] [𝔓.IsPrime] [𝓟.IsPrime] :
-    ramificationIdx 𝔓 𝓟 = 1 := by
+    ramificationIdx' 𝔓 𝓟 = 1 := by
   have hpq : ¬ p ∣ p ^ f - 1 := (Nat.Prime.coprime_iff_not_dvd hp.out).mp (coprime_pow_sub_one p f).symm
   have hpm : ¬ p ∣ m := hp.out.coprime_iff_not_dvd.mp <|
     (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro_left d hdm
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 𝔓 𝒑
-  have htower := Ideal.ramificationIdx_algebra_tower' 𝒑 𝔓 𝓟
-  rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝓟 (by simpa using hp.out.ne_zero),
+  have htower := Ideal.ramificationIdx'_algebra_tower' 𝒑 𝔓 𝓟
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 𝓟 (by simpa using hp.out.ne_zero),
     @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
       (by ring) hpq,
-    Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝔓 (by simpa using hp.out.ne_zero),
+    Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 𝔓 (by simpa using hp.out.ne_zero),
     @IsCyclotomicExtension.Rat.ramificationIdx_eq (m * p) m p 0 hp E _ _ 𝔓 _ _ _
       (by ring) hpm] at htower
   simp at htower
@@ -179,15 +179,15 @@ omit [NeZero (p ^ f - 1)] in
 include hdm in
 theorem ramificationIdx_eq_sub_one₀ [NeZero f] [NeZero m] [Algebra k E] [𝔓.LiesOver 𝔭] [𝔭.LiesOver 𝒑]
     [𝔓.IsPrime] [IsCyclotomicExtension {m} ℚ k] [𝔭.IsPrime] :
-    ramificationIdx 𝔭 𝔓 = p - 1 := by
+    ramificationIdx' 𝔭 𝔓 = p - 1 := by
   have hpm : ¬ p ∣ m := hp.out.coprime_iff_not_dvd.mp <|
     (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro_left d hdm
   have : 𝔓.LiesOver 𝒑 := LiesOver.trans 𝔓 𝔭 𝒑
-  have htower := Ideal.ramificationIdx_algebra_tower' 𝒑 𝔭 𝔓
-  rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝔓 (by simpa using hp.out.ne_zero),
+  have htower := Ideal.ramificationIdx'_algebra_tower' 𝒑 𝔭 𝔓
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 𝔓 (by simpa using hp.out.ne_zero),
     @IsCyclotomicExtension.Rat.ramificationIdx_eq (m * p) m p 0 hp E _ _ 𝔓 _ _ _
       (by ring) hpm,
-    Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝔭 (by simpa using hp.out.ne_zero),
+    Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 𝔭 (by simpa using hp.out.ne_zero),
     IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p k 𝔭 hpm,
     one_mul] at htower
   simpa using htower.symm
@@ -197,16 +197,16 @@ include hdm in
 theorem ramificationIdx_eq_sub_one [NeZero f] [NeZero m] [𝔭.LiesOver 𝒑]
     [IsCyclotomicExtension {m} ℚ k] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [𝔭.IsPrime]
     [𝓟.IsPrime] [𝓟.LiesOver 𝔭] :
-    ramificationIdx 𝔭 𝓟 = p - 1 := by
+    ramificationIdx' 𝔭 𝓟 = p - 1 := by
   have hpq : ¬ p ∣ p ^ f - 1 := (Nat.Prime.coprime_iff_not_dvd hp.out).mp (coprime_pow_sub_one p f).symm
   have hpm : ¬ p ∣ m := hp.out.coprime_iff_not_dvd.mp <|
     (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro_left d hdm
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 𝔭 𝒑
-  have htower := Ideal.ramificationIdx_algebra_tower' 𝒑 𝔭 𝓟
-  rw [Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝓟 (by simpa using hp.out.ne_zero),
+  have htower := Ideal.ramificationIdx'_algebra_tower' 𝒑 𝔭 𝓟
+  rw [Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 𝓟 (by simpa using hp.out.ne_zero),
     @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
       (by ring) hpq,
-    Ideal.ramificationIdx_eq_ramificationIdx' 𝒑 𝔭 (by simpa using hp.out.ne_zero),
+    Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 𝔭 (by simpa using hp.out.ne_zero),
     IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p k 𝔭 hpm,
     one_mul] at htower
   simpa using htower.symm
@@ -314,7 +314,7 @@ theorem emultiplicity_galEquivZMod_symm_smul_gaussSum [IsCyclotomicExtension {m}
       Ideal.mem_comap, Ideal.mem_comap, mem_pointwise_smul_iff_inv_smul_mem, inv_inv,
       gaFEquiv_symm_smul_algebraMap_eq hη m d hdm _ _ _ hb]
   rw [this] at hmain
-  have : (((galEquivZMod m k).symm a⁻¹ • 𝔭).ramificationIdx (σ • 𝓟)) = p - 1 := by
+  have : (((galEquivZMod m k).symm a⁻¹ • 𝔭).ramificationIdx' (σ • 𝓟)) = p - 1 := by
     have := (liesOver_iff _ _).mpr this.symm
     rw [ramificationIdx_eq_sub_one _ m d hdm]
   rw [this, FiniteMultiplicity.emultiplicity_eq_multiplicity, ← Nat.cast_mul, ← Nat.cast_mul,
@@ -354,7 +354,7 @@ theorem emultplicity_gaussSum_eq_zero [P.LiesOver 𝒑] {𝔭 : Ideal (𝓞 k)} 
     (NeZero.ne _)] at this
   apply eq_zero_of_ne_zero_of_mul_left_eq_zero ?_ this
   rw [Nat.cast_ne_zero]
-  apply IsDedekindDomain.ramificationIdx_ne_zero_of_liesOver
+  apply IsDedekindDomain.ramificationIdx'_ne_zero_of_liesOver
   exact hP₀.ne_zero
 
 theorem emultiplicity_galEquivZMod_symm_smul [IsCyclotomicExtension {m} ℚ k] [NeZero m] [𝔭.IsPrime]
