@@ -25,7 +25,7 @@ Every abelian extension of `ℚ` is contained in a cyclotomic field.
 4. A compositum of cyclotomic fields is cyclotomic.
 -/
 
-open NumberField IntermediateField
+open NumberField IntermediateField IsCyclotomicExtension
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Seam between the ramification reduction and the base cases: a cyclic extension of `ℚ` of
@@ -117,14 +117,31 @@ lemma kw_reduce_to_prime_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → 
     rwa [← iSup_univ, ← Finset.coe_univ, Finset.iSup_coe, lift_iSup _ _ _ Finset.univ,
       lift_top] at this
 
+set_option backward.isDefEq.respectTransparency false in
 /-- **Kronecker-Weber theorem**: every abelian extension of `ℚ` is contained in a cyclotomic
 field. -/
 theorem kronecker_weber
     (K : Type*) [Field K] [NumberField K] [IsAbelianGalois ℚ K] :
     ∃ n : ℕ, Nonempty (K →ₐ[ℚ] CyclotomicField n ℚ) := by
-  let A := AlgClo
-  have {n : ℕ} : HasEnoughRootsOfUnity ℂ n := by exact?
-  have := kw_reduce_to_prime_power (A := ℂ)
-  sorry
+  let A := AlgebraicClosure K
+  have : Algebra K A := by exact AlgebraicClosure.instAlgebra K
+  let ξ : ℕ → A :=
+    fun n ↦ if hn : n = 0 then 0 else
+      haveI : NeZero n := ⟨hn⟩
+      (HasEnoughRootsOfUnity.exists_primitiveRoot A n).choose
+  have hξ (n : ℕ) : IsPrimitiveRoot (ξ n) n := by
+    cases n
+    · exact IsPrimitiveRoot.zero
+    · exact (HasEnoughRootsOfUnity.exists_primitiveRoot A _).choose_spec
+  have : NumberField (IsScalarTower.toAlgHom ℚ K A).fieldRange :=
+    .of_ringEquiv K _ (IsScalarTower.toAlgHom ℚ K A).equivFieldRange
+  have : IsAbelianGalois ℚ (IsScalarTower.toAlgHom ℚ K A).fieldRange :=
+    .of_algHom (IsScalarTower.toAlgHom ℚ K A).equivFieldRange.symm.toAlgHom
+  obtain ⟨n, hn, hK⟩ := kw_reduce_to_prime_power hξ (IsScalarTower.toAlgHom ℚ K A).fieldRange
+  refine ⟨n, ?_⟩
+  have : NeZero n := ⟨hn.ne'⟩
+  have : IsCyclotomicExtension {n} ℚ ℚ⟮ξ n⟯ := (hξ n).adjoinSimple_isCyclotomicExtension n ℚ A
+  exact ⟨((algEquiv {n} ℚ ℚ⟮ξ n⟯ _).toAlgHom.comp (inclusion hK)).comp
+    (IsScalarTower.toAlgHom ℚ K A).equivFieldRange.toAlgHom⟩
 
 end

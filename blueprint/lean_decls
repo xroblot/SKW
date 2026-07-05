@@ -40,6 +40,7 @@ emultiplicity_galEquivZMod_symm_smul_gaussSum
 sum_with_mul_inv_mem_eq_sum_range
 GaussSum_factorization
 Stickelberger
+kronecker_weber
 IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top
 kw_reduce_to_unramified_outside_p
 kw_cyclic_primePow_le_cyclotomic

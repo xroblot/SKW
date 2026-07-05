@@ -984,11 +984,14 @@ The goal of this chapter is to prove the following theorem.
 
 \begin{theorem}
   \label{thm:kronecker_weber}
+  \lean{kronecker_weber}
+  \leanok
   \uses{lem:kw_reduce_to_prime_power, prop:kw_odd_prime_power, prop:kw_2_power}
   Every abelian extension of $\QQ$ is contained in a cyclotomic field.
 \end{theorem}
 
 \begin{proof}
+  \leanok
   By \ref{lem:kw_reduce_to_prime_power}, it suffices to prove that every cyclic
   extension of $\QQ$ of prime power degree $p^m$ unramified outside $p$ is
   contained in a cyclotomic field. For odd $p$, this is
