@@ -48,6 +48,8 @@ def IsCyclicOfPrimePowDegree (K : Type*) [Field K] [Algebra ℚ K] : Prop :=
 
 variable {p : ℕ} [hp : Fact p.Prime]
 
+/- Superseded by the ambient (`IntermediateField ℚ A`) form below, which callers use without
+restricting into the compositum.
 /-- Two cyclic `p`-extensions of `ℚ` whose compositum is cyclic must be comparable. -/
 lemma kw_cyclic_compositum (L : Type*) [Field L] [NumberField L] (K K' : IntermediateField ℚ L)
     (h : finrank ℚ K ∣ finrank ℚ K') [IsGalois ℚ L] [hCL : IsCyclic Gal(L/ℚ)] :
@@ -64,6 +66,7 @@ lemma kw_cyclic_compositum (L : Type*) [Field L] [NumberField L] (K K' : Interme
   have he' : finrank K' L = finrank ℚ L / finrank ℚ K' :=
     Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
   rwa [he, he', Nat.div_dvd_div_iff finrank_pos finrank_pos hd' hd]
+-/
 
 /-- Every non-trivial extension of `ℚ` is ramified at some finite prime (Minkowski). -/
 lemma kw_minkowski (K : Type*) [Field K] [NumberField K] (h : Module.finrank ℚ K > 1) :
@@ -325,6 +328,32 @@ lemma kw_reduce_to_unramified_outside_p {A : Type*} [Field A] [CharZero A] (ξ :
     exact hq.mem_primeFactors (by rwa [← Int.natCast_dvd])
       (Int.natAbs_ne_zero.mpr <| discr_ne_zero K)
   exact kw_reduce_to_unramified_outside_p_aux ξ hξ S K ⟨m, hK⟩ hS
+
+set_option backward.isDefEq.respectTransparency false in
+/-- Two cyclic `p`-extensions `K`, `K'` of `ℚ` inside a common ambient `A`, whose compositum
+`K ⊔ K'` is cyclic over `ℚ`, are comparable (`K ≤ K'`) once `[K:ℚ] ∣ [K':ℚ]`. -/
+lemma kw_cyclic_compositum {A : Type*} [Field A] [CharZero A] (K K' : IntermediateField ℚ A)
+    [NumberField ↑(K ⊔ K')] [IsGalois ℚ ↑(K ⊔ K')] [IsCyclic Gal(↑(K ⊔ K')/ℚ)]
+    (h : Module.finrank ℚ K ∣ Module.finrank ℚ K') : K ≤ K' := by
+  rw [← restrict_le_restrict_iff (le_sup_left : K ≤ K ⊔ K') (le_sup_right : K' ≤ K ⊔ K')]
+  set J := K.restrict (le_sup_left : K ≤ K ⊔ K')
+  set J' := K'.restrict (le_sup_right : K' ≤ K ⊔ K')
+  replace h : finrank ℚ J ∣ finrank ℚ J' := by
+    rw [finrank_restrict, finrank_restrict]; exact h
+  rw [← IsGaloisGroup.fixedPoints_fixingSubgroup Gal(↑(K ⊔ K')/ℚ) ℚ ↑(K ⊔ K') J,
+    ← IsGaloisGroup.fixedPoints_fixingSubgroup Gal(↑(K ⊔ K')/ℚ) ℚ ↑(K ⊔ K') J']
+  apply IsGaloisGroup.fixedPoints_le_of_le
+  rw [IsCyclic.subgroup_le_subgroup_iff, IsGaloisGroup.card_fixingSubgroup_eq_finrank,
+    IsGaloisGroup.card_fixingSubgroup_eq_finrank]
+  have hd : finrank ℚ J ∣ finrank ℚ ↑(K ⊔ K') :=
+    finrank_mul_finrank ℚ J ↑(K ⊔ K') ▸ dvd_mul_right _ _
+  have hd' : finrank ℚ J' ∣ finrank ℚ ↑(K ⊔ K') :=
+    finrank_mul_finrank ℚ J' ↑(K ⊔ K') ▸ dvd_mul_right _ _
+  have he : finrank J ↑(K ⊔ K') = finrank ℚ ↑(K ⊔ K') / finrank ℚ J :=
+    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
+  have he' : finrank J' ↑(K ⊔ K') = finrank ℚ ↑(K ⊔ K') / finrank ℚ J' :=
+    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
+  rwa [he, he', Nat.div_dvd_div_iff finrank_pos finrank_pos hd' hd]
 
 end
 

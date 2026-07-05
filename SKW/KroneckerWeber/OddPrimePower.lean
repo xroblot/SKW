@@ -192,10 +192,7 @@ theorem prop_kw_odd_prime_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
     · rwa [finrank_lift]
     · apply UnramifiedOutside.of_algEquiv p (liftAlgEquiv _)
       exact UnramifiedOutside.tower_bot p (unramifiedOutside_sup p K K' hKram hK'₄)
-  have hKK' : K ≤ K' := by
-    have := kw_cyclic_compositum ↑(K ⊔ K') (K.restrict le_sup_left) (K'.restrict le_sup_right)
-      (by rw [finrank_restrict, finrank_restrict, hK, hK'₂])
-    rwa [restrict_le_restrict_iff] at this
+  have hKK' : K ≤ K' := kw_cyclic_compositum K K' (hK.trans hK'₂.symm).dvd
   exact hKK'.trans hK'₁
 
 end
