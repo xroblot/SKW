@@ -6,6 +6,7 @@ public import Mathlib.GroupTheory.FiniteAbelian.Basic
 public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 public import Mathlib.RingTheory.IntegralDomain
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.Algebra.Group.Subgroup.Order
 
 public import SKW.PRed2Mathlib.AlgebraMisc
 
@@ -202,8 +203,8 @@ theorem isCyclic_iff_subgroup_card_injective {G : Type*} [Group G] [Finite G] :
     IsCyclic G ↔ ∀ H K : Subgroup G, Nat.card H = Nat.card K → H = K :=
   ⟨fun _ _ _ => IsCyclic.subgroup_eq_subgroup_iff.mpr, isCyclic_of_subgroup_card_injective⟩
 
-/- Superseded by the commutativity-free `IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic` below,
-which goes through `isCoatom_iff_index_eq_prime_of_finite` + `isCyclic_of_isCoatom_subsingleton`
+/- Superseded by the coatom-route `IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic` below,
+which goes through `CommGroup.isCoatom_iff_index_eq_prime` + `isCyclic_of_isCoatom_subsingleton`
 instead of the finite-abelian structure theorem.
 /-- A finite non-cyclic abelian `p`-group has two distinct subgroups of index `p`. -/
 theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [CommGroup G] [Finite G] {p : ℕ}
@@ -259,12 +260,44 @@ theorem isCyclic_of_isCoatom_subsingleton {G : Type*} [Group G] [IsCoatomic (Sub
     IsCyclic G := by
   rw [isCyclic_iff_exists_zpowers_eq_top]
   obtain hbot | ⟨M, hM, -⟩ := eq_top_or_exists_le_coatom (⊥ : Subgroup G)
-  · exact ⟨1, top_unique (hbot ▸ bot_le)⟩
+  · exact ⟨1, eq_top_of_bot_eq_top hbot _⟩
   · obtain ⟨g, -, hg⟩ := SetLike.exists_of_lt hM.lt_top
     refine ⟨g, ?_⟩
     by_contra hne
     obtain ⟨M', hM', hle⟩ := (eq_top_or_exists_le_coatom (zpowers g)).resolve_left hne
     exact hg (h M' M hM' hM ▸ hle (mem_zpowers g))
+
+/-- The correspondence theorem as an order isomorphism `Subgroup (G ⧸ N) ≃o Set.Ici N`.
+
+TODO: this is intended to **replace** `QuotientGroup.comapMk'OrderIso`, whose codomain is the bare
+subtype `{H : Subgroup G // N ≤ H}`. That bare subtype carries only the generic `Subtype.partialOrder`
+and gets *none* of the interval API — `Set.Ici.boundedOrder`, `Set.Ici.coe_top`/`coe_bot`,
+`Set.isSimpleOrder_Ici_iff_isCoatom` — so proofs that identify maximality/simplicity through the
+correspondence (e.g. `isSimpleGroup_iff_isCoatom`) run into endless `OrderTop`/`BoundedOrder`
+synthesis and instance-mismatch friction. Landing in `Set.Ici N` makes that whole layer available.
+
+This mirrors the submodule side, which is already done this way: `Submodule.comapMkQRelIso` has
+codomain `Set.Ici`, which is exactly why `isSimpleModule_iff_isCoatom` proves cleanly. The `Subgroup`
+version landing in the bare subtype is the anomaly; this `'`-variant fixes it and should be
+upstreamed. -/
+@[simps apply_coe]
+def QuotientGroup.comapMk'OrderIso' {G : Type*} [Group G] (N : Subgroup G) [hn : N.Normal] :
+    Subgroup (G ⧸ N) ≃o Set.Ici N where
+  toFun H' := ⟨Subgroup.comap (mk' N) H', le_comap_mk' N _⟩
+  invFun H := Subgroup.map (mk' N) H
+  left_inv H' := Subgroup.map_comap_eq_self <| by simp
+  right_inv := fun ⟨H, hH⟩ => Subtype.ext <| by simpa
+  map_rel_iff' := Subgroup.comap_le_comap_of_surjective <| mk'_surjective _
+
+/-- A subgroup of a commutative group is maximal (a coatom in the subgroup lattice) iff the quotient
+by it is simple. Group analogue of `isSimpleModule_iff_isCoatom`. -/
+theorem CommGroup.isSimpleGroup_iff_isCoatom {G : Type*} [CommGroup G] {M : Subgroup G} :
+    IsSimpleGroup (G ⧸ M) ↔ IsCoatom M := by
+  rw [← Set.isSimpleOrder_Ici_iff_isCoatom,
+    ← (QuotientGroup.comapMk'OrderIso' M).isSimpleOrder_iff, isSimpleGroup_iff, isSimpleOrder_iff]
+  by_cases hG : Nontrivial (G ⧸ M)
+  · simp [hG, Subgroup.normal_of_isMulCommutative]
+  · simp [hG]
 
 open Subgroup in
 /-- In an abelian `p`-group (finite or infinite), the maximal subgroups are exactly the subgroups
@@ -273,48 +306,31 @@ abelian*, hence `≅ ℤ/q` for a prime `q` (a simple abelian group is automatic
 a quotient of a `p`-group forces `q = p`; thus `[G : M] = p`. (This fails for non-abelian infinite
 `p`-groups — e.g. Tarski monsters, whose maximal subgroups have order `p` and infinite index.)
 
-Proof route (TODO, currently `sorry`): `IsCoatom M ↔ IsSimpleGroup (G ⧸ M)` via the correspondence
-theorem `QuotientGroup.comapMk'OrderIso`, then `CommGroup.is_simple_iff_prime_card` gives
-`(Nat.card (G ⧸ M)).Prime`, and `IsPGroup.to_quotient` + `IsPGroup.card_eq_or_dvd` pin the prime to
-`p`; `Subgroup.index_eq_card` converts card to index. The mechanical snag is bridging
-`comapMk'OrderIso`'s codomain `{H // M ≤ H}` to `↥(Set.Ici M)` for `Set.isSimpleOrder_Ici_iff_isCoatom`
-(no `BoundedOrder {H // M ≤ H}` instance). -/
-theorem isCoatom_iff_index_eq_prime {G : Type*} [CommGroup G] {p : ℕ} [Fact p.Prime]
+The proof goes `IsCoatom M ↔ IsSimpleGroup (G ⧸ M)` (`CommGroup.isSimpleGroup_iff_isCoatom`), then
+`CommGroup.is_simple_iff_prime_card` turns that into `(Nat.card (G ⧸ M)).Prime`, and
+`IsPGroup.card_eq_or_dvd` (for the `p`-group quotient) forces that prime to be `p`;
+`Subgroup.index_eq_card` converts card to index. -/
+theorem CommGroup.isCoatom_iff_index_eq_prime {G : Type*} [CommGroup G] {p : ℕ} [hp : Fact p.Prime]
     (hG : IsPGroup p G) (M : Subgroup G) : IsCoatom M ↔ M.index = p := by
-  sorry
+  rw [← CommGroup.isSimpleGroup_iff_isCoatom, CommGroup.is_simple_iff_prime_card,
+    Subgroup.index_eq_card]
+  refine ⟨fun h ↦ ?_, fun h ↦  h ▸ hp.out⟩
+  have h_dvd := (IsPGroup.card_eq_or_dvd (hG.to_quotient M)).resolve_left h.ne_one
+  exact ((Nat.prime_dvd_prime_iff_eq hp.out h).mp h_dvd).symm
 
 open Subgroup in
-/-- Finite `p`-group version, dropping commutativity: the maximal subgroups of a finite `p`-group are
-exactly the subgroups of index `p`.
-
-Proof (TODO, currently `sorry`) by strong induction on `Nat.card G`, quotienting by the centre.
-The centre `Z := center G` of a nontrivial finite `p`-group is nontrivial.
-* If `G` is abelian (`Z = ⊤`), this is `isCoatom_iff_index_eq_prime`.
-* Otherwise `Z` is a proper nontrivial normal subgroup, and for a maximal `M`:
-  * if `Z ≤ M`, then `M.map (mk' Z)` is maximal in the strictly smaller `G ⧸ Z` (correspondence
-    theorem), the induction hypothesis gives it index `p`, and `[G : M] = [G ⧸ Z : M ⧸ Z] = p`;
-  * if `¬ Z ≤ M`, then `M ⊔ Z = ⊤` by maximality (`Z` central makes `M ⊔ Z` a subgroup properly
-    above `M`), so `[G : M] = [Z : M ⊓ Z]` (second isomorphism theorem) with `M ⊓ Z` maximal in the
-    abelian `Z`, and `isCoatom_iff_index_eq_prime` applied to `Z` gives `[Z : M ⊓ Z] = p`.
-The backward direction (prime index ⟹ maximal) needs no `p`-group hypothesis. -/
-theorem isCoatom_iff_index_eq_prime_of_finite {G : Type*} [Group G] [Finite G] {p : ℕ}
-    [Fact p.Prime] (hG : IsPGroup p G) (M : Subgroup G) : IsCoatom M ↔ M.index = p := by
-  sorry
-
-open Subgroup in
-/-- A finite non-cyclic `p`-group has two distinct subgroups of index `p`. No commutativity is
-needed: if there is at most one index-`p` subgroup then, since maximal subgroups of a finite
-`p`-group are exactly the index-`p` subgroups (`isCoatom_iff_index_eq_prime_of_finite`), there is at
-most one maximal subgroup, so `G` is cyclic (`isCyclic_of_isCoatom_subsingleton`) — contradicting
-`hnc`. -/
-theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [Group G] [Finite G]
+/-- A finite non-cyclic abelian `p`-group has two distinct subgroups of index `p`. Contrapositive
+route: if there is at most one index-`p` subgroup then, since maximal subgroups are exactly the
+index-`p` subgroups (`CommGroup.isCoatom_iff_index_eq_prime`), there is at most one maximal subgroup,
+so `G` is cyclic (`isCyclic_of_isCoatom_subsingleton`) — contradicting `hnc`. -/
+theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [CommGroup G] [Finite G]
     {p : ℕ} [Fact p.Prime] (hG : IsPGroup p G) (hnc : ¬ IsCyclic G) :
     ∃ H₁ H₂ : Subgroup G, H₁.index = p ∧ H₂.index = p ∧ H₁ ≠ H₂ := by
   by_contra hcon
   push Not at hcon
   refine hnc (isCyclic_of_isCoatom_subsingleton fun M₁ M₂ hM₁ hM₂ => ?_)
-  exact hcon M₁ M₂ ((isCoatom_iff_index_eq_prime_of_finite hG M₁).mp hM₁)
-    ((isCoatom_iff_index_eq_prime_of_finite hG M₂).mp hM₂)
+  exact hcon M₁ M₂ ((CommGroup.isCoatom_iff_index_eq_prime hG M₁).mp hM₁)
+    ((CommGroup.isCoatom_iff_index_eq_prime hG M₂).mp hM₂)
 
 end
 
