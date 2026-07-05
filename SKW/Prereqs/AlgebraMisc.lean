@@ -202,6 +202,9 @@ theorem isCyclic_iff_subgroup_card_injective {G : Type*} [Group G] [Finite G] :
     IsCyclic G ↔ ∀ H K : Subgroup G, Nat.card H = Nat.card K → H = K :=
   ⟨fun _ _ _ => IsCyclic.subgroup_eq_subgroup_iff.mpr, isCyclic_of_subgroup_card_injective⟩
 
+/- Superseded by the commutativity-free `IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic` below,
+which goes through `isCoatom_iff_index_eq_prime_of_finite` + `isCyclic_of_isCoatom_subsingleton`
+instead of the finite-abelian structure theorem.
 /-- A finite non-cyclic abelian `p`-group has two distinct subgroups of index `p`. -/
 theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [CommGroup G] [Finite G] {p : ℕ}
     [Fact p.Prime] (hG : IsPGroup p G) (hnc : ¬ IsCyclic G) :
@@ -245,6 +248,73 @@ theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [CommGroup
     exact Prod.snd_surjective.comp hg
   · obtain ⟨y, hy⟩ := hg <| Multiplicative.ofAdd (0, 1)
     exact ne_of_mem_of_not_mem' (a := y) (by simp [hy]) (by simp [hy])
+-/
+
+open Subgroup in
+/-- A group with at most one maximal subgroup is cyclic. Maximal subgroups are the coatoms
+`IsCoatom (· : Subgroup G)` of the subgroup lattice. Only `IsCoatomic (Subgroup G)` is required
+(automatic for finite `G`); no finiteness, commutativity, or `p`-group hypothesis is needed. -/
+theorem isCyclic_of_isCoatom_subsingleton {G : Type*} [Group G] [IsCoatomic (Subgroup G)]
+    (h : ∀ M₁ M₂ : Subgroup G, IsCoatom M₁ → IsCoatom M₂ → M₁ = M₂) :
+    IsCyclic G := by
+  rw [isCyclic_iff_exists_zpowers_eq_top]
+  obtain hbot | ⟨M, hM, -⟩ := eq_top_or_exists_le_coatom (⊥ : Subgroup G)
+  · exact ⟨1, top_unique (hbot ▸ bot_le)⟩
+  · obtain ⟨g, -, hg⟩ := SetLike.exists_of_lt hM.lt_top
+    refine ⟨g, ?_⟩
+    by_contra hne
+    obtain ⟨M', hM', hle⟩ := (eq_top_or_exists_le_coatom (zpowers g)).resolve_left hne
+    exact hg (h M' M hM' hM ▸ hle (mem_zpowers g))
+
+open Subgroup in
+/-- In an abelian `p`-group (finite or infinite), the maximal subgroups are exactly the subgroups
+of index `p`. Finiteness is unnecessary: for a maximal `M`, the quotient `G ⧸ M` is simple *and
+abelian*, hence `≅ ℤ/q` for a prime `q` (a simple abelian group is automatically finite), and being
+a quotient of a `p`-group forces `q = p`; thus `[G : M] = p`. (This fails for non-abelian infinite
+`p`-groups — e.g. Tarski monsters, whose maximal subgroups have order `p` and infinite index.)
+
+Proof route (TODO, currently `sorry`): `IsCoatom M ↔ IsSimpleGroup (G ⧸ M)` via the correspondence
+theorem `QuotientGroup.comapMk'OrderIso`, then `CommGroup.is_simple_iff_prime_card` gives
+`(Nat.card (G ⧸ M)).Prime`, and `IsPGroup.to_quotient` + `IsPGroup.card_eq_or_dvd` pin the prime to
+`p`; `Subgroup.index_eq_card` converts card to index. The mechanical snag is bridging
+`comapMk'OrderIso`'s codomain `{H // M ≤ H}` to `↥(Set.Ici M)` for `Set.isSimpleOrder_Ici_iff_isCoatom`
+(no `BoundedOrder {H // M ≤ H}` instance). -/
+theorem isCoatom_iff_index_eq_prime {G : Type*} [CommGroup G] {p : ℕ} [Fact p.Prime]
+    (hG : IsPGroup p G) (M : Subgroup G) : IsCoatom M ↔ M.index = p := by
+  sorry
+
+open Subgroup in
+/-- Finite `p`-group version, dropping commutativity: the maximal subgroups of a finite `p`-group are
+exactly the subgroups of index `p`.
+
+Proof (TODO, currently `sorry`) by strong induction on `Nat.card G`, quotienting by the centre.
+The centre `Z := center G` of a nontrivial finite `p`-group is nontrivial.
+* If `G` is abelian (`Z = ⊤`), this is `isCoatom_iff_index_eq_prime`.
+* Otherwise `Z` is a proper nontrivial normal subgroup, and for a maximal `M`:
+  * if `Z ≤ M`, then `M.map (mk' Z)` is maximal in the strictly smaller `G ⧸ Z` (correspondence
+    theorem), the induction hypothesis gives it index `p`, and `[G : M] = [G ⧸ Z : M ⧸ Z] = p`;
+  * if `¬ Z ≤ M`, then `M ⊔ Z = ⊤` by maximality (`Z` central makes `M ⊔ Z` a subgroup properly
+    above `M`), so `[G : M] = [Z : M ⊓ Z]` (second isomorphism theorem) with `M ⊓ Z` maximal in the
+    abelian `Z`, and `isCoatom_iff_index_eq_prime` applied to `Z` gives `[Z : M ⊓ Z] = p`.
+The backward direction (prime index ⟹ maximal) needs no `p`-group hypothesis. -/
+theorem isCoatom_iff_index_eq_prime_of_finite {G : Type*} [Group G] [Finite G] {p : ℕ}
+    [Fact p.Prime] (hG : IsPGroup p G) (M : Subgroup G) : IsCoatom M ↔ M.index = p := by
+  sorry
+
+open Subgroup in
+/-- A finite non-cyclic `p`-group has two distinct subgroups of index `p`. No commutativity is
+needed: if there is at most one index-`p` subgroup then, since maximal subgroups of a finite
+`p`-group are exactly the index-`p` subgroups (`isCoatom_iff_index_eq_prime_of_finite`), there is at
+most one maximal subgroup, so `G` is cyclic (`isCyclic_of_isCoatom_subsingleton`) — contradicting
+`hnc`. -/
+theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [Group G] [Finite G]
+    {p : ℕ} [Fact p.Prime] (hG : IsPGroup p G) (hnc : ¬ IsCyclic G) :
+    ∃ H₁ H₂ : Subgroup G, H₁.index = p ∧ H₂.index = p ∧ H₁ ≠ H₂ := by
+  by_contra hcon
+  push Not at hcon
+  refine hnc (isCyclic_of_isCoatom_subsingleton fun M₁ M₂ hM₁ hM₂ => ?_)
+  exact hcon M₁ M₂ ((isCoatom_iff_index_eq_prime_of_finite hG M₁).mp hM₁)
+    ((isCoatom_iff_index_eq_prime_of_finite hG M₂).mp hM₂)
 
 end
 
