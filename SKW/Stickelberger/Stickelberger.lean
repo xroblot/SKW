@@ -66,16 +66,13 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
     change Function.Bijective <| rootsOfUnityMapQuot P (p ^ f - 1)
     have hNP : absNorm P = p ^ f := by
       rw [absNorm_eq_pow_inertiaDeg' P hp.out, Ideal.inertiaDeg'_eq_inertiaDeg, inertia_deg_eq p f]
-    have : Fintype (𝓞 K ⧸ P) := Fintype.ofFinite (𝓞 K ⧸ P)
-    have : Fintype (rootsOfUnity (p ^ f - 1) (𝓞 K)) := sorry
-    refine (Fintype.bijective_iff_injective_and_card _).mpr ⟨?_, ?_⟩
+    refine (Nat.bijective_iff_injective_and_card _).mpr ⟨?_, ?_⟩
     · apply rootsOfUnityMapQuot_injective
       · rw [hNP]
         exact ne_of_gt <|  Nat.lt_of_add_left_lt <| three_le_p_pow p f
       · rw [hNP]
         exact Nat.Coprime.pow_left _ (coprime_pow_sub_one p f).symm
-    · rw [← Nat.card_eq_fintype_card, IsPrimitiveRoot.card_rootsOfUnity hη,
-        Fintype.card_units (𝓞 K ⧸ P), ← Nat.card_eq_fintype_card, ← absNorm_eq_card, hNP]
+    · rw [IsPrimitiveRoot.card_rootsOfUnity hη, Nat.card_units (𝓞 K ⧸ P), ← absNorm_eq_card, hNP]
   obtain ⟨Γ, hΓ₀, hΓ⟩ := exists_mem_gaussSum_pow_eq hbij hζ hη 𝓟 m d hdm E k₀
   refine ⟨e Γ, ?_⟩
   simp_rw [Ideal.submodule_span_eq, ← Set.image_singleton, ← map_span,

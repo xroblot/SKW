@@ -119,10 +119,8 @@ lemma kw_exists_realUnit_torsion [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {η :
       rw [torsionOrder_eq (n := p), if_neg (Nat.not_even_iff_odd.mpr hp')]
     refine ⟨ζ ^ 2, ε ^ 2, pow_mem hε 2, ?_, ?_⟩
     · rw [SubmonoidClass.coe_pow, ← mul_pow, ← h', ← pow_mul]
-    · have : Fintype (Units.torsion F) := sorry
-      rw [← Units.val_pow_eq_pow_val, ← Subgroup.coe_pow, ← pow_mul, ← h₁, Units.torsionOrder,
-        Nat.card_eq_fintype_card,
-        pow_card_eq_one, OneMemClass.coe_one, Units.val_one]
+    · rw [← Units.val_pow_eq_pow_val, ← Subgroup.coe_pow, ← pow_mul, ← h₁, Units.torsionOrder,
+        pow_card_eq_one', OneMemClass.coe_one, Units.val_one]
   have hη4 : (η : F) ^ 4 = (ζ.val : F) * (ε : F) := by exact_mod_cast congrArg Units.val h'
   have hζ' : ((galEquivZMod p F).symm (-1)) (ζ.val : F) = (ζ.val : F) ^ (-1 : ℤ) :=
     galEquivZMod_symm_apply_of_pow_eq p F (by simp) (by rw [← map_pow, hζ, map_one])

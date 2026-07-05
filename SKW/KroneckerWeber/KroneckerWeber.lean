@@ -1,8 +1,9 @@
 module
 
+public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+
 public import SKW.KroneckerWeber.OddPrimePower
 public import SKW.KroneckerWeber.TwoPower
-
 public import SKW.Prereqs.Instances
 
 @[expose] public section
@@ -121,6 +122,9 @@ field. -/
 theorem kronecker_weber
     (K : Type*) [Field K] [NumberField K] [IsAbelianGalois ℚ K] :
     ∃ n : ℕ, Nonempty (K →ₐ[ℚ] CyclotomicField n ℚ) := by
+  let A := AlgClo
+  have {n : ℕ} : HasEnoughRootsOfUnity ℂ n := by exact?
+  have := kw_reduce_to_prime_power (A := ℂ)
   sorry
 
 end
