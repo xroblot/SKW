@@ -105,6 +105,32 @@ theorem IsGaloisGroup.finrank_fixedPoints_eq_index_subgroup (G K L : Type*) [Gro
   rw [← mul_left_inj' this, Module.finrank_mul_finrank, finrank_fixedPoints_eq_card_subgroup,
     Subgroup.index_mul_card, card_eq_finrank G K L]
 
+/-- Fixed-field is antitone (the Galois correspondence), so it sends `⊓` of subgroups to `⊔` of
+fixed fields: `fixedField (A ⊓ B) = fixedField A ⊔ fixedField B`. -/
+theorem FixedPoints.intermediateField_inf (G K L : Type*) [Group G] [Field K] [Field L]
+    [Algebra K L] [MulSemiringAction G L] [Finite G] [IsGaloisGroup G K L] (A B : Subgroup G) :
+    (FixedPoints.intermediateField ↑(A ⊓ B) : IntermediateField K L) =
+      FixedPoints.intermediateField A ⊔ FixedPoints.intermediateField B := by
+  rw [← IsGaloisGroup.intermediateFieldEquivSubgroup_symm_apply_toDual G K L (H := A ⊓ B),
+    ← IsGaloisGroup.intermediateFieldEquivSubgroup_symm_apply_toDual G K L (H := A),
+    ← IsGaloisGroup.intermediateFieldEquivSubgroup_symm_apply_toDual G K L (H := B),
+    toDual_inf, OrderIso.map_sup]
+
+/-- **Inertia field from a complement.** For a Galois group `G` of `L/K` (`IsGaloisGroup G K L`), if
+a normal subgroup `I` is complemented by the fixing subgroup of an intermediate field `F`
+(`IsComplement' I (fixingSubgroup G (F : Set L))`), then the fixed field of `I` together with `F`
+generates `L`, and the complement is `G ⧸ I`. Used both in the odd-prime ramification reduction and
+in the `p = 2` (Lemmermeyer) case, each taking a fixed field of a subgroup this way. -/
+theorem IsGaloisGroup.fixedPoints_sup_eq_top_of_isComplement (G K L : Type*) [Group G] [Field K]
+    [Field L] [Algebra K L] [MulSemiringAction G L] [Finite G] [IsGaloisGroup G K L]
+    {I : Subgroup G} [I.Normal] {F : IntermediateField K L}
+    (h : Subgroup.IsComplement' I (fixingSubgroup G (F : Set L))) :
+    FixedPoints.intermediateField I ⊔ F = ⊤ ∧
+      Nonempty (G ⧸ I ≃* (fixingSubgroup G (F : Set L))) := by
+  refine ⟨?_, ⟨h.symm.QuotientMulEquiv⟩⟩
+  rw [← fixedPoints_fixingSubgroup G K L F, ← FixedPoints.intermediateField_inf,
+    disjoint_iff.mp h.disjoint, fixedPoints_bot]
+
 open Module in
 lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Field E] [Algebra F E]
     (K L : IntermediateField F E) [IsGalois F K] [FiniteDimensional F K] [FiniteDimensional F L]

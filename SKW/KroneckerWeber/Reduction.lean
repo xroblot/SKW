@@ -120,6 +120,57 @@ theorem ramificationIdx_sup_dvd_lcm {K : Type*} [Field K] [NumberField K] [IsGal
   · rw [Subgroup.inf_subgroupOf_left, Subgroup.inf_subgroupOf_left, ← Subgroup.subgroupOf_inf,
       ← fixingSubgroup_sup, hEF, fixingSubgroup_top, Subgroup.bot_subgroupOf]
 
+/-- **(L1) Tame inertia complement (the Abhyankar core).** In an abelian number field `L/ℚ` with
+`E = ℚ⟮ζ_q⟯ ⊆ L` (cyclotomic, totally ramified at `q`, so `e_E = q - 1`) and `K ⊆ L` of `p`-power
+degree with `K ⊔ E = ⊤`, a tame prime `𝔔 ∣ q` of `𝓞 L` has its inertia group complemented by
+`Gal(L/E) = E.fixingSubgroup`: `IsComplement' (inertia Gal(L/ℚ) 𝔔) E.fixingSubgroup`. Packages the
+tame-inertia + Abhyankar + tower steps; this is the one genuinely hard leaf. -/
+lemma inertia_isComplement_fixingSubgroup {L : Type*} [Field L] [NumberField L] [IsAbelianGalois ℚ L]
+    (K E : IntermediateField ℚ L) [IsGalois ℚ K] [IsGalois ℚ E] (htop : K ⊔ E = ⊤) {q : ℕ}
+    (hq : q.Prime) (hqp : q ≠ p) [IsCyclotomicExtension {q} ℚ E] {m : ℕ}
+    (hK : Module.finrank ℚ K = p ^ m) (htame : ¬ q ∣ Module.finrank ℚ L) (𝔔 : Ideal (𝓞 L))
+    [𝔔.IsMaximal] [𝔔.LiesOver (span {(q : ℤ)})] :
+    Subgroup.IsComplement' (Ideal.inertia Gal(L/ℚ) 𝔔) E.fixingSubgroup := by
+  have : Fact q.Prime := ⟨hq⟩
+  let 𝔮 : Ideal ℤ := span {(q : ℤ)}
+  have : 𝔮.IsPrime := isPrime_of_liesOver 𝔔 𝔮
+  let G := Gal(L/ℚ)
+  have : FaithfulSMul G (𝓞 L) := IsGaloisGroup.faithful ℤ
+  have : IsAbelianGalois ℚ K := IsAbelianGalois.tower_bot ℚ K L
+  have : FaithfulSMul Gal(K/ℚ) (𝓞 K) := IsGaloisGroup.faithful ℤ
+  have hcard : Nat.card (Ideal.inertia G 𝔔) = 𝔔.ramificationIdx ℤ := by
+    rw [card_inertia_eq_ramificationIdxIn 𝔮 𝔔, ramificationIdxIn_eq_ramificationIdx 𝔮 𝔔 G]
+  have h₂ : 𝔔.ramificationIdx ℤ = q - 1 := by
+    apply dvd_antisymm
+    · have := ramificationIdx_sup_dvd_lcm K E htop htame 𝔔 (p := q)
+      refine dvd_trans this <| Nat.lcm_dvd ?_ ?_
+      · rw [← ramificationIdxIn_eq_ramificationIdx 𝔮 _ Gal(K/ℚ),
+          ← card_inertia_eq_ramificationIdxIn 𝔮 (under (𝓞 K) 𝔔) (G := Gal(K/ℚ))]
+        convert card_inertia_dvd_card_sub_one' (G := Gal(K/ℚ)) (under (𝓞 K) 𝔔) (R := ℤ) ?_
+        · have : (under (𝓞 K) 𝔔).LiesOver 𝔮 := Ideal.LiesOver.tower_bot 𝔔 (under (𝓞 K) 𝔔) 𝔮
+          simp [← (liesOver_iff _ _).mp this, 𝔮, Int.card_ideal_quot]
+        · apply card_inertia_notMem_of_not_dvd
+          simp [- Nat.card_eq_fintype_card, ← (liesOver_iff _ _).mp ‹𝔔.LiesOver 𝔮›,
+            IsGalois.card_aut_eq_finrank, 𝔮, hK]
+          exact fun h ↦ hqp <| (Nat.prime_dvd_prime_iff_eq hq hp.out).mp <| hq.dvd_of_dvd_pow h
+      · rw [IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime q]
+    · rw [ramificationIdx_tower (R := ℤ) (under (𝓞 E) 𝔔),
+        IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime q E]
+      exact dvd_mul_right (q - 1) _
+  have h₃ : 𝔔.ramificationIdx (𝓞 E) = 1 := by
+    have := ramificationIdx_tower (R := ℤ) (under (𝓞 E) 𝔔) 𝔔
+    rwa [h₂, IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime q E,
+      left_eq_mul₀ (by grind [hq.one_lt])] at this
+  have h₄ : 𝔔.inertia G ⊓ E.fixingSubgroup = ⊥ := by
+    rw [Subgroup.eq_bot_iff_card, ← Subgroup.subgroupOf_map_subtype, Subgroup.card_subtype,
+      Ideal.subgroupOf_inertia, card_inertia_eq_ramificationIdxIn (under (𝓞 E) 𝔔) 𝔔,
+      ramificationIdxIn_eq_ramificationIdx (under (𝓞 E) 𝔔) 𝔔 E.fixingSubgroup]
+    exact h₃
+  refine Subgroup.isComplement'_of_card_mul_and_disjoint ?_ (disjoint_iff.mpr h₄)
+  rw [IsGalois.card_aut_eq_finrank, ← finrank_mul_finrank ℚ E, hcard, h₂,
+    IsGalois.card_fixingSubgroup_eq_finrank,
+    IsCyclotomicExtension.Rat.finrank q E, Nat.totient_prime hq]
+
 set_option synthInstance.maxHeartbeats 500000 in
 set_option backward.isDefEq.respectTransparency false in
 /-- Ramification reduction: given `K/ℚ` cyclic of prime power degree `pᵐ` with `q ≠ p` ramified,
@@ -137,131 +188,44 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
       (∀ q' : ℕ, q'.Prime → Algebra.IsUnramifiedIn (𝓞 K) (Ideal.span {(q' : ℤ)}) →
         Algebra.IsUnramifiedIn (𝓞 F) (Ideal.span {(q' : ℤ)})) ∧ K ⊔ ℚ⟮ξ q⟯ = F ⊔ ℚ⟮ξ q⟯ := by
   let E := ℚ⟮ξ q⟯
-  let L := K ⊔ E
+  let L := ↥(K ⊔ E)
   let 𝔮 : Ideal ℤ := span {(q : ℤ)}
-  have : Fact q.Prime := sorry
-  have : 𝔮.IsPrime := sorry
+  have : Fact q.Prime := ⟨hq⟩
+  have : 𝔮.IsPrime := (Ideal.span_singleton_prime (by exact_mod_cast hq.ne_zero)).mpr (Nat.prime_iff_prime_int.mp hq)
   have : NumberField L := sorry
   have : IsAbelianGalois ℚ L := sorry
-  let G := Gal(L/ℚ)
-  have : FaithfulSMul G (𝓞 L) := IsGaloisGroup.faithful ℤ
-  have hF : finrank ℚ L ∣ p ^ m * (q - 1) := sorry
-  have hq₁ : ¬ q ∣ finrank ℚ L := sorry
-  obtain ⟨𝔔, _, h𝔔⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral 𝔮 (S := 𝓞 L)
-  have h₁ : IsCyclic (Ideal.inertia G 𝔔) ∧
-      Nat.card (Ideal.inertia G 𝔔) = ramificationIdx 𝔔 ℤ := by
-    refine ⟨?_, ?_⟩
-    · have : ↑(Nat.card (inertia G 𝔔)) ∉ 𝔔 := sorry
-      exact isCyclic_inertia' 𝔔 this
-    · rw [card_inertia_eq_ramificationIdxIn 𝔮 𝔔, ramificationIdxIn_eq_ramificationIdx 𝔮 𝔔 G]
+  let K' : IntermediateField ℚ L := K.restrict le_sup_left
   let E' : IntermediateField ℚ L := E.restrict le_sup_right
-  have : IsCyclotomicExtension {q} ℚ E' := sorry
+  have : IsGalois ℚ K' := IsGalois.of_algEquiv (restrict_algEquiv le_sup_left)
   have : IsGalois ℚ E' := sorry
-  have h₂ : 𝔔.ramificationIdx ℤ = q - 1 := by
-    apply dvd_antisymm
-    · let K' : IntermediateField ℚ L := K.restrict le_sup_left
-      have : IsAbelianGalois ℚ K' := sorry
-      have hK' : finrank ℚ K' = p ^ m := sorry
-      have : FaithfulSMul Gal(K'/ℚ) (𝓞 K') := IsGaloisGroup.faithful ℤ
-      have : IsGalois ℚ E' := sorry
-      have := ramificationIdx_sup_dvd_lcm K' E' ?_ ?_ 𝔔 (p := q)
-      refine dvd_trans this <| Nat.lcm_dvd ?_ ?_
-      · rw [← ramificationIdxIn_eq_ramificationIdx 𝔮 _ Gal(K'/ℚ),
-          ← card_inertia_eq_ramificationIdxIn 𝔮 (under (𝓞 K') 𝔔) (G := Gal(K'/ℚ))]
-        convert card_inertia_dvd_card_sub_one' (G := Gal(K'/ℚ)) (under (𝓞 K') 𝔔) (R := ℤ) ?_
-        · have : (under (𝓞 K') 𝔔).LiesOver 𝔮 := sorry
-          simp [← (liesOver_iff _ _).mp this, 𝔮, Int.card_ideal_quot]
-        · apply card_inertia_notMem_of_not_dvd
-          simp [- Nat.card_eq_fintype_card, ← (liesOver_iff _ _).mp h𝔔,
-            IsGalois.card_aut_eq_finrank, 𝔮, hK']
-          exact fun h ↦ hqp <| (Nat.prime_dvd_prime_iff_eq hq hp.out).mp <| hq.dvd_of_dvd_pow h
-      · rw [IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime q]
-      · exact lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top])
-      exact hq₁
-    · have : IsCyclotomicExtension {q} ℚ E' := sorry
-      rw [ramificationIdx_tower (R := ℤ) (under (𝓞 E') 𝔔),
-        IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime q E']
-      exact dvd_mul_right (q - 1) _
-  have h₃ : 𝔔.ramificationIdx (𝓞 E') = 1 := by
-    have := ramificationIdx_tower (R := ℤ) (under (𝓞 E') 𝔔) 𝔔
-    rwa [h₂, IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime q E',
-      left_eq_mul₀ (by grind [hq.one_lt])] at this
-  have h₄ : 𝔔.inertia G ⊓ E'.fixingSubgroup = ⊥ := by
-    rw [Subgroup.eq_bot_iff_card, ← Subgroup.subgroupOf_map_subtype, Subgroup.card_subtype,
-      Ideal.subgroupOf_inertia, card_inertia_eq_ramificationIdxIn (under (𝓞 E') 𝔔) 𝔔,
-      ramificationIdxIn_eq_ramificationIdx (under (𝓞 E') 𝔔) 𝔔 E'.fixingSubgroup]
-    exact h₃
-  have h₅ : Subgroup.IsComplement' (𝔔.inertia G) E'.fixingSubgroup := by
-    refine Subgroup.isComplement'_of_card_mul_and_disjoint ?_ (disjoint_iff.mpr <| h₄)
-    rw [IsGalois.card_aut_eq_finrank, ← finrank_mul_finrank ℚ E', h₁.2, h₂,
-      IsGalois.card_fixingSubgroup_eq_finrank,
-      IsCyclotomicExtension.Rat.finrank q E', Nat.totient_prime hq]
-  let F : IntermediateField ℚ L := fixedField (inertia G 𝔔)
-  have hF : IsGaloisGroup (inertia G 𝔔) F L := .of_fixedPoints_eq G ℚ L (inertia G 𝔔) _ rfl
-  refine ⟨lift (fixedField (𝔔.inertia G)), ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+  have : IsCyclotomicExtension {q} ℚ E' := sorry
+  have hK'top : K' ⊔ E' = ⊤ :=
+    lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top])
+  have hK'deg : Module.finrank ℚ K' = p ^ m := by rw [finrank_restrict]; exact hK
+  have htame : ¬ q ∣ Module.finrank ℚ L := sorry
+  obtain ⟨𝔔, hmax, h𝔔⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral 𝔮 (S := 𝓞 L)
+  haveI := hmax
+  haveI := h𝔔
+  -- (L1) the inertia group of `𝔔` is complemented by `Gal(L/E')`, and (L2) its fixed field `F`
+  -- satisfies `F ⊔ E' = ⊤` with `Gal(F/ℚ) ≃* Gal(L/E')`.
+  have hcompl := inertia_isComplement_fixingSubgroup K' E' hK'top hq hqp hK'deg htame 𝔔
+  obtain ⟨hFsup, ⟨eF⟩⟩ :=
+    IsGaloisGroup.fixedPoints_sup_eq_top_of_isComplement Gal(L/ℚ) ℚ L hcompl
+  refine ⟨lift (fixedField (Ideal.inertia Gal(L/ℚ) 𝔔)), ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
   · infer_instance
   · infer_instance
-  · have : IsCyclic Gal(fixedField (inertia G 𝔔)/ℚ) := sorry
-    infer_instance
-  ·
+  · -- `Gal(F/ℚ) ≃* Gal(L/E') = E'.fixingSubgroup`, cyclic (quotient of the cyclic `Gal(K/ℚ)`)
     sorry
-  · have : IsInertiaField ℚ L 𝔔 (fixedField (inertia G 𝔔)) := (isInertiaField_iff ℚ _ 𝔔 _).mpr hF
-
+  · -- `[F:ℚ] = Nat.card E'.fixingSubgroup = [L:E'] ∣ [K':ℚ] = p^m`, hence a `p`-power
     sorry
-  ·
+  · -- `F` is the inertia field of `𝔔` (`IsInertiaField`), so unramified at `q`
     sorry
-  ·
+  · -- no new ramified prime: `L = K ⊔ E'` is unramified outside `K`'s primes ∪ {q}
+    -- (`unramifiedOutside_sup` + `unramifiedOutside_of_isCyclotomicExtension`), and `F ⊆ L`
+    -- inherits it (`UnramifiedOutside.tower_bot`)
     sorry
-
-
-  -- ROUTE (a): inertia / fixed field.  Write `E = ℚ(ζ_q) = ℚ⟮ξ q⟯`, `L = K ⊔ E`, `G = Gal(L/ℚ)`.
-  -- `F` will be the **inertia field** of a prime `𝔔 ∣ q` of `𝓞 L` (the fixed field of its inertia
-  -- group), lifted back into `A`.
-  --
-  -- Preliminaries.
-  --   • `E` is cyclotomic (`hξ q : IsPrimitiveRoot (ξ q) q`): `NumberField E`, `IsGalois ℚ E`,
-  --     `IsCyclic Gal(E/ℚ) ≅ (ℤ/q)ˣ`, and `E` is **totally ramified** at `q` with `e(E) = q - 1`.
-  --   • `L = K·E` is a `NumberField`, `IsGalois ℚ L`, and `G := Gal(L/ℚ)` is **abelian** (compositum
-  --     of the abelian `K` and `E`).  Restriction gives `G ↪ Gal(K/ℚ) × Gal(E/ℚ)`, injective because
-  --     `L = K·E`, i.e. `Gal(L/K) ⊓ Gal(L/E) = ⊥`.
-  --
-  -- Step 1 (tame inertia).  Fix a prime `𝔔 ∣ q` of `𝓞 L` and set `I := Ideal.inertia G 𝔔 ⊆ G`.
-  --   Since `q ≠ p` and `q ∤ [L:ℚ]` (because `[L:ℚ] ∣ pᵐ·(q-1)`, coprime to `q`), `q` is tame, so:
-  --     · `I` is cyclic (`isCyclic_inertia'`, the full-`G` form);
-  --     · `Nat.card I = e(𝔔 ∣ q) = e(L)` (Mathlib `card_inertia_eq_ramificationIdxIn`, bridged to
-  --       `𝔔.ramificationIdx ℤ` via `ramificationIdxIn_eq_ramificationIdx`).
-  --
-  -- Step 2 (Abhyankar: `q` unramified in `L/E`).  Viewing `K`, `E` as intermediate fields of `L`
-  --   (`K ⊔ E = ⊤` in `L`), `ramificationIdx_sup_dvd_lcm` applied to `𝔔` gives
-  --   `e(L) ∣ Nat.lcm (e K) (e E)` directly -- this stays inside `G ↷ 𝓞 L` (index form, via
-  --   `coe_mem_inertia` + tower), so NO cross-ring inertia functoriality is needed.  Now `e K = p^a`
-  --   and `card_inertia_dvd_card_sub_one'` gives `p^a ∣ q - 1 = e E`, so `lcm (e K) (e E) = q - 1`;
-  --   with `e E ∣ e L` (tower `E ⊆ L`, `ramificationIdx_tower`) we conclude `e L = q - 1 = e E`.
-  --   Hence `e(L/E) = e L / e E = 1`, i.e. **`I ⊓ Gal(L/E) = ⊥`** (`q` unramified in `L/E`).
-  --
-  -- Step 3 (direct product).  `G` abelian, `I ⊓ Gal(L/E) = ⊥`, and
-  --   `Nat.card I · Nat.card Gal(L/E) = (q-1)·[L:E] = [L:ℚ] = Nat.card G`, so **`G = I × Gal(L/E)`**.
-  --
-  -- Step 4 (the field `F`).  Let `F := IntermediateField.lift (fixedField I)` (inertia field of `𝔔`).
-  --     • **`F` unramified at `q`**: `Gal(L/F) = I` is the inertia, so `F` is the inertia field
-  --       (ramification index `1` at `q`).
-  --     • **`F` cyclic** and **`p`-power degree**: `Gal(F/ℚ) ≅ G/I ≅ Gal(L/E) ≅ Gal(K / K∩E)`, a
-  --       subgroup of the cyclic `Gal(K/ℚ)`; and `[F:ℚ] = [G:I] = [L:E] = [K:K∩E] ∣ pᵐ`.
-  --     • **`K ⊔ ℚ⟮ξ q⟯ = F ⊔ ℚ⟮ξ q⟯`**: `F ⊔ E ↔ I ⊓ Gal(L/E) = ⊥ ↔ L = K ⊔ E` (Galois corresp.).
-  --     • **no new ramified prime**: `F ⊆ L`, `L` ramifies only where `K` or `E` do, `E` only at `q`,
-  --       and `F` is unramified at `q`; so `K` unramified at `q' ⟹ F` unramified at `q'`.
-  --
-  -- Assemble `⟨F, ‹NumberField F›, ‹IsGalois ℚ F›, ‹IsCyclic Gal(F/ℚ)›, ⟨k, hk⟩, hFq, hFpres, hcomp⟩`.
-  --
-  -- Sub-lemmas to discharge:
-  --   (i)   instances `NumberField L`, `IsGalois ℚ L`, `IsMulCommutative Gal(L/ℚ)`;
-  --   (ii)  `E` totally ramified at `q`, `e E = q - 1`;
-  --   (iii) view `K`, `E` as `IntermediateField ℚ L` with `K ⊔ E = ⊤`, matching `ramificationIdx`
-  --         across the `A`- and `L`-currencies (same rings of integers), to apply
-  --         `ramificationIdx_sup_dvd_lcm` -- routine bookkeeping, NOT inertia functoriality;
-  --   (iv)  `Nat.card I = e L` (`card_inertia_eq_ramificationIdxIn`, bridged) and the tower
-  --         `e L = e(L/E) · e E` (`ramificationIdx_tower`);
-  --   (v)   `G = I × Gal(L/E)`; for `F = fixedField I`: degree, cyclicity, `F ⊔ E = L`, unramified at `q`.
+  · -- `K ⊔ ℚ⟮ξ q⟯ = F ⊔ ℚ⟮ξ q⟯` from `hFsup : fixedField _ ⊔ E' = ⊤` lifted back to `A`
+    sorry
 
 
 /-- Auxiliary form of `kw_reduce_to_unramified_outside_p`, generalized over a finite set `S` of
