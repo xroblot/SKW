@@ -5,6 +5,9 @@ public import Mathlib.Algebra.Algebra.Hom.Rat
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Lemmas
 public import Mathlib.GroupTheory.SpecificGroups.Cyclic
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.GroupTheory.PGroup
+public import Mathlib.GroupTheory.QuotientGroup.Basic
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
 
 @[expose] public section
 
@@ -217,5 +220,82 @@ theorem IntermediateField.adjoin_simple_mul {F E : Type*} [Field F] [Field E] [A
   · rw [adjoin_simple_le_iff]
     convert IntermediateField.div_mem _ (mem_adjoin_simple_self F _) (algebraMap_mem _ y)
     rw [mul_div_cancel_right₀ x (by rwa [map_ne_zero])]
+
+end
+
+/-!
+# PRed to Mathlib: coatoms of the subgroup lattice and abelian `p`-groups
+
+The declarations in this file were extracted from `SKW.Prereqs.AlgebraMisc` and submitted upstream as
+two stacked Mathlib PRs:
+* [#41651](https://github.com/leanprover-community/mathlib4/pull/41651): `comapMk'OrderIso'`,
+  `isCyclic_of_isCoatom_subsingleton`, `CommGroup.isSimpleGroup_iff_isCoatom`.
+* [#41652](https://github.com/leanprover-community/mathlib4/pull/41652): `CommGroup.isCoatom_iff_index_eq_prime`,
+  `IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic`.
+
+Once those PRs merge and the `lake-manifest.json` pin is bumped past the merge commits, this file (and
+its import in `SKW.Prereqs.AlgebraMisc`) should be deleted, and any usages redirected to the Mathlib
+versions.
+-/
+
+@[expose] public section
+
+open Subgroup in
+/-- A group with at most one maximal subgroup is cyclic. Maximal subgroups are the coatoms
+`IsCoatom (· : Subgroup G)` of the subgroup lattice. Only `IsCoatomic (Subgroup G)` is required
+(automatic for finite `G`); no finiteness, commutativity, or `p`-group hypothesis is needed. -/
+theorem isCyclic_of_isCoatom_subsingleton {G : Type*} [Group G] [IsCoatomic (Subgroup G)]
+    (h : ∀ M₁ M₂ : Subgroup G, IsCoatom M₁ → IsCoatom M₂ → M₁ = M₂) :
+    IsCyclic G := by
+  rw [isCyclic_iff_exists_zpowers_eq_top]
+  obtain hbot | ⟨M, hM, -⟩ := eq_top_or_exists_le_coatom (⊥ : Subgroup G)
+  · exact ⟨1, eq_top_of_bot_eq_top hbot _⟩
+  · obtain ⟨g, -, hg⟩ := SetLike.exists_of_lt hM.lt_top
+    refine ⟨g, ?_⟩
+    by_contra hne
+    obtain ⟨M', hM', hle⟩ := (eq_top_or_exists_le_coatom (zpowers g)).resolve_left hne
+    exact hg (h M' M hM' hM ▸ hle (mem_zpowers g))
+
+/-- The correspondence theorem as an order isomorphism `Subgroup (G ⧸ N) ≃o Set.Ici N`. -/
+@[simps apply_coe]
+def QuotientGroup.comapMk'OrderIso' {G : Type*} [Group G] (N : Subgroup G) [hn : N.Normal] :
+    Subgroup (G ⧸ N) ≃o Set.Ici N where
+  toFun H' := ⟨Subgroup.comap (mk' N) H', le_comap_mk' N _⟩
+  invFun H := Subgroup.map (mk' N) H
+  left_inv H' := Subgroup.map_comap_eq_self <| by simp
+  right_inv := fun ⟨H, hH⟩ => Subtype.ext <| by simpa
+  map_rel_iff' := Subgroup.comap_le_comap_of_surjective <| mk'_surjective _
+
+/-- A subgroup of a commutative group is maximal (a coatom in the subgroup lattice) iff the quotient
+by it is simple. Group analogue of `isSimpleModule_iff_isCoatom`. -/
+theorem CommGroup.isSimpleGroup_iff_isCoatom {G : Type*} [CommGroup G] {M : Subgroup G} :
+    IsSimpleGroup (G ⧸ M) ↔ IsCoatom M := by
+  rw [← Set.isSimpleOrder_Ici_iff_isCoatom,
+    ← (QuotientGroup.comapMk'OrderIso' M).isSimpleOrder_iff, isSimpleGroup_iff, isSimpleOrder_iff]
+  by_cases hG : Nontrivial (G ⧸ M)
+  · simp [hG, Subgroup.normal_of_isMulCommutative]
+  · simp [hG]
+
+open Subgroup in
+/-- In an abelian `p`-group (finite or infinite), the maximal subgroups are exactly the subgroups
+of index `p`. -/
+theorem CommGroup.isCoatom_iff_index_eq_prime {G : Type*} [CommGroup G] {p : ℕ} [hp : Fact p.Prime]
+    (hG : IsPGroup p G) (M : Subgroup G) : IsCoatom M ↔ M.index = p := by
+  rw [← CommGroup.isSimpleGroup_iff_isCoatom, CommGroup.is_simple_iff_prime_card,
+    Subgroup.index_eq_card]
+  refine ⟨fun h ↦ ?_, fun h ↦ h ▸ hp.out⟩
+  have h_dvd := (IsPGroup.card_eq_or_dvd (hG.to_quotient M)).resolve_left h.ne_one
+  exact ((Nat.prime_dvd_prime_iff_eq hp.out h).mp h_dvd).symm
+
+open Subgroup in
+/-- A finite non-cyclic abelian `p`-group has two distinct subgroups of index `p`. -/
+theorem IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic {G : Type*} [CommGroup G] [Finite G]
+    {p : ℕ} [Fact p.Prime] (hG : IsPGroup p G) (hnc : ¬ IsCyclic G) :
+    ∃ H₁ H₂ : Subgroup G, H₁.index = p ∧ H₂.index = p ∧ H₁ ≠ H₂ := by
+  by_contra hcon
+  push Not at hcon
+  refine hnc (isCyclic_of_isCoatom_subsingleton fun M₁ M₂ hM₁ hM₂ => ?_)
+  exact hcon M₁ M₂ ((CommGroup.isCoatom_iff_index_eq_prime hG M₁).mp hM₁)
+    ((CommGroup.isCoatom_iff_index_eq_prime hG M₂).mp hM₂)
 
 end
