@@ -1270,10 +1270,51 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
   trivially, whence $|I|$ divides $\operatorname{lcm}$ of their indices.
 \end{proof}
 
+\begin{lemma}[Tame inertia complement]
+  \label{lem:inertia_isComplement_fixingSubgroup}
+  \lean{inertia_isComplement_fixingSubgroup}
+  \leanok
+  \uses{lem:tame_inertia_cyclic, lem:abelian_tame_ramificationIdx_dvd, lem:ramificationIdx_sup_dvd_lcm}
+  Let $L/\QQ$ be a finite abelian extension containing $E = \QQ(\zeta_q)$ (totally ramified at $q$,
+  so $e_q(E) = q-1$) and a subfield $K$ of $p$-power degree with $KE = L$. For a prime
+  $\mathfrak{Q}\mid q$ of $L$ (tame, since $q \nmid [L:\QQ]$), the inertia group
+  $I = I_q(L) \subseteq \Gal(L/\QQ)$ is a complement of $\Gal(L/E)$: one has
+  $I \cap \Gal(L/E) = 1$ and $|I|\cdot|\Gal(L/E)| = |\Gal(L/\QQ)|$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  By \ref{lem:tame_inertia_cyclic}, $I$ is cyclic with $|I| = e_q(L)$. The Abhyankar bound
+  \ref{lem:ramificationIdx_sup_dvd_lcm} gives $e_q(L) \mid \operatorname{lcm}(e_q(K), e_q(E))$;
+  here $e_q(K) = p^s$ is a $p$-power and, as $K/\QQ$ is abelian,
+  \ref{lem:abelian_tame_ramificationIdx_dvd} gives $p^s \mid q-1 = e_q(E)$, so the lcm is $q-1$.
+  With $e_q(E) \mid e_q(L)$ from the ramification tower $E \subseteq L$ we conclude
+  $e_q(L) = q-1 = e_q(E)$, i.e.\ $q$ is unramified in $L/E$, which is exactly $I \cap \Gal(L/E) = 1$.
+  The order identity is the ramification tower $e_q(L) = e_q(E)\cdot e(L/E)$ together with
+  $|\Gal(L/E)| = [L:E]$.
+\end{proof}
+
+\begin{lemma}[Inertia field from a complement]
+  \label{lem:inertia_field_from_complement}
+  \lean{IsGaloisGroup.fixedPoints_sup_eq_top_of_isComplement}
+  \leanok
+  Let $G = \Gal(L/\QQ)$, let $I \trianglelefteq G$ be a normal subgroup complemented by $\Gal(L/E)$
+  for an intermediate field $E$. Then the fixed field $F = L^{I}$ satisfies $FE = L$ and
+  $G/I \cong \Gal(L/E)$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  The identity $FE = L$ is the Galois correspondence sending intersection of subgroups to
+  compositum of fixed fields: $F = L^{I}$ and $E = L^{\Gal(L/E)}$, so
+  $FE = L^{I \cap \Gal(L/E)} = L^{1} = L$. The isomorphism $G/I \cong \Gal(L/E)$ is the quotient
+  map attached to the complement.
+\end{proof}
+
 \begin{lemma}
   \label{lem:kw_ramification_reduction}
   \lean{kw_ramification_reduction}
-  \uses{lem:tame_inertia_cyclic, lem:abelian_tame_ramificationIdx_dvd, lem:ramificationIdx_sup_dvd_lcm}
+  \uses{lem:inertia_isComplement_fixingSubgroup, lem:inertia_field_from_complement}
   Let $K/\QQ$ be a cyclic extension of $p$-power degree. If $q \neq p$ is ramified in $K/\QQ$,
   then there exist a cyclic cyclotomic extension $\Lambda/\QQ$ and a cyclic extension $F/\QQ$
   of $p$-power degree in which $q$ is unramified, such that $K\Lambda = F\Lambda$ and every
@@ -1281,40 +1322,18 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \end{lemma}
 
 \begin{proof}
-  Write $[K:\QQ] = p^m$. As $q \neq p$, the prime $q$ is tamely ramified in $K/\QQ$; let
-  $p^s = e_q(K)$ be its ramification index, so by \ref{lem:tame_inertia_cyclic} the inertia
-  $I_q(K) \subseteq \Gal(K/\QQ) \cong \ZZ/p^m\ZZ$ is cyclic of order $p^s$. Since $K/\QQ$ is
-  abelian, \ref{lem:abelian_tame_ramificationIdx_dvd} (with $N(q) = q$) gives $p^s \mid q - 1$.
-  As $\Gal(\QQ(\zeta_q)/\QQ) \cong \ZZ/(q-1)\ZZ$ is cyclic, it has a unique subfield $\Lambda$ of
-  degree $p^s$; since $\QQ(\zeta_q)/\QQ$ is totally ramified at $q$, so is $\Lambda$, whence
-  $I_q(\Lambda) = \Gal(\Lambda/\QQ)$.
-
-  Put $A = K\Lambda$ and fix a prime of $A$ above $q$ with inertia $I := I_q(A) \subseteq
-  \Gal(A/\QQ)$. Restriction embeds $\Gal(A/\QQ) \hookrightarrow \Gal(K/\QQ) \times
-  \Gal(\Lambda/\QQ)$ and carries $I$ onto $I_q(K)$ and onto $I_q(\Lambda) = \Gal(\Lambda/\QQ)$
-  (inertia surjects onto the inertia of a sub-extension). So $I$, cyclic by
-  \ref{lem:tame_inertia_cyclic}, embeds into $I_q(K) \times I_q(\Lambda) \cong \ZZ/p^s\ZZ \times
-  \ZZ/p^s\ZZ$ while surjecting onto each factor; a cyclic subgroup of $\ZZ/p^s\ZZ \times
-  \ZZ/p^s\ZZ$ with that property has order exactly $p^s$, so $|I| = p^s$.
-
-  Let $F := A^{I}$ be the inertia field of $q$ in $A/\QQ$; by the defining property of the
-  inertia field, $q$ is unramified in $F/\QQ$. Because $\Lambda$ is totally ramified at $q$, the
-  restriction $I \to \Gal(\Lambda/\QQ)$ is onto, and since $|I| = p^s = |\Gal(\Lambda/\QQ)|$ it
-  is an isomorphism. Hence $I \cap \Gal(A/\Lambda) = 1$ and $|I|\cdot|\Gal(A/\Lambda)| =
-  |\Gal(A/\QQ)|$, so
+  Write $[K:\QQ] = p^m$, put $E = \QQ(\zeta_q)$ and $L = KE$, and fix a prime $\mathfrak{Q}\mid q$
+  of $L$ with inertia $I = I_q(L) \subseteq \Gal(L/\QQ)$. By
+  \ref{lem:inertia_isComplement_fixingSubgroup}, $I$ is a complement of $\Gal(L/E)$. Let
+  $F = L^{I}$ be the inertia field of $q$ in $L/\QQ$. By \ref{lem:inertia_field_from_complement},
+  $FE = L = KE$ and
   \[
-    \Gal(A/\QQ) = I \times \Gal(A/\Lambda).
+    \Gal(F/\QQ) \cong \Gal(L/\QQ)/I \cong \Gal(L/E) \cong \Gal\!\big(K/(K\cap E)\big),
   \]
-  Therefore:
-  \begin{itemize}
-    \item $F\Lambda = A$ (from $I \cap \Gal(A/\Lambda) = 1$), i.e.\ $F\Lambda = K\Lambda$;
-    \item $\Gal(F/\QQ) = \Gal(A/\QQ)/I \cong \Gal(A/\Lambda) \cong \Gal\!\big(K/(K\cap\Lambda)\big)$,
-      which is cyclic of $p$-power degree; so $F/\QQ$ is cyclic of $p$-power degree.
-  \end{itemize}
-  Finally $F \subseteq A = K\Lambda$ and $\Lambda$ is ramified only at $q$, so every prime
-  ramified in $F$ is ramified in $K$, while $q$ is unramified in $F$.
-  (When $K \cap \Lambda = \QQ$ — automatic if $s < m$, since the only subfield of $K$ totally
-  ramified at $q$ is $\QQ$ — one gets $[F:\QQ] = p^m$, recovering Lemmermeyer's statement.)
+  a subgroup of the cyclic $\Gal(K/\QQ)$, hence cyclic of $p$-power degree. Finally $F = L^{I}$ is
+  the inertia field, so $q$ is unramified in $F/\QQ$; and $F \subseteq L = KE$ with
+  $E = \QQ(\zeta_q)$ ramified only at $q$, so every prime ramified in $F$ is ramified in $K$.
+  Taking $\Lambda = E$ gives the claim.
 \end{proof}
 
 \begin{lemma}

@@ -53,6 +53,8 @@ Ideal.isCyclic_inertia
 Ideal.tameCharacter_conj
 Ideal.card_inertia_dvd_card_sub_one
 ramificationIdx_sup_dvd_lcm
+inertia_isComplement_fixingSubgroup
+IsGaloisGroup.fixedPoints_sup_eq_top_of_isComplement
 kw_ramification_reduction
 kw_minkowski
 prop_kw_2_quadratic

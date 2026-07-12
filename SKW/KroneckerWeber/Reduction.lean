@@ -17,6 +17,7 @@ public import SKW.Prereqs.CyclotomicField
 public import SKW.Prereqs.Instances
 public import SKW.Prereqs.IntermediateField
 public import SKW.Prereqs.TameRamification
+public import SKW.Prereqs.Unramified
 
 @[expose] public section
 
@@ -198,28 +199,35 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   let E' : IntermediateField ℚ L := E.restrict le_sup_right
   have : IsGalois ℚ K' := IsGalois.of_algEquiv (restrict_algEquiv le_sup_left)
   have : IsGalois ℚ E' := sorry
+  let jK : Gal(K/ℚ) ≃* Gal(K'/ℚ) := AlgEquiv.autCongr <| restrict_algEquiv _
+  have : IsCyclic Gal(K'/ℚ) := by rwa [← jK.isCyclic]
   have : IsCyclotomicExtension {q} ℚ E' := sorry
   have hK'top : K' ⊔ E' = ⊤ :=
     lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top])
   have hK'deg : Module.finrank ℚ K' = p ^ m := by rw [finrank_restrict]; exact hK
   have htame : ¬ q ∣ Module.finrank ℚ L := sorry
   obtain ⟨𝔔, hmax, h𝔔⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral 𝔮 (S := 𝓞 L)
-  haveI := hmax
-  haveI := h𝔔
-  -- (L1) the inertia group of `𝔔` is complemented by `Gal(L/E')`, and (L2) its fixed field `F`
-  -- satisfies `F ⊔ E' = ⊤` with `Gal(F/ℚ) ≃* Gal(L/E')`.
+  -- `hcompl` (L1): `I := inertia G 𝔔` is complemented by `E'.fixingSubgroup = Gal(L/E')`. Then
+  -- `hFsup : fixedField I ⊔ E' = ⊤` and `eF : G ⧸ I ≃* E'.fixingSubgroup` (`I` normal, `G` abelian).
+  -- The output field is `F := fixedField I` (the inertia field of `𝔔`), lifted to `A`.
   have hcompl := inertia_isComplement_fixingSubgroup K' E' hK'top hq hqp hK'deg htame 𝔔
   obtain ⟨hFsup, ⟨eF⟩⟩ :=
     IsGaloisGroup.fixedPoints_sup_eq_top_of_isComplement Gal(L/ℚ) ℚ L hcompl
-  refine ⟨lift (fixedField (Ideal.inertia Gal(L/ℚ) 𝔔)), ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
-  · infer_instance
-  · infer_instance
-  · -- `Gal(F/ℚ) ≃* Gal(L/E') = E'.fixingSubgroup`, cyclic (quotient of the cyclic `Gal(K/ℚ)`)
+  refine ⟨lift (fixedField (Ideal.inertia Gal(L/ℚ) 𝔔)), inferInstance, inferInstance, ?_, ?_, ?_, ?_, ?_⟩
+  · rw [(liftAlgEquiv _).symm.autCongr.isCyclic, (IsGalois.normalAutEquivQuotient _).symm.isCyclic,
+      eF.isCyclic, ← IntermediateField.fixingSubgroup, (fixingSubgroupEquiv E').isCyclic]
+    exact isCyclic_of_injective _ <| restrictRestrictAlgEquivMapHom_injective K' E' hK'top
+  ·
+    -- `∃ k, finrank ℚ F = p^k`: `[F:ℚ] = [G:I] = Nat.card (G ⧸ I) = Nat.card E'.fixingSubgroup`
+    -- `= [L:E'] = [K':(K'∩E')] ∣ [K':ℚ] = p^m`, hence a `p`-power.
     sorry
-  · -- `[F:ℚ] = Nat.card E'.fixingSubgroup = [L:E'] ∣ [K':ℚ] = p^m`, hence a `p`-power
-    sorry
-  · -- `F` is the inertia field of `𝔔` (`IsInertiaField`), so unramified at `q`
-    sorry
+  · have : IsInertiaField ℚ L 𝔔 (fixedField (inertia Gal(L/ℚ) 𝔔)) := by
+      sorry
+    apply Algebra.IsUnramifiedIn.of_algEquiv <|
+      RingOfIntegers.mapIntAlgEquiv (liftAlgEquiv _).toRingEquiv
+    refine Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one.mpr fun 𝔓 _ _ ↦ ?_
+    have :  𝔔.LiesOver 𝔓 := sorry
+    apply IsInertiaField.ramificationIdx_eq ℚ L (fixedField (inertia Gal(L/ℚ) 𝔔)) _ 𝔔 𝔓
   · -- no new ramified prime: `L = K ⊔ E'` is unramified outside `K`'s primes ∪ {q}
     -- (`unramifiedOutside_sup` + `unramifiedOutside_of_isCyclotomicExtension`), and `F ⊆ L`
     -- inherits it (`UnramifiedOutside.tower_bot`)
