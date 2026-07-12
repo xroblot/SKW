@@ -4,6 +4,7 @@ public import Mathlib.Algebra.Algebra.Equiv
 public import Mathlib.Algebra.Algebra.Hom.Rat
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Lemmas
 public import Mathlib.GroupTheory.SpecificGroups.Cyclic
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 
 @[expose] public section
 
@@ -181,5 +182,40 @@ theorem IsCyclic.subgroup_eq_subgroup_iff {G : Type*} [Group G] [Finite G] [hG :
     H = K ↔ Nat.card H = Nat.card K := by
   rw [le_antisymm_iff, subgroup_le_subgroup_iff, subgroup_le_subgroup_iff, dvd_dvd_iff_associated,
     associated_iff_eq]
+
+end
+
+/-!
+# PRed to Mathlib: `IntermediateField.adjoin_simple_add` / `adjoin_simple_mul`
+
+The declarations in this file were extracted from `SKW.Prereqs.AlgebraMisc` and submitted
+upstream as Mathlib PR [#41649](https://github.com/leanprover-community/mathlib4/pull/41649)
+(there renamed `IntermediateField.adjoin_simple_add_algebraMap` /
+`IntermediateField.adjoin_simple_mul_algebraMap`).
+
+Once that PR is merged and the `lake-manifest.json` pin is bumped past the merge commit,
+this file (and its import in `SKW.Prereqs.AlgebraMisc`) should be deleted, and any usages
+redirected to the Mathlib versions.
+-/
+
+@[expose] public section
+
+theorem IntermediateField.adjoin_simple_add {F E : Type*} [Field F] [Field E] [Algebra F E]
+    (x : E) (y : F) : adjoin F {x + algebraMap F E y} = adjoin F {x} := by
+  apply le_antisymm
+  · rw [adjoin_le_iff, Set.singleton_subset_iff, SetLike.mem_coe]
+    exact add_mem (mem_adjoin_simple_self F x) (algebraMap_mem _ y)
+  · rw [adjoin_simple_le_iff]
+    convert IntermediateField.sub_mem _ (mem_adjoin_simple_self F _) (algebraMap_mem _ y)
+    rw [eq_sub_iff_add_eq]
+
+theorem IntermediateField.adjoin_simple_mul {F E : Type*} [Field F] [Field E] [Algebra F E]
+    (x : E) (y : F) (hy : y ≠ 0) : adjoin F {x * algebraMap F E y} = adjoin F {x} := by
+  apply le_antisymm
+  · rw [adjoin_le_iff, Set.singleton_subset_iff, SetLike.mem_coe]
+    exact mul_mem (mem_adjoin_simple_self F x) (algebraMap_mem _ y)
+  · rw [adjoin_simple_le_iff]
+    convert IntermediateField.div_mem _ (mem_adjoin_simple_self F _) (algebraMap_mem _ y)
+    rw [mul_div_cancel_right₀ x (by rwa [map_ne_zero])]
 
 end

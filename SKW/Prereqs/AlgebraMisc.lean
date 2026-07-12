@@ -21,24 +21,6 @@ theorem Algebra.adjoin_singleton_add {R A : Type*} [CommRing R] [Ring A] [Algebr
     convert Subalgebra.sub_mem _ (self_mem_adjoin_singleton R _) (algebraMap_mem _ y)
     rw [add_sub_cancel_right]
 
-theorem IntermediateField.adjoin_simple_add {F E : Type*} [Field F] [Field E] [Algebra F E]
-    (x : E) (y : F) : adjoin F {x + algebraMap F E y} = adjoin F {x} := by
-  apply le_antisymm
-  · rw [adjoin_le_iff, Set.singleton_subset_iff, SetLike.mem_coe]
-    exact add_mem (mem_adjoin_simple_self F x) (algebraMap_mem _ y)
-  · rw [adjoin_simple_le_iff]
-    convert IntermediateField.sub_mem _ (mem_adjoin_simple_self F _) (algebraMap_mem _ y)
-    rw [eq_sub_iff_add_eq]
-
-theorem IntermediateField.adjoin_simple_mul {F E : Type*} [Field F] [Field E] [Algebra F E]
-    (x : E) (y : F) (hy : y ≠ 0) : adjoin F {x * algebraMap F E y} = adjoin F {x} := by
-  apply le_antisymm
-  · rw [adjoin_le_iff, Set.singleton_subset_iff, SetLike.mem_coe]
-    exact mul_mem (mem_adjoin_simple_self F x) (algebraMap_mem _ y)
-  · rw [adjoin_simple_le_iff]
-    convert IntermediateField.div_mem _ (mem_adjoin_simple_self F _) (algebraMap_mem _ y)
-    rw [mul_div_cancel_right₀ x (by rwa [map_ne_zero])]
-
 /-! ### MulEquiv / AlgHom / AlgEquiv -/
 
 @[to_additive (attr := simp)]
