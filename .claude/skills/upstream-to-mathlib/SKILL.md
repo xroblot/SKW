@@ -126,7 +126,27 @@ Working copy: `/Users/roblot/Desktop/EnCours/Lean/Lean4/mathlib4-alt`
 - Run `lake exe mk_all` if files were added or removed.
 - Build the touched file(s) and confirm no errors/`sorry`: `lake build Mathlib.<Module>`.
 
-## 3. Open the PR
+## 3. Self-review the diff with `lean:mathlib-review`
+
+Before opening the PR, always run the `lean:mathlib-review` skill on the ported
+declarations and act on its findings — this is a required step, not optional. A Mathlib
+reviewer will apply exactly these criteria, so catching them now avoids a review round
+trip. Pay particular attention to:
+
+- **Naming.** The names that were fine inside SKW are often not the most idiomatic Mathlib
+  names. Check the conclusion-describes-the-name convention and existing precedent (e.g.
+  the `_op_algebraMap` suffix: `adjoin_simple_add_algebraMap`, not a bare `adjoin_simple_add`
+  that reads ambiguously). Renaming here is cheap; renaming after review is not. Since the
+  quarantined SKW copy (§5) keeps its original names, a Mathlib rename just means the
+  post-merge redirect maps the SKW name to the new upstream name.
+- **Missing API / attributes** on any new `def` (`@[simp]` lemmas, `@[ext]`, instances).
+- **Style** the compiler won't flag: unsqueezed terminal `simp`, `erw`/`rfl`-after-`rw`
+  smells, line length, docstrings on every new declaration.
+
+Then confirm the touched module still builds and `lake exe runLinter Mathlib.<Module>`
+passes after any changes the review prompted.
+
+## 4. Open the PR
 
 Follow `lean:mathlib-pr` for commit-message format (`<type>(<scope>): <subject>`),
 fork/branch conventions, and labels.
@@ -142,7 +162,7 @@ Steps:
 - `gh pr create --repo leanprover-community/mathlib4 --base master ...` with a HEREDOC
   body. Note the resulting PR number/URL — it's needed for the quarantine step below.
 
-## 4. Quarantine the SKW copy in `PRed2Mathlib`
+## 5. Quarantine the SKW copy in `PRed2Mathlib`
 
 Once the PR is open (so you have its number to link), don't leave the ported
 declarations sitting in their original SKW
@@ -193,7 +213,7 @@ This way the eventual cleanup (once the PR merges and the pin bumps — see belo
 two-line deletion: drop the `PRed2Mathlib` file and the one `public import` line, with
 zero risk of missing a stray duplicated declaration elsewhere in the original file.
 
-## 5. Plan the post-merge cleanup
+## 6. Plan the post-merge cleanup
 
 Once the PR merges, the `PRed2Mathlib` mirror file becomes fully redundant. Don't delete
 it immediately — SKW pins a specific Mathlib commit via `lake-manifest.json`, so the
