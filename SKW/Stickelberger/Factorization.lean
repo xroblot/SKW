@@ -59,7 +59,7 @@ theorem smul_gaussSum_eq_gaussSum' [NeZero f] [NeZero m] [Fact (Odd p)] [IsCyclo
             rw [← map_pow, ← pow_mul, ← mul_assoc, hdm, pow_mul, hη.pow_eq_one, one_pow, map_one])
         refine ⟨ε ^ i, ?_⟩
         rw [map_pow _ ε, hi]
-      rw [hx, AlgEquiv.smul_def, AlgEquiv.coe_restrictScalars', AlgEquiv.commutes]
+      rw [hx, AlgEquiv.smul_def, AlgEquiv.coe_restrictScalars, AlgEquiv.commutes]
     have := congr_arg (· ^ d) <| galLFEquiv_apply_eta p f hη (τ.restrictScalars F)
     rw [← map_pow, ← map_pow, ← smul_pow', ← map_pow, t₀, ← pow_mul,
       (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 L)).eq_iff,
