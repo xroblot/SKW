@@ -11,7 +11,7 @@ For `I` an ideal of `R`, the group morphism from the roots of unity of `R`
 of order `n` to `(R ⧸ I)ˣ`.
 -/
 def rootsOfUnity.mapQuot : (rootsOfUnity n R) →* (R ⧸ I)ˣ :=
-  (Units.map (Ideal.Quotient.mk I).toMonoidHom).restrict _
+  (Units.map (Ideal.Quotient.mk I).toMonoidHom).domRestrict _
 
 
 @[simp]

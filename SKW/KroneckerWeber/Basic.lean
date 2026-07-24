@@ -117,7 +117,7 @@ lemma kw_abelian_kummer (σ : Gal(F/ℚ)) :
     rw [IsPrimitiveRoot.iff_orderOf, orderOf_units, Subgroup.orderOf_coe, MulEquiv.orderOf_eq]
     rw [orderOf_eq_card_of_forall_mem_zpowers hτ, IsGalois.card_aut_eq_finrank, hrF]
   have hmain := AlgEquiv.congr_fun this <| rootOfSplitsXPowSubC hp.out.pos (μ : F) L
-  simp only [AlgEquiv.mul_apply, AlgEquiv.coe_restrictScalars'] at hmain
+  simp only [AlgEquiv.mul_apply, AlgEquiv.coe_restrictScalars] at hmain
   rw [hτα, MulAction.subgroup_smul_def, Units.smul_def, Algebra.smul_def, map_mul,
     AlgEquiv.liftNormal_commutes, Rat.galEquivZMod_apply_of_pow_eq p _ _ hζ.pow_eq_one, map_pow] at hmain
   obtain ⟨c, j, hj, h⟩ := exists_eq_algebraMap_mul_pow_of_pow_eq_algebraMap hF hIrr (α := α)
@@ -483,7 +483,7 @@ lemma kw_abelian_kummer (σ : Gal(F/ℚ)) :
     rw [IsPrimitiveRoot.iff_orderOf, orderOf_units, Subgroup.orderOf_coe, MulEquiv.orderOf_eq]
     rw [orderOf_eq_card_of_forall_mem_zpowers hτ, IsGalois.card_aut_eq_finrank, hrF]
   have hmain := AlgEquiv.congr_fun this <| rootOfSplitsXPowSubC hp.out.pos (μ : F) L
-  simp only [AlgEquiv.mul_apply, AlgEquiv.coe_restrictScalars'] at hmain
+  simp only [AlgEquiv.mul_apply, AlgEquiv.coe_restrictScalars] at hmain
   rw [hτα, MulAction.subgroup_smul_def, Units.smul_def, Algebra.smul_def, map_mul,
     AlgEquiv.liftNormal_commutes, Rat.galEquivZMod_apply_of_pow_eq p _ _ hζ.pow_eq_one, map_pow] at hmain
   obtain ⟨c, j, hj, h⟩ := exists_eq_algebraMap_mul_pow_of_pow_eq_algebraMap hF hIrr (α := α)

@@ -111,7 +111,7 @@ theorem valGauss_add_valGauss_sub_self [NeZero f] [𝓟.LiesOver 𝒑] [P.LiesOv
   rw [show k - a = -a + k by ring, valGauss_periodic hbij hζ hη 𝓟 hk]
   split_ifs with h
   · rw [valGauss_eq_zero hbij hζ hη 𝓟 _ h, valGauss_eq_zero hbij hζ hη 𝓟 _ (by rwa [Int.dvd_neg]),
-      zero_add, ENat.coe_zero]
+      zero_add, ENat.natCast_zero]
   · rw [valGauss, valGauss, ← emultiplicity_mul h𝓟, span_mul_span, Set.singleton_mul_singleton,
       GaussSum_mul_GaussSum_neg hbij hζ _ h, ← Set.singleton_mul_singleton, ← span_mul_span,
       emultiplicity_mul h𝓟, emultiplicity_of_isUnit_right h𝓟.not_unit, zero_add, ← span_singleton_pow,
@@ -121,7 +121,7 @@ theorem valGauss_add_valGauss_sub_self [NeZero f] [𝓟.LiesOver 𝒑] [P.LiesOv
       Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 𝓟 (by simpa using hp.out.ne_zero)]
     haveI : 𝓟.IsPrime := Ideal.isPrime_of_prime h𝓟
     rw [ramificationIdx_eq_p_sub_one (p := p) f 𝓟,
-      ENat.coe_mul]
+      ENat.natCast_mul]
     · infer_instance
     · rw [isUnit_iff, span_singleton_eq_top]
       exact RingHom.isUnit_map (algebraMap (𝓞 K) (𝓞 L)) <|
@@ -213,7 +213,7 @@ theorem valGauss_le_self [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) :
 
 theorem valGauss_ne_top₀' [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) :
     valGauss hbij hζ 𝓟 a ≠ ⊤ :=
-  lt_top_iff_ne_top.mp <| lt_of_le_of_lt (valGauss_le_self hbij hζ hη 𝓟 a) (ENat.coe_lt_top a)
+  lt_top_iff_ne_top.mp <| lt_of_le_of_lt (valGauss_le_self hbij hζ hη 𝓟 a) (ENat.natCast_lt_top a)
 
 theorem valGauss_ne_top₀ [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℤ) :
     valGauss hbij hζ 𝓟 a ≠ ⊤ := by
@@ -238,7 +238,7 @@ theorem valGauss_ne_top (𝓠 : Ideal (𝓞 L)) (hQ : Prime 𝓠) [𝓟.LiesOver
 
 -- theorem valGauss_toNat_eq_self [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) (ha : a < p - 1) :
 --     (valGauss hbij hζ 𝓟 a).toNat = a := by
---   rw [← ENat.coe_inj, ENat.coe_toNat_eq_self.mpr (valGauss_ne_top₀ hbij hζ hη 𝓟 a)]
+--   rw [← ENat.natCast_inj, ENat.natCast_toNat_eq_self.mpr (valGauss_ne_top₀ hbij hζ hη 𝓟 a)]
 --   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
 --   have : 1 < p := hp.out.one_lt
 --   have : 1 ≤ f := NeZero.pos f
@@ -252,8 +252,8 @@ theorem valGauss_ne_top (𝓠 : Ideal (𝓞 L)) (hQ : Prime 𝓠) [𝓟.LiesOver
 --       suffices k * (p - 1) + 1 ≤ n + 1 by
 --         refine (lt_iff_not_ge.mp (lt_of_le_of_lt this ha)) ?_
 --         nlinarith [Nat.one_le_iff_ne_zero.mpr h]
---       rw [← ENat.coe_le_coe, Nat.cast_add_one, add_comm, ENat.coe_mul, hk,
---         ENat.add_le_add_iff_right (ENat.coe_toNat_eq_self.mp rfl)]
+--       rw [← ENat.coe_le_coe, Nat.cast_add_one, add_comm, ENat.natCast_mul, hk,
+--         ENat.add_le_add_iff_right (ENat.natCast_toNat_eq_self.mp rfl)]
 --       refine one_le_valGauss hbij hζ 𝓟 (n + 1 : ℕ) ?_
 --       rw [Int.natCast_dvd_natCast]
 --       apply Nat.not_dvd_of_pos_of_lt n.succ_pos
@@ -261,14 +261,14 @@ theorem valGauss_ne_top (𝓠 : Ideal (𝓞 L)) (hQ : Prime 𝓠) [𝓟.LiesOver
 
 -- theorem valGauss_toNat_p_sub_one [𝓟.LiesOver P] [P.LiesOver 𝒑] (hf : 2 ≤ f) :
 --     (valGauss hbij hζ 𝓟 (p - 1 : ℕ)).toNat = p - 1 := by
---   rw [← ENat.coe_inj, ENat.coe_toNat_eq_self.mpr (valGauss_ne_top₀ hbij hζ hη 𝓟 _)]
+--   rw [← ENat.natCast_inj, ENat.natCast_toNat_eq_self.mpr (valGauss_ne_top₀ hbij hζ hη 𝓟 _)]
 --   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
 --   obtain ⟨k, hk⟩ := exists_eq_valGauss_self_add_mul hbij hζ hη 𝓟 (p - 1 : ℕ)
 --   suffices k = 0 by
 --     rwa [this, Nat.cast_zero, zero_mul, add_zero, ENat.coe_sub, Nat.cast_one, eq_comm] at hk
 --   by_contra! h
 --   suffices 1 + k * (p - 1) ≤ p - 1 by nlinarith [Nat.one_le_iff_ne_zero.mpr h]
---   rw [← ENat.coe_le_coe, hk, ENat.coe_add, ENat.coe_mul, Nat.cast_one]
+--   rw [← ENat.coe_le_coe, hk, ENat.coe_add, ENat.natCast_mul, Nat.cast_one]
 --   gcongr
 --   refine one_le_valGauss hbij hζ 𝓟 _ ?_
 --   rw [Int.natCast_dvd_natCast]
@@ -292,7 +292,7 @@ theorem valGauss_le_sum_digits_aux [𝓟.LiesOver P] [P.LiesOver 𝒑] (L : List
 
 theorem valGauss_toNat_le_sum_digits [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) :
     (valGauss hbij hζ 𝓟 a).toNat ≤ (Nat.digits p a).sum := by
-  apply ENat.toNat_le_of_le_coe
+  apply ENat.toNat_le_of_le_natCast
   convert valGauss_le_sum_digits_aux hbij hζ hη 𝓟 (Nat.digits p a)
   rw [Nat.ofDigits_digits]
 
@@ -300,8 +300,8 @@ theorem two_mul_sum_valGauss_toNat' [𝓟.LiesOver P] [P.LiesOver 𝒑] :
     2 * ∑ a ∈ Finset.range (p ^ f), (valGauss hbij hζ 𝓟 a).toNat =
       (p ^ f - 2) * f * (p - 1) := by
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
-  rw [← ENat.coe_inj, Nat.cast_mul, Nat.cast_sum, Nat.cast_ofNat]
-  simp_rw [ENat.coe_toNat_eq_self.mpr (valGauss_ne_top₀ hbij hζ hη 𝓟 _)]
+  rw [← ENat.natCast_inj, Nat.cast_mul, Nat.cast_sum, Nat.cast_ofNat]
+  simp_rw [ENat.natCast_toNat_eq_self.mpr (valGauss_ne_top₀ hbij hζ hη 𝓟 _)]
   have h : 1 ≤ p ^ f := NeZero.one_le
   rw [two_mul, ← Fin.sum_univ_eq_sum_range, show p ^ f = p ^ f - 1 + 1 by rw [Nat.sub_add_cancel h]]
   nth_rewrite 2 [← Equiv.sum_comp Fin.revPerm]
@@ -324,8 +324,8 @@ theorem two_mul_sum_valGauss_toNat [𝓟.LiesOver P] [P.LiesOver 𝒑] :
       f * (p - 1) * (p ^ f - 2) := by
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
   rw [← Finset.sum_insert_of_eq_zero_if_notMem (a := p ^ f - 1), ← Finset.range_add_one,
-        Nat.sub_add_cancel NeZero.one_le, ← ENat.coe_inj, Nat.cast_mul, Nat.cast_sum, Nat.cast_ofNat]
-  · simp_rw [ENat.coe_toNat_eq_self.mpr (valGauss_ne_top₀ hbij hζ hη 𝓟 _)]
+        Nat.sub_add_cancel NeZero.one_le, ← ENat.natCast_inj, Nat.cast_mul, Nat.cast_sum, Nat.cast_ofNat]
+  · simp_rw [ENat.natCast_toNat_eq_self.mpr (valGauss_ne_top₀ hbij hζ hη 𝓟 _)]
     have h : 1 ≤ p ^ f := NeZero.one_le
     rw [two_mul, ← Fin.sum_univ_eq_sum_range, show p ^ f = p ^ f - 1 + 1 by rw [Nat.sub_add_cancel h]]
     nth_rewrite 2 [← Equiv.sum_comp Fin.revPerm]
@@ -383,5 +383,5 @@ theorem valGauss_toNat_eq_sum_digits_mod [𝓟.LiesOver P] [P.LiesOver 𝒑] (a 
 
 theorem valGauss_eq_sum_digits [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) (ha : a ≤ p ^ f - 2) :
     valGauss hbij hζ 𝓟 a = (Nat.digits p a).sum := by
-  rw [← valGauss_toNat_eq_sum_digits hbij hζ hη 𝓟 a ha,  ENat.coe_toNat]
+  rw [← valGauss_toNat_eq_sum_digits hbij hζ hη 𝓟 a ha,  ENat.natCast_toNat]
   exact valGauss_ne_top₀' hbij hζ hη 𝓟 a

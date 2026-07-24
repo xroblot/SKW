@@ -234,7 +234,7 @@ theorem mul_valGauss_eq_mul_sum [NeZero f] [NeZero m] [NeZero d] [𝓟.LiesOver 
     [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
     [IsCyclotomicExtension {p ^ f - 1} ℚ K] [Fact (Odd p)] [𝓟.IsPrime] (a : ℕ) (ha : d * a ≤ p ^ f - 2) :
     m * (valGauss hbij hζ 𝓟 (d * a : ℕ)) = (p - 1 : ℕ) * ∑ i ∈ Finset.range f, (a * p ^ i % m) := by
-  rw [← Nat.cast_mul, ← ENat.coe_toNat (valGauss_ne_top₀' hbij hζ hη 𝓟 _), ← Nat.cast_mul,
+  rw [← Nat.cast_mul, ← ENat.natCast_toNat (valGauss_ne_top₀' hbij hζ hη 𝓟 _), ← Nat.cast_mul,
     Nat.cast_inj]
   qify
   rw [← Nat.cast_mul d, valGauss_toNat_eq_sum_digits hbij hζ hη _ _ ha,

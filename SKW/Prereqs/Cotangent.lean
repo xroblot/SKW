@@ -138,7 +138,7 @@ instance : SMul (MulAction.stabilizer M I) I.Cotangent where
         (fun x hx ↦ Ideal.smul_mem_of_mem_stabilizer I m hx))
         (fun x hx ↦ by
           rw [Submodule.mem_smul_top_iff, smul_eq_mul, ← pow_two] at hx
-          simp only [Submodule.mem_comap, LinearMap.restrict_apply, Submodule.mem_smul_top_iff,
+          simp only [Submodule.mem_comap, Submodule.mem_smul_top_iff,
             smul_eq_mul, ← pow_two]
           exact Ideal.smul_mem_pow_of_mem_stabilizer I m hx) v
 
