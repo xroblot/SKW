@@ -16,8 +16,10 @@ public import SKW.Prereqs.Ideals
 public import SKW.Prereqs.CyclotomicField
 public import SKW.Prereqs.Instances
 public import SKW.Prereqs.IntermediateField
+public import SKW.Prereqs.Normal
 public import SKW.Prereqs.TameRamification
 public import SKW.Prereqs.Unramified
+public import SKW.Prereqs.NumberField
 
 @[expose] public section
 
@@ -172,7 +174,7 @@ lemma inertia_isComplement_fixingSubgroup {L : Type*} [Field L] [NumberField L] 
     IsGalois.card_fixingSubgroup_eq_finrank,
     IsCyclotomicExtension.Rat.finrank q E, Nat.totient_prime hq]
 
-set_option synthInstance.maxHeartbeats 500000 in
+-- set_option synthInstance.maxHeartbeats 500000 in
 set_option backward.isDefEq.respectTransparency false in
 /-- Ramification reduction: given `K/ℚ` cyclic of prime power degree `pᵐ` with `q ≠ p` ramified,
 there is a cyclic `F/ℚ` of degree `pᵐ` (in the same ambient field `A`), unramified at `q` and not
@@ -189,23 +191,39 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
       (∀ q' : ℕ, q'.Prime → Algebra.IsUnramifiedIn (𝓞 K) (Ideal.span {(q' : ℤ)}) →
         Algebra.IsUnramifiedIn (𝓞 F) (Ideal.span {(q' : ℤ)})) ∧ K ⊔ ℚ⟮ξ q⟯ = F ⊔ ℚ⟮ξ q⟯ := by
   let E := ℚ⟮ξ q⟯
+  have : NeZero q := ⟨hq.ne_zero⟩
+  have hEcyc : IsCyclotomicExtension {q} ℚ E :=
+    (hξ q).adjoinSimple_isCyclotomicExtension q ℚ A
+  have : NumberField E := IsCyclotomicExtension.numberField {q} ℚ E
   let L := ↥(K ⊔ E)
   let 𝔮 : Ideal ℤ := span {(q : ℤ)}
   have : Fact q.Prime := ⟨hq⟩
   have : 𝔮.IsPrime := (Ideal.span_singleton_prime (by exact_mod_cast hq.ne_zero)).mpr (Nat.prime_iff_prime_int.mp hq)
-  have : NumberField L := sorry
-  have : IsAbelianGalois ℚ L := sorry
+  have hKab : IsAbelianGalois ℚ K := IsAbelianGalois.of_isCyclic ℚ K
+  have hEab : IsAbelianGalois ℚ E := IsCyclotomicExtension.isAbelianGalois {q} ℚ E
+  have : IsAbelianGalois ℚ L := IsAbelianGalois.sup K E
   let K' : IntermediateField ℚ L := K.restrict le_sup_left
   let E' : IntermediateField ℚ L := E.restrict le_sup_right
   have : IsGalois ℚ K' := IsGalois.of_algEquiv (restrict_algEquiv le_sup_left)
-  have : IsGalois ℚ E' := sorry
+  have : IsGalois ℚ E' :=  IsGalois.of_algEquiv (restrict_algEquiv le_sup_right)
   let jK : Gal(K/ℚ) ≃* Gal(K'/ℚ) := AlgEquiv.autCongr <| restrict_algEquiv _
   have : IsCyclic Gal(K'/ℚ) := by rwa [← jK.isCyclic]
-  have : IsCyclotomicExtension {q} ℚ E' := sorry
+  have : IsCyclotomicExtension {q} ℚ E' :=
+    IsCyclotomicExtension.equiv _ _ _ (restrict_algEquiv le_sup_right)
   have hK'top : K' ⊔ E' = ⊤ :=
     lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top])
   have hK'deg : Module.finrank ℚ K' = p ^ m := by rw [finrank_restrict]; exact hK
-  have htame : ¬ q ∣ Module.finrank ℚ L := sorry
+  have htame : ¬ q ∣ Module.finrank ℚ L := by
+    intro hdvd
+    have h1 : q ∣ Module.finrank ℚ K * Module.finrank ℚ E :=
+      hdvd.trans (finrank_sup_dvd_mul_of_isGalois K E)
+    rw [hK, IsCyclotomicExtension.Rat.finrank q E, Nat.totient_prime hq] at h1
+    obtain h | h := (Nat.Prime.dvd_mul hq).mp h1
+    · exact hqp ((Nat.prime_dvd_prime_iff_eq hq hp.out).mp (hq.dvd_of_dvd_pow h))
+    · obtain h | h := Nat.dvd_sub_self_left.mp h
+      · trivial
+      · have := hq.one_lt
+        grind
   obtain ⟨𝔔, hmax, h𝔔⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral 𝔮 (S := 𝓞 L)
   -- `hcompl` (L1): `I := inertia G 𝔔` is complemented by `E'.fixingSubgroup = Gal(L/E')`. Then
   -- `hFsup : fixedField I ⊔ E' = ⊤` and `eF : G ⧸ I ≃* E'.fixingSubgroup` (`I` normal, `G` abelian).
@@ -217,24 +235,41 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   · rw [(liftAlgEquiv _).symm.autCongr.isCyclic, (IsGalois.normalAutEquivQuotient _).symm.isCyclic,
       eF.isCyclic, ← IntermediateField.fixingSubgroup, (fixingSubgroupEquiv E').isCyclic]
     exact isCyclic_of_injective _ <| restrictRestrictAlgEquivMapHom_injective K' E' hK'top
-  ·
-    -- `∃ k, finrank ℚ F = p^k`: `[F:ℚ] = [G:I] = Nat.card (G ⧸ I) = Nat.card E'.fixingSubgroup`
+  · -- `∃ k, finrank ℚ F = p^k`: `[F:ℚ] = [G:I] = Nat.card (G ⧸ I) = Nat.card E'.fixingSubgroup`
     -- `= [L:E'] = [K':(K'∩E')] ∣ [K':ℚ] = p^m`, hence a `p`-power.
-    sorry
-  · have : IsInertiaField ℚ L 𝔔 (fixedField (inertia Gal(L/ℚ) 𝔔)) := by
-      sorry
+    suffices h : finrank ℚ (lift (fixedField (inertia Gal(L/ℚ) 𝔔))) ∣ p ^ m by
+      obtain ⟨k, -, hk⟩ := (Nat.dvd_prime_pow hp.out).mp h; exact ⟨k, hk⟩
+    rw [finrank_lift, fixedField, IsGaloisGroup.finrank_fixedPoints_eq_index_subgroup,
+      Subgroup.index_eq_card, Nat.card_congr eF.toEquiv, ← IntermediateField.fixingSubgroup,
+      IsGalois.card_fixingSubgroup_eq_finrank, ← hK'deg]
+    exact finrank_dvd_finrank_of_isGalois_of_sup_eq_top E' K' hK'top
+  · apply Algebra.IsUnramifiedIn.of_algEquiv <|
+      RingOfIntegers.mapIntAlgEquiv (liftAlgEquiv _).toRingEquiv
+    exact isUnramifiedIn_fixedField_inertia 𝔔
+  · -- no new ramified prime: for `q'` unramified in `K` we have `q' ≠ q` (else it contradicts
+    -- `hram`), so `q'` is unramified in `E' = ℚ⟮ξ q⟯` too, hence in `L = K' ⊔ E'`, and `F ⊆ L`
+    -- inherits it.
+    intro q' hq' hunram
+    have hq'q : q' ≠ q := fun h ↦ hram (h ▸ hunram)
+    have : Fact q'.Prime := ⟨hq'⟩
+    have hK'u : Algebra.IsUnramifiedIn (𝓞 K') (span {(q' : ℤ)}) :=
+      hunram.of_algEquiv ((RingOfIntegers.mapAlgEquiv (restrict_algEquiv le_sup_left)).restrictScalars ℤ)
+    have hE'u : Algebra.IsUnramifiedIn (𝓞 E') (span {(q' : ℤ)}) :=
+      unramifiedOutside_of_isCyclotomicExtension q q' hq' hq'q
+    have hq₀ : span {(q' : ℤ)} ≠ ⊥ := by simpa using hq'.ne_zero
+    have hL : Algebra.IsUnramifiedIn (𝓞 L) (span {(q' : ℤ)}) := by
+      refine Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one.mpr fun 𝔯 _ h𝔯 ↦ ?_
+      exact ramificationIdx_sup_eq_one hK'top
+        (ramificationIdx_eq_one_iff.mpr (hK'u _ (IsPrime.under _ 𝔯) (LiesOver.tower_bot 𝔯 _ _)))
+        (ramificationIdx_eq_one_iff.mpr (hE'u _ (IsPrime.under _ 𝔯) (LiesOver.tower_bot 𝔯 _ _)))
+        hq₀
     apply Algebra.IsUnramifiedIn.of_algEquiv <|
       RingOfIntegers.mapIntAlgEquiv (liftAlgEquiv _).toRingEquiv
-    refine Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one.mpr fun 𝔓 _ _ ↦ ?_
-    have :  𝔔.LiesOver 𝔓 := sorry
-    apply IsInertiaField.ramificationIdx_eq ℚ L (fixedField (inertia Gal(L/ℚ) 𝔔)) _ 𝔔 𝔓
-  · -- no new ramified prime: `L = K ⊔ E'` is unramified outside `K`'s primes ∪ {q}
-    -- (`unramifiedOutside_sup` + `unramifiedOutside_of_isCyclotomicExtension`), and `F ⊆ L`
-    -- inherits it (`UnramifiedOutside.tower_bot`)
-    sorry
+    exact Algebra.IsUnramifiedIn.tower_bot (T := 𝓞 L) hL
   · -- `K ⊔ ℚ⟮ξ q⟯ = F ⊔ ℚ⟮ξ q⟯` from `hFsup : fixedField _ ⊔ E' = ⊤` lifted back to `A`
-    sorry
-
+    have h := congr_arg lift hFsup
+    rw [lift_sup, lift_restrict, lift_top] at h
+    exact h.symm
 
 /-- Auxiliary form of `kw_reduce_to_unramified_outside_p`, generalized over a finite set `S` of
 primes (assumed to contain every `q ≠ p` ramified in `K`) and over `K`. Proved by induction on `S`,
