@@ -86,7 +86,36 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
     [IsTotallyReal K] (hK : Module.finrank ℚ K = 2 ^ m) (hKram : UnramifiedOutside K 2) :
     K ≤ ℚ⟮ξ (2 ^ (m + 2))⟯ := by
-  sorry
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : IsAbelianGalois ℚ K := IsAbelianGalois.of_isCyclic ℚ K
+  have hCcyc : IsCyclotomicExtension {2 ^ (m + 2)} ℚ ℚ⟮ξ (2 ^ (m + 2))⟯ :=
+    (hξ (2 ^ (m + 2))).adjoinSimple_isCyclotomicExtension (2 ^ (m + 2)) ℚ A
+  have : NumberField ℚ⟮ξ (2 ^ (m + 2))⟯ := IsCyclotomicExtension.numberField {2 ^ (m + 2)} ℚ _
+  -- `K' = ℚ(ζ_{2^{m+2}})⁺`, the maximal real subfield: cyclic of degree `2^m`, totally real,
+  -- unramified outside `2`, contained in `ℚ(ζ_{2^{m+2}})`.
+  obtain ⟨K', hK'le, hK'deg, hK'gal, hK'cyc, hK'ram, hK'real⟩ :
+      ∃ K' : IntermediateField ℚ A, K' ≤ ℚ⟮ξ (2 ^ (m + 2))⟯ ∧ Module.finrank ℚ K' = 2 ^ m ∧
+        IsGalois ℚ K' ∧ IsCyclic Gal(K'/ℚ) ∧ UnramifiedOutside K' 2 ∧ IsTotallyReal K' := sorry
+  have : NumberField K' :=
+    let : Algebra K' ℚ⟮ξ (2 ^ (m + 2))⟯ := (inclusion hK'le).toAlgebra
+    NumberField.of_tower ℚ ℚ⟮ξ (2 ^ (m + 2))⟯ _
+  have : IsGalois ℚ K' := hK'gal
+  have : IsCyclic Gal(K'/ℚ) := hK'cyc
+  have : IsTotallyReal K' := hK'real
+  have : IsAbelianGalois ℚ K' := IsAbelianGalois.of_isCyclic ℚ K'
+  -- The compositum `K ⊔ K'` is totally real (both factors are).
+  have hsupreal : IsTotallyReal ↑(K ⊔ K') := sorry
+  refine (kw_le_of_unique_prime_subfield K K' hK hK'deg hKram hK'ram ?_).trans hK'le
+  intro F₁ F₂ _ _ _ _ _ _ hle₁ hle₂ hf₁ hf₂ hr₁ hr₂
+  let : Algebra F₁ ↑(K ⊔ K') := (inclusion hle₁).toAlgebra
+  let : Algebra F₂ ↑(K ⊔ K') := (inclusion hle₂).toAlgebra
+  have : IsScalarTower ℚ F₁ ↑(K ⊔ K') :=
+    IsScalarTower.of_algebraMap_eq fun x => ((inclusion hle₁).commutes x).symm
+  have : IsScalarTower ℚ F₂ ↑(K ⊔ K') :=
+    IsScalarTower.of_algebraMap_eq fun x => ((inclusion hle₂).commutes x).symm
+  have : IsTotallyReal F₁ := IsTotallyReal.of_algebra F₁ ↑(K ⊔ K')
+  have : IsTotallyReal F₂ := IsTotallyReal.of_algebra F₂ ↑(K ⊔ K')
+  exact prop_kw_2_quadratic_real_unique hξ F₁ hf₁ hr₁ F₂ hf₂ hr₂
 
 open IntermediateField in
 /-- Every cyclic extension of `ℚ` of degree `2ᵐ` unramified outside `2` is cyclotomic: contained in

@@ -362,6 +362,60 @@ lemma kw_cyclic_compositum {A : Type*} [Field A] [CharZero A] (K K' : Intermedia
     Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
   rwa [he, he', Nat.div_dvd_div_iff finrank_pos finrank_pos hd' hd]
 
+set_option backward.isDefEq.respectTransparency false in
+/-- Two cyclic extensions `K`, `K'` of `ℚ` (in a common ambient `A`) of the same `p`-power degree
+`pᵐ`, both unramified outside `p`, are comparable (`K ≤ K'`) provided any two degree-`p` subfields
+of the compositum `K ⊔ K'` unramified outside `p` coincide. The compositum `K ⊔ K'` is then cyclic
+(a non-cyclic abelian `p`-group would have two distinct index-`p` subgroups, giving two distinct
+such subfields), and `kw_cyclic_compositum` finishes. The uniqueness input `huniq` is where the odd
+and `p = 2` cases differ. -/
+lemma kw_le_of_unique_prime_subfield {A : Type*} [Field A] [CharZero A]
+    (K K' : IntermediateField ℚ A) [NumberField K] [IsAbelianGalois ℚ K]
+    [NumberField K'] [IsAbelianGalois ℚ K'] {m : ℕ}
+    (hK : Module.finrank ℚ K = p ^ m) (hK' : Module.finrank ℚ K' = p ^ m)
+    (hKram : UnramifiedOutside K p) (hK'ram : UnramifiedOutside K' p)
+    (huniq : ∀ (F₁ F₂ : IntermediateField ℚ A) [NumberField F₁] [IsGalois ℚ F₁]
+      [IsCyclic Gal(F₁/ℚ)] [NumberField F₂] [IsGalois ℚ F₂] [IsCyclic Gal(F₂/ℚ)],
+      F₁ ≤ K ⊔ K' → F₂ ≤ K ⊔ K' → Module.finrank ℚ F₁ = p → Module.finrank ℚ F₂ = p →
+      UnramifiedOutside F₁ p → UnramifiedOutside F₂ p → F₁ = F₂) :
+    K ≤ K' := by
+  have : IsAbelianGalois ℚ ↑(K ⊔ K') := IsAbelianGalois.sup K K'
+  have hCyc : IsCyclic Gal(↑(K ⊔ K')/ℚ) := by
+    let : CommGroup Gal(↑(K ⊔ K')/ℚ) := IsMulCommutative.instCommGroup
+    by_contra! hCyc
+    have hP : IsPGroup p Gal(↑(K ⊔ K')/ℚ) := by
+      refine IsPGroup.iff_card.mpr ?_
+      rw [IsGalois.card_aut_eq_finrank]
+      have := finrank_sup_dvd_mul_of_isGalois K K'
+      rw [hK, hK', ← pow_add, Nat.dvd_prime_pow hp.out] at this
+      obtain ⟨k, _, hk⟩ := this
+      exact ⟨k, hk⟩
+    obtain ⟨H₁, H₂, hind₁, hind₂, h₁₂⟩ := IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic hP hCyc
+    let K₁ := fixedField H₁
+    let K₂ := fixedField H₂
+    suffices K₁ = K₂ by
+      refine h₁₂ ?_
+      simpa [K₁, K₂, fixingSubgroup_fixedField] using congr_arg (fixingSubgroup ·) this
+    apply lift_injective
+    have hK₁ : Module.finrank ℚ K₁ = p := by
+      rw [← IsGalois.card_aut_eq_finrank,
+        ← Nat.card_congr (IsGalois.normalAutEquivQuotient _).toEquiv, ← Subgroup.index, hind₁]
+    have hK₂ : Module.finrank ℚ K₂ = p := by
+      rw [← IsGalois.card_aut_eq_finrank,
+        ← Nat.card_congr (IsGalois.normalAutEquivQuotient _).toEquiv, ← Subgroup.index, hind₂]
+    have hcyc₁ : IsCyclic Gal(K₁/ℚ) :=
+      isCyclic_of_prime_card (by rw [IsGalois.card_aut_eq_finrank, hK₁])
+    have hcyc₂ : IsCyclic Gal(K₂/ℚ) :=
+      isCyclic_of_prime_card (by rw [IsGalois.card_aut_eq_finrank, hK₂])
+    refine huniq (lift K₁) (lift K₂) (lift_le _) (lift_le _) ?_ ?_ ?_ ?_
+    · rwa [finrank_lift]
+    · rwa [finrank_lift]
+    · exact UnramifiedOutside.of_algEquiv p (liftAlgEquiv _)
+        (UnramifiedOutside.tower_bot p (unramifiedOutside_sup p K K' hKram hK'ram))
+    · exact UnramifiedOutside.of_algEquiv p (liftAlgEquiv _)
+        (UnramifiedOutside.tower_bot p (unramifiedOutside_sup p K K' hKram hK'ram))
+  exact kw_cyclic_compositum K K' (hK.trans hK'.symm).dvd
+
 end
 
 end

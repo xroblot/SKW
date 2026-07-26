@@ -157,43 +157,9 @@ theorem prop_kw_odd_prime_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   have : IsAbelianGalois ℚ K' := by
     have : Algebra K' C := (inclusion hK'₁).toAlgebra
     exact IsAbelianGalois.tower_bot ℚ K' C
-  have hCyc : IsCyclic Gal(↑(K ⊔ K')/ℚ) := by
-    have : IsAbelianGalois ℚ ↑(K ⊔ K') := IsAbelianGalois.sup K K'
-    let : CommGroup Gal(↑(K ⊔ K')/ℚ) := IsMulCommutative.instCommGroup
-    by_contra! hCyc
-    have hP : IsPGroup p Gal(↑(K ⊔ K')/ℚ) := by
-      refine IsPGroup.iff_card.mpr ?_
-      rw [IsGalois.card_aut_eq_finrank]
-      have := finrank_sup_dvd_mul_of_isGalois K K'
-      rw [hK, hK'₂, ← pow_add, Nat.dvd_prime_pow hp.out] at this
-      obtain ⟨k, _, hk⟩ := this
-      exact ⟨k, hk⟩
-    obtain ⟨H₁, H₂, hind₁, hind₂, h₁₂⟩ := IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic hP hCyc
-    let K₁ := fixedField H₁
-    let K₂ := fixedField H₂
-    suffices K₁ = K₂ by
-      refine h₁₂ ?_
-      simpa [K₁, K₂, fixingSubgroup_fixedField] using congr_arg (fixingSubgroup · ) this
-    apply lift_injective
-    have hK₁ : Module.finrank ℚ K₁ = p := by
-      rw [← IsGalois.card_aut_eq_finrank,
-        ← Nat.card_congr (IsGalois.normalAutEquivQuotient _).toEquiv, ← Subgroup.index, hind₁]
-    have hK₂ : Module.finrank ℚ K₂ = p := by
-      rw [← IsGalois.card_aut_eq_finrank,
-        ← Nat.card_congr (IsGalois.normalAutEquivQuotient _).toEquiv, ← Subgroup.index, hind₂]
-    have hcyc₁ : IsCyclic Gal(K₁/ℚ) :=
-      isCyclic_of_prime_card (by rw [IsGalois.card_aut_eq_finrank, hK₁])
-    have hcyc₂ : IsCyclic Gal(K₂/ℚ) :=
-      isCyclic_of_prime_card (by rw [IsGalois.card_aut_eq_finrank, hK₂])
-    apply prop_kw_exponent_p_eq p hp'.out (hξ (p ^ 2))
-    · rwa [finrank_lift]
-    · apply UnramifiedOutside.of_algEquiv p (liftAlgEquiv _)
-      exact UnramifiedOutside.tower_bot p (unramifiedOutside_sup p K K' hKram hK'₄)
-    · rwa [finrank_lift]
-    · apply UnramifiedOutside.of_algEquiv p (liftAlgEquiv _)
-      exact UnramifiedOutside.tower_bot p (unramifiedOutside_sup p K K' hKram hK'₄)
-  have hKK' : K ≤ K' := kw_cyclic_compositum K K' (hK.trans hK'₂.symm).dvd
-  exact hKK'.trans hK'₁
+  exact (kw_le_of_unique_prime_subfield K K' hK hK'₂ hKram hK'₄
+    (fun F₁ F₂ _ _ _ _ _ _ _ _ hf₁ hf₂ hr₁ hr₂ =>
+      prop_kw_exponent_p_eq p hp'.out (hξ (p ^ 2)) F₁ F₂ hf₁ hr₁ hf₂ hr₂)).trans hK'₁
 
 end
 
