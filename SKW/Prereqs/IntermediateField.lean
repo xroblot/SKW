@@ -213,7 +213,7 @@ lemma IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top
     have h_eq_one {ψ : Gal(K/F) →* (AlgebraicClosure ℚ)ˣ} : ψ g = 1 := by
       have : ψ ∈ Subgroup.closure
           {χ : Gal(K/F) →* (AlgebraicClosure ℚ)ˣ| IsPrimePow (orderOf χ)} := by
-        rw [CommGroup.closure_isPrimePow_orderOf_eq_top isTorsion_of_finite]
+        rw [CommGroup.closure_isPrimePow_orderOf_eq_top isMulTorsion_of_finite]
         exact Subgroup.mem_top ψ
       induction this using Subgroup.closure_induction with
       | mem η hη => exact Subgroup.mem_iInf.mp hg ⟨η, hη⟩

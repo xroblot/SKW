@@ -64,7 +64,7 @@ theorem mem_iSup_primaryComponent_primeFactors {x : G} (hx : IsOfFinOrder x) :
   mem_iSup_primaryComponent_primeFactors_aux hx.orderOf_pos rfl
 
 /-- Every element of a torsion commutative group lies in the join of its `p`-primary components. -/
-theorem mem_iSup_primaryComponent (hG : Monoid.IsTorsion G) (g : G) :
+theorem mem_iSup_primaryComponent (hG : IsMulTorsion G) (g : G) :
     g ∈ ⨆ p : Nat.Primes, primaryComponent G p := by
   refine mem_of_le_of_mem ?_ <| mem_iSup_primaryComponent_primeFactors (hG g)
   rw [show ⨆ p : Nat.Primes, primaryComponent G p = ⨆ p ∈ {n | Nat.Prime n}, primaryComponent G p
@@ -72,12 +72,12 @@ theorem mem_iSup_primaryComponent (hG : Monoid.IsTorsion G) (g : G) :
   exact biSup_mono fun h hp ↦ (Nat.mem_primeFactors.mp hp).1
 
 /-- In a torsion commutative group, the primary components generate the whole group. -/
-theorem iSup_primaryComponent_eq_top (hG : Monoid.IsTorsion G) :
+theorem iSup_primaryComponent_eq_top (hG : IsMulTorsion G) :
     ⨆ p : Nat.Primes, primaryComponent G p = ⊤ :=
   eq_top_iff.mpr fun g _ ↦ mem_iSup_primaryComponent hG g
 
 /-- In a torsion commutative group, the elements of prime power order generate the whole group. -/
-theorem closure_isPrimePow_orderOf_eq_top (hG : Monoid.IsTorsion G) :
+theorem closure_isPrimePow_orderOf_eq_top (hG : IsMulTorsion G) :
     Subgroup.closure {x : G | IsPrimePow (orderOf x)} = ⊤ := by
   rw [eq_top_iff, ← iSup_primaryComponent_eq_top hG,  iSup_le_iff]
   intro p x hx
