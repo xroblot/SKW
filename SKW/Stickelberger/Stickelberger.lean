@@ -65,7 +65,7 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
   have hbij : Function.Bijective (rootsOfUnity.mapQuot (p ^ f - 1) P) := by
     change Function.Bijective <| rootsOfUnityMapQuot P (p ^ f - 1)
     have hNP : absNorm P = p ^ f := by
-      rw [absNorm_eq_pow_inertiaDeg' P hp.out, Ideal.inertiaDeg'_eq_inertiaDeg, inertia_deg_eq p f]
+      rw [← Ideal.pow_inertiaDeg p P, inertia_deg_eq p f]
     refine (Nat.bijective_iff_injective_and_card _).mpr ⟨?_, ?_⟩
     · apply rootsOfUnityMapQuot_injective
       · rw [hNP]

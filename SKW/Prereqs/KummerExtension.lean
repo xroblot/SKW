@@ -4,7 +4,7 @@ public import Mathlib.FieldTheory.KummerExtension
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 public import Mathlib.GroupTheory.QuotientGroup.Basic
 public import SKW.Prereqs.Normal
-public import SKW.PRed2Mathlib.KummerExtension
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
 public import SKW.Prereqs.AlgebraMisc
 
 @[expose] public section
@@ -239,7 +239,7 @@ theorem isSplittingField_X_pow_sub_C_mul_pow (a : K) (hK : (primitiveRoots n K).
   have hrank : finrank K L = n := finrank_of_isSplittingField_X_pow_sub_C hK H (L := L)
   rw [← hrank] at hK hβ H hα hS ⊢
   refine isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top hK hβ ?_
-  rw [IntermediateField.adjoin_simple_mul α x hx]
+  rw [IntermediateField.adjoin_simple_mul_algebraMap α x hx]
   exact IntermediateField.adjoin_root_eq_top_of_isSplittingField hK H hα
 
 /-- Reverse of `isSplittingField_X_pow_sub_C_mul_pow`: if `L` is a splitting field of
@@ -257,7 +257,7 @@ theorem isSplittingField_X_pow_sub_C_of_mul_pow (a : K) {x : K} (hx : x ≠ 0)
     rw [mul_pow, hβ, ← map_pow, ← map_mul, inv_pow, mul_assoc, mul_inv_cancel₀ (pow_ne_zero n hx),
       mul_one]
   have htop : K⟮β * algebraMap K L x⁻¹⟯ = ⊤ := by
-    rw [IntermediateField.adjoin_simple_mul β x⁻¹ (inv_ne_zero hx)]
+    rw [IntermediateField.adjoin_simple_mul_algebraMap β x⁻¹ (inv_ne_zero hx)]
     exact IntermediateField.adjoin_root_eq_top_of_isSplittingField hK H hβ
   rw [← hrank] at hK hγ ⊢
   exact isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top hK hγ htop

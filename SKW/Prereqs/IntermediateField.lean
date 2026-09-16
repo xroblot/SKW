@@ -61,21 +61,21 @@ open IntermediateField in
 theorem IntermediateField.rank_restrict {K L : Type*} [Field K] [Field L] [Algebra K L]
     {F E : IntermediateField K L} (h : F ≤ E) :
     Module.rank K (restrict h) = Module.rank K F :=
-  (restrict_algEquiv h).toLinearEquiv.rank_eq.symm
+  (restrictAlgEquiv h).toLinearEquiv.rank_eq.symm
 
 open IntermediateField in
 /-- `restrict` preserves the degree over the base field: `[restrict h : K] = [F : K]`. -/
 theorem IntermediateField.finrank_restrict {K L : Type*} [Field K] [Field L] [Algebra K L]
     {F E : IntermediateField K L} (h : F ≤ E) :
     Module.finrank K (restrict h) = Module.finrank K F :=
-  (restrict_algEquiv h).toLinearEquiv.finrank_eq.symm
+  (restrictAlgEquiv h).toLinearEquiv.finrank_eq.symm
 
 open IntermediateField in
 /-- `restrict` preserves finite-dimensionality over the base field. -/
 instance IntermediateField.finiteDimensional_restrict {K L : Type*} [Field K] [Field L]
     [Algebra K L] {F E : IntermediateField K L} {h : F ≤ E} [FiniteDimensional K F] :
     FiniteDimensional K (restrict h) :=
-  Module.Finite.equiv (restrict_algEquiv h).toLinearEquiv
+  Module.Finite.equiv (restrictAlgEquiv h).toLinearEquiv
 
 open IntermediateField in
 /-- `restrict` is order-reflecting in the restricted field: for `F₁, F₂ ≤ E`, one has
@@ -252,11 +252,11 @@ theorem IntermediateField.finrank_sup_dvd_mul_of_isGalois {F E : Type*} [Field F
     finrank F ↑(A ⊔ B) ∣ finrank F A * finrank F B := by
   let A' : IntermediateField F ↥(A ⊔ B) := A.restrict le_sup_left
   let B' : IntermediateField F ↥(A ⊔ B) := B.restrict le_sup_right
-  have : IsGalois F B' := IsGalois.of_algEquiv (restrict_algEquiv le_sup_right)
+  have : IsGalois F B' := IsGalois.of_algEquiv (restrictAlgEquiv le_sup_right)
   have : B' ⊔ A' = ⊤ :=
     lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top, sup_comm])
   have := mul_dvd_mul_left (finrank F A') <| finrank_dvd_finrank_of_isGalois_of_sup_eq_top A' B' this
-  rwa [finrank_mul_finrank, finrank_restrict, finrank_restrict] at this
+  rwa [finrank_mul_finrank', finrank_restrict, finrank_restrict] at this
 
 theorem IntermediateField.lift_iInf {F E : Type*} [Field F] [Field E] [Algebra F E]
     (K : IntermediateField F E) {ι : Type*} (S : Finset ι) (hS : S.Nonempty)

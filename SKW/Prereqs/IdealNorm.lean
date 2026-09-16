@@ -17,7 +17,8 @@ For an order `S` in a number field (`IsDedekindDomain S`, finite free over `ℤ`
 
 namespace Ideal
 
-variable {S : Type*} [CommRing S] [IsDedekindDomain S] [Module.Free ℤ S] [Module.Finite ℤ S]
+variable {S : Type*} [CommRing S] [IsDedekindDomain S] [Infinite S] [Module.Free ℤ S]
+  [Module.Finite ℤ S]
 
 /-- A rational prime `p` dividing `absNorm I` lies under a maximal ideal containing `I`. -/
 theorem exists_isMaximal_le_of_prime_dvd_absNorm {p : ℕ} (hp : p.Prime) {I : Ideal S}

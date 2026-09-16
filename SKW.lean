@@ -2,12 +2,9 @@ import SKW.Basic
 import SKW.Misc
 import SKW.PRed2Mathlib.AlgebraMisc
 import SKW.PRed2Mathlib.IntermediateFields
-import SKW.PRed2Mathlib.KummerExtension
-import SKW.PRed2Mathlib.Ideals
 import SKW.PRed2Mathlib.NumberTheory
 import SKW.PRed2Mathlib.FractionalIdeal
 import SKW.PRed2Mathlib.Action
-import SKW.PRed2Mathlib.Normal
 import SKW.Prereqs.AlgebraMisc
 import SKW.Prereqs.ClassGroup
 import SKW.Prereqs.ClassGroupCoprime

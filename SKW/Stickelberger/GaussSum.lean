@@ -182,8 +182,8 @@ theorem GaussSum_mul_GaussSum_neg [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : �
     mul_right_comm, neg_neg, zpow_neg, ← MulChar.ringHomComp_inv, mul_assoc,
     gaussSum_mul_gaussSum_eq_card (teichmuller_pow_comp_algebraMap_ne_one hbij a ha)
     (addCharTrace_isPrimitive P (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) (𝓞 L)))),
-    Fintype.card_eq_nat_card, ← absNorm_eq_card, absNorm_eq_pow_inertiaDeg' P hp.out,
-    Ideal.inertiaDeg'_eq_inertiaDeg, MulChar.ringHomComp_inv, MulChar.ringHomComp_apply,
+    Fintype.card_eq_nat_card, ← absNorm_eq_card, ← Ideal.pow_inertiaDeg p P,
+    MulChar.ringHomComp_inv, MulChar.ringHomComp_apply,
     Nat.cast_pow, inertia_deg_eq p f P]
 
 theorem norm_GaussSum [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) :
@@ -229,12 +229,13 @@ theorem mk_sq_gausssum_eq_aux [DecidableEq (𝓞 K ⧸ P)] [(𝓟 ^ 2).LiesOver 
     rw [mul_comm, ← zpow_natCast, ← zpow_sub_one₀ hx, ← Nat.cast_pred, zpow_natCast]
     refine Nat.pow_pos Nat.card_pos
   simp_rw [this, FiniteField.sum_pow_units]
-  rw [← Nat.succ_pred_eq_of_pos Module.finrank_pos, ← Ideal.inertiaDeg'_algebraMap, Finset.sum_range_succ',
+  rw [← Nat.succ_pred_eq_of_pos Module.finrank_pos, ← Ideal.inertiaDeg_eq_of_isMaximal 𝒑 P,
+    Finset.sum_range_succ',
     pow_zero, Nat.sub_self, if_pos (Nat.dvd_zero _), Finset.sum_eq_zero, zero_add, map_neg, map_one]
   intro i hi
   rw [if_neg]
   rw [Fintype.card_eq_nat_card, ← Ideal.absNorm_eq_card, Int.card_ideal_quot,
-    Ideal.absNorm_eq_pow_inertiaDeg' P hp.out]
+    ← Ideal.pow_inertiaDeg p P]
   apply Nat.not_dvd_of_pos_of_lt
   · rw [Nat.sub_pos_iff_lt]
     exact Nat.one_lt_pow i.succ_ne_zero hp.out.one_lt

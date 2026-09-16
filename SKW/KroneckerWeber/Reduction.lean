@@ -60,7 +60,7 @@ lemma kw_cyclic_compositum (L : Type*) [Field L] [NumberField L] (K K' : Interme
   rw [← IsGaloisGroup.fixedPoints_fixingSubgroup Gal(L/ℚ) ℚ L K,
     ← IsGaloisGroup.fixedPoints_fixingSubgroup Gal(L/ℚ) ℚ L K']
   apply IsGaloisGroup.fixedPoints_le_of_le
-  rw [IsCyclic.subgroup_le_subgroup_iff, IsGaloisGroup.card_fixingSubgroup_eq_finrank,
+  rw [IsCyclic.subgroup_le_iff_card_dvd, IsGaloisGroup.card_fixingSubgroup_eq_finrank,
     IsGaloisGroup.card_fixingSubgroup_eq_finrank]
   have hd : finrank ℚ K ∣ finrank ℚ L := finrank_mul_finrank ℚ K L ▸ dvd_mul_right _ _
   have hd' : finrank ℚ K' ∣ finrank ℚ L := finrank_mul_finrank ℚ K' L ▸ dvd_mul_right _ _
@@ -68,7 +68,7 @@ lemma kw_cyclic_compositum (L : Type*) [Field L] [NumberField L] (K K' : Interme
     Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
   have he' : finrank K' L = finrank ℚ L / finrank ℚ K' :=
     Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
-  rwa [he, he', Nat.div_dvd_div_iff finrank_pos finrank_pos hd' hd]
+  rwa [he, he', Nat.div_dvd_div_iff_left finrank_pos hd' hd]
 -/
 
 /-- Every non-trivial extension of `ℚ` is ramified at some finite prime (Minkowski). -/
@@ -174,8 +174,9 @@ lemma inertia_isComplement_fixingSubgroup {L : Type*} [Field L] [NumberField L] 
     IsGalois.card_fixingSubgroup_eq_finrank,
     IsCyclotomicExtension.Rat.finrank q E, Nat.totient_prime hq]
 
--- set_option synthInstance.maxHeartbeats 500000 in
-set_option backward.isDefEq.respectTransparency false in
+set_option synthInstance.maxHeartbeats 500000 in
+set_option maxHeartbeats 500000 in
+--set_option backward.isDefEq.respectTransparency false in
 /-- Ramification reduction: given `K/ℚ` cyclic of prime power degree `pᵐ` with `q ≠ p` ramified,
 there is a cyclic `F/ℚ` of degree `pᵐ` (in the same ambient field `A`), unramified at `q` and not
 ramified at any prime where `K` is unramified, such that `K · ℚ(ζ_q) = F · ℚ(ζ_q)`. This removes `q`
@@ -204,12 +205,12 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   have : IsAbelianGalois ℚ L := IsAbelianGalois.sup K E
   let K' : IntermediateField ℚ L := K.restrict le_sup_left
   let E' : IntermediateField ℚ L := E.restrict le_sup_right
-  have : IsGalois ℚ K' := IsGalois.of_algEquiv (restrict_algEquiv le_sup_left)
-  have : IsGalois ℚ E' :=  IsGalois.of_algEquiv (restrict_algEquiv le_sup_right)
-  let jK : Gal(K/ℚ) ≃* Gal(K'/ℚ) := AlgEquiv.autCongr <| restrict_algEquiv _
+  have : IsGalois ℚ K' := IsGalois.of_algEquiv (restrictAlgEquiv le_sup_left)
+  have : IsGalois ℚ E' :=  IsGalois.of_algEquiv (restrictAlgEquiv le_sup_right)
+  let jK : Gal(K/ℚ) ≃* Gal(K'/ℚ) := AlgEquiv.autCongr <| restrictAlgEquiv _
   have : IsCyclic Gal(K'/ℚ) := by rwa [← jK.isCyclic]
   have : IsCyclotomicExtension {q} ℚ E' :=
-    IsCyclotomicExtension.equiv _ _ _ (restrict_algEquiv le_sup_right)
+    IsCyclotomicExtension.equiv _ _ _ (restrictAlgEquiv le_sup_right)
   have hK'top : K' ⊔ E' = ⊤ :=
     lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top])
   have hK'deg : Module.finrank ℚ K' = p ^ m := by rw [finrank_restrict]; exact hK
@@ -253,7 +254,8 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
     have hq'q : q' ≠ q := fun h ↦ hram (h ▸ hunram)
     have : Fact q'.Prime := ⟨hq'⟩
     have hK'u : Algebra.IsUnramifiedIn (𝓞 K') (span {(q' : ℤ)}) :=
-      hunram.of_algEquiv ((RingOfIntegers.mapAlgEquiv (restrict_algEquiv le_sup_left)).restrictScalars ℤ)
+      hunram.of_algEquiv
+        ((RingOfIntegers.mapAlgEquiv (restrictAlgEquiv (le_sup_left : K ≤ K ⊔ E))).restrictScalars ℤ)
     have hE'u : Algebra.IsUnramifiedIn (𝓞 E') (span {(q' : ℤ)}) :=
       unramifiedOutside_of_isCyclotomicExtension q q' hq' hq'q
     have hq₀ : span {(q' : ℤ)} ≠ ⊥ := by simpa using hq'.ne_zero
@@ -350,17 +352,17 @@ lemma kw_cyclic_compositum {A : Type*} [Field A] [CharZero A] (K K' : Intermedia
   rw [← IsGaloisGroup.fixedPoints_fixingSubgroup Gal(↑(K ⊔ K')/ℚ) ℚ ↑(K ⊔ K') J,
     ← IsGaloisGroup.fixedPoints_fixingSubgroup Gal(↑(K ⊔ K')/ℚ) ℚ ↑(K ⊔ K') J']
   apply IsGaloisGroup.fixedPoints_le_of_le
-  rw [IsCyclic.subgroup_le_subgroup_iff, IsGaloisGroup.card_fixingSubgroup_eq_finrank,
+  rw [IsCyclic.subgroup_le_iff_card_dvd, IsGaloisGroup.card_fixingSubgroup_eq_finrank,
     IsGaloisGroup.card_fixingSubgroup_eq_finrank]
   have hd : finrank ℚ J ∣ finrank ℚ ↑(K ⊔ K') :=
-    finrank_mul_finrank ℚ J ↑(K ⊔ K') ▸ dvd_mul_right _ _
+    finrank_mul_finrank' (R := ℚ) (S := J) ↑(K ⊔ K') ▸ dvd_mul_right _ _
   have hd' : finrank ℚ J' ∣ finrank ℚ ↑(K ⊔ K') :=
-    finrank_mul_finrank ℚ J' ↑(K ⊔ K') ▸ dvd_mul_right _ _
+    finrank_mul_finrank' (R := ℚ) (S := J') ↑(K ⊔ K') ▸ dvd_mul_right _ _
   have he : finrank J ↑(K ⊔ K') = finrank ℚ ↑(K ⊔ K') / finrank ℚ J :=
-    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
+    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank'])
   have he' : finrank J' ↑(K ⊔ K') = finrank ℚ ↑(K ⊔ K') / finrank ℚ J' :=
-    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
-  rwa [he, he', Nat.div_dvd_div_iff finrank_pos finrank_pos hd' hd]
+    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank'])
+  rwa [he, he', Nat.div_dvd_div_iff_left finrank_pos hd' hd]
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Two cyclic extensions `K`, `K'` of `ℚ` (in a common ambient `A`) of the same `p`-power degree

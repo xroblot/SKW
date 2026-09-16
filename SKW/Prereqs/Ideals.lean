@@ -6,7 +6,7 @@ public import Mathlib.RingTheory.Ideal.Int
 public import Mathlib.RingTheory.RamificationInertia.Ramification
 public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 
-public import SKW.PRed2Mathlib.Ideals
+public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
 
 @[expose] public section
 
@@ -14,7 +14,7 @@ open NumberField
 
 /-! ### Ideal -/
 
-theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [IsDedekindDomain S]
+theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [IsDedekindDomain S] [Infinite S]
     [Module.Free ℤ S] (I : Ideal S) :
     Ideal.absNorm I = Nat.card (S ⧸ I) := rfl
 
@@ -30,7 +30,7 @@ theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [IsDedekindDomain S]
 
 theorem Ideal.multiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
     multiplicity I ⊤ = 0 := by
-  rw [← one_eq_top, multiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
+  rw [← one_eq_top, multiplicity_one_right]
 
 theorem Ideal.emultiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
     emultiplicity I ⊤ = 0 := by
@@ -106,7 +106,7 @@ instance Ideal.Quotient.isScalarTower_of_liesOver_liesOver {A B C : Type*} [Comm
   simp [this, Ideal.Quotient.algebraMap_mk_of_liesOver, ← IsScalarTower.algebraMap_apply]
 
 theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDedekindDomain R]
-    [Module.Free ℤ R] [Algebra.IsIntegral ℤ R] (I : Ideal R) [I.IsPrime] {p k : ℕ}
+    [Infinite R] [Module.Free ℤ R] [Algebra.IsIntegral ℤ R] (I : Ideal R) [I.IsPrime] {p k : ℕ}
     [hp : Fact (Nat.Prime p)] (hI : Ideal.absNorm I ∣ p ^ k) :
     I.LiesOver (Ideal.span {(p : ℤ)}) := by
   have : NeZero I := ⟨by
@@ -119,7 +119,8 @@ theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDede
 
 theorem Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain {R S : Type*} [CommRing R] [CommRing S]
     [Algebra R S] {p : Ideal S} [p.IsPrime] [IsDedekindDomain S] [Module.Finite R S] [IsDomain R]
-    [Module.IsTorsionFree R S] [Module.Finite ℤ R] [CharZero R] (hp : p ≠ ⊥) :
+    [Module.IsTorsionFree R S] [Module.Finite ℤ R] [CharZero R]
+    [Algebra.HasSeparableResidueFieldsAt R S (Ideal.under R p)] (hp : p ≠ ⊥) :
     ¬ IsUnramifiedAt R p ↔ 1 < (Ideal.under R p).ramificationIdx' p := by
   rw [Ideal.ramificationIdx'_eq_ramificationIdx _ _ (Ideal.under_ne_bot R hp),
     ← Ideal.ramificationIdx_eq_one_iff]

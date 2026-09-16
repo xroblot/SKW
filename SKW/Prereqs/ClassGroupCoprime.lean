@@ -27,7 +27,7 @@ theorem exists_mk0_eq_and_isCoprime (C : ClassGroup R) {J : Ideal R} (hJ : J ≠
   obtain ⟨I₀, hI₀⟩ := mk0_surjective C⁻¹
   have hI₀0 : (I₀ : Ideal R) ≠ 0 := mem_nonZeroDivisors_iff_ne_zero.mp I₀.prop
   obtain ⟨a, ha⟩ := IsDedekindDomain.exists_sup_span_eq
-    (Ideal.mul_le_right : (I₀ : Ideal R) * J ≤ I₀) (mul_ne_zero hI₀0 hJ)
+    (Ideal.mul_le_left : (I₀ : Ideal R) * J ≤ I₀) (mul_ne_zero hI₀0 hJ)
   have hspan_le : Ideal.span {a} ≤ (I₀ : Ideal R) := ha ▸ le_sup_right
   obtain ⟨I, hI⟩ := Ideal.dvd_iff_le.mpr hspan_le
   have ha0 : a ≠ 0 := by

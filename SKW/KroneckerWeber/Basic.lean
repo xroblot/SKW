@@ -83,8 +83,7 @@ lemma exists_pth_root :
     refine ⟨⟨rootOfSplitsXPowSubC (NeZero.pos p) (μ : F) L, ?_⟩, rfl⟩
     rw [mem_integralClosure_iff, ← IsIntegral.pow_iff (NeZero.pos p)]
     rw [hβ, ← IsScalarTower.algebraMap_apply]
-    exact (isIntegral_algebraMap_iff (FaithfulSMul.algebraMap_injective _ _)).mpr <|
-      RingOfIntegers.isIntegral μ
+    exact isIntegral_algebraMap_iff.mpr <| RingOfIntegers.isIntegral μ
   refine ⟨α, ?_, ?_⟩
   · have := adjoin_root_eq_top_of_isSplittingField hF hIrr hβ
     contrapose! this
@@ -159,14 +158,16 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮)
     have := congr_arg (multiplicity 𝔮 · ) h𝔞
     rwa [multiplicity_mul h𝔮 (by rwa [← h𝔞]), hf𝔮.multiplicity_pow h𝔮, multiplicity_self,
       mul_one, Nat.left_eq_add] at this
-  have hσ𝔞₀ : σ • 𝔞 ≠ 0 := by
-    contrapose! hσ𝔞
-    simp [hσ𝔞]
+    exact hf𝔮
+  have h𝔞₀ : 𝔞 ≠ 0 := by
+    contrapose! h𝔞
+    simpa [h𝔞]
+  have hσ𝔞₀ : σ • 𝔞 ≠ 0 := (smul_ne_zero_iff_ne σ).mpr h𝔞₀
   have h₁ := congr_arg (multiplicity 𝔮 · ) <| congr_arg (σ • · ) <|
     congr_arg (span {(d ^ p : 𝓞 F)} * · ) h𝔞
   rw [span_singleton_mul_span_singleton, smul_mul', multiplicity_mul h𝔮, smul_mul', smul_pow', hσ,
     multiplicity_mul h𝔮, smul_span, smul_span, smul_pow', ← span_singleton_pow,
-    FiniteMultiplicity.multiplicity_pow h𝔮, multiplicity_pow_self h𝔮.ne_zero h𝔮.not_unit, hβ,
+    FiniteMultiplicity.multiplicity_pow h𝔮, multiplicity_pow_self h𝔮.ne_zero h𝔮.not_isUnit, hβ,
     ← span_singleton_mul_span_singleton, multiplicity_mul h𝔮, ← span_singleton_pow,
     ← span_singleton_pow, FiniteMultiplicity.multiplicity_pow h𝔮 hfβ,
     FiniteMultiplicity.multiplicity_pow h𝔮 hfμ, hσ𝔞, add_zero] at h₁
@@ -277,7 +278,7 @@ lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (spa
   let α := rootOfSplitsXPowSubC hp.out.pos (μ : F) L
   have hα : α ^ p = algebraMap (𝓞 F) L μ := by
         rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
-  rw [multiplicity_span_span] at hk
+  rw [multiplicity_span_eq_multiplicity] at hk
   have hν₀ : ν ≠ 0 := by
     contrapose! hμ
     rwa [hμ, mul_zero] at hν
@@ -292,7 +293,7 @@ lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (spa
         neg_mul, neg_add_cancel, zpow_zero, one_mul]
       rwa [IsScalarTower.algebraMap_apply (𝓞 F) F, _root_.map_ne_zero]
     · rw [mul_comm, IsScalarTower.algebraMap_apply (𝓞 F) F L, ← map_zpow₀,
-        adjoin_simple_mul _ _ (zpow_ne_zero _ hζ₀)]
+        adjoin_simple_mul_algebraMap _ _ (zpow_ne_zero _ hζ₀)]
       have hα : α ^ p = algebraMap (𝓞 F) L μ := by
         rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
       exact adjoin_root_eq_top_of_isSplittingField (hrF ▸ hF) hIrr hα
@@ -304,14 +305,14 @@ lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (spa
   · replace hν := congr_arg (span {·}) hν
     replace hν := congr_arg (emultiplicity (span {hζ.toInteger - 1}) · ) hν
     rwa [← span_singleton_mul_span_singleton, ← span_singleton_pow,
-      emultiplicity_mul hsζ, emultiplicity_pow_self, emultiplicity_span_span,
+      emultiplicity_mul hsζ, emultiplicity_pow_self, emultiplicity_span_eq_emultiplicity,
       FiniteMultiplicity.emultiplicity_eq_multiplicity,
       FiniteMultiplicity.emultiplicity_eq_multiplicity, ← Nat.cast_add, Nat.cast_inj,
       Nat.left_eq_add, ← Rat.eq_span_zeta_sub_one_of_liesOver' p F hζ 𝔭] at hν
     · exact FiniteMultiplicity.of_prime_left hsζ (by simpa)
     · exact FiniteMultiplicity.of_prime_left hζ₁ hμ
     · exact hsζ.ne_zero
-    · exact hsζ.not_unit
+    · exact hsζ.not_isUnit
 
 end IsScalarTower
 
@@ -448,8 +449,7 @@ lemma exists_pth_root :
     refine ⟨⟨rootOfSplitsXPowSubC (NeZero.pos p) (μ : F) L, ?_⟩, rfl⟩
     rw [mem_integralClosure_iff, ← IsIntegral.pow_iff (NeZero.pos p)]
     rw [hβ, ← IsScalarTower.algebraMap_apply]
-    exact (isIntegral_algebraMap_iff (FaithfulSMul.algebraMap_injective _ _)).mpr <|
-      RingOfIntegers.isIntegral μ
+    exact isIntegral_algebraMap_iff.mpr <| RingOfIntegers.isIntegral μ
   refine ⟨α, ?_, ?_⟩
   · have := adjoin_root_eq_top_of_isSplittingField hF hIrr hβ
     contrapose! this
@@ -647,7 +647,7 @@ lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (spa
   let α := rootOfSplitsXPowSubC hp.out.pos (μ : F) L
   have hα : α ^ p = algebraMap (𝓞 F) L μ := by
         rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
-  rw [multiplicity_span_span] at hk
+  rw [multiplicity_span_eq_multiplicity] at hk
   have hν₀ : ν ≠ 0 := by
     contrapose! hμ
     rwa [hμ, mul_zero] at hν
@@ -662,7 +662,7 @@ lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (spa
         neg_mul, neg_add_cancel, zpow_zero, one_mul]
       rwa [IsScalarTower.algebraMap_apply (𝓞 F) F, _root_.map_ne_zero]
     · rw [mul_comm, IsScalarTower.algebraMap_apply (𝓞 F) F L, ← map_zpow₀,
-        adjoin_simple_mul _ _ (zpow_ne_zero _ hζ₀)]
+        adjoin_simple_mul_algebraMap _ _ (zpow_ne_zero _ hζ₀)]
       have hα : α ^ p = algebraMap (𝓞 F) L μ := by
         rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
       exact adjoin_root_eq_top_of_isSplittingField (hrF ▸ hF) hIrr hα
@@ -674,7 +674,7 @@ lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (spa
   · replace hν := congr_arg (span {·}) hν
     replace hν := congr_arg (emultiplicity (span {hζ.toInteger - 1}) · ) hν
     rwa [← span_singleton_mul_span_singleton, ← span_singleton_pow,
-      emultiplicity_mul hsζ, emultiplicity_pow_self, emultiplicity_span_span,
+      emultiplicity_mul hsζ, emultiplicity_pow_self, emultiplicity_span_eq_emultiplicity,
       FiniteMultiplicity.emultiplicity_eq_multiplicity,
       FiniteMultiplicity.emultiplicity_eq_multiplicity, ← Nat.cast_add, Nat.cast_inj,
       Nat.left_eq_add, ← Rat.eq_span_zeta_sub_one_of_liesOver' p F hζ 𝔭] at hν

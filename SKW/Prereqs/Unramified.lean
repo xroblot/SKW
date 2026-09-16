@@ -121,8 +121,8 @@ lemma unramifiedOutside_sup {A : Type*} [Field A] [CharZero A] (K F : Intermedia
   refine unramifiedOutside_sup' p K' F' ?_ ?_
     (lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top]))
   · exact fun q hq hqp ↦ (hKram q hq hqp).of_algEquiv
-      ((RingOfIntegers.mapAlgEquiv (restrict_algEquiv le_sup_left)).restrictScalars ℤ)
+      ((RingOfIntegers.mapAlgEquiv (restrictAlgEquiv (le_sup_left : K ≤ K ⊔ F))).restrictScalars ℤ)
   · exact fun q hq hqp ↦ (hFram q hq hqp).of_algEquiv
-      ((RingOfIntegers.mapAlgEquiv (restrict_algEquiv le_sup_right)).restrictScalars ℤ)
+      ((RingOfIntegers.mapAlgEquiv (restrictAlgEquiv (le_sup_right : F ≤ K ⊔ F))).restrictScalars ℤ)
 
 end

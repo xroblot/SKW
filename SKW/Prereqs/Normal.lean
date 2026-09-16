@@ -2,7 +2,7 @@ module
 
 public import Mathlib.FieldTheory.Galois.IsGaloisGroup
 public import Mathlib.FieldTheory.Normal.Basic
-public import SKW.PRed2Mathlib.Normal
+public import Mathlib.FieldTheory.Galois.Abelian
 
 @[expose] public section
 
