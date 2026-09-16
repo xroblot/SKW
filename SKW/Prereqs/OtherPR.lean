@@ -1,5 +1,7 @@
 module
 
+public import Mathlib.NumberTheory.FundamentalDiscriminant
+public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
 public import Mathlib.NumberTheory.NumberField.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.NumberTheory.RamificationInertia.Unramified
@@ -34,3 +36,15 @@ theorem isUnramifiedIn_fixedField_inertia {L : Type*} [Field L] [NumberField L]
     [𝔔.LiesOver (span {(q : ℤ)})] :
     Algebra.IsUnramifiedIn (𝓞 ↥(fixedField (inertia Gal(L/ℚ) 𝔔))) (span {(q : ℤ)}) := by
   sorry
+
+/-- The discriminant of a quadratic field is a fundamental discriminant. Extracted from the
+quadratic-fields stack, where it is stated for `[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
+theorem NumberField.isFundamentalDiscr_discr (K : Type*) [Field K] [NumberField K]
+    (hK : Module.finrank ℚ K = 2) :
+    Int.IsFundamentalDiscr (NumberField.discr K) := by
+  sorry
+
+/-- An integer is odd iff it is not divisible by `2`. From Mathlib PR
+[#43088](https://github.com/leanprover-community/mathlib4/pull/43088), where it is added to
+`Mathlib/Algebra/Ring/Int/Parity.lean`. -/
+theorem Int.not_two_dvd_iff_odd {n : ℤ} : ¬ 2 ∣ n ↔ Odd n := by grind

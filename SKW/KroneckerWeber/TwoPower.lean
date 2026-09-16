@@ -2,9 +2,16 @@ module
 
 public import Mathlib.NumberTheory.Cyclotomic.Basic
 public import Mathlib.NumberTheory.NumberField.Basic
-public import Mathlib.NumberTheory.RamificationInertia.Basic
+public import Mathlib.LinearAlgebra.Dimension.DivisionRing
+public import Mathlib.NumberTheory.RamificationInertia.Inertia
+public import Mathlib.NumberTheory.RamificationInertia.Ramification
+public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
+public import Mathlib.RingTheory.SimpleModule.Basic
+public import Mathlib.NumberTheory.FundamentalDiscriminant
 public import Mathlib.NumberTheory.NumberField.CMField
 public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Mathlib.Data.Nat.Factors
+public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
 
 public import SKW.KroneckerWeber.Basic
 public import SKW.KroneckerWeber.Reduction
@@ -44,6 +51,41 @@ open NumberField Ideal
 
 noncomputable section
 
+/-- A quadratic field unramified outside `2` has discriminant `-8`, `-4` or `8`, that is, it is
+`ℚ(√-2)`, `ℚ(i)` or `ℚ(√2)`. -/
+theorem kw_2_quadratic_discr (K : Type*) [Field K] [NumberField K]
+    (hK : Module.finrank ℚ K = 2) (hKram : UnramifiedOutside K 2) :
+    NumberField.discr K = -8 ∨ NumberField.discr K = -4 ∨ NumberField.discr K = 8 := by
+  have h_main {p : ℕ} : p.Prime → (p : ℤ) ∣ discr K → p = 2 := by
+    intro hp₁ hp₂
+    contrapose! hp₂
+    exact (not_dvd_discr_iff_isUnramifiedIn K (𝓞 K) (Nat.prime_iff_prime_int.mp hp₁)).mpr
+      <| hKram p hp₁ hp₂
+  have hfund : Int.IsFundamentalDiscr (discr K) := isFundamentalDiscr_discr K hK
+  have hKne : (discr K).natAbs ≠ 1:= by
+    grind [NumberField.abs_discr_gt_two (K := K) (hK ▸ one_lt_two)]
+  obtain h | h := hfund.emod_four_eq_zero_or_one
+  · obtain ⟨m, hm⟩ := Int.dvd_iff_emod_eq_zero.mpr h
+    simp only [hm, Int.isFundamentalDiscr_four_mul] at *
+    have : m.natAbs = 1 ∨ m.natAbs = 2 := by
+      rw [← Nat.prod_primeFactors_of_squarefree (Int.squarefree_natAbs.mpr hfund.1)]
+      have : m.natAbs.primeFactors ⊆ {2} := by
+        refine Finset.subset_singleton_iff'.mpr fun p hp ↦ ?_
+        obtain ⟨hp₁, hp₂, -⟩ := Nat.mem_primeFactors.mp hp
+        exact h_main hp₁ <| Int.dvd_mul_of_dvd_right (Int.natCast_dvd.mpr hp₂)
+      grind [Finset.subset_singleton_iff]
+    grind
+  · have hKo : Odd (discr K) := by
+      rw [Int.odd_iff, ← Int.emod_emod_of_dvd _ (by norm_num : (2 : ℤ) ∣ 4), h, Int.one_emod_two]
+    obtain ⟨p, hp₁, hp₂, hp₃⟩ : ∃ (p : ℕ), p.Prime ∧ p ≠ 2 ∧ (p : ℤ) ∣ discr K := by
+      obtain ⟨p, hp₁, hp₃⟩ := Nat.exists_prime_and_dvd hKne
+      rw [← Int.natCast_dvd] at  hp₃
+      refine ⟨p, hp₁, ?_, hp₃⟩
+      contrapose! hp₃
+      rw [hp₃, Nat.cast_ofNat]
+      exact Int.not_two_dvd_iff_odd.mpr hKo
+    exact False.elim (hp₂ <| h_main hp₁ hp₃)
+
 open IntermediateField in
 /-- The quadratic extensions of `ℚ` unramified outside `2` are exactly `ℚ(i)`, `ℚ(√-2)`, `ℚ(√2)`,
 all contained in `ℚ(ζ_8) = ℚ⟮ξ 8⟯`. (Proof: `ℚ(√d)`, `d` squarefree, ramifies at `ℓ` iff
@@ -54,6 +96,7 @@ theorem prop_kw_2_quadratic {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] (hK : Module.finrank ℚ K = 2)
     (hKram : UnramifiedOutside K 2) :
     K ≤ ℚ⟮ξ 8⟯ := by
+  
   sorry
 
 open IntermediateField in

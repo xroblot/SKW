@@ -1354,9 +1354,28 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 % nontrivial extension K/Q, so some prime divides d_K and is thus ramified.
 % A Mathlib PR is in progress for this result.
 
+\begin{lemma}
+  \label{lem:kw_2_quadratic_discr}
+  \lean{kw_2_quadratic_discr}
+  \leanok
+  A quadratic field unramified outside $2$ has discriminant $-8$, $-4$ or $8$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  A prime divides the discriminant of a number field iff it ramifies, so every prime dividing
+  $\operatorname{disc} K$ is $2$. Moreover $\operatorname{disc} K$ is a fundamental discriminant,
+  hence congruent to $0$ or $1$ modulo $4$. If $\operatorname{disc} K \equiv 1 \pmod 4$ then it is
+  odd, and since $|\operatorname{disc} K| \neq 1$ (Minkowski) it has a prime divisor, necessarily
+  odd, a contradiction. So $\operatorname{disc} K = 4m$, and being fundamental forces $m$ to be
+  squarefree with $m \not\equiv 1 \pmod 4$; as the only prime dividing $m$ is $2$, this leaves
+  $m \in \{-1, 2, -2\}$, that is $\operatorname{disc} K \in \{-4, 8, -8\}$.
+\end{proof}
+
 \begin{proposition}
   \label{prop:kw_2_quadratic}
   \lean{prop_kw_2_quadratic}
+  \uses{lem:kw_2_quadratic_discr}
   The only quadratic extensions of $\QQ$ unramified outside $2$ are
   $\QQ(i)$, $\QQ(\sqrt{-2})$, and $\QQ(\sqrt{2})$; all three lie in $\QQ(\zeta_8)$. In particular, the
   maximal real abelian $2$-extension of $\QQ$ with exponent $2$ and
