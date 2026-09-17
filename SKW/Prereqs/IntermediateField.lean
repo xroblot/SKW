@@ -56,6 +56,21 @@ instance IntermediateField.finiteDimensional_lift {K L : Type*} [Field K] [Field
     FiniteDimensional K (lift E) :=
   Module.Finite.equiv (liftAlgEquiv E).toLinearEquiv
 
+open scoped IntermediateField in
+theorem IntermediateField.two_le_rank_adjoin_simple_iff {F E : Type*} [Field F] [Field E]
+    [Algebra F E] (α : E) :
+    2 ≤ Module.rank F F⟮α⟯ ↔ α ∉ (⊥ : IntermediateField F E) := by
+  rw [← rank_adjoin_simple_eq_one_iff, Cardinal.two_le_iff_one_lt, lt_iff_not_ge,
+    Cardinal.le_one_iff, not_or, and_iff_right_iff_imp]
+  exact fun _ ↦ Module.rank_pos_of_free.ne'
+
+open scoped IntermediateField in
+theorem IntermediateField.two_le_finrank_adjoin_simple_iff {F E : Type*} [Field F] [Field E]
+    [Algebra F E] (α : E) (h : IsIntegral F α) :
+    2 ≤ Module.finrank F F⟮α⟯ ↔ α ∉ (⊥ : IntermediateField F E) := by
+  have := adjoin.finiteDimensional h
+  rw [← two_le_rank_adjoin_simple_iff, ← Module.finrank_eq_rank, Nat.ofNat_le_cast]
+
 open IntermediateField in
 /-- `restrict` preserves the rank over the base field. -/
 theorem IntermediateField.rank_restrict {K L : Type*} [Field K] [Field L] [Algebra K L]

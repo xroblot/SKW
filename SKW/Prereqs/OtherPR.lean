@@ -1,5 +1,6 @@
 module
 
+public import Mathlib.Algebra.QuadraticAlgebra.Basic
 public import Mathlib.NumberTheory.FundamentalDiscriminant
 public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
 public import Mathlib.NumberTheory.NumberField.Basic
@@ -48,3 +49,52 @@ theorem NumberField.isFundamentalDiscr_discr (K : Type*) [Field K] [NumberField 
 [#43088](https://github.com/leanprover-community/mathlib4/pull/43088), where it is added to
 `Mathlib/Algebra/Ring/Int/Parity.lean`. -/
 theorem Int.not_two_dvd_iff_odd {n : ℤ} : ¬ 2 ∣ n ↔ Odd n := by grind
+
+/-- Every quadratic field is `ℚ(√(discr K))`. From Mathlib PR
+[#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
+`[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
+theorem NumberField.nonempty_algEquiv_quadraticAlgebra_discr (K : Type*) [Field K] [NumberField K]
+    (hK : Module.finrank ℚ K = 2) :
+    Nonempty (K ≃ₐ[ℚ] QuadraticAlgebra ℚ (NumberField.discr K : ℚ) 0) := by
+  sorry
+
+/-- The discriminant is a complete invariant of quadratic fields. From Mathlib PR
+[#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
+`[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
+theorem NumberField.nonempty_algEquiv_iff_discr_eq (K F : Type*) [Field K] [Field F]
+    [NumberField K] [NumberField F] (hK : Module.finrank ℚ K = 2)
+    (hF : Module.finrank ℚ F = 2) :
+    Nonempty (K ≃ₐ[ℚ] F) ↔ NumberField.discr K = NumberField.discr F := by
+  sorry
+
+/-- The discriminant of `ℚ(√d)` is `4 * d` when `d` is squarefree and `d ≡ 2, 3 [ZMOD 4]`. From
+Mathlib PR [#43491](https://github.com/leanprover-community/mathlib4/pull/43491). -/
+theorem NumberField.discr_sqrtd {d : ℤ} [Fact (¬ IsSquare (d : ℚ))]
+    [NumberField (QuadraticAlgebra ℚ (d : ℚ) 0)]
+    (hd₁ : Squarefree d) (hd₂ : d % 4 = 2 ∨ d % 4 = 3) :
+    NumberField.discr (QuadraticAlgebra ℚ (d : ℚ) 0) = 4 * d := by
+  sorry
+
+/-- The discriminant of `ℚ(√d)` is `d` itself when `d` is squarefree and `d ≡ 1 [ZMOD 4]`. From
+Mathlib PR [#43491](https://github.com/leanprover-community/mathlib4/pull/43491). -/
+theorem NumberField.discr_half {d : ℤ} [Fact (¬ IsSquare (d : ℚ))]
+    [NumberField (QuadraticAlgebra ℚ (d : ℚ) 0)]
+    (hd : Squarefree d) (hd1 : d ≠ 1) (h : d % 4 = 1) :
+    NumberField.discr (QuadraticAlgebra ℚ (d : ℚ) 0) = d := by
+  sorry
+
+/-- `√(discr K)` lies in `K`. From Mathlib PR
+[#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
+`[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
+theorem NumberField.exists_sq_eq_discr (K : Type*) [Field K] [NumberField K]
+    (hK : Module.finrank ℚ K = 2) :
+    ∃ x : K, x ^ 2 = (NumberField.discr K : K) := by
+  sorry
+
+/-- The discriminant of a quadratic field is not a square. From Mathlib PR
+[#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
+`[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
+theorem NumberField.not_isSquare_discr (K : Type*) [Field K] [NumberField K]
+    (hK : Module.finrank ℚ K = 2) :
+    ¬ IsSquare (NumberField.discr K) := by
+  sorry

@@ -88,16 +88,48 @@ theorem kw_2_quadratic_discr (K : Type*) [Field K] [NumberField K]
 
 open IntermediateField in
 /-- The quadratic extensions of `ℚ` unramified outside `2` are exactly `ℚ(i)`, `ℚ(√-2)`, `ℚ(√2)`,
-all contained in `ℚ(ζ_8) = ℚ⟮ξ 8⟯`. (Proof: `ℚ(√d)`, `d` squarefree, ramifies at `ℓ` iff
-`ℓ ∣ disc`, with `disc = d` or `4d`; unramified outside `2` forces `disc` a power of `2`, i.e.
-`d ∈ {-1, 2, -2}`; and `ζ_8` supplies `i = ζ_8²`, `√2 = ζ_8 + ζ_8⁻¹`, `√-2 = i√2`.) -/
+all contained in `ℚ(ζ_8) = ℚ⟮ξ 8⟯`. (Proof: by `kw_2_quadratic_discr` the discriminant of `K` is
+`-8`, `-4` or `8`, so `K` is `ℚ(√-2)`, `ℚ(i)` or `ℚ(√2)` respectively; and `ζ_8` supplies
+`√-2 = ζ_8 + ζ_8³`, `i = ζ_8²` and `√2 = ζ_8 + ζ_8⁻¹`.) -/
 theorem prop_kw_2_quadratic {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
-    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n)
-    (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] (hK : Module.finrank ℚ K = 2)
-    (hKram : UnramifiedOutside K 2) :
+    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K]
+    (hK : Module.finrank ℚ K = 2) (hKram : UnramifiedOutside K 2) :
     K ≤ ℚ⟮ξ 8⟯ := by
-  
-  sorry
+  set ζ := ξ 8
+  rsuffices ⟨y, hy₁, hy₂⟩ : ∃ y ∈ ℚ⟮ζ⟯, (y : A) ^ 2 = discr K
+  · have h₃ : y ∈ K := by
+      obtain ⟨x, hx⟩ := NumberField.exists_sq_eq_discr K hK
+      replace hx := congr_arg ((↑) : K → A) hx
+      obtain rfl | rfl := eq_or_eq_neg_of_sq_eq_sq _ _ <| hy₂.trans hx.symm
+      · exact SetLike.coe_mem x
+      · exact neg_mem_iff.mpr <| SetLike.coe_mem x
+    have h₄ : IsIntegral ℚ y := (IsIntegral.of_finite ℚ (⟨y, h₃⟩ : K)).map K.val
+    have h₅ : ℚ⟮y⟯ = K := by
+      refine IntermediateField.eq_of_le_of_finrank_le (adjoin_simple_le_iff.mpr h₃) ?_
+      rw [hK, two_le_finrank_adjoin_simple_iff _ h₄]
+      intro h
+      refine not_isSquare_discr K hK ?_
+      obtain ⟨r, rfl⟩ := IntermediateField.mem_bot.mp h
+      rw [← Rat.isSquare_intCast_iff]
+      refine ⟨r, ?_⟩
+      apply FaithfulSMul.algebraMap_injective ℚ A
+      rw [map_intCast, ← hy₂, pow_two, map_mul]
+    exact h₅ ▸ adjoin_simple_le_iff.mpr hy₁
+  · have hζ₀ : ζ ≠ 0 := (hξ 8).ne_zero (by norm_num)
+    have hζ₁ : (ζ ^ 2) ^ 2 = -1 := by
+      rw [← pow_mul]
+      exact IsPrimitiveRoot.eq_neg_one_of_two_right <| (hξ 8).pow (by positivity) (by norm_num)
+    have hζ₂ : ζ ^ 2 + ζ⁻¹ ^ 2 = 0 := by grind
+    obtain hd | hd | hd := kw_2_quadratic_discr K hK hKram
+    · refine ⟨2 * (ζ - ζ⁻¹), by aesop, ?_⟩
+      rw [mul_pow, sub_sq, sub_add_eq_add_sub, hζ₂, zero_sub, mul_inv_cancel_right₀ hζ₀, hd]
+      norm_num
+    · refine ⟨2 * ζ ^ 2, by aesop, ?_⟩
+      rw [mul_pow, hζ₁, hd]
+      norm_num
+    · refine ⟨2 * (ζ + ζ⁻¹), by aesop, ?_⟩
+      rw [mul_pow, add_sq, add_right_comm, hζ₂, zero_add, mul_inv_cancel_right₀ hζ₀, hd]
+      norm_num
 
 open IntermediateField in
 /-- Uniqueness of the real quadratic: any two *totally real* quadratic extensions of `ℚ` unramified

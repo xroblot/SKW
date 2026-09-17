@@ -1375,25 +1375,25 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{proposition}
   \label{prop:kw_2_quadratic}
   \lean{prop_kw_2_quadratic}
+  \leanok
   \uses{lem:kw_2_quadratic_discr}
-  The only quadratic extensions of $\QQ$ unramified outside $2$ are
-  $\QQ(i)$, $\QQ(\sqrt{-2})$, and $\QQ(\sqrt{2})$; all three lie in $\QQ(\zeta_8)$. In particular, the
-  maximal real abelian $2$-extension of $\QQ$ with exponent $2$ and
-  unramified outside $2$ is $\QQ(\sqrt{2})$, which is the subfield of
-  $\QQ(\zeta_8)$ of degree $2$.
+  Every quadratic extension of $\QQ$ unramified outside $2$ is contained in $\QQ(\zeta_8)$. There
+  are three of them, $\QQ(i)$, $\QQ(\sqrt{-2})$ and $\QQ(\sqrt{2})$, of respective discriminants
+  $-4$, $-8$ and $8$, and only $\QQ(\sqrt 2) = \QQ(\zeta_8)^+$ is real.
 \end{proposition}
 
 \begin{proof}
-  Write a quadratic field as $\QQ(\sqrt{d})$ with $d \neq 1$ squarefree. A prime $\ell$
-  ramifies in $\QQ(\sqrt d)$ iff $\ell \mid \operatorname{disc}$, where $\operatorname{disc} = d$
-  if $d \equiv 1 \pmod 4$ and $\operatorname{disc} = 4d$ otherwise. Hence $\QQ(\sqrt d)$ is
-  unramified outside $2$ iff $\operatorname{disc}$ is
-  (up to sign) a power of $2$, i.e.\ iff $d$ has no odd prime factor, i.e.\ $d \in \{-1, 2, -2\}$.
-  This gives exactly $\QQ(i)$ ($d = -1$), $\QQ(\sqrt 2)$ ($d = 2$), and $\QQ(\sqrt{-2})$
-  ($d = -2$); of these only $\QQ(\sqrt 2)$ is real. Since $\zeta_8 + \zeta_8^{-1} = \sqrt 2$,
-  we have $\QQ(\sqrt 2) = \QQ(\zeta_8)^+$, the degree-$2$ subfield of $\QQ(\zeta_8)$; being the
-  only real quadratic field unramified outside $2$, it is the maximal real abelian extension
-  of exponent $2$ unramified outside $2$.
+  \leanok
+  Let $K$ be such a field and $D = \operatorname{disc} K$, so $D \in \{-8, -4, 8\}$ by
+  \ref{lem:kw_2_quadratic_discr}. A square root $y$ of $D$ lies in $K$, and $K = \QQ(y)$: indeed
+  $\QQ(y) \subseteq K$, and $\QQ(y) \neq \QQ$ since $D$, being a fundamental discriminant other
+  than $1$, is not a square, so $\QQ(y)$ has degree $2 = [K : \QQ]$.
+
+  It is therefore enough to exhibit a square root of $D$ in $\QQ(\zeta_8)$, and $\zeta = \zeta_8$
+  supplies one in each case: from $\zeta^4 = -1$, hence $\zeta^2 + \zeta^{-2} = 0$, the elements
+  $2(\zeta - \zeta^{-1})$, $2\zeta^2$ and $2(\zeta + \zeta^{-1})$ have squares $-8$, $-4$ and $8$
+  respectively. Any two square roots of $D$ differ by a sign, so the one in $K$ lies in
+  $\QQ(\zeta_8)$ as well, and $K = \QQ(y) \subseteq \QQ(\zeta_8)$.
 \end{proof}
 
 \begin{proposition}
