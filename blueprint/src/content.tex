@@ -1358,7 +1358,8 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
   \label{lem:kw_2_quadratic_discr}
   \lean{kw_2_quadratic_discr}
   \leanok
-  A quadratic field unramified outside $2$ has discriminant $-8$, $-4$ or $8$.
+  A quadratic field unramified outside $2$ has discriminant $-8$, $-4$ or $8$; the three fields
+  are $\QQ(\sqrt{-2})$, $\QQ(i)$ and $\QQ(\sqrt 2)$, all contained in $\QQ(\zeta_8)$.
 \end{lemma}
 
 \begin{proof}
@@ -1370,28 +1371,6 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
   odd, a contradiction. So $\operatorname{disc} K = 4m$, and being fundamental forces $m$ to be
   squarefree with $m \not\equiv 1 \pmod 4$; as the only prime dividing $m$ is $2$, this leaves
   $m \in \{-1, 2, -2\}$, that is $\operatorname{disc} K \in \{-4, 8, -8\}$.
-\end{proof}
-
-\begin{proposition}
-  \label{prop:kw_2_quadratic}
-  \uses{lem:kw_2_quadratic_discr}
-  Every quadratic extension of $\QQ$ unramified outside $2$ is contained in $\QQ(\zeta_8)$. There
-  are three of them, $\QQ(i)$, $\QQ(\sqrt{-2})$ and $\QQ(\sqrt{2})$, of respective discriminants
-  $-4$, $-8$ and $8$, and only $\QQ(\sqrt 2) = \QQ(\zeta_8)^+$ is real.
-\end{proposition}
-
-\begin{proof}
-  \leanok
-  Let $K$ be such a field and $D = \operatorname{disc} K$, so $D \in \{-8, -4, 8\}$ by
-  \ref{lem:kw_2_quadratic_discr}. A square root $y$ of $D$ lies in $K$, and $K = \QQ(y)$: indeed
-  $\QQ(y) \subseteq K$, and $\QQ(y) \neq \QQ$ since $D$, being a fundamental discriminant other
-  than $1$, is not a square, so $\QQ(y)$ has degree $2 = [K : \QQ]$.
-
-  It is therefore enough to exhibit a square root of $D$ in $\QQ(\zeta_8)$, and $\zeta = \zeta_8$
-  supplies one in each case: from $\zeta^4 = -1$, hence $\zeta^2 + \zeta^{-2} = 0$, the elements
-  $2(\zeta - \zeta^{-1})$, $2\zeta^2$ and $2(\zeta + \zeta^{-1})$ have squares $-8$, $-4$ and $8$
-  respectively. Any two square roots of $D$ differ by a sign, so the one in $K$ lies in
-  $\QQ(\zeta_8)$ as well, and $K = \QQ(y) \subseteq \QQ(\zeta_8)$.
 \end{proof}
 
 \begin{proposition}
@@ -1433,7 +1412,7 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{proposition}
   \label{prop:kw_2_power}
   \lean{prop_kw_2_power}
-  \uses{prop:kw_2_power_real, prop:kw_2_quadratic}
+  \uses{prop:kw_2_power_real}
   Let $K/\QQ$ be a cyclic extension of degree $2^m$ unramified outside $2$.
   Then $K$ is cyclotomic.
 \end{proposition}
