@@ -32,8 +32,8 @@ classification of quadratics and the compositum comparison.
 
 ## Structure
 
-- `prop_kw_2_quadratic`: every quadratic extension of `ℚ` unramified outside `2` lies in
-  `ℚ(ζ_8) = ℚ⟮ξ 8⟯` (the three are `ℚ(i)`, `ℚ(√-2)`, `ℚ(√2)`).
+- `kw_2_quadratic_discr`: a quadratic extension of `ℚ` unramified outside `2` has discriminant
+  `-8`, `-4` or `8` (the three fields are `ℚ(√-2)`, `ℚ(i)`, `ℚ(√2)`, all inside `ℚ(ζ_8)`).
 - `prop_kw_2_quadratic_real_unique`: there is a *unique* totally real quadratic extension of `ℚ`
   unramified outside `2` (namely `ℚ(√2) = ℚ(ζ_8)⁺`). This is the pigeonhole that forces cyclicity of
   the relevant compositum in the real case.
@@ -47,7 +47,7 @@ The engines are `kw_cyclic_compositum`, the non-cyclic-`2`-group fact
 `IsCyclotomicExtension.Rat.isCMField`).
 -/
 
-open NumberField Ideal
+open NumberField NumberField.QuadraticField Ideal
 
 noncomputable section
 
@@ -86,6 +86,11 @@ theorem kw_2_quadratic_discr (K : Type*) [Field K] [NumberField K]
       exact Int.not_two_dvd_iff_odd.mpr hKo
     exact False.elim (hp₂ <| h_main hp₁ hp₃)
 
+/- No longer used: `prop_kw_2_quadratic_real_unique` now goes through the discriminant
+(`kw_2_quadratic_discr` and `nonempty_algEquiv_iff_discr_eq`) rather than through the inclusion in
+`ℚ(ζ_8)`. Kept here, commented out, since it is the classification statement the blueprint
+advertises.
+
 open IntermediateField in
 /-- The quadratic extensions of `ℚ` unramified outside `2` are exactly `ℚ(i)`, `ℚ(√-2)`, `ℚ(√2)`,
 all contained in `ℚ(ζ_8) = ℚ⟮ξ 8⟯`. (Proof: by `kw_2_quadratic_discr` the discriminant of `K` is
@@ -98,14 +103,14 @@ theorem prop_kw_2_quadratic {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   set ζ := ξ 8
   rsuffices ⟨y, hy₁, hy₂⟩ : ∃ y ∈ ℚ⟮ζ⟯, (y : A) ^ 2 = discr K
   · have h₃ : y ∈ K := by
-      obtain ⟨x, hx⟩ := NumberField.exists_sq_eq_discr K hK
+      obtain ⟨x, hx⟩ := QuadraticField.exists_sq_eq_discr K hK
       replace hx := congr_arg ((↑) : K → A) hx
       obtain rfl | rfl := eq_or_eq_neg_of_sq_eq_sq _ _ <| hy₂.trans hx.symm
       · exact SetLike.coe_mem x
       · exact neg_mem_iff.mpr <| SetLike.coe_mem x
     have h₄ : IsIntegral ℚ y := (IsIntegral.of_finite ℚ (⟨y, h₃⟩ : K)).map K.val
     have h₅ : ℚ⟮y⟯ = K := by
-      refine IntermediateField.eq_of_le_of_finrank_le (adjoin_simple_le_iff.mpr h₃) ?_
+      refine eq_of_le_of_finrank_le (adjoin_simple_le_iff.mpr h₃) ?_
       rw [hK, two_le_finrank_adjoin_simple_iff _ h₄]
       intro h
       refine not_isSquare_discr K hK ?_
@@ -130,20 +135,30 @@ theorem prop_kw_2_quadratic {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     · refine ⟨2 * (ζ + ζ⁻¹), by aesop, ?_⟩
       rw [mul_pow, add_sq, add_right_comm, hζ₂, zero_add, mul_inv_cancel_right₀ hζ₀, hd]
       norm_num
+-/
 
 open IntermediateField in
 /-- Uniqueness of the real quadratic: any two *totally real* quadratic extensions of `ℚ` unramified
-outside `2` coincide (both equal `ℚ(√2) = ℚ(ζ_8)⁺`). Follows from `prop_kw_2_quadratic`: both lie in
-`ℚ(ζ_8)`, are real of degree `2`, and `ℚ(√2)` is the only real quadratic subfield of `ℚ(ζ_8)`. This
-is the pigeonhole used in `prop_kw_2_power_real`. -/
-theorem prop_kw_2_quadratic_real_unique {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
-    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n)
+outside `2` coincide (both equal `ℚ(√2) = ℚ(ζ_8)⁺`). By `kw_2_quadratic_discr` both discriminants
+are `-8`, `-4` or `8`, and positive since the fields are real, hence both equal `8`; the
+discriminant being a complete invariant, the two fields are isomorphic, hence equal since they are
+normal. This is the pigeonhole used in `prop_kw_2_power_real`. -/
+theorem prop_kw_2_quadratic_real_unique {A : Type*} [Field A] [CharZero A]
     (K₁ : IntermediateField ℚ A) [NumberField K₁] [IsGalois ℚ K₁] [IsTotallyReal K₁]
     (hK₁ : Module.finrank ℚ K₁ = 2) (hKram₁ : UnramifiedOutside K₁ 2)
     (K₂ : IntermediateField ℚ A) [NumberField K₂] [IsGalois ℚ K₂] [IsTotallyReal K₂]
     (hK₂ : Module.finrank ℚ K₂ = 2) (hKram₂ : UnramifiedOutside K₂ 2) :
     K₁ = K₂ := by
-  sorry
+  have : discr K₁ = discr K₂ := by
+    have : 0 < discr K₁ := discr_pos K₁ hK₁
+    have : 0 < discr K₂ := discr_pos K₂ hK₂
+    rw [((kw_2_quadratic_discr K₁ hK₁ hKram₁).resolve_left (by grind)).resolve_left (by grind),
+      ((kw_2_quadratic_discr K₂ hK₂ hKram₂).resolve_left (by grind)).resolve_left (by grind)]
+  let e := ((nonempty_algEquiv_iff_discr_eq K₁ K₂ hK₁ hK₂).mpr this).some
+  refine eq_of_le_of_finrank_eq ?_ (by rw [hK₁, hK₂])
+  intro x hx
+  rw [← AlgHom.fieldRange_of_normal (K₁.val.comp e.symm.toAlgHom)]
+  exact ⟨e ⟨x, hx⟩, by simp⟩
 
 open IntermediateField in
 /-- **Real case.** A totally real cyclic extension of `ℚ` of degree `2^m` unramified outside `2` is
@@ -190,7 +205,7 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     IsScalarTower.of_algebraMap_eq fun x => ((inclusion hle₂).commutes x).symm
   have : IsTotallyReal F₁ := IsTotallyReal.of_algebra F₁ ↑(K ⊔ K')
   have : IsTotallyReal F₂ := IsTotallyReal.of_algebra F₂ ↑(K ⊔ K')
-  exact prop_kw_2_quadratic_real_unique hξ F₁ hf₁ hr₁ F₂ hf₂ hr₂
+  exact prop_kw_2_quadratic_real_unique F₁ hf₁ hr₁ F₂ hf₂ hr₂
 
 open IntermediateField in
 /-- Every cyclic extension of `ℚ` of degree `2ᵐ` unramified outside `2` is cyclotomic: contained in

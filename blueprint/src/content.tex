@@ -1374,8 +1374,6 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 
 \begin{proposition}
   \label{prop:kw_2_quadratic}
-  \lean{prop_kw_2_quadratic}
-  \leanok
   \uses{lem:kw_2_quadratic_discr}
   Every quadratic extension of $\QQ$ unramified outside $2$ is contained in $\QQ(\zeta_8)$. There
   are three of them, $\QQ(i)$, $\QQ(\sqrt{-2})$ and $\QQ(\sqrt{2})$, of respective discriminants
@@ -1399,14 +1397,18 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{proposition}
   \label{prop:kw_2_quadratic_real_unique}
   \lean{prop_kw_2_quadratic_real_unique}
-  \uses{prop:kw_2_quadratic}
+  \leanok
+  \uses{lem:kw_2_quadratic_discr}
   Any two totally real quadratic extensions of $\QQ$ unramified outside $2$ coincide (both equal
   $\QQ(\sqrt 2) = \QQ(\zeta_8)^+$).
 \end{proposition}
 
 \begin{proof}
-  By \ref{prop:kw_2_quadratic} each lies in $\QQ(\zeta_8)$ and, being real of degree $2$, equals its
-  unique real quadratic subfield $\QQ(\sqrt 2)$.
+  \leanok
+  By \ref{lem:kw_2_quadratic_discr} each discriminant is $-8$, $-4$ or $8$, and it is positive
+  since the field is totally real, so both equal $8$. The discriminant being a complete invariant
+  of quadratic fields, the two fields are isomorphic over $\QQ$; being normal, they are then equal
+  as subfields of the ambient field.
 \end{proof}
 
 \begin{proposition}
