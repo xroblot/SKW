@@ -18,6 +18,7 @@ import SKW.Prereqs.IntermediateField
 import SKW.Prereqs.KummerExtension
 import SKW.Prereqs.MulChars
 import SKW.Prereqs.Normal
+import SKW.Prereqs.Subfield
 import SKW.Prereqs.Unramified
 import SKW.Prereqs.NumberTheory
 import SKW.Prereqs.Cotangent

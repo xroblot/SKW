@@ -160,6 +160,41 @@ theorem prop_kw_2_quadratic_real_unique {A : Type*} [Field A] [CharZero A]
   rw [← AlgHom.fieldRange_of_normal (K₁.val.comp e.symm.toAlgHom)]
   exact ⟨e ⟨x, hx⟩, by simp⟩
 
+section MaximalReal
+
+open IntermediateField IsCyclotomicExtension
+
+variable {A : Type*} [Field A] [CharZero A] (m : ℕ) (C : IntermediateField ℚ A) [NumberField C]
+  [IsCyclotomicExtension {2 ^ (m + 2)} ℚ C] [IsAbelianGalois ℚ C]
+
+/-- Complex conjugation on `ℚ(ζ_{2^{m+2}})`, as the subgroup of the Galois group corresponding to
+`-1 ∈ (ℤ/2^{m+2})ˣ`. Its fixed field is the maximal real subfield. -/
+noncomputable def conjSubgroup : Subgroup Gal(C/ℚ) :=
+  Subgroup.zpowers ((Rat.galEquivZMod (2 ^ (m + 2)) C).symm (-1))
+
+/-- `⟨-1⟩` has index `2 ^ m` in `Gal(ℚ(ζ_{2^{m+2}})/ℚ)`, which has order `2 ^ (m + 1)`. -/
+theorem index_conjSubgroup : (conjSubgroup m C).index = 2 ^ m := by
+  sorry
+
+/-- The quotient of `Gal(ℚ(ζ_{2^{m+2}})/ℚ) ≅ (ℤ/2^{m+2})ˣ` by complex conjugation is cyclic. This
+is `isCyclic_units_two_pow_quotient_neg_one` transported along `Rat.galEquivZMod`. -/
+theorem isCyclic_quotient_conjSubgroup [(conjSubgroup m C).Normal] :
+    IsCyclic (Gal(C/ℚ) ⧸ conjSubgroup m C) := by
+  sorry
+
+/-- The fixed field of complex conjugation is totally real: it is the maximal real subfield. -/
+theorem isTotallyReal_lift_fixedField_conjSubgroup :
+    IsTotallyReal (lift (fixedField (conjSubgroup m C))) := by
+  sorry
+
+/-- A subfield of `ℚ(ζ_{2^{m+2}})` is unramified outside `2`; same proof as in the odd case
+(`prop_kw_odd_prime_power`). -/
+theorem unramifiedOutside_lift_fixedField_conjSubgroup :
+    UnramifiedOutside (lift (fixedField (conjSubgroup m C))) 2 := by
+  sorry
+
+end MaximalReal
+
 open IntermediateField in
 /-- **Real case.** A totally real cyclic extension of `ℚ` of degree `2^m` unramified outside `2` is
 contained in `ℚ(ζ_{2^{m+2}}) = ℚ⟮ξ (2^(m+2))⟯`.
@@ -183,9 +218,23 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   have : NumberField ℚ⟮ξ (2 ^ (m + 2))⟯ := IsCyclotomicExtension.numberField {2 ^ (m + 2)} ℚ _
   -- `K' = ℚ(ζ_{2^{m+2}})⁺`, the maximal real subfield: cyclic of degree `2^m`, totally real,
   -- unramified outside `2`, contained in `ℚ(ζ_{2^{m+2}})`.
+  have : IsAbelianGalois ℚ ℚ⟮ξ (2 ^ (m + 2))⟯ :=
+    IsCyclotomicExtension.isAbelianGalois {2 ^ (m + 2)} ℚ _
   obtain ⟨K', hK'le, hK'deg, hK'gal, hK'cyc, hK'ram, hK'real⟩ :
       ∃ K' : IntermediateField ℚ A, K' ≤ ℚ⟮ξ (2 ^ (m + 2))⟯ ∧ Module.finrank ℚ K' = 2 ^ m ∧
-        IsGalois ℚ K' ∧ IsCyclic Gal(K'/ℚ) ∧ UnramifiedOutside K' 2 ∧ IsTotallyReal K' := sorry
+        IsGalois ℚ K' ∧ IsCyclic Gal(K'/ℚ) ∧ UnramifiedOutside K' 2 ∧ IsTotallyReal K' := by
+    -- `K'` is the fixed field of complex conjugation, i.e. `ℚ(ζ_{2^{m+2}})⁺`
+    refine ⟨lift (fixedField (conjSubgroup m ℚ⟮ξ (2 ^ (m + 2))⟯)), lift_le _, ?_, ?_, ?_,
+      unramifiedOutside_lift_fixedField_conjSubgroup m _,
+      isTotallyReal_lift_fixedField_conjSubgroup m _⟩
+    · -- degree: the index of `⟨-1⟩`
+      rw [finrank_lift, fixedField, IsGaloisGroup.finrank_fixedPoints_eq_index_subgroup,
+        index_conjSubgroup]
+    · -- `IsGalois ℚ (lift …)`: transporting along `liftAlgEquiv` times out here
+      sorry
+    · -- cyclic: a quotient of `Gal(ℚ(ζ_{2^{m+2}})/ℚ)` by complex conjugation
+      rw [(liftAlgEquiv _).symm.autCongr.isCyclic, ← (IsGalois.normalAutEquivQuotient _).isCyclic]
+      exact isCyclic_quotient_conjSubgroup m _
   have : NumberField K' :=
     let : Algebra K' ℚ⟮ξ (2 ^ (m + 2))⟯ := (inclusion hK'le).toAlgebra
     NumberField.of_tower ℚ ℚ⟮ξ (2 ^ (m + 2))⟯ _
@@ -194,7 +243,10 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   have : IsTotallyReal K' := hK'real
   have : IsAbelianGalois ℚ K' := IsAbelianGalois.of_isCyclic ℚ K'
   -- The compositum `K ⊔ K'` is totally real (both factors are).
-  have hsupreal : IsTotallyReal ↑(K ⊔ K') := sorry
+  have hsupreal : IsTotallyReal ↑(K ⊔ K') := by
+    change IsTotallyReal ↑(K ⊔ K').toSubfield
+    rw [sup_toSubfield]
+    apply NumberField.isTotallyReal_sup'
   refine (kw_le_of_unique_prime_subfield K K' hK hK'deg hKram hK'ram ?_).trans hK'le
   intro F₁ F₂ _ _ _ _ _ _ hle₁ hle₂ hf₁ hf₂ hr₁ hr₂
   let : Algebra F₁ ↑(K ⊔ K') := (inclusion hle₁).toAlgebra
