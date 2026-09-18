@@ -1,20 +1,17 @@
 module
 
 public import Mathlib.Algebra.Field.Subfield.Basic
-public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import SKW.PRed2Mathlib.Subfield
 
 @[expose] public section
 
 /-!
-# Suprema of subfields
+# Induction principles for suprema of subfields
 
-Induction principles for suprema of subfields, a Galois coinsertion for `map`/`comap`, and the
-fact that a supremum of totally real subfields is totally real.
-
-`Subfield.iSup_induction`, its dependent version `Subfield.iSup_induction'` and the binary
-`Subfield.sup_induction`, following `Subalgebra.iSup_induction` and `Submonoid.iSup_induction`.
-Candidates for Mathlib: the `Subfield` API has `closure_induction` but no induction principle for
-suprema.
+`Subfield.iSup_induction`, its dependent version `Subfield.iSup_induction'`, the binary
+`Subfield.sup_induction` and `Subfield.sup_induction'`, following `Subalgebra.iSup_induction` and
+`Submonoid.iSup_induction`. Candidates for Mathlib: the `Subfield` API has `closure_induction` but
+no induction principle for suprema.
 -/
 
 namespace Subfield
@@ -98,99 +95,6 @@ theorem sup_induction' {E F : Subfield K} {motive : ∀ x, x ∈ E ⊔ F → Pro
     (fun _ h ↦ ⟨_, neg _ _ h.choose_spec⟩) (fun _ h ↦ ⟨_, inv _ _ h.choose_spec⟩)
     (fun _ _ h h' ↦ ⟨_, mul _ _ _ _ h.choose_spec h'.choose_spec⟩)
 
-section GaloisCoinsertion
-
-variable {L : Type*} [Field L] {ι : Sort*} (f : K →+* L)
-
-/-- `map f` and `comap f` form a `GaloisCoinsertion`: a ring homomorphism out of a field is
-injective. -/
-def gciMapComap : GaloisCoinsertion (map f) (comap f) :=
-  (gc_map_comap f).toGaloisCoinsertion fun S x => by simp [mem_comap]
-
-/-- Same statement as `Subfield.comap_map`, proved through `Subfield.gciMapComap`; it is meant to
-replace it when this material goes to Mathlib. -/
-theorem comap_map' (S : Subfield K) : (S.map f).comap f = S :=
-  (gciMapComap f).u_l_eq _
-
-theorem comap_surjective : Function.Surjective (comap f) :=
-  (gciMapComap f).u_surjective
-
-theorem map_injective : Function.Injective (map f) :=
-  (gciMapComap f).l_injective
-
-theorem comap_inf_map (S T : Subfield K) : (S.map f ⊓ T.map f).comap f = S ⊓ T :=
-  (gciMapComap f).u_inf_l _ _
-
-theorem comap_iInf_map (S : ι → Subfield K) : (⨅ i, (S i).map f).comap f = ⨅ i, S i :=
-  (gciMapComap f).u_iInf_l _
-
-theorem comap_sup_map (S T : Subfield K) : (S.map f ⊔ T.map f).comap f = S ⊔ T :=
-  (gciMapComap f).u_sup_l _ _
-
-theorem comap_iSup_map (S : ι → Subfield K) : (⨆ i, (S i).map f).comap f = ⨆ i, S i :=
-  (gciMapComap f).u_iSup_l _
-
-theorem map_le_map_iff {S T : Subfield K} : S.map f ≤ T.map f ↔ S ≤ T :=
-  (gciMapComap f).l_le_l_iff
-
-/-- `comap` commutes with `⊔` for subfields lying in the range of `f`. -/
-theorem comap_sup {S T : Subfield L} (hS : S ≤ f.fieldRange) (hT : T ≤ f.fieldRange) :
-    (S ⊔ T).comap f = S.comap f ⊔ T.comap f := by
-  rw [← map_comap_eq_self hS, ← map_comap_eq_self hT, comap_sup_map, comap_map', comap_map']
-
-/-- `comap` commutes with `⨆` for subfields lying in the range of `f`. -/
-theorem comap_iSup {S : ι → Subfield L} (hS : ∀ i, S i ≤ f.fieldRange) :
-    (⨆ i, S i).comap f = ⨆ i, (S i).comap f := by
-  have : ∀ i, ((S i).comap f).map f = S i := fun i ↦ map_comap_eq_self (hS i)
-  calc (⨆ i, S i).comap f = (⨆ i, ((S i).comap f).map f).comap f := by simp_rw [this]
-    _ = ⨆ i, (S i).comap f := comap_iSup_map f _
-
-section Subtype
-
-variable {s t : Subfield K}
-
-@[simp]
-theorem comap_subtype_eq_top : t.comap s.subtype = ⊤ ↔ s ≤ t := by
-  refine ⟨fun h x hx ↦ ?_, fun h ↦ eq_top_iff.mpr fun z _ ↦ mem_comap.mpr (h z.2)⟩
-  exact mem_comap.mp (h ▸ mem_top (⟨x, hx⟩ : s))
-
-@[simp]
-theorem comap_subtype_self (s : Subfield K) : s.comap s.subtype = ⊤ :=
-  comap_subtype_eq_top.mpr le_rfl
-
-theorem map_comap_subtype : (t.comap s.subtype).map s.subtype = s ⊓ t :=
-  SetLike.coe_injective <| by
-    ext x
-    exact ⟨by rintro ⟨⟨_, h₁⟩, h₂, rfl⟩; exact ⟨h₁, h₂⟩, fun ⟨h₁, h₂⟩ ↦ ⟨⟨x, h₁⟩, h₂, rfl⟩⟩
-
-end Subtype
-
-end GaloisCoinsertion
-
 end Subfield
-
-open Subfield NumberField in
-/-- The compositum of totally real subfields is totally real. -/
-instance NumberField.isTotallyReal_iSup' {A : Type*} [Field A] {ι : Type*} (F : ι → Subfield A)
-    [hF : ∀ i, NumberField.IsTotallyReal (F i)] :
-    NumberField.IsTotallyReal ↑(⨆ i, F i) := by
-  refine ⟨fun w ↦ InfinitePlace.isReal_iff.mpr <|
-      ComplexEmbedding.isReal_iff.mpr <| RingHom.ext fun z ↦ RingHom.mem_eqLocusField.mp ?_⟩
-  have : (ComplexEmbedding.conjugate w.embedding).eqLocusField w.embedding = ⊤ := by
-    rw [eq_top_iff, ← comap_subtype_self, comap_iSup _ (fun _ ↦ by simpa using le_iSup _ _),
-      iSup_le_iff]
-    refine fun _ x hx ↦ RingHom.congr_fun (IsTotallyReal.complexEmbedding_isReal
-        (w.embedding.comp (Subfield.inclusion ?_))) ⟨x, hx⟩
-    exact le_iSup _ _
-  exact this ▸ Subsemiring.mem_top z
-
-open NumberField in
-/-- The compositum of two totally real subfields is totally real. -/
-instance NumberField.isTotallyReal_sup' {A : Type*} [Field A] {E F : Subfield A}
-    [NumberField.IsTotallyReal E] [NumberField.IsTotallyReal F] :
-    NumberField.IsTotallyReal ↑(E ⊔ F) := by
-  rw [sup_eq_iSup]
-  exact isTotallyReal_iSup' (fun b ↦ cond b E F) (hF := by rintro (_ | _) <;> assumption)
-
 
 end
