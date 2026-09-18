@@ -290,6 +290,31 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
     (hK : Module.finrank ℚ K = 2 ^ m) (hKram : UnramifiedOutside K 2) :
     K ≤ ℚ⟮ξ (2 ^ (m + 2))⟯ := by
+  -- if `K` is already totally real, the real case applies directly
+  by_cases hreal : IsTotallyReal K
+  · exact prop_kw_2_power_real hξ m hm K hK hKram
+  -- otherwise pass to `L = K(i) = K ⊔ ℚ(i)`, which is CM
+  set L : IntermediateField ℚ A := K ⊔ ℚ⟮ξ 4⟯ with hL
+  have hKL : K ≤ L := le_sup_left
+  have : NumberField L := sorry
+  have : IsGalois ℚ L := sorry
+  have : IsCMField L := sorry
+  have hLram : UnramifiedOutside L 2 := sorry
+  -- its maximal real subfield `M` is cyclic of `2`-power degree, unramified outside `2`
+  set M : IntermediateField ℚ A := maximalReal L with hM
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, Module.finrank ℚ M = 2 ^ k := sorry
+  have hkm : k ≤ m := sorry
+  have : (Subgroup.zpowers (conjGal L)).Normal := sorry
+  have : NumberField M := sorry
+  have : IsCyclic Gal(M/ℚ) := by
+    refine isCyclic_gal_maximalReal L ?_
+    -- `Gal(K(i)/ℚ) ≅ ℤ/2^m × ℤ/2` with complex conjugation `(2^{m-1}, 1)`, so the quotient is cyclic
+    sorry
+  -- the real case applies to `M`
+  have hM' : M ≤ ℚ⟮ξ (2 ^ (k + 2))⟯ :=
+    prop_kw_2_power_real hξ k sorry M hk (unramifiedOutside_maximalReal L hLram)
+  -- and `K ≤ L = M(i) ≤ ℚ(ζ_{2^{k+2}}) ⊔ ℚ(i) ≤ ℚ(ζ_{2^{m+2}})`
+  have hLM : L = M ⊔ ℚ⟮ξ 4⟯ := sorry
   sorry
 
 end
