@@ -124,42 +124,37 @@ theorem prop_kw_odd_prime_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
     (hξ (p ^ (m + 1))).adjoinSimple_isCyclotomicExtension _ ℚ A
   have : IsAbelianGalois ℚ C := isAbelianGalois {p ^ (m + 1)} ℚ C
   have : NumberField C := IsCyclotomicExtension.numberField {p ^ (m + 1)} ℚ C
-  obtain ⟨K', hK'₁, hK'₂, hK'₃, hK'₄⟩ :
-      ∃ K' : IntermediateField ℚ A, K' ≤ C ∧ Module.finrank ℚ K' = p ^ m ∧
-        IsCyclic Gal(K'/ℚ) ∧ UnramifiedOutside K' p := by
-    have : IsCyclic Gal(C/ℚ) := by
-      rw [(Rat.galEquivZMod (p ^ (m + 1)) C).isCyclic]
-      exact ZMod.isCyclic_units_of_prime_pow _ hp.out (by grind [hp'.out]) _
-    obtain ⟨σ, hσ⟩ := IsCyclic.exists_ofOrder_eq_natCard (α := Gal(C/ℚ))
-    have hC : Nat.card Gal(C/ℚ) = p ^ m * (p - 1) := by
-      rw [IsGalois.card_aut_eq_finrank, Rat.finrank (p ^ (m + 1)),
-        Nat.totient_prime_pow hp.out (by positivity), add_tsub_cancel_right]
-    refine ⟨lift (fixedField (Subgroup.zpowers (σ ^ (p ^ m)))), lift_le _, ?_, ?_, ?_⟩
-    · rw [finrank_lift, fixedField, IsGaloisGroup.finrank_fixedPoints_eq_index_subgroup,
-        Subgroup.index_eq_iff_card_mul_eq_card, Nat.card_zpowers,
-        orderOf_pow_of_orderOf_eq_mul (orderOf_pos σ) (by rw [hσ, hC]),
-        IsGalois.card_aut_eq_finrank, Rat.finrank (p ^ (m + 1)),
-        Nat.totient_prime_pow hp.out (by positivity), add_tsub_cancel_right, mul_comm]
-    · rw [(liftAlgEquiv _).symm.autCongr.isCyclic, ← (IsGalois.normalAutEquivQuotient _).isCyclic]
-      apply isCyclic_of_surjective _ (QuotientGroup.mk'_surjective _)
-    · intro q hq hqp
-      have : Fact q.Prime := ⟨hq⟩
-      apply Algebra.IsUnramifiedIn.of_algEquiv <|
-        RingOfIntegers.mapIntAlgEquiv (liftAlgEquiv _).toRingEquiv
-      refine Algebra.IsUnramifiedIn.tower_bot (T := 𝓞 C) fun Q hQ₁ hQ₂ ↦
-        ramificationIdx_eq_one_iff.mp ?_
-      rw [Rat.ramificationIdx_eq_of_not_dvd q (m := p ^ (m + 1))]
-      intro h
-      exact hqp <| (Nat.prime_dvd_prime_iff_eq hq hp.out).mp <| hq.dvd_of_dvd_pow h
+  have hCram : UnramifiedOutside C p := by
+    intro q hq hqp
+    have : Fact q.Prime := ⟨hq⟩
+    refine fun Q hQ₁ hQ₂ ↦ ramificationIdx_eq_one_iff.mp ?_
+    rw [Rat.ramificationIdx_eq_of_not_dvd q (m := p ^ (m + 1))]
+    intro h
+    exact hqp <| (Nat.prime_dvd_prime_iff_eq hq hp.out).mp <| hq.dvd_of_dvd_pow h
+  have : IsCyclic Gal(C/ℚ) := by
+    rw [(Rat.galEquivZMod (p ^ (m + 1)) C).isCyclic]
+    exact ZMod.isCyclic_units_of_prime_pow _ hp.out (by grind [hp'.out]) _
+  obtain ⟨σ, hσ⟩ := IsCyclic.exists_ofOrder_eq_natCard (α := Gal(C/ℚ))
+  have hcard : Nat.card Gal(C/ℚ) = p ^ m * (p - 1) := by
+    rw [IsGalois.card_aut_eq_finrank, Rat.finrank (p ^ (m + 1)),
+      Nat.totient_prime_pow hp.out (by positivity), add_tsub_cancel_right]
+  -- `K'` is the fixed field of `⟨σ ^ pᵐ⟩`, of index `pᵐ`
+  obtain ⟨hK'₂, hK'gal, hK'₃, hK'₄⟩ :=
+    fixedField_spec_of_index_eq_prime_pow C hCram (Subgroup.zpowers (σ ^ p ^ m))
+      (by rw [Subgroup.index_eq_iff_card_mul_eq_card, Nat.card_zpowers,
+        orderOf_pow_of_orderOf_eq_mul (orderOf_pos σ) (by rw [hσ, hcard]), hcard, mul_comm])
+      (isCyclic_of_surjective _ (QuotientGroup.mk'_surjective _))
+  set K' : IntermediateField ℚ A := lift (fixedField (Subgroup.zpowers (σ ^ p ^ m))) with hK'def
+  have hK'₁ : K' ≤ C := lift_le _
   have : NumberField K' :=
     let : Algebra K' C := (inclusion hK'₁).toAlgebra
     NumberField.of_tower ℚ C _
   have : IsAbelianGalois ℚ K' := by
     have : Algebra K' C := (inclusion hK'₁).toAlgebra
     exact IsAbelianGalois.tower_bot ℚ K' C
-  exact (kw_le_of_unique_prime_subfield K K' hK hK'₂ hKram hK'₄
+  exact (kw_eq_of_unique_prime_subfield K K' hK hK'₂ hKram hK'₄
     (fun F₁ F₂ _ _ _ _ _ _ _ _ hf₁ hf₂ hr₁ hr₂ =>
-      prop_kw_exponent_p_eq p hp'.out (hξ (p ^ 2)) F₁ F₂ hf₁ hr₁ hf₂ hr₂)).trans hK'₁
+      prop_kw_exponent_p_eq p hp'.out (hξ (p ^ 2)) F₁ F₂ hf₁ hr₁ hf₂ hr₂)).le.trans hK'₁
 
 end
 

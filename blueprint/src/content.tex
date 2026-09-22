@@ -1393,7 +1393,8 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{proposition}
   \label{prop:kw_2_power_real}
   \lean{prop_kw_2_power_real}
-  \uses{prop:kw_2_quadratic_real_unique, lem:kw_cyclic_compositum}
+  \uses{prop:kw_2_quadratic_real_unique, lem:kw_eq_of_unique_prime_subfield,
+    lem:kw_fixedField_index}
   Let $K/\QQ$ be a totally real cyclic extension of degree $2^m$ unramified outside $2$. Then
   $K \subseteq \QQ(\zeta_{2^{m+2}})$.
 \end{proposition}
@@ -1429,27 +1430,59 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
   $K$ — cyclotomic. (This is Lemmermeyer's argument, Prop.~1.5.)
 \end{proof}
 
+\begin{lemma}
+  \label{lem:kw_fixedField_index}
+  \lean{fixedField_spec_of_index_eq_prime_pow}
+  \leanok
+  Let $C/\QQ$ be abelian and unramified outside $p$, and let $H \leq \Gal(C/\QQ)$ be of index
+  $p^m$ with cyclic quotient. Then $C^{H}$ is a cyclic extension of $\QQ$ of degree $p^m$,
+  unramified outside $p$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  By the Galois correspondence $[C^{H} : \QQ] = [\Gal(C/\QQ) : H] = p^m$ and
+  $\Gal(C^{H}/\QQ) \cong \Gal(C/\QQ)/H$, which is cyclic by hypothesis. A subfield of $C$ is
+  unramified outside $p$ because $C$ is.
+\end{proof}
+
+\begin{lemma}
+  \label{lem:kw_eq_of_unique_prime_subfield}
+  \lean{kw_eq_of_unique_prime_subfield}
+  \leanok
+  \uses{lem:kw_cyclic_compositum}
+  Let $K, K'$ be cyclic extensions of $\QQ$ of the same degree $p^m$, both unramified outside
+  $p$, inside a common ambient field. If any two subfields of $KK'$ of degree $p$ over $\QQ$ and
+  unramified outside $p$ coincide, then $K = K'$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  $\Gal(KK'/\QQ)$ is an abelian $p$-group. Were it not cyclic it would have two distinct
+  subgroups of index $p$, hence two distinct degree-$p$ subfields of $KK'$, both unramified
+  outside $p$, contrary to the hypothesis. So $KK'/\QQ$ is cyclic and
+  \ref{lem:kw_cyclic_compositum} gives $K \subseteq K'$; the degrees being equal and finite,
+  $K = K'$.
+\end{proof}
+
 \begin{proposition}
   \label{prop:kw_odd_prime_power}
   \lean{prop_kw_odd_prime_power}
   \leanok
-  \uses{prop:kw_exponent_p, lem:kw_cyclic_compositum, lem:kw_minkowski}
+  \uses{prop:kw_exponent_p, lem:kw_eq_of_unique_prime_subfield, lem:kw_fixedField_index,
+    lem:kw_minkowski}
   Let $K/\QQ$ be a cyclic extension of odd prime power degree $p^m$
   unramified outside $p$. Then $K$ is cyclotomic.
 \end{proposition}
 
 \begin{proof}
   \leanok
-  Let $K'$ be the unique subfield of degree $p^m$ in $\QQ(\zeta_{p^{m+1}})$;
-  it is cyclic of degree $p^m$ and unramified outside $p$. Suppose $K'K/\QQ$
-  is not cyclic. Then $\Gal(K'K/\QQ)$ is a non-cyclic $p$-group, so it has
-  $(\ZZ/p\ZZ)^2$ as a quotient, giving a subfield $E \subseteq K'K$ with
-  $\Gal(E/\QQ) \cong (\ZZ/p\ZZ)^2$. Since $K$ and $K'$ are unramified
-  outside $p$, so is $E$. But by \ref{prop:kw_exponent_p} the maximal
-  abelian extension of exponent $p$ unramified outside $p$ is cyclic of
-  degree $p$, so no extension with Galois group $(\ZZ/p\ZZ)^2$ exists.
-  This contradiction shows $K'K/\QQ$ is cyclic, so \ref{lem:kw_cyclic_compositum}
-  gives $K \subseteq K' \subseteq \QQ(\zeta_{p^{m+1}})$.
+  Put $C = \QQ(\zeta_{p^{m+1}})$. As $p$ is odd, $\Gal(C/\QQ) \cong (\ZZ/p^{m+1}\ZZ)^\times$ is
+  cyclic of order $p^{m}(p-1)$; let $\sigma$ be a generator and $H = \langle \sigma^{p^m}\rangle$,
+  of index $p^m$ and with cyclic quotient. By \ref{lem:kw_fixedField_index}, $K' = C^{H}$ is
+  cyclic of degree $p^m$ over $\QQ$ and unramified outside $p$. Two degree-$p$ subfields of
+  $KK'$ unramified outside $p$ coincide by \ref{prop:kw_exponent_p}, so
+  \ref{lem:kw_eq_of_unique_prime_subfield} gives $K = K' \subseteq \QQ(\zeta_{p^{m+1}})$.
 \end{proof}
 
 \section{The prime degree case}

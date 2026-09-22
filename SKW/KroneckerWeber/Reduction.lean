@@ -368,14 +368,35 @@ lemma kw_cyclic_compositum {A : Type*} [Field A] [CharZero A] (K K' : Intermedia
     Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank'])
   rwa [he, he', Nat.div_dvd_div_iff_left finrank_pos hd' hd]
 
+open IntermediateField in
+/-- The subfield cut out by a subgroup `H` of `Gal(C/ℚ)`, for `C/ℚ` abelian and unramified outside
+`p`: if `H` has index `pᵐ` and cyclic quotient, then `Fix H` is a cyclic extension of `ℚ` of degree
+`pᵐ`, unramified outside `p` (and contained in `C`, which is `IntermediateField.lift_le`). This is the construction shared by the odd and
+the `p = 2` cases: only the choice of `H`, and the proof that the quotient is cyclic, differ. -/
+lemma fixedField_spec_of_index_eq_prime_pow {A : Type*} [Field A] [CharZero A]
+    (C : IntermediateField ℚ A) [NumberField C] [IsAbelianGalois ℚ C]
+    (hCram : UnramifiedOutside C p) {m : ℕ} (H : Subgroup Gal(C/ℚ))
+    (hindex : H.index = p ^ m) (hcyc : IsCyclic (Gal(C/ℚ) ⧸ H)) :
+    Module.finrank ℚ (lift (fixedField H)) = p ^ m ∧ IsGalois ℚ (lift (fixedField H)) ∧
+      IsCyclic Gal(lift (fixedField H)/ℚ) ∧ UnramifiedOutside (lift (fixedField H)) p := by
+  have : H.Normal := Subgroup.normal_of_isMulCommutative H
+  have hGal : IsGalois ℚ (lift (fixedField H)) :=
+    IsGalois.of_algEquiv (liftAlgEquiv (fixedField H))
+  refine ⟨?_, hGal, ?_, ?_⟩
+  · rw [finrank_lift, fixedField, IsGaloisGroup.finrank_fixedPoints_eq_index_subgroup, hindex]
+  · rw [(liftAlgEquiv _).symm.autCongr.isCyclic, ← (IsGalois.normalAutEquivQuotient _).isCyclic]
+    exact hcyc
+  · exact UnramifiedOutside.of_algEquiv p (liftAlgEquiv _)
+      (UnramifiedOutside.tower_bot p hCram)
+
 set_option backward.isDefEq.respectTransparency false in
 /-- Two cyclic extensions `K`, `K'` of `ℚ` (in a common ambient `A`) of the same `p`-power degree
-`pᵐ`, both unramified outside `p`, are comparable (`K ≤ K'`) provided any two degree-`p` subfields
-of the compositum `K ⊔ K'` unramified outside `p` coincide. The compositum `K ⊔ K'` is then cyclic
+`pᵐ`, both unramified outside `p`, are equal provided any two degree-`p` subfields of the
+compositum `K ⊔ K'` unramified outside `p` coincide. The compositum `K ⊔ K'` is then cyclic
 (a non-cyclic abelian `p`-group would have two distinct index-`p` subgroups, giving two distinct
 such subfields), and `kw_cyclic_compositum` finishes. The uniqueness input `huniq` is where the odd
 and `p = 2` cases differ. -/
-lemma kw_le_of_unique_prime_subfield {A : Type*} [Field A] [CharZero A]
+lemma kw_eq_of_unique_prime_subfield {A : Type*} [Field A] [CharZero A]
     (K K' : IntermediateField ℚ A) [NumberField K] [IsAbelianGalois ℚ K]
     [NumberField K'] [IsAbelianGalois ℚ K'] {m : ℕ}
     (hK : Module.finrank ℚ K = p ^ m) (hK' : Module.finrank ℚ K' = p ^ m)
@@ -384,7 +405,8 @@ lemma kw_le_of_unique_prime_subfield {A : Type*} [Field A] [CharZero A]
       [IsCyclic Gal(F₁/ℚ)] [NumberField F₂] [IsGalois ℚ F₂] [IsCyclic Gal(F₂/ℚ)],
       F₁ ≤ K ⊔ K' → F₂ ≤ K ⊔ K' → Module.finrank ℚ F₁ = p → Module.finrank ℚ F₂ = p →
       UnramifiedOutside F₁ p → UnramifiedOutside F₂ p → F₁ = F₂) :
-    K ≤ K' := by
+    K = K' := by
+  refine eq_of_le_of_finrank_eq ?_ (by rw [hK, hK'])
   have : IsAbelianGalois ℚ ↑(K ⊔ K') := IsAbelianGalois.sup K K'
   have hCyc : IsCyclic Gal(↑(K ⊔ K')/ℚ) := by
     let : CommGroup Gal(↑(K ⊔ K')/ℚ) := IsMulCommutative.instCommGroup

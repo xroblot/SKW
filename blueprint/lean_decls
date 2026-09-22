@@ -61,6 +61,8 @@ kw_2_quadratic_discr
 prop_kw_2_quadratic_real_unique
 prop_kw_2_power_real
 prop_kw_2_power
+fixedField_spec_of_index_eq_prime_pow
+kw_eq_of_unique_prime_subfield
 prop_kw_odd_prime_power
 prop_kw_exponent_p
 kw_kummer
