@@ -94,17 +94,19 @@ theorem prop_kw_exponent_p_eq (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {
   have h₁ : K₁ ≤ ℚ⟮ξ⟯ := prop_kw_exponent_p p hp' hξ K₁ hK₁ hKram₁
   have h₂ : K₂ ≤ ℚ⟮ξ⟯ := prop_kw_exponent_p p hp' hξ K₂ hK₂ hKram₂
   let : Algebra K₁ ↑(K₁ ⊔ K₂) := (inclusion le_sup_left).toAlgebra
+  have : FaithfulSMul K₁ ↑(K₁ ⊔ K₂) :=
+    (faithfulSMul_iff_algebraMap_injective _ _).mpr (inclusion_injective le_sup_left)
   suffices Module.finrank ℚ K₁ = Module.finrank ℚ ↑(K₁ ⊔ K₂) by
       rw [← eq_iff_finrank_eq_of_le le_sup_left, left_eq_sup] at this
       rw [eq_comm]
       exact eq_of_le_of_finrank_eq this (by rw [hK₁, hK₂])
-  rw [← Module.finrank_mul_finrank ℚ K₁ ↑(K₁ ⊔ K₂), left_eq_mul₀ Module.finrank_pos.ne']
+  rw [← Module.finrank_mul_finrank' (R := ℚ) (S := K₁) ↑(K₁ ⊔ K₂), left_eq_mul₀ Module.finrank_pos.ne']
   have h_ineq := finrank_le_of_le_right <| sup_le h₁ h₂
-  rw [Rat.finrank (p ^ 2) ℚ⟮ξ⟯, ← Module.finrank_mul_finrank ℚ K₁, hK₁,
+  rw [Rat.finrank (p ^ 2) ℚ⟮ξ⟯, ← Module.finrank_mul_finrank' (R := ℚ) (S := K₁) ↑(K₁ ⊔ K₂), hK₁,
     Nat.totient_prime_pow hp.out (by simp), Nat.add_one_sub_one, pow_one,
     Nat.mul_le_mul_left_iff (NeZero.pos p)] at h_ineq
   have h_div := finrank_sup_dvd_mul_of_isGalois K₁ K₂
-  rw [← Module.finrank_mul_finrank ℚ K₁, Nat.mul_dvd_mul_iff_left Module.finrank_pos, hK₂,
+  rw [← Module.finrank_mul_finrank' (R := ℚ) (S := K₁) ↑(K₁ ⊔ K₂), Nat.mul_dvd_mul_iff_left Module.finrank_pos, hK₂,
     Nat.dvd_prime hp.out] at h_div
   exact h_div.resolve_right fun h ↦ by grind [hp.out.ne_zero]
 

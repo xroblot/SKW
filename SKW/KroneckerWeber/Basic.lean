@@ -158,7 +158,6 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮)
     have := congr_arg (multiplicity 𝔮 · ) h𝔞
     rwa [multiplicity_mul h𝔮 (by rwa [← h𝔞]), hf𝔮.multiplicity_pow h𝔮, multiplicity_self,
       mul_one, Nat.left_eq_add] at this
-    exact hf𝔮
   have h𝔞₀ : 𝔞 ≠ 0 := by
     contrapose! h𝔞
     simpa [h𝔞]
@@ -217,13 +216,11 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
   · obtain ⟨𝔔, _, _⟩  := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔮
     have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
     have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
-    have h𝔔' : 𝔮.ramificationIdx' 𝔔 = 1 := by
-      have hram : (span {(q : ℤ)}).ramificationIdx' 𝔔 = 1 := by
-        rw [Ideal.ramificationIdx'_eq_ramificationIdx _ _ (by simpa using hq.out.ne_zero)]
-        exact (hLRam q hq.out hqp).ramificationIdx_eq_one ‹𝔔.LiesOver (span {(q : ℤ)})›
-      have htower := ramificationIdx'_algebra_tower' (span {(q : ℤ)}) 𝔮 𝔔
-      rw [hram, Ideal.ramificationIdx'_eq_ramificationIdx _ 𝔮 (by simpa using hq.out.ne_zero),
-        IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd q F 𝔮
+    have h𝔔' : 𝔔.ramificationIdx (𝓞 F) = 1 := by
+      have hram : 𝔔.ramificationIdx ℤ = 1 :=
+        (hLRam q hq.out hqp).ramificationIdx_eq_one ‹𝔔.LiesOver (span {(q : ℤ)})›
+      have htower := Ideal.ramificationIdx_tower (R := ℤ) 𝔮 𝔔
+      rw [hram, IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd q F 𝔮
           (by rwa [Nat.prime_dvd_prime_iff_eq hq.out hp.out]),
         one_mul] at htower
       linarith

@@ -78,11 +78,10 @@ lemma kw_cyclic_compositum (L : Type*) [Field L] [NumberField L] (K K' : Interme
 /-- Every non-trivial extension of `ℚ` is ramified at some finite prime (Minkowski). -/
 lemma kw_minkowski (K : Type*) [Field K] [NumberField K] (h : Module.finrank ℚ K > 1) :
     ∃ q : ℕ, q.Prime ∧ ∃ 𝔮 : Ideal (𝓞 K), 𝔮.IsMaximal ∧ 𝔮.LiesOver (Ideal.span {(q : ℤ)}) ∧
-      1 < Ideal.ramificationIdx' (Ideal.span {(q : ℤ)}) 𝔮 := by
+      1 < 𝔮.ramificationIdx ℤ := by
   obtain ⟨𝔮, hq, hq'⟩ := exists_not_isUnramifiedAt_int (K := K) (𝒪 := 𝓞 K) h.ne'
   refine ⟨absNorm (Ideal.under ℤ 𝔮), Nat.absNorm_under_prime 𝔮, 𝔮, hq, Int.liesOver_span_absNorm 𝔮, ?_⟩
-  rwa [Int.ideal_span_absNorm_eq_self, ← Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain]
-  exact IsMaximal.ne_bot_of_isIntegral_int 𝔮
+  rwa [← Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain]
 
 /-- **Tame Abhyankar (ramification index, hard direction).** For a Galois `K/ℚ`, two Galois
 intermediate fields `E`, `F` with `E ⊔ F = ⊤`, and a prime `𝔓` of `𝓞 K` over a rational prime `p`
