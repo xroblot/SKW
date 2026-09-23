@@ -112,17 +112,15 @@ theorem valGauss_add_valGauss_sub_self [NeZero f] [𝓟.LiesOver 𝒑] [P.LiesOv
   split_ifs with h
   · rw [valGauss_eq_zero hbij hζ hη 𝓟 _ h, valGauss_eq_zero hbij hζ hη 𝓟 _ (by rwa [Int.dvd_neg]),
       zero_add, ENat.natCast_zero]
-  · rw [valGauss, valGauss, ← emultiplicity_mul h𝓟, span_mul_span, Set.singleton_mul_singleton,
+  · haveI : 𝓟.IsPrime := Ideal.isPrime_of_prime h𝓟
+    rw [valGauss, valGauss, ← emultiplicity_mul h𝓟, span_mul_span, Set.singleton_mul_singleton,
       GaussSum_mul_GaussSum_neg hbij hζ _ h, ← Set.singleton_mul_singleton, ← span_mul_span,
       emultiplicity_mul h𝓟, emultiplicity_of_isUnit_right h𝓟.not_unit, zero_add, ← span_singleton_pow,
       emultiplicity_pow h𝓟, show (p : 𝓞 L) = algebraMap ℤ (𝓞 L) p by simp, ← Set.image_singleton,
       ← map_span, (FiniteMultiplicity.of_not_isUnit h𝓟.not_unit h₁).emultiplicity_eq_multiplicity,
-      ← IsDedekindDomain.ramificationIdx'_eq_multiplicity h₁,
-      Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 𝓟 (by simpa using hp.out.ne_zero)]
-    haveI : 𝓟.IsPrime := Ideal.isPrime_of_prime h𝓟
+      ← IsDedekindDomain.ramificationIdx_eq_multiplicity 𝒑 𝓟 h₁]
     rw [ramificationIdx_eq_p_sub_one (p := p) f 𝓟,
       ENat.natCast_mul]
-    · infer_instance
     · rw [isUnit_iff, span_singleton_eq_top]
       exact RingHom.isUnit_map (algebraMap (𝓞 K) (𝓞 L)) <|
         isUnit_teichmuller_zpow_apply hbij (- a) isUnit_neg_one.unit

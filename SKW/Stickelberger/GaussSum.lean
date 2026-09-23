@@ -88,13 +88,10 @@ variable (p f P) in
 theorem ramificationIdx_eq_p_sub_one' [𝓟.LiesOver P] [P.LiesOver 𝒑]
     [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
     𝓟.ramificationIdx (𝓞 K) = p - 1 := by
-  rw [← Ideal.ramificationIdx'_eq_ramificationIdx P 𝓟 (Ideal.IsMaximal.ne_bot_of_isIntegral_int P)]
   have h𝓟 : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
-  have tower := Ideal.ramificationIdx'_algebra_tower' 𝒑 P 𝓟
-  rw [Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 𝓟 (by simpa using hp.out.ne_zero),
-    @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
+  have tower := Ideal.ramificationIdx_tower (R := ℤ) P 𝓟
+  rw [@IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
       (by ring) (not_dvd_pow_self_sub_one p f),
-    Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 P (by simpa using hp.out.ne_zero),
     IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p K P (not_dvd_pow_self_sub_one p f),
     one_mul] at tower
   simpa using tower.symm
@@ -103,13 +100,9 @@ variable (p f) in
 theorem ramificationIdx_under_eq_one [𝓟.LiesOver 𝒑] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
     𝓟.ramificationIdx (𝓞 F) = 1 := by
   have h𝓟 : 𝓟 ≠ ⊥ := ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using hp.out.ne_zero) 𝓟
-  rw [← Ideal.ramificationIdx'_eq_ramificationIdx (under (𝓞 F) 𝓟) 𝓟
-    (Ideal.under_ne_bot (𝓞 F) h𝓟)]
-  have tower := Ideal.ramificationIdx'_algebra_tower' 𝒑 (under (𝓞 F) 𝓟) 𝓟
-  rw [Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 𝓟 (by simpa using hp.out.ne_zero),
-    @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
+  have tower := Ideal.ramificationIdx_tower (R := ℤ) (under (𝓞 F) 𝓟) 𝓟
+  rw [@IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
       (by ring) (not_dvd_pow_self_sub_one p f),
-    Ideal.ramificationIdx'_eq_ramificationIdx 𝒑 (under (𝓞 F) 𝓟) (by simpa using hp.out.ne_zero),
     IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p F _] at tower
   simp at tower
   have hne : p - 1 ≠ 0 := Nat.sub_ne_zero_iff_lt.mpr hp.out.one_lt
@@ -127,19 +120,16 @@ omit [IsCyclotomicExtension {p ^ f - 1} ℚ K] [P.IsMaximal] in
 theorem zeta_sub_one_not_mem_sq [𝓟.LiesOver P] [𝓟.LiesOver 𝒑]
     [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
     algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∉ 𝓟 ^ 2:= by
+  have hspan : span {ζ - 1} = under (𝓞 F) 𝓟 :=
+    (IsCyclotomicExtension.Rat.eq_span_zeta_sub_one_of_liesOver' p F
+      (IsPrimitiveRoot.coe_submonoidClass_iff.mpr hζ) (under (𝓞 F) 𝓟)).symm
   have h : Ideal.map (algebraMap (𝓞 F) (𝓞 L)) (span {ζ - 1}) ≠ ⊥ := by
     apply map_ne_bot_of_ne_bot
     simpa [sub_eq_zero] using hζ.ne_one hp.out.one_lt
   rw [← map_one (f := algebraMap (𝓞 F) (𝓞 L)), ← map_sub, ← dvd_span_singleton,
     ← Set.image_singleton, ← map_span, FiniteMultiplicity.pow_dvd_iff_le_multiplicity
-    (IsDedekindDomain.finiteMulticity IsPrime.ne_top' h),
-    ← IsDedekindDomain.ramificationIdx'_eq_multiplicity h inferInstance,
-    show span {ζ - 1} = under (𝓞 F) 𝓟 from
-      (IsCyclotomicExtension.Rat.eq_span_zeta_sub_one_of_liesOver' p F
-        (IsPrimitiveRoot.coe_submonoidClass_iff.mpr hζ) (under (𝓞 F) 𝓟)).symm]
-  have h𝓟ne : 𝓟 ≠ ⊥ := ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using hp.out.ne_zero) 𝓟
-  rw [Ideal.ramificationIdx'_eq_ramificationIdx (under (𝓞 F) 𝓟) 𝓟
-      (Ideal.under_ne_bot (𝓞 F) h𝓟ne),
+    (IsDedekindDomain.finiteMulticity IsPrime.ne_top' h), hspan,
+    ← IsDedekindDomain.ramificationIdx_eq_multiplicity (under (𝓞 F) 𝓟) 𝓟 (hspan ▸ h),
     ramificationIdx_under_eq_one p f]
   exact Nat.not_succ_le_self 1
 
