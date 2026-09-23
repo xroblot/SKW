@@ -7,6 +7,7 @@ public import Mathlib.RingTheory.RamificationInertia.Ramification
 public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 
 public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
+public import SKW.PRed2Mathlib.Ideals
 
 @[expose] public section
 
@@ -27,14 +28,6 @@ theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [IsDedekindDomain S] [Inf
 --   · exact mul_mem_right _ J (absNorm_mem J)
 --   · simp only [← Int.cast_natCast (R := S), ← Int.cast_mul, ← Int.cast_add,
 --       ← Nat.gcd_eq_gcd_ab I.absNorm J.absNorm, h, Nat.cast_one, Int.cast_one]
-
-theorem Ideal.multiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
-    multiplicity I ⊤ = 0 := by
-  rw [← one_eq_top, multiplicity_one_right]
-
-theorem Ideal.emultiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
-    emultiplicity I ⊤ = 0 := by
-  rw [← one_eq_top, emultiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
 
 @[simps]
 def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike F R S]
@@ -157,11 +150,6 @@ theorem Ideal.IsDedekindDomain.ramificationIdx_mul_emultiplicity_under_eq {R : T
     irreducible_iff_prime.mpr <|
       (prime_iff_isPrime (under_ne_bot R hw_bot)).mpr (IsPrime.under R w)
   exact (emultiplicity_map_eq_ramificationIdx_mul' I this hw hw_bot).symm
-
-theorem Ideal.IsDedekindDomain.finiteMulticity {R : Type*} [CommRing R] [IsDedekindDomain R]
-    {I J : Ideal R} (hI : I ≠ ⊤) (hJ : J ≠ ⊥) :
-    FiniteMultiplicity I J :=
-  FiniteMultiplicity.of_not_isUnit (by rwa [Ideal.isUnit_iff]) hJ
 
 open Pointwise in
 @[simp]
