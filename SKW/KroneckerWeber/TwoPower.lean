@@ -170,18 +170,40 @@ variable {A : Type*} [Field A] [CharZero A] (L : IntermediateField ℚ A) [Numbe
 /-- Complex conjugation of the CM field `L`, as an element of `Gal(L/ℚ)`. -/
 noncomputable def conjGal : Gal(L/ℚ) := (IsCMField.complexConj L).restrictScalars ℚ
 
-/-- The maximal real subfield `L⁺` of a CM field `L ⊆ A`, as an intermediate field of `A / ℚ`: it
-is the fixed field of complex conjugation. -/
-noncomputable def maximalReal : IntermediateField ℚ A := lift (fixedField (Subgroup.zpowers (conjGal L)))
+/-- The maximal real subfield `L⁺` of a CM field `L ⊆ A`, as an intermediate field of `A / ℚ`. -/
+noncomputable def maximalReal : IntermediateField ℚ A :=
+  lift ((NumberField.maximalRealSubfield L).toIntermediateField fun x ↦ by
+    simpa using (NumberField.maximalRealSubfield L).toSubring.rangeS_le ⟨x, rfl⟩)
 
 theorem maximalReal_le : maximalReal L ≤ L := lift_le _
 
-/-- `⟨c⟩` has order `2`, so its index is half the degree of `L`. -/
-theorem index_zpowers_conjGal :
-    (Subgroup.zpowers (conjGal L)).index * 2 = Module.finrank ℚ L := by
-  sorry
-
 instance isTotallyReal_maximalReal : IsTotallyReal (maximalReal L) := by
+  have h : ∀ x : ℚ, algebraMap ℚ ↥L x ∈ NumberField.maximalRealSubfield ↥L := fun x ↦ by
+    simpa using (NumberField.maximalRealSubfield L).toSubring.rangeS_le ⟨x, rfl⟩
+  have : IsTotallyReal ↥((NumberField.maximalRealSubfield ↥L).toIntermediateField h) :=
+    inferInstanceAs (IsTotallyReal ↥(NumberField.maximalRealSubfield ↥L))
+  exact IsTotallyReal.ofRingEquiv (liftAlgEquiv _).toRingEquiv
+
+/-- Complex conjugation has order `2`, as an element of `Gal(L/ℚ)`. -/
+theorem orderOf_conjGal : orderOf (conjGal L) = 2 := by
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  refine orderOf_eq_prime_iff.mpr ⟨?_, ?_⟩
+  · ext x
+    simpa [conjGal, pow_two] using IsCMField.complexConj_apply_apply L x
+  · intro h
+    refine IsCMField.complexConj_ne_one L (AlgEquiv.restrictScalars_injective ℚ ?_)
+    exact show AlgEquiv.restrictScalars ℚ (IsCMField.complexConj ↥L) =
+      AlgEquiv.restrictScalars ℚ 1 from h
+
+/-- `⟨c⟩` has order `2`, so its index is half the degree of `L`. -/
+theorem index_zpowers_conjGal [IsGalois ℚ L] :
+    (Subgroup.zpowers (conjGal L)).index * 2 = Module.finrank ℚ L := by
+  rw [← orderOf_conjGal L, ← Nat.card_zpowers, Subgroup.index_mul_card,
+    IsGalois.card_aut_eq_finrank]
+
+/-- `L⁺` is the fixed field of complex conjugation. -/
+theorem maximalReal_eq_lift_fixedField :
+    maximalReal L = lift (fixedField (Subgroup.zpowers (conjGal L))) := by
   sorry
 
 end MaximalReal
@@ -230,6 +252,7 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
             sorry)
         (by -- the quotient `(ℤ/2^{m+2})ˣ / ⟨-1⟩` is cyclic
             sorry)
+    rw [← maximalReal_eq_lift_fixedField] at hdeg hgal hcyc hram
     exact ⟨maximalReal ℚ⟮ξ (2 ^ (m + 2))⟯, maximalReal_le _, hdeg, hgal, hcyc, hram,
       isTotallyReal_maximalReal _⟩
   have : NumberField K' :=
