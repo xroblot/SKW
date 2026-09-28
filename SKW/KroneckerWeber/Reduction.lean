@@ -260,7 +260,7 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
       hunram.of_algEquiv
         ((RingOfIntegers.mapAlgEquiv (restrictAlgEquiv (le_sup_left : K ≤ K ⊔ E))).restrictScalars ℤ)
     have hE'u : Algebra.IsUnramifiedIn (𝓞 E') (span {(q' : ℤ)}) :=
-      unramifiedOutside_of_isCyclotomicExtension q q' hq' hq'q
+      isUnramifiedIn_of_isCyclotomicExtension q' (by rwa [Nat.prime_dvd_prime_iff_eq hq' hq])
     have hq₀ : span {(q' : ℤ)} ≠ ⊥ := by simpa using hq'.ne_zero
     have hL : Algebra.IsUnramifiedIn (𝓞 L) (span {(q' : ℤ)}) := by
       refine Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one.mpr fun 𝔯 _ h𝔯 ↦ ?_

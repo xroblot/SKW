@@ -84,14 +84,12 @@ lemma UnramifiedOutside.tower_bot {K L : Type*} [Field K] [Field L] [NumberField
   fun q hq hqp ↦ (h q hq hqp).tower_bot
 
 open NumberField in
-/-- A cyclotomic extension `ℚ(ζ_p)` is unramified outside `p`. -/
-lemma unramifiedOutside_of_isCyclotomicExtension {K : Type*} [Field K] [NumberField K]
-    [hp : Fact p.Prime] [IsCyclotomicExtension {p} ℚ K] : UnramifiedOutside K p := by
-  intro q hq hqp
-  have : Fact q.Prime := ⟨hq⟩
-  refine Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one.mpr fun 𝔓 _ h𝔓 ↦ ?_
-  exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd q K 𝔓
-    (by rwa [Nat.prime_dvd_prime_iff_eq hq hp.out])
+/-- A cyclotomic extension `ℚ(ζ_n)` is unramified at every prime not dividing `n`. -/
+lemma isUnramifiedIn_of_isCyclotomicExtension {K : Type*} [Field K] [NumberField K] {n : ℕ}
+    [NeZero n] [IsCyclotomicExtension {n} ℚ K] [Fact p.Prime] (hpn : ¬ p ∣ n) :
+    Algebra.IsUnramifiedIn (𝓞 K) (span {(p : ℤ)}) := by
+  refine Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one.mpr fun P _ hP ↦ ?_
+  exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p K P hpn
 
 open NumberField IntermediateField in
 /-- Top-field version of `unramifiedOutside_sup`: if `K` and `F` are both unramified outside `p` and

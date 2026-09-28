@@ -54,7 +54,9 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
   haveI : IsScalarTower ℚ ℚ⟮ζ⟯ M :=
     IsScalarTower.of_algebraMap_eq fun x => ((inclusion (le_sup_right : ℚ⟮ζ⟯ ≤ M)).commutes x).symm
   have hMram : UnramifiedOutside M p := unramifiedOutside_sup p K ℚ⟮ζ⟯ hKram
-    (unramifiedOutside_of_isCyclotomicExtension p)
+    (fun q hq hqp ↦
+      have : Fact q.Prime := ⟨hq⟩
+      isUnramifiedIn_of_isCyclotomicExtension q (by rwa [Nat.prime_dvd_prime_iff_eq hq hp.out]))
   have hζdeg : Module.finrank ℚ ℚ⟮ζ⟯ = p - 1 :=
     Nat.totient_prime hp.out ▸ IsCyclotomicExtension.Rat.finrank p ℚ⟮ζ⟯
   have hMdeg : Module.finrank ℚ ↥M = p * (p - 1) := by
