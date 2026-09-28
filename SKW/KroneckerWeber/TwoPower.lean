@@ -296,12 +296,22 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   by_cases hreal : IsTotallyReal K
   · exact prop_kw_2_power_real hξ m hm K hK hKram
   -- otherwise pass to `L = K(i) = K ⊔ ℚ(i)`, which is CM
+  have : IsCyclotomicExtension {4} ℚ ℚ ⟮ξ 4⟯ := (hξ 4).adjoinSimple_isCyclotomicExtension 4 ℚ A
+  have : NumberField ℚ⟮ξ 4⟯ := IsCyclotomicExtension.numberField {4} ℚ _
+  have : IsAbelianGalois ℚ ℚ⟮ξ 4⟯ := IsCyclotomicExtension.isAbelianGalois {4} ℚ ℚ⟮ξ 4⟯
+  have : IsTotallyComplex ℚ⟮ξ 4⟯ :=
+    IsCyclotomicExtension.Rat.isTotallyComplex ℚ⟮ξ 4⟯ (by norm_num : 3 ≤ 4)
+  have : IsAbelianGalois ℚ K := IsAbelianGalois.of_isCyclic _ _
   set L : IntermediateField ℚ A := K ⊔ ℚ⟮ξ 4⟯ with hL
   have hKL : K ≤ L := le_sup_left
-  have : NumberField L := sorry
-  have : IsGalois ℚ L := sorry
-  have : IsCMField L := sorry
-  have hLram : UnramifiedOutside L 2 := sorry
+  have : IsTotallyComplex L := by
+    have : Algebra ℚ⟮ξ 4⟯ L := RingHom.toAlgebra (inclusion le_sup_right).toRingHom
+    exact isTotallyComplex_of_algebra ℚ⟮ξ 4⟯ L
+  have hLram : UnramifiedOutside L 2 := by
+    intro q hq hq2 Q hQ _
+    refine ramificationIdx_eq_one_iff.mp ?_
+    apply Ideal.ramificationIdx_sup_eq_one 
+    sorry
   -- its maximal real subfield `M` is cyclic of `2`-power degree, unramified outside `2`
   set M : IntermediateField ℚ A := maximalReal L with hM
   obtain ⟨k, hk⟩ : ∃ k : ℕ, Module.finrank ℚ M = 2 ^ k := sorry

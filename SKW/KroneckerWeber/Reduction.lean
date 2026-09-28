@@ -368,6 +368,7 @@ lemma kw_cyclic_compositum {A : Type*} [Field A] [CharZero A] (K K' : Intermedia
   rwa [he, he', Nat.div_dvd_div_iff_left finrank_pos hd' hd]
 
 open IntermediateField in
+omit hp in
 /-- The subfield cut out by a subgroup `H` of `Gal(C/ℚ)`, for `C/ℚ` abelian and unramified outside
 `p`: if `H` has index `pᵐ` and cyclic quotient, then `Fix H` is a cyclic extension of `ℚ` of degree
 `pᵐ`, unramified outside `p` (and contained in `C`, which is `IntermediateField.lift_le`). This is the construction shared by the odd and
