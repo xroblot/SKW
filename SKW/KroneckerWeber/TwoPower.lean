@@ -307,9 +307,12 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   have : IsTotallyComplex L := by
     have : Algebra ℚ⟮ξ 4⟯ L := RingHom.toAlgebra (inclusion le_sup_right).toRingHom
     exact isTotallyComplex_of_algebra ℚ⟮ξ 4⟯ L
-  have hLram : UnramifiedOutside L 2 := by
-    apply unramifiedOutside_sup 2 _ _ hKram
-
+  have hLram : UnramifiedOutside L 2 :=
+    unramifiedOutside_sup 2 K ℚ⟮ξ 4⟯ hKram fun q hq hq2 ↦
+      have : Fact q.Prime := ⟨hq⟩
+      isUnramifiedIn_of_isCyclotomicExtension (n := 4) q
+        fun h ↦ hq2 ((Nat.prime_dvd_prime_iff_eq hq Nat.prime_two).mp
+          (hq.dvd_of_dvd_pow (n := 2) (by norm_num at h ⊢; exact h)))
   -- its maximal real subfield `M` is cyclic of `2`-power degree, unramified outside `2`
   set M : IntermediateField ℚ A := maximalReal L with hM
   obtain ⟨k, hk⟩ : ∃ k : ℕ, Module.finrank ℚ M = 2 ^ k := sorry
