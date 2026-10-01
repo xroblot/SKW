@@ -36,7 +36,7 @@ prime over `q`, not just the one below `𝔔`). Extracted from the inertia-field
 theorem isUnramifiedIn_fixedField_inertia {L : Type*} [Field L] [NumberField L]
     [IsAbelianGalois ℚ L] {q : ℕ} (𝔔 : Ideal (𝓞 L)) [𝔔.IsPrime]
     [𝔔.LiesOver (span {(q : ℤ)})] :
-    Algebra.IsUnramifiedIn (𝓞 ↥(fixedField (inertia Gal(L/ℚ) 𝔔))) (span {(q : ℤ)}) := by
+    Algebra.IsUnramifiedIn (𝓞 (fixedField (inertia Gal(L/ℚ) 𝔔))) (span {(q : ℤ)}) := by
   sorry
 
 /-- The discriminant of a quadratic field is a fundamental discriminant. Extracted from the

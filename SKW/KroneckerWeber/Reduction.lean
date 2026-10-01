@@ -199,7 +199,7 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   have hEcyc : IsCyclotomicExtension {q} ℚ E :=
     (hξ q).adjoinSimple_isCyclotomicExtension q ℚ A
   have : NumberField E := IsCyclotomicExtension.numberField {q} ℚ E
-  let L := ↥(K ⊔ E)
+  let L := ↑(K ⊔ E)
   let 𝔮 : Ideal ℤ := span {(q : ℤ)}
   have : Fact q.Prime := ⟨hq⟩
   have : 𝔮.IsPrime := (Ideal.span_singleton_prime (by exact_mod_cast hq.ne_zero)).mpr (Nat.prime_iff_prime_int.mp hq)

@@ -266,7 +266,7 @@ set_option backward.isDefEq.respectTransparency false in
 theorem K_sup_F_eq_top : K ⊔ F = (⊤ : IntermediateField ℚ L) := by
   have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ (⊤ : IntermediateField ℚ L) :=
       IsCyclotomicExtension.equiv _ _ _ topEquiv.symm
-  have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ ↥(K ⊔ F) := by
+  have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ ↑(K ⊔ F) := by
         rw [mul_comm, ← Nat.Coprime.lcm_eq_mul (coprime_pow_sub_one p f)]
         exact isCyclotomicExtension_lcm_sup ℚ L (p ^ f - 1) p K F
   exact isCyclotomicExtension_eq {p * (p ^ f - 1)}  ℚ L _ _

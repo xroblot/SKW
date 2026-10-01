@@ -38,7 +38,7 @@ set_option backward.isDefEq.respectTransparency false in
 open IntermediateField Polynomial in
 /-- Every cyclic extension of `ℚ` of prime degree `p` (odd) unramified outside `p` is contained in
 `ℚ(ζ_{p²}) = ℚ⟮ξ⟯`. Here `K`, `ℚ⟮ζ⟯` stay in `A`; the Kummer/class-group work runs on the tower
-`ℚ → ↥ℚ⟮ζ⟯ → ↥(K ⊔ ℚ⟮ζ⟯)`, with no restriction of `K`. -/
+`ℚ → ℚ⟮ζ⟯ → K ⊔ ℚ⟮ζ⟯`, with no restriction of `K`. -/
 theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ : A}
     (hξ : IsPrimitiveRoot ξ (p ^ 2)) (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K]
     [hCK : IsCyclic Gal(K/ℚ)] (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
@@ -59,8 +59,8 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
       isUnramifiedIn_of_isCyclotomicExtension q (by rwa [Nat.prime_dvd_prime_iff_eq hq hp.out]))
   have hζdeg : Module.finrank ℚ ℚ⟮ζ⟯ = p - 1 :=
     Nat.totient_prime hp.out ▸ IsCyclotomicExtension.Rat.finrank p ℚ⟮ζ⟯
-  have hMdeg : Module.finrank ℚ ↥M = p * (p - 1) := by
-    have hinf : Module.finrank ℚ ↥(K ⊓ ℚ⟮ζ⟯) = 1 := by
+  have hMdeg : Module.finrank ℚ M = p * (p - 1) := by
+    have hinf : Module.finrank ℚ ↑(K ⊓ ℚ⟮ζ⟯) = 1 := by
       have hc : p.Coprime (p - 1) := by have := hp.out.one_le; aesop
       have h₁ : Module.finrank ℚ ↑(K ⊓ ℚ⟮ζ⟯) ∣ p := by
         rw [← hK]; exact finrank_dvd_of_le_right inf_le_left
@@ -70,11 +70,11 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
     have := finrank_sup_mul_finrank_inf_eq K ℚ⟮ζ⟯
     rwa [hinf, mul_one, hK, hζdeg] at this
   obtain ⟨hGal, hCyc, hrF⟩ := kw_kummer₀ p (F := ℚ⟮ζ⟯) (L := M) hMdeg
-  obtain ⟨μ, hμ, hS⟩ := kw_kummer p ↥ℚ⟮ζ⟯ hrF
+  obtain ⟨μ, hμ, hS⟩ := kw_kummer p ℚ⟮ζ⟯ hrF
   have hIrr : Irreducible (X ^ p - C (algebraMap (𝓞 ℚ⟮ζ⟯) ℚ⟮ζ⟯ μ)) := by
     rw [X_pow_sub_C_irreducible_iff_of_prime hp.out]
     intro b hb
-    have := hS.splits_iff.mp (X_pow_sub_C_splits_of_isPrimitiveRoot (zeta_spec p ℚ ↥ℚ⟮ζ⟯) hb)
+    have := hS.splits_iff.mp (X_pow_sub_C_splits_of_isPrimitiveRoot (zeta_spec p ℚ ℚ⟮ζ⟯) hb)
     rw [eq_comm, Subalgebra.bot_eq_top_iff_finrank_eq_one, hrF] at this
     exact hp.out.ne_one this
   obtain ⟨𝔞, h𝔞₀, h𝔞⟩ := kw_mu_pth_power_ideal p ℚ⟮ζ⟯ hrF hμ hIrr hMram hp'

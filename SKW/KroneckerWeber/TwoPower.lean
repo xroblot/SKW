@@ -144,7 +144,7 @@ are `-8`, `-4` or `8`, and positive since the fields are real, hence both equal 
 discriminant being a complete invariant, the two fields are isomorphic, hence equal since they are
 normal. This is the pigeonhole used in `prop_kw_2_power_real`. -/
 theorem prop_kw_2_quadratic_real_unique {A : Type*} [Field A] [CharZero A]
-    (K₁ : IntermediateField ℚ A) [NumberField K₁] [IsGalois ℚ K₁] [IsTotallyReal K₁]
+    (K₁ : IntermediateField ℚ A) [NumberField K₁] [IsTotallyReal K₁]
     (hK₁ : Module.finrank ℚ K₁ = 2) (hKram₁ : UnramifiedOutside K₁ 2)
     (K₂ : IntermediateField ℚ A) [NumberField K₂] [IsGalois ℚ K₂] [IsTotallyReal K₂]
     (hK₂ : Module.finrank ℚ K₂ = 2) (hKram₂ : UnramifiedOutside K₂ 2) :
@@ -173,15 +173,16 @@ noncomputable def conjGal : Gal(L/ℚ) := (IsCMField.complexConj L).restrictScal
 /-- The maximal real subfield `L⁺` of a CM field `L ⊆ A`, as an intermediate field of `A / ℚ`. -/
 noncomputable def maximalReal : IntermediateField ℚ A :=
   lift ((NumberField.maximalRealSubfield L).toIntermediateField fun x ↦ by
-    simpa using (NumberField.maximalRealSubfield L).toSubring.rangeS_le ⟨x, rfl⟩)
+    simp)
 
+omit [NumberField L] [IsCMField L] in
 theorem maximalReal_le : maximalReal L ≤ L := lift_le _
 
 instance isTotallyReal_maximalReal : IsTotallyReal (maximalReal L) := by
-  have h : ∀ x : ℚ, algebraMap ℚ ↥L x ∈ NumberField.maximalRealSubfield ↥L := fun x ↦ by
-    simpa using (NumberField.maximalRealSubfield L).toSubring.rangeS_le ⟨x, rfl⟩
-  have : IsTotallyReal ↥((NumberField.maximalRealSubfield ↥L).toIntermediateField h) :=
-    inferInstanceAs (IsTotallyReal ↥(NumberField.maximalRealSubfield ↥L))
+  have h : ∀ x : ℚ, algebraMap ℚ L x ∈ NumberField.maximalRealSubfield L := fun _ ↦ by
+    simp
+  have : IsTotallyReal ((NumberField.maximalRealSubfield L).toIntermediateField h) :=
+    inferInstanceAs (IsTotallyReal (NumberField.maximalRealSubfield L))
   exact IsTotallyReal.ofRingEquiv (liftAlgEquiv _).toRingEquiv
 
 /-- Complex conjugation has order `2`, as an element of `Gal(L/ℚ)`. -/
@@ -189,10 +190,10 @@ theorem orderOf_conjGal : orderOf (conjGal L) = 2 := by
   have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   refine orderOf_eq_prime_iff.mpr ⟨?_, ?_⟩
   · ext x
-    simpa [conjGal, pow_two] using IsCMField.complexConj_apply_apply L x
+    simp [conjGal, pow_two]
   · intro h
     refine IsCMField.complexConj_ne_one L (AlgEquiv.restrictScalars_injective ℚ ?_)
-    exact show AlgEquiv.restrictScalars ℚ (IsCMField.complexConj ↥L) =
+    exact show AlgEquiv.restrictScalars ℚ (IsCMField.complexConj L) =
       AlgEquiv.restrictScalars ℚ 1 from h
 
 /-- `⟨c⟩` has order `2`, so its index is half the degree of `L`. -/
@@ -246,12 +247,17 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
         IsGalois ℚ K' ∧ IsCyclic Gal(K'/ℚ) ∧ UnramifiedOutside K' 2 ∧ IsTotallyReal K' := by
     -- `K'` is the maximal real subfield, i.e. the fixed field of complex conjugation
     obtain ⟨hdeg, hgal, hcyc, hram⟩ :=
-      fixedField_spec_of_index_eq_prime_pow (p := 2) ℚ⟮ξ (2 ^ (m + 2))⟯ hCram
+      fixedField_spec_of_index_eq_prime_pow (p := 2) (m := m) ℚ⟮ξ (2 ^ (m + 2))⟯ hCram
         (Subgroup.zpowers (conjGal ℚ⟮ξ (2 ^ (m + 2))⟯))
         (by -- index `2 ^ m`: half of `[ℚ(ζ_{2^{m+2}}) : ℚ] = 2 ^ (m + 1)`
-            sorry)
-        (by -- the quotient `(ℤ/2^{m+2})ˣ / ⟨-1⟩` is cyclic
-            sorry)
+          rw [Subgroup.index_eq_card_div, Nat.card_zpowers, orderOf_conjGal,
+            IsGalois.card_aut_eq_finrank, IsCyclotomicExtension.Rat.finrank (2 ^ (m + 2)),
+            Nat.totient_prime_pow Nat.prime_two (by norm_num), Nat.add_one_sub_one,
+            Nat.add_one_sub_one, mul_one, Nat.pow_succ, Nat.mul_div_cancel _ zero_lt_two])
+        (by
+          rw [MulEquiv.isCyclic (QuotientGroup.congr _ _
+            (IsCyclotomicExtension.Rat.galEquivZMod (2 ^ (m + 2)) _) rfl)]
+          sorry)
     rw [← maximalReal_eq_lift_fixedField] at hdeg hgal hcyc hram
     exact ⟨maximalReal ℚ⟮ξ (2 ^ (m + 2))⟯, maximalReal_le _, hdeg, hgal, hcyc, hram,
       isTotallyReal_maximalReal _⟩
@@ -315,7 +321,9 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
           (hq.dvd_of_dvd_pow (n := 2) (by norm_num at h ⊢; exact h)))
   -- its maximal real subfield `M` is cyclic of `2`-power degree, unramified outside `2`
   set M : IntermediateField ℚ A := maximalReal L with hM
-  obtain ⟨k, hk⟩ : ∃ k : ℕ, Module.finrank ℚ M = 2 ^ k := sorry
+  obtain ⟨k, hk⟩ : ∃ k : ℕ, Module.finrank ℚ M = 2 ^ k := by
+
+    sorry
   have hkm : k ≤ m := sorry
   have : NumberField M := sorry
   have hMram : UnramifiedOutside M 2 := sorry

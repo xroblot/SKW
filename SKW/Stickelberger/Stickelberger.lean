@@ -78,7 +78,7 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
   simp_rw [Ideal.submodule_span_eq, ← Set.image_singleton, ← map_span,
     GaussSum_factorization hbij hζ hη 𝓟 m d hf hdm 𝔭₀ _ hΓ₀ hΓ, ← mapHom_apply, map_prod, mapHom_apply]
   have (a : (ZMod m)ˣ) : ((galEquivZMod m k).symm a)⁻¹ • 𝔭 =
-        Ideal.map e (((galEquivZMod m ↥k₀).symm a)⁻¹ • 𝔭₀) := by
+        Ideal.map e (((galEquivZMod m k₀).symm a)⁻¹ • 𝔭₀) := by
     ext x
     rw [← comap_symm e, pointwise_smul_eq_comap 𝔭₀, def_p₀, map_symm, mem_comap, mem_comap, mem_comap]
     rw [MulSemiringAction.toRingAut_apply, MulSemiringAction.toRingEquiv_apply_symm_apply, inv_inv]

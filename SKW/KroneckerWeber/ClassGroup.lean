@@ -216,7 +216,7 @@ include hrF hIrr in
 open Pointwise nonZeroDivisors FractionalIdeal in
 /-- By Stickelberger's theorem, if `(μ) = 𝔞ᵖ` then the ideal class `[𝔞]` is trivial. -/
 lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) : 𝔞.IsPrincipal := by
-  have : IsGalois ℚ F := IsCyclotomicExtension.isGalois {p} ℚ ↥F
+  have : IsGalois ℚ F := IsCyclotomicExtension.isGalois {p} ℚ F
   let 𝔞₀ : (Ideal (𝓞 F))⁰ := ⟨𝔞, mem_nonZeroDivisors_of_ne_zero h𝔞₀⟩
   rw [← ClassGroup.mk0_eq_one_iff (mem_nonZeroDivisors_of_ne_zero h𝔞₀)]
   change ClassGroup.mk0 𝔞₀ = 1

@@ -251,7 +251,7 @@ theorem gaFEquiv_symm_smul_algebraMap_eq [NeZero f] [NeZero m] [IsCyclotomicExte
   suffices (((galRestrict (𝓞 F) (F) L (𝓞 L))
       ((galFEquiv p f K).symm b)).toAlgHom.restrictScalars ℤ).comp
         (IsScalarTower.toAlgHom ℤ (𝓞 k) (𝓞 L)) = (IsScalarTower.toAlgHom ℤ (𝓞 k) (𝓞 L)).comp
-          (((galRestrict ℤ ℚ (↥k) (𝓞 ↥k)) ((galEquivZMod m ↥k).symm a)).toAlgHom.restrictScalars ℤ) by
+          (((galRestrict ℤ ℚ k (𝓞 k)) ((galEquivZMod m k).symm a)).toAlgHom.restrictScalars ℤ) by
     exact AlgHom.congr_fun this x
   let ε : k := IsCyclotomicExtension.zeta m ℚ k
   have hε : IsPrimitiveRoot ε m := IsCyclotomicExtension.zeta_spec m ℚ k
