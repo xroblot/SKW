@@ -206,7 +206,16 @@ theorem index_zpowers_conjGal [IsGalois ℚ L] :
 /-- `L⁺` is the fixed field of complex conjugation. -/
 theorem maximalReal_eq_lift_fixedField :
     maximalReal L = lift (fixedField (Subgroup.zpowers (conjGal L))) := by
-  sorry
+  classical
+  rw [maximalReal]
+  congr
+  ext x
+  simp only [mem_fixedField_iff, mem_zpowers_iff_mem_range_orderOf, orderOf_conjGal,
+    Finset.mem_image, Finset.mem_range, Order.lt_two_iff, Nat.le_one_iff_eq_zero_or_eq_one,
+    exists_eq_or_imp, pow_zero, existsAndEq, pow_one, true_and, or_imp, forall_and, forall_eq',
+    AlgEquiv.one_apply, true_and, AlgEquiv.coe_restrictScalars,
+    IsCMField.complexConj_eq_self_iff]
+  rfl
 
 end MaximalReal
 

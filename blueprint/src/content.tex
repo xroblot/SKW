@@ -1393,9 +1393,17 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{lemma}
   \label{lem:kw_maximalReal_fixedField}
   \lean{maximalReal_eq_lift_fixedField}
+  \leanok
   Let $L$ be a CM field inside the ambient field $A$. Then the maximal real subfield $L^+$ is the
   fixed field of complex conjugation.
 \end{lemma}
+
+\begin{proof}
+  \leanok
+  An element of $L$ lies in $L^+$ exactly when it is fixed by complex conjugation $c$. Since $c$ has
+  order $2$, every element of $\langle c \rangle$ is $1$ or $c$, so being fixed by the whole of
+  $\langle c \rangle$ is the same condition.
+\end{proof}
 
 \begin{proposition}
   \label{prop:kw_2_power_real}
