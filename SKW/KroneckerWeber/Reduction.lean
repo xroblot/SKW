@@ -81,7 +81,7 @@ lemma kw_minkowski (K : Type*) [Field K] [NumberField K] (h : Module.finrank ℚ
       1 < 𝔮.ramificationIdx ℤ := by
   obtain ⟨𝔮, hq, hq'⟩ := exists_not_isUnramifiedAt_int (K := K) (𝒪 := 𝓞 K) h.ne'
   refine ⟨absNorm (Ideal.under ℤ 𝔮), Nat.absNorm_under_prime 𝔮, 𝔮, hq, Int.liesOver_span_absNorm 𝔮, ?_⟩
-  rwa [← Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain]
+  rwa [← Algebra.not_isUnramifiedAt_iff]
 
 /-- **Tame Abhyankar (ramification index, hard direction).** For a Galois `K/ℚ`, two Galois
 intermediate fields `E`, `F` with `E ⊔ F = ⊤`, and a prime `𝔓` of `𝓞 K` over a rational prime `p`

@@ -81,6 +81,10 @@ instance (K : Type*) [Field K] [NumberField K] :
 
 /-! ### Ideal — LiesOver / ramification -/
 
+-- TODO(SKW): convert to the unprimed `Ideal.ramificationIdx` once Mathlib has an unprimed
+-- `le_comap_pow_ramificationIdx`. The name is currently taken by a deprecated alias for the primed
+-- lemma, and converting here without it would force Dedekind hypotheses on an otherwise
+-- `CommRing`-level statement. The call site `GaussSum.lean` bridges in the meantime.
 theorem Ideal.pow_liesOver_of_liesOver {R S : Type*} [CommRing R] [CommRing S] [Algebra R S] (p : Ideal R) (P : Ideal S) [P.LiesOver p]
     {i : ℕ} (hi : i + 1 ≤ Ideal.ramificationIdx' p P) :
     (P ^ (i + 1)).LiesOver p := by
@@ -110,7 +114,7 @@ theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDede
   rw [Ideal.liesOver_iff, ← Nat.prime_eq_prime_of_dvd_pow (Nat.absNorm_under_prime I)
     hp.out this, Int.ideal_span_absNorm_eq_self]
 
-theorem Algebra.not_isUnramifiedAt_iff_of_isDedekindDomain {R S : Type*} [CommRing R] [CommRing S]
+theorem Algebra.not_isUnramifiedAt_iff {R S : Type*} [CommRing R] [CommRing S]
     [Algebra R S] {p : Ideal S} [p.IsPrime] [Module.Finite R S]
     [Algebra.HasSeparableResidueFieldsAt R S (Ideal.under R p)] :
     ¬ IsUnramifiedAt R p ↔ 1 < p.ramificationIdx R := by
@@ -126,6 +130,10 @@ theorem Ideal.IsDedekindDomain.prime_of_maximal {R : Type*} [CommRing R] [CharZe
   refine (prime_iff_isPrime (IsMaximal.ne_bot_of_isIntegral_int I)).mpr <| IsMaximal.isPrime' I
 
 -- Replace Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul?
+-- TODO(SKW): the statement is already unprimed, but the proof bridges back to the primed index
+-- because `emultiplicity_map_eq_ramificationIdx'_mul` has no unprimed version upstream. Once it
+-- does, the `rw` below goes, and `ramificationIdx'_ne_zero` becomes
+-- `ramificationIdx_pos_of_isDedekindDomain'`.
 theorem Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' {R : Type*} [CommRing R]
     {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul R S]
     {v : Ideal R} {w : Ideal S} (I : Ideal R) (hv : Irreducible v) (hw : Irreducible w)
