@@ -1390,16 +1390,25 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
   as subfields of the ambient field.
 \end{proof}
 
+\begin{lemma}
+  \label{lem:kw_maximalReal_fixedField}
+  \lean{maximalReal_eq_lift_fixedField}
+  Let $L$ be a CM field inside the ambient field $A$. Then the maximal real subfield $L^+$ is the
+  fixed field of complex conjugation.
+\end{lemma}
+
 \begin{proposition}
   \label{prop:kw_2_power_real}
   \lean{prop_kw_2_power_real}
+  \leanok
   \uses{prop:kw_2_quadratic_real_unique, lem:kw_eq_of_unique_prime_subfield,
-    lem:kw_fixedField_index}
+    lem:kw_fixedField_index, lem:kw_maximalReal_fixedField}
   Let $K/\QQ$ be a totally real cyclic extension of degree $2^m$ unramified outside $2$. Then
   $K \subseteq \QQ(\zeta_{2^{m+2}})$.
 \end{proposition}
 
 \begin{proof}
+  \leanok
   Let $K' = \QQ(\zeta_{2^{m+2}})^+$ be the maximal real subfield of $\QQ(\zeta_{2^{m+2}})$; since
   $\Gal(\QQ(\zeta_{2^{m+2}})/\QQ) \cong \ZZ/2\ZZ \times \ZZ/2^m\ZZ$ with complex conjugation
   generating the $\ZZ/2\ZZ$ factor, the quotient $\Gal(K'/\QQ) \cong \ZZ/2^m\ZZ$ is cyclic, and

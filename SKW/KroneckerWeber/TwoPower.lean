@@ -242,7 +242,11 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
           _ ≤ 2 ^ (m + 2) := Nat.pow_le_pow_right (by norm_num) (by omega)⟩
   -- `ℚ(ζ_{2^{m+2}})` is unramified outside `2`
   have hCram : UnramifiedOutside ℚ⟮ξ (2 ^ (m + 2))⟯ 2 := by
-    sorry
+    intro q hq hq2
+    have : Fact (q.Prime) := ⟨hq⟩
+    apply isUnramifiedIn_of_isCyclotomicExtension (p := q) (n := 2 ^ (m + 2))
+    intro h
+    exact hq2 <| Nat.prime_eq_prime_of_dvd_pow hq Nat.prime_two h
   obtain ⟨K', hK'le, hK'deg, hK'gal, hK'cyc, hK'ram, hK'real⟩ :
       ∃ K' : IntermediateField ℚ A, K' ≤ ℚ⟮ξ (2 ^ (m + 2))⟯ ∧ Module.finrank ℚ K' = 2 ^ m ∧
         IsGalois ℚ K' ∧ IsCyclic Gal(K'/ℚ) ∧ UnramifiedOutside K' 2 ∧ IsTotallyReal K' := by
