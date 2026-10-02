@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.NumberTheory.NumberField.CMField
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 
 open NumberField IsCMField Units
 
@@ -48,3 +49,11 @@ theorem NumberField.ComplexEmbedding.IsConj.eq_inv_of_isPrimitiveRoot {K : Type*
     (hσ : IsConj φ σ) {ζ : K} {n : ℕ} [NeZero n] (hζ : IsPrimitiveRoot ζ n) :
     σ ζ = ζ⁻¹ :=
   hσ.eq_inv_of_pow_eq_one hζ.pow_eq_one
+
+/-- Complex conjugation of a CM field sends a primitive root of unity to its inverse. This is the
+version of `NumberField.IsCMField.complexConj_torsion` for an arbitrary primitive root. -/
+theorem NumberField.IsCMField.complexConj_eq_inv_of_isPrimitiveRoot {K : Type*} [Field K]
+    [NumberField K] [IsCMField K] {ζ : K} {n : ℕ} [NeZero n] (hζ : IsPrimitiveRoot ζ n) :
+    complexConj K ζ = ζ⁻¹ :=
+  (isConj_complexConj K
+    (Classical.choice (inferInstance : Nonempty (K →+* ℂ)))).eq_inv_of_isPrimitiveRoot hζ

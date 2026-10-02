@@ -18,6 +18,7 @@ public import SKW.KroneckerWeber.Reduction
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.CMField
 public import SKW.Prereqs.CyclotomicField
+public import SKW.Prereqs.ZModUnits
 
 @[expose] public section
 
@@ -168,7 +169,7 @@ variable {A : Type*} [Field A] [CharZero A] (L : IntermediateField ℚ A) [Numbe
   [IsCMField L]
 
 /-- Complex conjugation of the CM field `L`, as an element of `Gal(L/ℚ)`. -/
-noncomputable def conjGal : Gal(L/ℚ) := (IsCMField.complexConj L).restrictScalars ℚ
+noncomputable abbrev conjGal : Gal(L/ℚ) := (IsCMField.complexConj L).restrictScalars ℚ
 
 /-- The maximal real subfield `L⁺` of a CM field `L ⊆ A`, as an intermediate field of `A / ℚ`. -/
 noncomputable def maximalReal : IntermediateField ℚ A :=
@@ -257,6 +258,8 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
         (by
           rw [MulEquiv.isCyclic (QuotientGroup.congr _ _
             (IsCyclotomicExtension.Rat.galEquivZMod (2 ^ (m + 2)) _) rfl)]
+          rw [MonoidHom.map_zpowers]
+
           sorry)
     rw [← maximalReal_eq_lift_fixedField] at hdeg hgal hcyc hram
     exact ⟨maximalReal ℚ⟮ξ (2 ^ (m + 2))⟯, maximalReal_le _, hdeg, hgal, hcyc, hram,

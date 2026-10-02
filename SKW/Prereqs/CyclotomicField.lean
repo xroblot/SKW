@@ -201,3 +201,24 @@ theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_neg_one_apply (n : ℕ) [NeZ
   show (galEquivZMod n F).symm (-1) (zeta n ℚ F) = (complexConj F).restrictScalars ℚ (zeta n ℚ F)
   rw [galEquivZMod_symm_apply_of_pow_eq n F (z := -1) (by simp) (zeta_pow n ℚ F), zpow_neg_one,
     AlgEquiv.restrictScalars_apply, (isConj_complexConj F φ).eq_inv_of_isPrimitiveRoot hζ]
+
+open NumberField IsCyclotomicExtension IsCyclotomicExtension.Rat in
+/-- An automorphism `σ` sends `ζ` to `ζ ^ k` exactly when `galEquivZMod` sends `σ` to `k`. -/
+theorem IsCyclotomicExtension.Rat.galEquivZMod_apply_eq_zpow_iff {n : ℕ} [NeZero n] {K : Type*}
+    [Field K] [NumberField K] [IsCyclotomicExtension {n} ℚ K] {σ : Gal(K/ℚ)} {k : ℤ}
+    {ζ : K} (hζ : IsPrimitiveRoot ζ n) :
+    σ ζ = ζ ^ k ↔ (galEquivZMod n K σ).val = k := by
+  rw [galEquivZMod_apply_of_pow_eq n K σ hζ.pow_eq_one, ← zpow_natCast,
+    ← IsUnit.unit_spec (hζ.isUnit (NeZero.ne n)), ←  Units.val_zpow_eq_zpow_val,
+    ← Units.val_zpow_eq_zpow_val, ← Units.ext_iff, zpow_eq_zpow_iff_modEq,
+    ← (hζ.isUnit_unit (NeZero.ne n)).eq_orderOf, ← ZMod.intCast_eq_intCast_iff]
+  simp
+
+open IsCyclotomicExtension IsCyclotomicExtension.Rat in
+/-- In a cyclotomic field, complex conjugation corresponds to `-1` under `galEquivZMod`. -/
+theorem IsCyclotomicExtension.Rat.galEquivZMod_complexConj (n : ℕ) [NeZero n] (K : Type*)
+    [Field K] [NumberField K] [IsCyclotomicExtension {n} ℚ K] [IsCMField K] :
+    galEquivZMod n K ((IsCMField.complexConj K).restrictScalars ℚ) = -1 := by
+  rw [Units.ext_iff, Units.coe_neg_one, ← Int.cast_one, ← Int.cast_neg,
+    ← galEquivZMod_apply_eq_zpow_iff (zeta_spec n ℚ K), AlgEquiv.coe_restrictScalars, zpow_neg_one,
+    IsCMField.complexConj_eq_inv_of_isPrimitiveRoot (zeta_spec n ℚ K)]
