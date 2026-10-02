@@ -248,7 +248,7 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     IsCyclotomicExtension.Rat.isCMField _ (S := {2 ^ (m + 2)})
       ⟨2 ^ (m + 2), rfl, by
         calc 2 < 2 ^ 2 := by norm_num
-          _ ≤ 2 ^ (m + 2) := Nat.pow_le_pow_right (by norm_num) (by omega)⟩
+          _ ≤ 2 ^ (m + 2) := Nat.pow_le_pow_right (by norm_num) (by lia)⟩
   -- `ℚ(ζ_{2^{m+2}})` is unramified outside `2`
   have hCram : UnramifiedOutside ℚ⟮ξ (2 ^ (m + 2))⟯ 2 := by
     intro q hq hq2
@@ -336,20 +336,41 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
         fun h ↦ hq2 ((Nat.prime_dvd_prime_iff_eq hq Nat.prime_two).mp
           (hq.dvd_of_dvd_pow (n := 2) (by norm_num at h ⊢; exact h)))
   -- its maximal real subfield `M` is cyclic of `2`-power degree, unramified outside `2`
+  obtain ⟨l, hl₁, hl₂⟩ : ∃ l, l ≤ m + 1 ∧ Module.finrank ℚ L = 2 ^ l := by
+    rw [← Nat.dvd_prime_pow Nat.prime_two]
+    convert finrank_sup_dvd_mul_of_isGalois K ℚ⟮ξ 4⟯
+    rw [hK, IsCyclotomicExtension.Rat.finrank 4, show 4 = 2 ^ 2 by rfl, Nat.totient_prime_pow
+      Nat.prime_two (by positivity), Nat.add_one_sub_one, pow_one, mul_one, Nat.pow_succ]
   set M : IntermediateField ℚ A := maximalReal L with hM
-  obtain ⟨k, hk⟩ : ∃ k : ℕ, Module.finrank ℚ M = 2 ^ k := by
-
-    sorry
-  have hkm : k ≤ m := sorry
-  have : NumberField M := sorry
-  have hMram : UnramifiedOutside M 2 := sorry
-  have : IsGalois ℚ M := sorry
+  obtain ⟨k, hk₁, hk₂⟩ : ∃ k, k ≤ l ∧ Module.finrank ℚ M = 2 ^ k := by
+    rw [← Nat.dvd_prime_pow Nat.prime_two, ← hl₂]
+    exact finrank_dvd_of_le_right <| maximalReal_le L
+  have hkm : k ≤ m := by
+    refine (Nat.le_add_one_iff.mp <| hk₁.trans hl₁).resolve_right fun h ↦ ?_
+    have : IsTotallyReal L := by
+      have h : M = L := by
+        apply IntermediateField.eq_of_le_of_finrank_le (maximalReal_le L)
+        rwa [hl₂, hk₂, Nat.pow_le_pow_iff_right one_lt_two, h]
+      rw [← h]
+      exact isTotallyReal_maximalReal L
+    obtain ⟨φ⟩ : Nonempty (L →+* ℂ) := inferInstance
+    exact IsTotallyComplex.complexEmbedding_not_isReal φ <| IsTotallyReal.complexEmbedding_isReal φ
+  have : NumberField M := by
+    refine { to_charZero := charZero M, to_finiteDimensional := FiniteDimensional.of_finrank_pos ?_ }
+    rw [hk₂]
+    exact Nat.two_pow_pos k
+  have hMram : UnramifiedOutside M 2 := by
+    have : Algebra M L := (inclusion (maximalReal_le L)).toRingHom.toAlgebra
+    exact UnramifiedOutside.tower_bot _ hLram
+  have : IsAbelianGalois ℚ M := by
+    have : Algebra M L := (inclusion (maximalReal_le L)).toRingHom.toAlgebra
+    exact IsAbelianGalois.tower_bot ℚ _ L
   have : IsCyclic Gal(M/ℚ) := by
     -- `Gal(K(i)/ℚ) ≅ ℤ/2^m × ℤ/2` with complex conjugation `(2^{m-1}, 1)`, so the quotient is
     -- cyclic; then `fixedField_spec_of_index_eq_prime_pow` applies to `L` and `⟨c⟩`
     sorry
   -- the real case applies to `M`
-  have hM' : M ≤ ℚ⟮ξ (2 ^ (k + 2))⟯ := prop_kw_2_power_real hξ k sorry M hk hMram
+  have hM' : M ≤ ℚ⟮ξ (2 ^ (k + 2))⟯ := prop_kw_2_power_real hξ k sorry M hk₂ hMram
   -- and `K ≤ L = M(i) ≤ ℚ(ζ_{2^{k+2}}) ⊔ ℚ(i) ≤ ℚ(ζ_{2^{m+2}})`
   have hLM : L = M ⊔ ℚ⟮ξ 4⟯ := sorry
   sorry
