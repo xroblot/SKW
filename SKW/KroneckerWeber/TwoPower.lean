@@ -258,9 +258,9 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
         (by
           rw [MulEquiv.isCyclic (QuotientGroup.congr _ _
             (IsCyclotomicExtension.Rat.galEquivZMod (2 ^ (m + 2)) _) rfl)]
-          rw [MonoidHom.map_zpowers]
-
-          sorry)
+          rw [MonoidHom.map_zpowers, conjGal, MonoidHom.coe_ofClass]
+          rw [IsCyclotomicExtension.Rat.galEquivZMod_complexConj]
+          exact ZMod.isCyclic_units_two_pow_quotient_neg_one m)
     rw [← maximalReal_eq_lift_fixedField] at hdeg hgal hcyc hram
     exact ⟨maximalReal ℚ⟮ξ (2 ^ (m + 2))⟯, maximalReal_le _, hdeg, hgal, hcyc, hram,
       isTotallyReal_maximalReal _⟩
