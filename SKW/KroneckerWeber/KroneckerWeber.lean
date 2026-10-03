@@ -44,7 +44,7 @@ lemma kw_cyclic_primePow_le_cyclotomic {p : ℕ} (hp : p.Prime) {A : Type*} [Fie
     obtain rfl | hk := k.eq_zero_or_pos
     · exact ⟨1, one_pos, by simp_all⟩
     · obtain rfl | hodd := eq_or_ne p 2
-      · exact ⟨2 ^ (k + 2), by positivity, prop_kw_2_power hξ k hk F hF₁ hF₂⟩
+      · exact ⟨2 ^ (k + 2), by positivity, prop_kw_2_power hξ k F hF₁ hF₂⟩
       · have : Fact (Odd p) := ⟨hp.odd_of_ne_two hodd⟩
         have : IsAbelianGalois ℚ F := .of_isCyclic ℚ F
         exact ⟨p ^ (k + 1), pow_pos (Fact.out : p.Prime).pos _,

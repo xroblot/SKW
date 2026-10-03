@@ -231,7 +231,7 @@ both totally real (`K ⊔ K'` is totally real) and unramified outside `2` — co
 `prop_kw_2_quadratic_real_unique`. So `K ⊔ K'` is cyclic, and `kw_cyclic_compositum` gives
 `K ≤ K' ≤ ℚ⟮ξ (2^(m+2))⟯`. -/
 theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
-    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (m : ℕ) (hm : 0 < m)
+    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (m : ℕ)
     (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
     [IsTotallyReal K] (hK : Module.finrank ℚ K = 2 ^ m) (hKram : UnramifiedOutside K 2) :
     K ≤ ℚ⟮ξ (2 ^ (m + 2))⟯ := by
@@ -310,14 +310,16 @@ case directly. Otherwise pass to `K(i) = K · ℚ(i)`, a CM field with maximal r
 (`K(i) = M(i)`); `M` is real, cyclic, of `2`-power degree, and unramified outside `2`, so the real
 case makes `M` — and hence `K` — cyclotomic. -/
 theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
-    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (m : ℕ) (hm : 0 < m)
+    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (m : ℕ)
     (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
     (hK : Module.finrank ℚ K = 2 ^ m) (hKram : UnramifiedOutside K 2) :
     K ≤ ℚ⟮ξ (2 ^ (m + 2))⟯ := by
   -- if `K` is already totally real, the real case applies directly
   by_cases hreal : IsTotallyReal K
-  · exact prop_kw_2_power_real hξ m hm K hK hKram
+  · exact prop_kw_2_power_real hξ m K hK hKram
   -- otherwise pass to `L = K(i) = K ⊔ ℚ(i)`, which is CM
+  have : IsCyclotomicExtension {2 ^ (m + 2)} ℚ ℚ⟮ξ (2 ^ (m + 2))⟯ :=
+    (hξ (2 ^ (m + 2))).adjoinSimple_isCyclotomicExtension (2 ^ (m + 2)) ℚ A
   have : IsCyclotomicExtension {4} ℚ ℚ ⟮ξ 4⟯ := (hξ 4).adjoinSimple_isCyclotomicExtension 4 ℚ A
   have : NumberField ℚ⟮ξ 4⟯ := IsCyclotomicExtension.numberField {4} ℚ _
   have : IsAbelianGalois ℚ ℚ⟮ξ 4⟯ := IsCyclotomicExtension.isAbelianGalois {4} ℚ ℚ⟮ξ 4⟯
@@ -345,20 +347,18 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   obtain ⟨k, hk₁, hk₂⟩ : ∃ k, k ≤ l ∧ Module.finrank ℚ M = 2 ^ k := by
     rw [← Nat.dvd_prime_pow Nat.prime_two, ← hl₂]
     exact finrank_dvd_of_le_right <| maximalReal_le L
-  have hkm : k ≤ m := by
-    refine (Nat.le_add_one_iff.mp <| hk₁.trans hl₁).resolve_right fun h ↦ ?_
-    have : IsTotallyReal L := by
-      have h : M = L := by
-        apply IntermediateField.eq_of_le_of_finrank_le (maximalReal_le L)
-        rwa [hl₂, hk₂, Nat.pow_le_pow_iff_right one_lt_two, h]
-      rw [← h]
-      exact isTotallyReal_maximalReal L
-    obtain ⟨φ⟩ : Nonempty (L →+* ℂ) := inferInstance
-    exact IsTotallyComplex.complexEmbedding_not_isReal φ <| IsTotallyReal.complexEmbedding_isReal φ
   have : NumberField M := by
     refine { to_charZero := charZero M, to_finiteDimensional := FiniteDimensional.of_finrank_pos ?_ }
     rw [hk₂]
     exact Nat.two_pow_pos k
+  have hML : M ≠ L := fun h ↦ by
+    have : IsTotallyReal L := h ▸ isTotallyReal_maximalReal L
+    obtain ⟨φ⟩ : Nonempty (L →+* ℂ) := inferInstance
+    exact IsTotallyComplex.complexEmbedding_not_isReal φ <| IsTotallyReal.complexEmbedding_isReal φ
+  have hkm : k ≤ m := by
+    refine (Nat.le_add_one_iff.mp <| hk₁.trans hl₁).resolve_right fun h ↦ hML ?_
+    apply IntermediateField.eq_of_le_of_finrank_le (maximalReal_le L)
+    rwa [hl₂, hk₂, Nat.pow_le_pow_iff_right one_lt_two, h]
   have hMram : UnramifiedOutside M 2 := by
     have : Algebra M L := (inclusion (maximalReal_le L)).toRingHom.toAlgebra
     exact UnramifiedOutside.tower_bot _ hLram
@@ -370,10 +370,23 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     -- cyclic; then `fixedField_spec_of_index_eq_prime_pow` applies to `L` and `⟨c⟩`
     sorry
   -- the real case applies to `M`
-  have hM' : M ≤ ℚ⟮ξ (2 ^ (k + 2))⟯ := prop_kw_2_power_real hξ k sorry M hk₂ hMram
+  have hM' : M ≤ ℚ⟮ξ (2 ^ (k + 2))⟯ := prop_kw_2_power_real hξ k M hk₂ hMram
   -- and `K ≤ L = M(i) ≤ ℚ(ζ_{2^{k+2}}) ⊔ ℚ(i) ≤ ℚ(ζ_{2^{m+2}})`
-  have hLM : L = M ⊔ ℚ⟮ξ 4⟯ := sorry
-  sorry
+  have hLM : L = M ⊔ ℚ⟮ξ 4⟯ := by
+    sorry
+  -- K ≤ L = M ⊔ ℚ⟮ξ 4⟯ ≤ ℚ⟮ξ (2^(k+2))⟯ ⊔ ℚ⟮ξ 4⟯ ≤ ℚ⟮ξ (2^(m+2))⟯
+  refine hKL.trans ?_
+  have := sup_le_sup_right hM' ℚ⟮ξ 4⟯
+  rw [hLM]
+  refine le_trans this ?_
+  apply sup_le
+  · have : IsCyclotomicExtension {2 ^ (k + 2)} ℚ ℚ⟮ξ (2 ^ (k + 2))⟯ :=
+      (hξ (2 ^ (k + 2))).adjoinSimple_isCyclotomicExtension (2 ^ (k + 2)) ℚ A
+    apply isCyclotomicExtension_le_of_dvd _ _ (2 ^ (k + 2)) (2 ^ (m + 2))
+    apply Nat.pow_dvd_pow
+    lia
+  · apply isCyclotomicExtension_le_of_dvd _ _ 4 (2 ^ (m + 2))
+    lia
 
 end
 
