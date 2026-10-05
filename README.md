@@ -32,22 +32,20 @@ theorem following the approach of Lemmermeyer's paper
 ## Status
 
 Both `Stickelberger` and `kronecker_weber` are proved, and no file of this project contains
-a `sorry` of its own. What remains are thirteen statements admitted on purpose, each of
+a `sorry` of its own. What remains are nine statements admitted on purpose, each of
 them a result already submitted to Mathlib and awaiting review; until those land,
 `#print axioms kronecker_weber` still reports `sorryAx`.
 
-In [`SKW/Prereqs/OtherPR.lean`](SKW/Prereqs/OtherPR.lean):
+| PR | content | statements |
+|---|---|---|
+| [#36733](https://github.com/leanprover-community/mathlib4/pull/36733) | decomposition field and inertia field of a prime | 2 |
+| [#36843](https://github.com/leanprover-community/mathlib4/pull/36843) | a compositum of unramified extensions is unramified | 1 |
+| [#43490](https://github.com/leanprover-community/mathlib4/pull/43490) | quadratic fields and their discriminant | 4 |
+| [#43493](https://github.com/leanprover-community/mathlib4/pull/43493) | complex embeddings of quadratic fields | 1 |
+| [#40302](https://github.com/leanprover-community/mathlib4/pull/40302) | the `digitsAppend` API | 1 |
 
-| PR | content |
-|---|---|
-| [#36733](https://github.com/leanprover-community/mathlib4/pull/36733) | decomposition field and inertia field of a prime |
-| [#43088](https://github.com/leanprover-community/mathlib4/pull/43088) | maximal quadratic orders over `ℤ` |
-| [#43490](https://github.com/leanprover-community/mathlib4/pull/43490) | quadratic fields and their discriminant |
-| [#43491](https://github.com/leanprover-community/mathlib4/pull/43491) | the discriminant of `ℚ(√d)` |
-| [#43493](https://github.com/leanprover-community/mathlib4/pull/43493) | complex embeddings of quadratic fields |
-
-and in [`SKW/Prereqs/Digits.lean`](SKW/Prereqs/Digits.lean), one lemma from
-[#40302](https://github.com/leanprover-community/mathlib4/pull/40302) (`digitsAppend` API).
+The first four live in [`SKW/Prereqs/OtherPR.lean`](SKW/Prereqs/OtherPR.lean), the last one
+in [`SKW/Prereqs/Digits.lean`](SKW/Prereqs/Digits.lean).
 
 As each PR is merged, the corresponding stub is deleted and its uses redirected to the
 upstream name. The [blueprint](https://xroblot.github.io/SKW/blueprint/) tracks the

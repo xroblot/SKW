@@ -14,6 +14,9 @@ public import Mathlib.FieldTheory.Galois.Abelian
 
 open NumberField Ideal IntermediateField
 
+/-- If a prime is unramified in `F₁/ℚ` and in `F₂/ℚ`, then it is unramified in
+`(F₁ ⊔ F₂)/ℚ`. From Mathlib PR
+[#36843](https://github.com/leanprover-community/mathlib4/pull/36843). -/
 theorem Ideal.ramificationIdx_sup_eq_one {L : Type*} [Field L] [NumberField L]
     {F₁ F₂ : IntermediateField ℚ L} (htop : F₁ ⊔ F₂ = ⊤) {p : Ideal ℤ} {P₁ : Ideal (𝓞 F₁)}
     {P₂ : Ideal (𝓞 F₂)} {P : Ideal (𝓞 L)} [P₁.LiesOver p] [P₂.LiesOver p]
@@ -22,6 +25,9 @@ theorem Ideal.ramificationIdx_sup_eq_one {L : Type*} [Field L] [NumberField L]
     ramificationIdx P ℤ = 1 := by
   sorry
 
+/-- A prime is unramified in the inertia field of a prime above it. Extracted from the
+inertia-field API of Mathlib PR
+[#36733](https://github.com/leanprover-community/mathlib4/pull/36733). -/
 theorem IsInertiaField.ramificationIdx_eq (K L : Type*) {A B : Type*} [Field K] [Field L]
     [Algebra K L] [CommRing A] [CommRing B] [MulSemiringAction Gal(L/K) B] (E 𝓞E : Type*)
     [Field E] [CommRing 𝓞E] [Algebra E L] (P : Ideal B) (𝓟E : Ideal 𝓞E) [Algebra A 𝓞E]
@@ -39,8 +45,9 @@ theorem isUnramifiedIn_fixedField_inertia {L : Type*} [Field L] [NumberField L]
     Algebra.IsUnramifiedIn (𝓞 (fixedField (inertia Gal(L/ℚ) 𝔔))) (span {(q : ℤ)}) := by
   sorry
 
-/-- The discriminant of a quadratic field is a fundamental discriminant. Extracted from the
-quadratic-fields stack, where it is stated for `[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
+/-- The discriminant of a quadratic field is a fundamental discriminant. From Mathlib PR
+[#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
+`[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
 theorem NumberField.QuadraticField.isFundamentalDiscr_discr (K : Type*) [Field K] [NumberField K]
     (hK : Module.finrank ℚ K = 2) :
     Int.IsFundamentalDiscr (NumberField.discr K) := by
@@ -51,14 +58,6 @@ theorem NumberField.QuadraticField.isFundamentalDiscr_discr (K : Type*) [Field K
 `Mathlib/Algebra/Ring/Int/Parity.lean`. -/
 theorem Int.not_two_dvd_iff_odd {n : ℤ} : ¬ 2 ∣ n ↔ Odd n := by grind
 
-/-- Every quadratic field is `ℚ(√(discr K))`. From Mathlib PR
-[#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
-`[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
-theorem NumberField.QuadraticField.nonempty_algEquiv_quadraticAlgebra_discr (K : Type*) [Field K] [NumberField K]
-    (hK : Module.finrank ℚ K = 2) :
-    Nonempty (K ≃ₐ[ℚ] QuadraticAlgebra ℚ (NumberField.discr K : ℚ) 0) := by
-  sorry
-
 /-- The discriminant is a complete invariant of quadratic fields. From Mathlib PR
 [#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
 `[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
@@ -66,22 +65,6 @@ theorem NumberField.QuadraticField.nonempty_algEquiv_iff_discr_eq (K F : Type*) 
     [NumberField K] [NumberField F] (hK : Module.finrank ℚ K = 2)
     (hF : Module.finrank ℚ F = 2) :
     Nonempty (K ≃ₐ[ℚ] F) ↔ NumberField.discr K = NumberField.discr F := by
-  sorry
-
-/-- The discriminant of `ℚ(√d)` is `4 * d` when `d` is squarefree and `d ≡ 2, 3 [ZMOD 4]`. From
-Mathlib PR [#43491](https://github.com/leanprover-community/mathlib4/pull/43491). -/
-theorem NumberField.QuadraticField.discr_sqrtd {d : ℤ} [Fact (¬ IsSquare (d : ℚ))]
-    [NumberField (QuadraticAlgebra ℚ (d : ℚ) 0)]
-    (hd₁ : Squarefree d) (hd₂ : d % 4 = 2 ∨ d % 4 = 3) :
-    NumberField.discr (QuadraticAlgebra ℚ (d : ℚ) 0) = 4 * d := by
-  sorry
-
-/-- The discriminant of `ℚ(√d)` is `d` itself when `d` is squarefree and `d ≡ 1 [ZMOD 4]`. From
-Mathlib PR [#43491](https://github.com/leanprover-community/mathlib4/pull/43491). -/
-theorem NumberField.QuadraticField.discr_half {d : ℤ} [Fact (¬ IsSquare (d : ℚ))]
-    [NumberField (QuadraticAlgebra ℚ (d : ℚ) 0)]
-    (hd : Squarefree d) (hd1 : d ≠ 1) (h : d % 4 = 1) :
-    NumberField.discr (QuadraticAlgebra ℚ (d : ℚ) 0) = d := by
   sorry
 
 /-- `√(discr K)` lies in `K`. From Mathlib PR
@@ -106,14 +89,6 @@ theorem NumberField.QuadraticField.not_isSquare_discr (K : Type*) [Field K] [Num
 theorem NumberField.QuadraticField.isTotallyReal_iff_discr_pos (K : Type*) [Field K] [NumberField K]
     (hK : Module.finrank ℚ K = 2) :
     IsTotallyReal K ↔ 0 < NumberField.discr K := by
-  sorry
-
-/-- Every fundamental discriminant other than `1` is the discriminant of a quadratic field. From
-Mathlib PR [#43491](https://github.com/leanprover-community/mathlib4/pull/43491). -/
-theorem NumberField.QuadraticField.discr_quadraticAlgebra {D : ℤ} [Fact (¬ IsSquare (D : ℚ))]
-    [NumberField (QuadraticAlgebra ℚ (D : ℚ) 0)]
-    (hD : Int.IsFundamentalDiscr D) (hD1 : D ≠ 1) :
-    NumberField.discr (QuadraticAlgebra ℚ (D : ℚ) 0) = D := by
   sorry
 
 /-- Instance form of `NumberField.QuadraticField.isTotallyReal_iff_discr_pos`: a totally real
