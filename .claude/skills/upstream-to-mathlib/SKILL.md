@@ -131,7 +131,26 @@ Working copy: `/Users/roblot/Desktop/EnCours/Lean/Lean4/mathlib4-alt`
 Before opening the PR, always run the `lean:mathlib-review` skill on the ported
 declarations and act on its findings — this is a required step, not optional. A Mathlib
 reviewer will apply exactly these criteria, so catching them now avoids a review round
-trip. Pay particular attention to:
+trip.
+
+**Review the WHOLE diff, not the parts you happen to be thinking about.** Reviewing only the
+names and the hypotheses, and skipping how the declarations read and where they sit, is not a
+review — a reviewer reads every added line. Go through all of the following, every time, and
+for each one either act on it or be able to say why it is fine:
+
+- **Binder explicitness.** For each variable: can it actually be inferred? A variable that
+  appears *only in instance arguments* cannot be inferred unless the expected type pins it, so
+  it must be explicit — and it must match what the surrounding declarations in that file do.
+  Deciding this requires imagining the use site, not just reading the statement.
+- **Placement.** Put the declarations where a reader would look for them: in the section where
+  the notions involved are in scope, next to the cluster they belong with, and *obeying the
+  `variable` block already in force*. Adding a `variable` line to flip a binder for your own
+  declarations is a sign they are in the wrong place.
+- **Proof readability**, independently of whether it compiles: anonymous-constructor hypothesis
+  grabs (`‹_›`), one-letter names, a second lemma repeating the first's argument instead of
+  deriving it.
+
+Then the usual points:
 
 - **Naming.** The names that were fine inside SKW are often not the most idiomatic Mathlib
   names. Check the conclusion-describes-the-name convention and existing precedent (e.g.
@@ -146,18 +165,32 @@ trip. Pay particular attention to:
 Then confirm the touched module still builds and `lake exe runLinter Mathlib.<Module>`
 passes after any changes the review prompted.
 
-## 4. Open the PR
+## 4. Commit, push, open the PR
 
-Follow `lean:mathlib-pr` for commit-message format (`<type>(<scope>): <subject>`),
-fork/branch conventions, and labels.
+Once the review has been acted on and the module builds and lints clean, carry this section
+out without stopping to ask: commit, push, create the PR. The user picked the candidate in §1
+and that choice is the go-ahead for the whole sequence, so don't re-confirm the commit message,
+the push or the PR text — just apply the rules below and report the resulting URL.
+
+Follow `lean:mathlib-pr` for fork/branch conventions and labels.
+
+Commit message: the opening commit of the branch is named `1st commit`, and that convention
+covers the first commit only — every later commit says what it does instead (`clean up`,
+`review` for changes answering an actual reviewer comment, `fix after merge`); never continue
+the numbering. The `<type>(<scope>): <subject>` line is the **PR title**, not a commit message.
 
 PR description style (from project memory):
+- **Short and non-technical.** A couple of sentences saying what the PR adds, in plain
+  mathematical English. No hypothesis-by-hypothesis justification, no design discussion, no
+  comparison with the alternatives considered — that belongs in the docstrings, or in a reply
+  if a reviewer asks. A one-line PR gets a one-line description.
 - No `Co-Authored-By` trailer in commit messages.
 - Close the description with `:robot: This PR was extracted from the [SKW project](https://github.com/xroblot/SKW) by Claude.`
 - No bold titles in the description body.
 - List PR dependencies (`- [ ] depends on: #XXXX`) at the very bottom, after a `---`.
 
 Steps:
+- `git commit -m "1st commit"` with the reviewed diff.
 - Push the branch to `origin` (the fork).
 - `gh pr create --repo leanprover-community/mathlib4 --base master ...` with a HEREDOC
   body. Note the resulting PR number/URL — it's needed for the quarantine step below.
@@ -223,7 +256,9 @@ and remove the `public import SKW.PRed2Mathlib.<MirrorName>` line from the origi
 
 ## Cautions
 
-- This pushes to a shared external repo and opens a public PR — confirm with the user
-  before pushing or running `gh pr create`.
+- Pushing to the fork and opening the PR are part of §4 and need no separate confirmation:
+  the user's choice of candidate in §1 authorizes them. Anything beyond that sequence (closing
+  or editing someone else's PR, pushing to a branch that isn't yours, posting review comments)
+  still gets confirmed first.
 - Keep PRs focused: one logical unit of generalization per PR, per Mathlib reviewer
   preference (mentioned in `lean:mathlib-pr`'s `easy`/`WIP` label guidance).
