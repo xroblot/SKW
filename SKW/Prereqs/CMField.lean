@@ -123,6 +123,11 @@ theorem eq_ratComplexConj {φ : K →+* ℂ} {σ : Gal(K/ℚ)} (hσ : ComplexEmb
 
 variable (K)
 
+/-- Complex conjugation has order `2` in `Gal(K/ℚ)`. -/
+theorem orderOf_ratComplexConj : orderOf (ratComplexConj K) = 2 :=
+  (orderOf_injective (AlgEquiv.restrictScalarsHom ℚ)
+    (AlgEquiv.restrictScalars_injective ℚ) (complexConj K)).trans (orderOf_complexConj K)
+
 /-- Complex conjugation is central in `Gal(K/ℚ)`. -/
 theorem ratComplexConj_mem_center : ratComplexConj K ∈ Subgroup.center Gal(K/ℚ) := by
   let φ : K →+* ℂ := Classical.choice (inferInstance : Nonempty _)
@@ -151,6 +156,35 @@ instance [IsGalois ℚ K] : IsGalois ℚ K⁺ :=
   IsGaloisGroup.isGalois (Gal(K/ℚ) ⧸ Subgroup.zpowers (ratComplexConj K)) ℚ K⁺
 
 end
+
+/-! ### Complex conjugation and subfields -/
+
+section Subfields
+
+variable {K L : Type*} [Field K] [Field L] [NumberField K] [NumberField L] [IsCMField K]
+  [IsCMField L] [Algebra K L]
+
+/-- The complex conjugations of two CM fields `K ⊆ L` commute with the inclusion. -/
+theorem ratComplexConj_algebraMap (x : K) :
+    ratComplexConj L (algebraMap K L x) = algebraMap K L (ratComplexConj K x) := by
+  let φ : L →+* ℂ := Classical.choice (inferInstance : Nonempty _)
+  apply φ.injective
+  rw [ComplexEmbedding.IsConj.eq (isConj_ratComplexConj φ)]
+  exact (ComplexEmbedding.IsConj.eq (isConj_ratComplexConj (φ.comp (algebraMap K L))) x).symm
+
+/-- For an extension `L/K` of CM fields with `K/ℚ` normal, the restriction of the complex
+conjugation of `L` to `K` is the complex conjugation of `K`. -/
+theorem restrictNormal_ratComplexConj [Normal ℚ K] :
+    (ratComplexConj L).restrictNormal K = ratComplexConj K :=
+  AlgEquiv.ext fun x ↦ (algebraMap K L).injective <| by
+    rw [AlgEquiv.restrictNormal_commutes, ratComplexConj_algebraMap]
+
+/-- Version of `restrictNormal_ratComplexConj` for `AlgEquiv.restrictNormalHom`. -/
+theorem restrictNormalHom_ratComplexConj [Normal ℚ K] :
+    AlgEquiv.restrictNormalHom K (ratComplexConj L) = ratComplexConj K :=
+  restrictNormal_ratComplexConj
+
+end Subfields
 
 end NumberField.IsCMField
 

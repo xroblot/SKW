@@ -183,21 +183,10 @@ instance isTotallyReal_maximalReal : IsTotallyReal (maximalReal L) := by
     inferInstanceAs (IsTotallyReal (NumberField.maximalRealSubfield L))
   exact IsTotallyReal.ofRingEquiv (liftAlgEquiv _).toRingEquiv
 
-/-- Complex conjugation has order `2`, as an element of `Gal(L/ℚ)`. -/
-theorem orderOf_ratComplexConj : orderOf (IsCMField.ratComplexConj L) = 2 := by
-  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
-  refine orderOf_eq_prime_iff.mpr ⟨?_, ?_⟩
-  · ext x
-    simp [IsCMField.ratComplexConj, pow_two]
-  · intro h
-    refine IsCMField.complexConj_ne_one L (AlgEquiv.restrictScalars_injective ℚ ?_)
-    exact show AlgEquiv.restrictScalars ℚ (IsCMField.complexConj L) =
-      AlgEquiv.restrictScalars ℚ 1 from h
-
 /-- `⟨c⟩` has order `2`, so its index is half the degree of `L`. -/
 theorem index_zpowers_ratComplexConj [IsGalois ℚ L] :
     (Subgroup.zpowers (IsCMField.ratComplexConj L)).index * 2 = Module.finrank ℚ L := by
-  rw [← orderOf_ratComplexConj L, ← Nat.card_zpowers, Subgroup.index_mul_card,
+  rw [← IsCMField.orderOf_ratComplexConj L, ← Nat.card_zpowers, Subgroup.index_mul_card,
     IsGalois.card_aut_eq_finrank]
 
 /-- `L⁺` is the fixed field of complex conjugation. -/
@@ -207,7 +196,7 @@ theorem maximalReal_eq_lift_fixedField :
   rw [maximalReal]
   congr
   ext x
-  simp only [mem_fixedField_iff, mem_zpowers_iff_mem_range_orderOf, orderOf_ratComplexConj,
+  simp only [mem_fixedField_iff, mem_zpowers_iff_mem_range_orderOf, IsCMField.orderOf_ratComplexConj,
     Finset.mem_image, Finset.mem_range, Order.lt_two_iff, Nat.le_one_iff_eq_zero_or_eq_one,
     exists_eq_or_imp, pow_zero, existsAndEq, pow_one, true_and, or_imp, forall_and, forall_eq',
     AlgEquiv.one_apply, true_and, IsCMField.ratComplexConj_apply,
@@ -261,7 +250,7 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
       fixedField_spec_of_index_eq_prime_pow (p := 2) (m := m) ℚ⟮ξ (2 ^ (m + 2))⟯ hCram
         (Subgroup.zpowers (IsCMField.ratComplexConj ℚ⟮ξ (2 ^ (m + 2))⟯))
         (by -- index `2 ^ m`: half of `[ℚ(ζ_{2^{m+2}}) : ℚ] = 2 ^ (m + 1)`
-          rw [Subgroup.index_eq_card_div, Nat.card_zpowers, orderOf_ratComplexConj,
+          rw [Subgroup.index_eq_card_div, Nat.card_zpowers, IsCMField.orderOf_ratComplexConj,
             IsGalois.card_aut_eq_finrank, IsCyclotomicExtension.Rat.finrank (2 ^ (m + 2)),
             Nat.totient_prime_pow Nat.prime_two (by norm_num), Nat.add_one_sub_one,
             Nat.add_one_sub_one, mul_one, Nat.pow_succ, Nat.mul_div_cancel _ zero_lt_two])
@@ -366,7 +355,20 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   have : IsCyclic ((Gal(K/ℚ) × Gal(ℚ⟮ξ 4⟯/ℚ)) ⧸
       Subgroup.map (K.restrictNormalHomSupProd ℚ⟮ξ 4⟯)
         (Subgroup.zpowers (IsCMField.ratComplexConj L))) := by
-    sorry
+    apply isCyclic_quotient_of_sup_range_eq_top _ (MonoidHom.inl _ _)
+    rw [MonoidHom.range_inl, sup_comm, ← Subgroup.comap_map_eq, Subgroup.map_map]
+    rw [MonoidHom.map_zpowers, MonoidHom.coe_comp, Function.comp_apply]
+    rw [restrictNormalHomSupProd_apply, MonoidHom.coe_snd]
+    dsimp only
+    let : Algebra ℚ⟮ξ 4⟯ L := (inclusion le_sup_right).toRingHom.toAlgebra
+    rw [IsCMField.restrictNormalHom_ratComplexConj]
+    rw [Subgroup.eq_top_of_card_eq (Subgroup.zpowers _)]
+    rw [Subgroup.comap_top]
+    rw [Nat.card_zpowers]
+    rw [IsCMField.orderOf_ratComplexConj]
+    rw [IsGalois.card_aut_eq_finrank]
+    rw [IsCyclotomicExtension.Rat.finrank 4]
+    decide
   have : IsCyclic Gal(M/ℚ) := by
     suffices IsCyclic (Gal(L/ℚ) ⧸ Subgroup.zpowers (IsCMField.ratComplexConj L)) by
       let M₀ := maximalRealSubfield L
