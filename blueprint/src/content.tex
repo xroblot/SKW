@@ -1430,12 +1430,14 @@ $x \in \mathcal{O}$ we write $\bar x$ for its residue in $k$.
 \begin{proposition}
   \label{prop:kw_2_power}
   \lean{prop_kw_2_power}
+  \leanok
   \uses{prop:kw_2_power_real}
   Let $K/\QQ$ be a cyclic extension of degree $2^m$ unramified outside $2$.
   Then $K$ is cyclotomic.
 \end{proposition}
 
 \begin{proof}
+  \leanok
   If $K$ is totally real this is \ref{prop:kw_2_power_real}. Otherwise let $M$ be the maximal real
   subfield of $K(i)$. Then $K(i) = K \cdot \QQ(i) = M(i)$, so $K$ is cyclotomic $\iff K(i)$ is
   cyclotomic $\iff M$ is cyclotomic. Now $K(i)/\QQ$ is abelian (a compositum of the abelian

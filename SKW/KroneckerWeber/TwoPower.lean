@@ -176,12 +176,13 @@ noncomputable def maximalReal : IntermediateField ℚ A :=
 omit [NumberField L] [IsCMField L] in
 theorem maximalReal_le : maximalReal L ≤ L := lift_le _
 
-instance isTotallyReal_maximalReal : IsTotallyReal (maximalReal L) := by
-  have h : ∀ x : ℚ, algebraMap ℚ L x ∈ NumberField.maximalRealSubfield L := fun _ ↦ by
-    simp
-  have : IsTotallyReal ((NumberField.maximalRealSubfield L).toIntermediateField h) :=
-    inferInstanceAs (IsTotallyReal (NumberField.maximalRealSubfield L))
-  exact IsTotallyReal.ofRingEquiv (liftAlgEquiv _).toRingEquiv
+/-- The maximal real subfield of `L`, lifted to an intermediate field of `A / ℚ`, is isomorphic
+to `L⁺`. -/
+noncomputable def maximalRealAlgEquiv : maximalRealSubfield L ≃ₐ[ℚ] maximalReal L :=
+  (liftAlgEquiv ((maximalRealSubfield L).toIntermediateField fun x ↦ by simp))
+
+instance isTotallyReal_maximalReal : IsTotallyReal (maximalReal L) :=
+  IsTotallyReal.ofRingEquiv (maximalRealAlgEquiv L).toRingEquiv
 
 /-- `⟨c⟩` has order `2`, so its index is half the degree of `L`. -/
 theorem index_zpowers_ratComplexConj [IsGalois ℚ L] :
@@ -338,10 +339,8 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     refine { to_charZero := charZero M, to_finiteDimensional := FiniteDimensional.of_finrank_pos ?_ }
     rw [hk₂]
     exact Nat.two_pow_pos k
-  have hML : M ≠ L := fun h ↦ by
-    have : IsTotallyReal L := h ▸ isTotallyReal_maximalReal L
-    obtain ⟨φ⟩ : Nonempty (L →+* ℂ) := inferInstance
-    exact IsTotallyComplex.complexEmbedding_not_isReal φ <| IsTotallyReal.complexEmbedding_isReal φ
+  have hML : M ≠ L := fun h ↦
+    IsTotallyComplex.not_isTotallyReal L (h ▸ isTotallyReal_maximalReal L)
   have hkm : k ≤ m := by
     refine (Nat.le_add_one_iff.mp <| hk₁.trans hl₁).resolve_right fun h ↦ hML ?_
     apply IntermediateField.eq_of_le_of_finrank_le (maximalReal_le L)
@@ -372,7 +371,7 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   have : IsCyclic Gal(M/ℚ) := by
     suffices IsCyclic (Gal(L/ℚ) ⧸ Subgroup.zpowers (IsCMField.ratComplexConj L)) by
       let M₀ := maximalRealSubfield L
-      exact (AlgEquiv.autCongr (liftAlgEquiv (M₀.toIntermediateField _))).isCyclic.mp
+      exact (AlgEquiv.autCongr (maximalRealAlgEquiv L)).isCyclic.mp
         <| (IsGaloisGroup.mulEquivCongr _ Gal(M₀/ℚ) ℚ M₀).isCyclic.mp this
     refine isCyclic_of_injective
       (QuotientGroup.map (Subgroup.zpowers (IsCMField.ratComplexConj L)) _
@@ -387,12 +386,31 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   -- the real case applies to `M`
   have hM' : M ≤ ℚ⟮ξ (2 ^ (k + 2))⟯ := prop_kw_2_power_real hξ k M hk₂ hMram
   -- and `K ≤ L = M(i) ≤ ℚ(ζ_{2^{k+2}}) ⊔ ℚ(i) ≤ ℚ(ζ_{2^{m+2}})`
-  have hLM : L = M ⊔ ℚ⟮ξ 4⟯ := by
-    sorry
+  have hLM : M ⊔ ℚ⟮ξ 4⟯ = L := by
+    -- `M ⊔ ℚ⟮ξ 4⟯ ≤ L` by `sup_le`, and `M ≤ M ⊔ ℚ⟮ξ 4⟯`. Now `M = L⁺` is the fixed field of
+    -- `⟨c⟩`, which has order `2`, so `[L : M] = 2` and nothing lies strictly between `M` and `L`.
+    -- Since `M` is totally real, `ξ 4 ∉ M`, hence `M ⊔ ℚ⟮ξ 4⟯ ≠ M` and so `M ⊔ ℚ⟮ξ 4⟯ = L`.
+    refine eq_of_le_of_finrank_le (sup_le (maximalReal_le L) le_sup_right) ?_
+    obtain ⟨c, hc⟩ := finrank_dvd_of_le_right (le_sup_left : M ≤ M ⊔ ℚ⟮ξ 4⟯)
+    rw [hc]
+    rw [IsCMField.finrank_eq_two_mul, mul_comm]
+    gcongr
+    · exact le_of_eq <| LinearEquiv.finrank_eq (maximalRealAlgEquiv L).toLinearEquiv
+    · by_contra! h
+      interval_cases c
+      · rw [mul_zero] at hc
+        exact Module.finrank_pos.ne hc.symm
+      · have := eq_of_le_of_finrank_eq (le_sup_left : M ≤ M ⊔ ℚ⟮ξ 4⟯)
+          (by rwa [mul_one, eq_comm] at hc)
+        refine IsTotallyReal.not_isTotallyComplex M ?_
+        rw [this]
+        let : Algebra ℚ⟮ξ 4⟯ ↑(M ⊔ ℚ⟮ξ 4⟯) := (inclusion le_sup_right).toRingHom.toAlgebra
+        apply isTotallyComplex_of_algebra ℚ⟮ξ 4⟯
+  -- Module.finrank_dvd_finrank_right ℚ M ↑(M ⊔ ℚ⟮ξ 4⟯)
   -- K ≤ L = M ⊔ ℚ⟮ξ 4⟯ ≤ ℚ⟮ξ (2^(k+2))⟯ ⊔ ℚ⟮ξ 4⟯ ≤ ℚ⟮ξ (2^(m+2))⟯
   refine hKL.trans ?_
   have := sup_le_sup_right hM' ℚ⟮ξ 4⟯
-  rw [hLM]
+  rw [← hLM]
   refine le_trans this ?_
   apply sup_le
   · have : IsCyclotomicExtension {2 ^ (k + 2)} ℚ ℚ⟮ξ (2 ^ (k + 2))⟯ :=

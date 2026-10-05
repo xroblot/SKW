@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
 
 @[expose] public section
 
@@ -56,3 +57,21 @@ theorem mapIntAlgEquiv_symm_apply (e : K ≃+* L) (x : 𝓞 L) :
     ((mapIntAlgEquiv e).symm x : K) = e.symm (x : L) := rfl
 
 end NumberField.RingOfIntegers
+
+section TotallyRealComplex
+
+open NumberField
+
+variable (K : Type*) [Field K] [NumberField K]
+
+theorem IsTotallyComplex.not_isTotallyReal [IsTotallyComplex K] : ¬ IsTotallyReal K := by
+  intro _
+  obtain ⟨φ⟩ : Nonempty (K →+* ℂ) := inferInstance
+  exact IsTotallyComplex.complexEmbedding_not_isReal φ <| IsTotallyReal.complexEmbedding_isReal φ
+
+theorem IsTotallyReal.not_isTotallyComplex [IsTotallyReal K] : ¬ IsTotallyComplex K := by
+  intro _
+  obtain ⟨φ⟩ : Nonempty (K →+* ℂ) := inferInstance
+  exact IsTotallyComplex.complexEmbedding_not_isReal φ <| IsTotallyReal.complexEmbedding_isReal φ
+
+end TotallyRealComplex

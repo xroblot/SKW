@@ -123,6 +123,12 @@ theorem eq_ratComplexConj {φ : K →+* ℂ} {σ : Gal(K/ℚ)} (hσ : ComplexEmb
 
 variable (K)
 
+/-- A CM field has twice the degree of its maximal real subfield. -/
+theorem finrank_eq_two_mul :
+    Module.finrank ℚ K = 2 * Module.finrank ℚ K⁺ := by
+  rw [← Module.finrank_mul_finrank ℚ K⁺ K, Algebra.IsQuadraticExtension.finrank_eq_two K⁺ K,
+    mul_comm]
+
 /-- Complex conjugation has order `2` in `Gal(K/ℚ)`. -/
 theorem orderOf_ratComplexConj : orderOf (ratComplexConj K) = 2 :=
   (orderOf_injective (AlgEquiv.restrictScalarsHom ℚ)
