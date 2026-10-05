@@ -65,7 +65,7 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
     obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p F hrF hIrr ((galEquivZMod p F).symm a)
     rw [MulEquiv.apply_symm_apply] at hξ
     refine ⟨ξ, hξ₀, ?_⟩
-    rw [← (IsMulTorsionFree.pow_left_injective hp.out.ne_zero).eq_iff, mul_pow]
+    rw [← (Commute.all _ _).pow_left_inj hp.out.ne_zero, mul_pow]
     rw [SubmonoidClass.coe_pow, ← coeIdeal_pow, pow_right_comm, h𝔞, coeIdeal_pow,
       coeIdeal_span_singleton, spanSingleton_pow, spanSingleton_pow, spanSingleton_mul_spanSingleton,
       ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_span, coeIdeal_span_singleton,
@@ -94,7 +94,7 @@ lemma kw_conj_mul_eq_pow {α : 𝓞 F} {η : (𝓞 F)ˣ} (h : μ = α ^ p * η) 
     rw [hξ', mul_pow, ← zpow_natCast (μ : F), ← zpow_natCast (μ : F), mul_assoc, ← zpow_add₀ (by simpa),
       MulEquiv.apply_symm_apply, show (p : ℤ) + -1 = (p - 1 : ℕ) by
         rw [Int.add_neg_one, Nat.cast_sub hp.out.one_le, Nat.cast_one],
-      Units.coe_neg_one, ZMod.neg_val, if_neg one_ne_zero, ZMod.val_one]
+      Units.coe_neg_one, ZMod.neg_val, ite_eq_right one_ne_zero, ZMod.val_one]
   have hα0 : (α : F) ≠ 0 := by
     have : α ≠ 0 := by rintro rfl; rw [zero_pow hp.out.ne_zero, zero_mul] at h; exact hμ h
     exact_mod_cast this
@@ -116,7 +116,7 @@ lemma kw_exists_realUnit_torsion [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {η :
         ε ∈ IsCMField.realUnits F ∧ η ^ 4 = ζ * ε ∧ ζ.val.val ^ p = 1 := by
     obtain ⟨ζ, ε, hε, h'⟩ := IsCMField.exists_torsion_realunits_pow_two_eq_mul η
     have h₁ : Units.torsionOrder F = 2 * p := by
-      rw [torsionOrder_eq (n := p), if_neg (Nat.not_even_iff_odd.mpr hp')]
+      rw [torsionOrder_eq (n := p), ite_eq_right (Nat.not_even_iff_odd.mpr hp')]
     refine ⟨ζ ^ 2, ε ^ 2, pow_mem hε 2, ?_, ?_⟩
     · rw [SubmonoidClass.coe_pow, ← mul_pow, ← h', ← pow_mul]
     · rw [← Units.val_pow_eq_pow_val, ← Subgroup.coe_pow, ← pow_mul, ← h₁, Units.torsionOrder,
@@ -226,7 +226,7 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
     obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p F hrF hIrr ((galEquivZMod p F).symm a)
     rw [MulEquiv.apply_symm_apply] at hξ
     refine ⟨ξ, hξ₀, ?_⟩
-    rw [← (IsMulTorsionFree.pow_left_injective hp.out.ne_zero).eq_iff, mul_pow]
+    rw [← (Commute.all _ _).pow_left_inj hp.out.ne_zero, mul_pow]
     rw [SubmonoidClass.coe_pow, ← coeIdeal_pow, pow_right_comm, h𝔞, coeIdeal_pow,
       coeIdeal_span_singleton, spanSingleton_pow, spanSingleton_pow, spanSingleton_mul_spanSingleton,
       ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_span, coeIdeal_span_singleton,
@@ -256,7 +256,7 @@ lemma kw_conj_mul_eq_pow {α : 𝓞 F} {η : (𝓞 F)ˣ} (h : μ = α ^ p * η) 
     rw [hξ', mul_pow, ← zpow_natCast (μ : F), ← zpow_natCast (μ : F), mul_assoc, ← zpow_add₀ (by simpa),
       MulEquiv.apply_symm_apply, show (p : ℤ) + -1 = (p - 1 : ℕ) by
         rw [Int.add_neg_one, Nat.cast_sub hp.out.one_le, Nat.cast_one],
-      Units.coe_neg_one, ZMod.neg_val, if_neg one_ne_zero, ZMod.val_one]
+      Units.coe_neg_one, ZMod.neg_val, ite_eq_right one_ne_zero, ZMod.val_one]
   have hα0 : (α : F) ≠ 0 := by
     have : α ≠ 0 := by rintro rfl; rw [zero_pow hp.out.ne_zero, zero_mul] at h; exact hμ h
     exact_mod_cast this
@@ -279,7 +279,7 @@ lemma kw_exists_realUnit_torsion [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {η :
         ε ∈ IsCMField.realUnits F ∧ η ^ 4 = ζ * ε ∧ ζ.val.val ^ p = 1 := by
     obtain ⟨ζ, ε, hε, h'⟩ := IsCMField.exists_torsion_realunits_pow_two_eq_mul η
     have h₁ : Units.torsionOrder F = 2 * p := by
-      rw [torsionOrder_eq (n := p), if_neg (Nat.not_even_iff_odd.mpr hp')]
+      rw [torsionOrder_eq (n := p), ite_eq_right (Nat.not_even_iff_odd.mpr hp')]
     refine ⟨ζ ^ 2, ε ^ 2, pow_mem hε 2, ?_, ?_⟩
     · rw [SubmonoidClass.coe_pow, ← mul_pow, ← h', ← pow_mul]
     · rw [← Units.val_pow_eq_pow_val, ← Subgroup.coe_pow, ← pow_mul, ← h₁, Units.torsionOrder,

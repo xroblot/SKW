@@ -115,12 +115,13 @@ theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDede
     hp.out this, Int.ideal_span_absNorm_eq_self]
 
 theorem Algebra.not_isUnramifiedAt_iff {R S : Type*} [CommRing R] [CommRing S]
-    [Algebra R S] {p : Ideal S} [p.IsPrime] [Module.Finite R S]
+    [Algebra R S] {p : Ideal S} [p.IsPrime] [IsNoetherianRing R] [Module.Finite R S]
     [Algebra.HasSeparableResidueFieldsAt R S (Ideal.under R p)] :
     ¬ IsUnramifiedAt R p ↔ 1 < p.ramificationIdx R := by
+  have : IsNoetherianRing S := IsNoetherianRing.of_finite R S
   rw [← Ideal.ramificationIdx_eq_one_iff]
   have hpos : 0 < p.ramificationIdx R := p.ramificationIdx_pos R
-  omega
+  lia
 
 /-! ### Ideal — IsDedekindDomain / emultiplicity -/
 

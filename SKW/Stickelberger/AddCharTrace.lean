@@ -91,7 +91,7 @@ theorem algebraMap_comp_addCharTrace [P.LiesOver 𝒑] {S : Type*} [CommRing S] 
   have hζ₀ := hζ.map_of_injective (FaithfulSMul.algebraMap_injective R S)
   obtain ⟨a, ha, ha'⟩ := exists_nat_addCharTrace_eq_pow P hζ x
   obtain ⟨b, hb, hb'⟩ := exists_nat_addCharTrace_eq_pow P hζ₀ x
-  simp_rw [RingHom.toMonoidHom_eq_coe, MonoidHom.coe_compAddChar, MonoidHom.coe_coe,
+  simp_rw [RingHom.toMonoidHom_eq_coe, MonoidHom.coe_compAddChar, MonoidHom.coe_ofClass,
     Function.comp_apply, ha, hb, map_pow]
   refine (hζ₀.isOfFinOrder (NeZero.ne _)).pow_eq_pow_iff_modEq.mpr ?_
   rwa [hb', CharP.natCast_eq_natCast, Int.ringChar_idealQuot, hζ₀.eq_orderOf, Nat.ModEq.comm] at ha'

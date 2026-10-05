@@ -27,7 +27,7 @@ theorem Prime.emultiplicity_prime {α : Type*} [CommMonoidWithZero α] [IsCancel
   split_ifs with h
   · obtain ⟨u, rfl⟩ := h
     rw [emultiplicity_mul hp, hp.emultiplicity_self,
-      emultiplicity_of_unit_right (hp.not_unit), add_zero]
+      emultiplicity_of_unit_right (hp.not_isUnit), add_zero]
   · rwa [emultiplicity_eq_zero, hp.dvd_prime_iff_associated hq]
 
 theorem WfDvdMonoid.eq_zero_iff_forall_prime_pow_dvd {R : Type*} [CommMonoidWithZero R]
@@ -70,7 +70,7 @@ theorem UniqueFactorizationMonoid.associated_iff_emultiplicity_eq' {R : Type*}
     · intro h
       rw [WfDvdMonoid.eq_zero_iff_forall_prime_pow_dvd hp]
       specialize h p hp
-      simp only [emultiplicity_zero] at h
+      simp only [emultiplicity_zero_right] at h
       intro n
       rw [pow_dvd_iff_le_emultiplicity, ← h]
       exact le_top
@@ -82,7 +82,7 @@ theorem UniqueFactorizationMonoid.associated_iff_emultiplicity_eq' {R : Type*}
     · intro h
       rw [WfDvdMonoid.eq_zero_iff_forall_prime_pow_dvd hp]
       specialize h p hp
-      simp only [emultiplicity_zero] at h
+      simp only [emultiplicity_zero_right] at h
       intro n
       rw [pow_dvd_iff_le_emultiplicity, h]
       exact le_top

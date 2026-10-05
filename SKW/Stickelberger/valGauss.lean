@@ -115,9 +115,9 @@ theorem valGauss_add_valGauss_sub_self [NeZero f] [𝓟.LiesOver 𝒑] [P.LiesOv
   · haveI : 𝓟.IsPrime := Ideal.isPrime_of_prime h𝓟
     rw [valGauss, valGauss, ← emultiplicity_mul h𝓟, span_mul_span, Set.singleton_mul_singleton,
       GaussSum_mul_GaussSum_neg hbij hζ _ h, ← Set.singleton_mul_singleton, ← span_mul_span,
-      emultiplicity_mul h𝓟, emultiplicity_of_isUnit_right h𝓟.not_unit, zero_add, ← span_singleton_pow,
+      emultiplicity_mul h𝓟, emultiplicity_of_isUnit_right h𝓟.not_isUnit, zero_add, ← span_singleton_pow,
       emultiplicity_pow h𝓟, show (p : 𝓞 L) = algebraMap ℤ (𝓞 L) p by simp, ← Set.image_singleton,
-      ← map_span, (FiniteMultiplicity.of_not_isUnit h𝓟.not_unit h₁).emultiplicity_eq_multiplicity,
+      ← map_span, (FiniteMultiplicity.of_not_isUnit h𝓟.not_isUnit h₁).emultiplicity_eq_multiplicity,
       ← IsDedekindDomain.ramificationIdx_eq_multiplicity 𝒑 𝓟 h₁]
     rw [ramificationIdx_eq_p_sub_one (p := p) f 𝓟,
       ENat.natCast_mul]
@@ -311,7 +311,7 @@ theorem two_mul_sum_valGauss_toNat' [𝓟.LiesOver P] [P.LiesOver 𝒑] :
     ← Finset.sum_erase_add _ _ (a := Fin.ofNat (p ^ f - 1 + 1) (p ^ f - 1)) (by aesop),
     Finset.sum_ite_of_false, Finset.sum_const, Finset.card_erase_of_mem (by aesop),
     Finset.card_erase_of_mem (Finset.mem_univ 0), Finset.card_univ, Fintype.card_fin,
-    add_tsub_cancel_right, nsmul_eq_mul, if_pos (by aesop), if_pos (by aesop),
+    add_tsub_cancel_right, nsmul_eq_mul, ite_eq_left (by aesop), ite_eq_left (by aesop),
     add_zero, add_zero, mul_assoc]
   intro x hx
   simp at hx
@@ -335,7 +335,7 @@ theorem two_mul_sum_valGauss_toNat [𝓟.LiesOver P] [P.LiesOver 𝒑] :
       ← Finset.sum_erase_add _ _ (a := Fin.ofNat (p ^ f - 1 + 1) (p ^ f - 1)) (by aesop),
       Finset.sum_ite_of_false, Finset.sum_const, Finset.card_erase_of_mem (by aesop),
       Finset.card_erase_of_mem (Finset.mem_univ 0), Finset.card_univ, Fintype.card_fin,
-      add_tsub_cancel_right, nsmul_eq_mul, if_pos (by aesop), if_pos (by aesop),
+      add_tsub_cancel_right, nsmul_eq_mul, ite_eq_left (by aesop), ite_eq_left (by aesop),
       add_zero, add_zero, Nat.cast_comm]
     intro x hx
     simp at hx

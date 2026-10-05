@@ -128,11 +128,11 @@ theorem kronecker_weber
   let ξ : ℕ → A :=
     fun n ↦ if hn : n = 0 then 0 else
       haveI : NeZero n := ⟨hn⟩
-      (HasEnoughRootsOfUnity.exists_primitiveRoot A n).choose
+      (HasEnoughRootsOfUnity.exists_isPrimitiveRoot A n).choose
   have hξ (n : ℕ) : IsPrimitiveRoot (ξ n) n := by
     cases n
     · exact IsPrimitiveRoot.zero
-    · exact (HasEnoughRootsOfUnity.exists_primitiveRoot A _).choose_spec
+    · exact (HasEnoughRootsOfUnity.exists_isPrimitiveRoot A _).choose_spec
   have : NumberField (IsScalarTower.toAlgHom ℚ K A).fieldRange :=
     .of_ringEquiv K _ (IsScalarTower.toAlgHom ℚ K A).equivFieldRange
   have : IsAbelianGalois ℚ (IsScalarTower.toAlgHom ℚ K A).fieldRange :=

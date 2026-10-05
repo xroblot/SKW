@@ -427,4 +427,4 @@ theorem GaussSum_factorization [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
       rw [(smul_eq_iff_eq_inv_smul _).mp hP₀']
       exact LiesOver.smul σ⁻¹
     rw [emultplicity_gaussSum_eq_zero hbij hζ hη 𝓠 m d hΓ hQ₀ hP₀', emultiplicity_galEquivZMod_symm_smul m 𝔭 hQ₀, Nat.cast_sum]
-    simp [if_neg this]
+    simp [ite_eq_right this]

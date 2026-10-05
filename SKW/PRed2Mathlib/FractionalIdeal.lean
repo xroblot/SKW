@@ -32,7 +32,7 @@ def FractionalIdeal.spanSingletonHom :
 ideals of `R` (localized at `S`) is also torsion-free. -/
 theorem FractionalIdeal.isMulTorsionFree_of_le_nonZeroDivisors (h : S ≤ R⁰) [IsMulTorsionFree (Ideal R)] :
     IsMulTorsionFree (FractionalIdeal S P) where
-  pow_left_injective {n} hn I J hIJ := by
+  eq_of_pow_eq_pow_of_commute {n} hn {I J} _ hIJ := by
     let a := algebraMap R P I.den
     let b := algebraMap R P J.den
     suffices spanSingleton S (a * b) * I = spanSingleton S (a * b) * J by
@@ -41,8 +41,7 @@ theorem FractionalIdeal.isMulTorsionFree_of_le_nonZeroDivisors (h : S ≤ R⁰) 
       exact ((IsLocalization.map_units _ I.den).map spanSingletonHom).mul <|
         (IsLocalization.map_units _ J.den).map spanSingletonHom
     have main : Ideal.span {J.den.val} * I.num = Ideal.span {I.den.val} * J.num := by
-      dsimp at hIJ
-      rw [← (IsMulTorsionFree.pow_left_injective hn).eq_iff, ← coeIdeal_inj' (P := P) h]
+      rw [← (Commute.all _ _).pow_left_inj hn, ← coeIdeal_inj' (P := P) h]
       simp only [mul_pow, coeIdeal_mul, coeIdeal_pow, coeIdeal_span_singleton]
       rw [← den_mul_self_eq_num', mul_pow, hIJ,  ← mul_assoc, mul_right_comm,
         ← mul_pow, den_mul_self_eq_num', mul_comm]

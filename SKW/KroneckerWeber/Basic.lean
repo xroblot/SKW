@@ -7,6 +7,7 @@ public import SKW.Prereqs.OtherPR
 public import SKW.Prereqs.Unramified
 
 public import Mathlib.Algebra.FiniteSupport.Basic
+public import Mathlib.Algebra.GroupWithZero.Torsion
 
 @[expose] public section
 

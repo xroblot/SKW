@@ -3,6 +3,7 @@ module
 public import Mathlib.NumberTheory.RamificationInertia.Galois
 public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import Mathlib.RingTheory.Ideal.IsPrincipal
+public import Mathlib.NumberTheory.NumberField.Ideal.Basic
 
 public import SKW.Stickelberger.Factorization
 public import SKW.Prereqs.ClassGroup
@@ -106,7 +107,7 @@ theorem Stickelberger'' :
     by_contra! h
     rw [← hdm, h, zero_mul] at hpf
     exact neZero_zero_iff_false.mp hpf⟩
-  obtain ⟨ξ₀, hξ₀⟩ := HasEnoughRootsOfUnity.exists_primitiveRoot (AlgebraicClosure k) (p * (p ^ f - 1))
+  obtain ⟨ξ₀, hξ₀⟩ := HasEnoughRootsOfUnity.exists_isPrimitiveRoot (AlgebraicClosure k) (p * (p ^ f - 1))
   have : NumberField ℚ⟮ξ₀⟯ := {
     to_finiteDimensional := adjoin.finiteDimensional <| hξ₀.isIntegral' (NeZero.pos _) }
   have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ ℚ⟮ξ₀⟯ :=

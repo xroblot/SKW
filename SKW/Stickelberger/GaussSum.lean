@@ -2,6 +2,7 @@ module
 
 public import Mathlib.NumberTheory.JacobiSum.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 
 public import SKW.Stickelberger.AddCharTrace
 public import SKW.Stickelberger.Teichmuller
@@ -221,9 +222,9 @@ theorem mk_sq_gausssum_eq_aux [DecidableEq (𝓞 K ⧸ P)] [(𝓟 ^ 2).LiesOver 
   simp_rw [this, FiniteField.sum_pow_units]
   rw [← Nat.succ_pred_eq_of_pos Module.finrank_pos, ← Ideal.inertiaDeg_eq_of_isMaximal 𝒑 P,
     Finset.sum_range_succ',
-    pow_zero, Nat.sub_self, if_pos (Nat.dvd_zero _), Finset.sum_eq_zero, zero_add, map_neg, map_one]
+    pow_zero, Nat.sub_self, ite_eq_left (Nat.dvd_zero _), Finset.sum_eq_zero, zero_add, map_neg, map_one]
   intro i hi
-  rw [if_neg]
+  rw [ite_eq_right]
   rw [Fintype.card_eq_nat_card, ← Ideal.absNorm_eq_card, Int.card_ideal_quot,
     ← Ideal.pow_inertiaDeg p P]
   apply Nat.not_dvd_of_pos_of_lt
