@@ -33,7 +33,7 @@ theorem following the approach of Lemmermeyer's paper
 
 Both `Stickelberger` and `kronecker_weber` are proved, and no file of this project contains
 a `sorry` of its own. What remains are thirteen statements admitted on purpose, each of
-them a result of mine already submitted to Mathlib and awaiting review; until those land,
+them a result already submitted to Mathlib and awaiting review; until those land,
 `#print axioms kronecker_weber` still reports `sorryAx`.
 
 In [`SKW/Prereqs/OtherPR.lean`](SKW/Prereqs/OtherPR.lean):
@@ -48,8 +48,6 @@ In [`SKW/Prereqs/OtherPR.lean`](SKW/Prereqs/OtherPR.lean):
 
 and in [`SKW/Prereqs/Digits.lean`](SKW/Prereqs/Digits.lean), one lemma from
 [#40302](https://github.com/leanprover-community/mathlib4/pull/40302) (`digitsAppend` API).
-These rest in turn on [#42554](https://github.com/leanprover-community/mathlib4/pull/42554)
-(quadratic extensions), which is merged.
 
 As each PR is merged, the corresponding stub is deleted and its uses redirected to the
 upstream name. The [blueprint](https://xroblot.github.io/SKW/blueprint/) tracks the
