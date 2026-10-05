@@ -3,6 +3,7 @@ import SKW.Misc
 import SKW.PRed2Mathlib.AlgebraMisc
 import SKW.PRed2Mathlib.IntermediateFields
 import SKW.PRed2Mathlib.Ideals
+import SKW.PRed2Mathlib.NumberField
 import SKW.PRed2Mathlib.NumberTheory
 import SKW.PRed2Mathlib.Subfield
 import SKW.PRed2Mathlib.FractionalIdeal
