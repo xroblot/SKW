@@ -17,14 +17,14 @@ waiting on Mathlib pull requests (see [Status](#status) below).
 **Stickelberger's theorem** describes how prime ideals of `ℤ[ζ]` (where `ζ` is a root of
 unity) factor in terms of Gauss sums: it produces an explicit element of the group ring
 `ℤ[Gal(ℚ(ζ)/ℚ)]` — the *Stickelberger element* — that annihilates the class group of
-`ℚ(ζ)`. In this project it is stated as `Stickelberger` (in
-[`SKW/Stickelberger/Stickelberger.lean`](SKW/Stickelberger/Stickelberger.lean)): a certain
-product of Galois conjugates of a prime ideal `𝔭` above `p` is principal.
+`ℚ(ζ)`. In this project it is stated as
+[`Stickelberger`](https://xroblot.github.io/SKW/docs/SKW/Stickelberger/Stickelberger.html#Stickelberger):
+a certain product of Galois conjugates of a prime ideal `𝔭` above `p` is principal.
 
 **The Kronecker-Weber theorem** states that every abelian extension of `ℚ` is contained in
-a cyclotomic field `ℚ(ζₙ)` for some `n`. It is stated as `kronecker_weber` (in
-[`SKW/KroneckerWeber/KroneckerWeber.lean`](SKW/KroneckerWeber/KroneckerWeber.lean)). The
-proof formalized here proceeds by reducing to abelian extensions of prime power degree
+a cyclotomic field `ℚ(ζₙ)` for some `n`. It is stated as
+[`kronecker_weber`](https://xroblot.github.io/SKW/docs/SKW/KroneckerWeber/KroneckerWeber.html#kronecker_weber).
+The proof formalized here proceeds by reducing to abelian extensions of prime power degree
 ramified at a single prime, and derives the Kronecker-Weber theorem from Stickelberger's
 theorem following the approach of Lemmermeyer's paper
 [*Kronecker-Weber via Stickelberger*](https://arxiv.org/abs/1108.5671).
@@ -44,8 +44,8 @@ them a result already submitted to Mathlib and awaiting review; until those land
 | [#43493](https://github.com/leanprover-community/mathlib4/pull/43493) | complex embeddings of quadratic fields | 1 |
 | [#40302](https://github.com/leanprover-community/mathlib4/pull/40302) | the `digitsAppend` API | 1 |
 
-The first four live in [`SKW/Prereqs/OtherPR.lean`](SKW/Prereqs/OtherPR.lean), the last one
-in [`SKW/Prereqs/Digits.lean`](SKW/Prereqs/Digits.lean).
+The first four live in [`SKW.Prereqs.OtherPR`](https://xroblot.github.io/SKW/docs/SKW/Prereqs/OtherPR.html), the last one
+in [`SKW.Prereqs.Digits`](https://xroblot.github.io/SKW/docs/SKW/Prereqs/Digits.html).
 
 As each PR is merged, the corresponding stub is deleted and its uses redirected to the
 upstream name. The [blueprint](https://xroblot.github.io/SKW/blueprint/) tracks the
