@@ -111,6 +111,53 @@ theorem Subgroup.index_eq_iff_card_mul_eq_card {G : Type*} [Group G] [Finite G] 
   ⟨fun h ↦ h ▸ H.card_mul_index,
     fun h ↦ Nat.eq_of_mul_eq_mul_left Nat.card_pos (H.card_mul_index.trans h.symm)⟩
 
+/-- The map `G ⧸ N →* H ⧸ M` induced by `f` is injectPive exactly when `N` is the whole preimage
+of `M`. Companion to `QuotientGroup.map_surjective_of_surjective`. -/
+@[to_additive /-- The map `G ⧸ N →+ H ⧸ M` induced by `f` is injective exactly when `N` is the
+whole preimage of `M`. -/]
+theorem QuotientGroup.injective_map_iff {G H : Type*} [Group G] [Group H] (N : Subgroup G)
+    [N.Normal] (M : Subgroup H) [M.Normal] (f : G →* H) (h : N ≤ M.comap f) :
+    Function.Injective (QuotientGroup.map N M f h) ↔ M.comap f ≤ N := by
+  rw [← MonoidHom.ker_eq_bot_iff, QuotientGroup.ker_map, Subgroup.map_eq_bot_iff,
+    QuotientGroup.ker_mk']
+
+/-- Companion to `QuotientGroup.injective_map_iff`: if `N` is the preimage of `M`, the induced
+map `G ⧸ N →* H ⧸ M` is injective. -/
+@[to_additive /-- Companion to `QuotientGroup.injective_map_iff`: if `N` is the preimage of `M`,
+the induced map `G ⧸ N →+ H ⧸ M` is injective. -/]
+theorem QuotientGroup.injective_map_of_eq_comap {G H : Type*} [Group G] [Group H]
+    (N : Subgroup G) [N.Normal] (M : Subgroup H) [M.Normal] (f : G →* H) (hN : N = M.comap f) :
+    Function.Injective (QuotientGroup.map N M f hN.le) :=
+  (QuotientGroup.injective_map_iff N M f hN.le).mpr hN.ge
+
+/-- The range of `MonoidHom.inl` is the kernel of the second projection. -/
+@[to_additive]
+theorem MonoidHom.range_inl {A B : Type*} [Group A] [Group B] :
+    (MonoidHom.inl A B).range = (MonoidHom.snd A B).ker :=
+  SetLike.ext fun x ↦ by simp [MonoidHom.mem_range, Prod.ext_iff, eq_comm, Subgroup.mem_prod]
+
+/-- The range of `MonoidHom.inr` is the kernel of the first projection. -/
+@[to_additive]
+theorem MonoidHom.range_inr {A B : Type*} [Group A] [Group B] :
+    (MonoidHom.inr A B).range = (MonoidHom.fst A B).ker :=
+  SetLike.ext fun x ↦ by simp [MonoidHom.mem_range, Prod.ext_iff, eq_comm, Subgroup.mem_prod]
+
+/-- Every class of `G ⧸ N` is hit by `f` exactly when the range of `f` and `N` span `G`. -/
+@[to_additive]
+theorem QuotientGroup.surjective_mk'_comp_iff {G G' : Type*} [Group G] [Group G'] (N : Subgroup G')
+    [N.Normal] (f : G →* G') :
+    Function.Surjective ((QuotientGroup.mk' N).comp f) ↔ f.range ⊔ N = ⊤ := by
+  rw [← MonoidHom.range_eq_top, MonoidHom.range_comp, sup_comm,
+    ← QuotientGroup.comap_map_mk' N f.range,
+    ← (Subgroup.comap_injective (QuotientGroup.mk'_surjective N)).eq_iff, Subgroup.comap_top]
+
+/-- If a cyclic group maps to `G` with range spanning `G` together with `N`, then `G ⧸ N` is
+cyclic. -/
+theorem isCyclic_quotient_of_sup_range_eq_top {A G : Type*} [Group A] [Group G] [IsCyclic A]
+    (N : Subgroup G) [N.Normal] (f : A →* G) (hf : f.range ⊔ N = ⊤) :
+    IsCyclic (G ⧸ N) :=
+  isCyclic_of_surjective _ ((QuotientGroup.surjective_mk'_comp_iff N f).mpr hf)
+
 /-! ### MISC -/
 
 @[simp]
