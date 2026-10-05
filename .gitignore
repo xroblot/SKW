@@ -11,3 +11,5 @@ blueprint/src/web.paux
 /.lake
 .vscode/
 .DS_Store
+SKW/Sandbox.lean
+SKW/Sandbox2.lean

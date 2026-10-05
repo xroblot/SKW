@@ -1,7 +1,7 @@
 module
 
 public import Mathlib.NumberTheory.NumberField.Basic
-public import SKW.PRed2Mathlib.NumberField
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
 
 @[expose] public section
 

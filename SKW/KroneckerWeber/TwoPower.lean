@@ -339,8 +339,10 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     refine { to_charZero := charZero M, to_finiteDimensional := FiniteDimensional.of_finrank_pos ?_ }
     rw [hk₂]
     exact Nat.two_pow_pos k
-  have hML : M ≠ L := fun h ↦
-    IsTotallyComplex.not_isTotallyReal L (h ▸ isTotallyReal_maximalReal L)
+  have hML : M ≠ L := fun h ↦ by
+    have : IsTotallyReal L := h ▸ isTotallyReal_maximalReal L
+    obtain ⟨φ⟩ : Nonempty (L →+* ℂ) := inferInstance
+    exact IsTotallyComplex.complexEmbedding_not_isReal φ <| IsTotallyReal.complexEmbedding_isReal φ
   have hkm : k ≤ m := by
     refine (Nat.le_add_one_iff.mp <| hk₁.trans hl₁).resolve_right fun h ↦ hML ?_
     apply IntermediateField.eq_of_le_of_finrank_le (maximalReal_le L)
@@ -402,10 +404,13 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
         exact Module.finrank_pos.ne hc.symm
       · have := eq_of_le_of_finrank_eq (le_sup_left : M ≤ M ⊔ ℚ⟮ξ 4⟯)
           (by rwa [mul_one, eq_comm] at hc)
-        refine IsTotallyReal.not_isTotallyComplex M ?_
-        rw [this]
-        let : Algebra ℚ⟮ξ 4⟯ ↑(M ⊔ ℚ⟮ξ 4⟯) := (inclusion le_sup_right).toRingHom.toAlgebra
-        apply isTotallyComplex_of_algebra ℚ⟮ξ 4⟯
+        have : IsTotallyComplex M := by
+          rw [this]
+          let : Algebra ℚ⟮ξ 4⟯ ↑(M ⊔ ℚ⟮ξ 4⟯) := (inclusion le_sup_right).toRingHom.toAlgebra
+          apply isTotallyComplex_of_algebra ℚ⟮ξ 4⟯
+        obtain ⟨φ⟩ : Nonempty (M →+* ℂ) := inferInstance
+        exact IsTotallyComplex.complexEmbedding_not_isReal φ <|
+          IsTotallyReal.complexEmbedding_isReal φ
   -- Module.finrank_dvd_finrank_right ℚ M ↑(M ⊔ ℚ⟮ξ 4⟯)
   -- K ≤ L = M ⊔ ℚ⟮ξ 4⟯ ≤ ℚ⟮ξ (2^(k+2))⟯ ⊔ ℚ⟮ξ 4⟯ ≤ ℚ⟮ξ (2^(m+2))⟯
   refine hKL.trans ?_
