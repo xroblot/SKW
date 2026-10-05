@@ -317,10 +317,10 @@ theorem emultiplicity_galEquivZMod_symm_smul_gaussSum [IsCyclotomicExtension {m}
     exact hp.out.one_lt
   rw [FiniteMultiplicity.emultiplicity_eq_multiplicity, Nat.cast_inj, ← mul_right_inj' this,
     ← mul_right_inj' (NeZero.ne d), ← hmain]
-  · refine IsDedekindDomain.finiteMulticity ?_ ?_
+  · refine Ideal.finiteMultiplicity ?_ ?_
     · simpa using IsPrime.ne_top'
     · simpa using hΓ₀
-  · refine IsDedekindDomain.finiteMulticity ?_ ?_
+  · refine Ideal.finiteMultiplicity ?_ ?_
     · simpa using IsPrime.ne_top'
     · simpa using hΓ₀
   · have := (Nat.mul_lt_mul_left (NeZero.pos d)).mpr <| ZMod.val_lt a.val

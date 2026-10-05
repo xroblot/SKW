@@ -129,7 +129,7 @@ theorem zeta_sub_one_not_mem_sq [𝓟.LiesOver P] [𝓟.LiesOver 𝒑]
     simpa [sub_eq_zero] using hζ.ne_one hp.out.one_lt
   rw [← map_one (f := algebraMap (𝓞 F) (𝓞 L)), ← map_sub, ← dvd_span_singleton,
     ← Set.image_singleton, ← map_span, FiniteMultiplicity.pow_dvd_iff_le_multiplicity
-    (IsDedekindDomain.finiteMulticity IsPrime.ne_top' h), hspan,
+    (Ideal.finiteMultiplicity IsPrime.ne_top' h), hspan,
     ← IsDedekindDomain.ramificationIdx_eq_multiplicity (under (𝓞 F) 𝓟) 𝓟 (hspan ▸ h),
     ramificationIdx_under_eq_one p f]
   exact Nat.not_succ_le_self 1

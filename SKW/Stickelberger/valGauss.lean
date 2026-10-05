@@ -159,7 +159,7 @@ variable [IsCyclotomicExtension {p} ℚ F]
 --           IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' (v := P) hP h𝓟.irreducible
 --           (NeZero.ne _), ramificationIdx_eq_p_sub_one' p f, mul_comm,
 --           ← valGauss, FiniteMultiplicity.emultiplicity_eq_multiplicity]
---         exact IsDedekindDomain.finiteMulticity IsPrime.ne_top'
+--         exact Ideal.finiteMultiplicity IsPrime.ne_top'
 --           (by simpa using JacobiSum_ne_zero hbij hζ _ _ h ha hb)
 
 -- omit hη [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] in

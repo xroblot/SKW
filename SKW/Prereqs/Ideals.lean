@@ -7,7 +7,6 @@ public import Mathlib.RingTheory.RamificationInertia.Ramification
 public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 
 public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
-public import SKW.PRed2Mathlib.Ideals
 
 @[expose] public section
 
@@ -124,6 +123,13 @@ theorem Algebra.not_isUnramifiedAt_iff {R S : Type*} [CommRing R] [CommRing S]
   lia
 
 /-! ### Ideal — IsDedekindDomain / emultiplicity -/
+
+/-- Every ideal has `emultiplicity` `0` in `⊤`, the unit ideal. This is the `emultiplicity`
+companion of `Ideal.multiplicity_top_right`, which `emultiplicity` being slated for deprecation
+kept out of Mathlib PR #44134. -/
+theorem Ideal.emultiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI : I ≠ ⊤) :
+    emultiplicity I ⊤ = 0 := by
+  rw [← one_eq_top, emultiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
 
 theorem Ideal.IsDedekindDomain.prime_of_maximal {R : Type*} [CommRing R] [CharZero R]
     [Algebra.IsIntegral ℤ R] [IsDedekindDomain R] (I : Ideal R) [I.IsMaximal] :
