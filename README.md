@@ -53,6 +53,11 @@ mathematical proof and its Lean status, and the
 [dependency graph](https://xroblot.github.io/SKW/blueprint/dep_graph_document.html) shows
 how the pieces fit together.
 
+## License
+
+This project is released under the [Apache 2.0 license](LICENSE), the same license as
+Mathlib.
+
 ## Acknowledgements
 
 Parts of this formalization were written with [Claude Code](https://claude.com/claude-code)
