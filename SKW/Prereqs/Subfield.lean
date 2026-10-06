@@ -3,6 +3,8 @@ module
 public import Mathlib.Algebra.Field.Subfield.Basic
 public import SKW.PRed2Mathlib.Subfield
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!

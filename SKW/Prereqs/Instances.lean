@@ -2,6 +2,8 @@ module
 
 public import SKW.Prereqs.IntermediateField
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-! ### Local instances
@@ -11,7 +13,8 @@ Kept in one place so they are easy to review, promote, or drop. -/
 
 open IntermediateField
 
-/-- `lift E` is a number field whenever `E` is, transported along `liftAlgEquiv E : E ≃ₐ[K] lift E`. -/
+/-- `lift E` is a number field whenever `E` is,
+  transported along `liftAlgEquiv E : E ≃ₐ[K] lift E`. -/
 instance IntermediateField.numberField_lift {K L : Type*} [Field K] [Field L] [Algebra K L]
     {F : IntermediateField K L} (E : IntermediateField K F) [NumberField E] :
     NumberField (lift E) :=

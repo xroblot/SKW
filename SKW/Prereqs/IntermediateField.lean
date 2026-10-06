@@ -13,13 +13,16 @@ public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.Torsion
 public import SKW.Prereqs.Subfield
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-! ### Intermediate Fields -/
 
 /-- The fixing subgroup of an intermediate field `F` is a Galois group of `L / F`. This bridges
 `IntermediateField.fixingSubgroup` to `IsGaloisGroup.intermediateField`, which is stated on the raw
-`fixingSubgroup Gal(L/K) (↑F)`; instance search does not unfold the `IntermediateField.fixingSubgroup`
+`fixingSubgroup Gal(L/K) (↑F)`; instance search does not unfold the
+  `IntermediateField.fixingSubgroup`
 wrapper on its own, so without this the instance is not found for the `IntermediateField` form. -/
 instance {K L : Type*} [Field K] [Field L] [Algebra K L] [FiniteDimensional K L] [IsGalois K L]
     (F : IntermediateField K L) : IsGaloisGroup F.fixingSubgroup F L :=
@@ -141,11 +144,13 @@ lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Fi
   exact finrank_pos.ne'
 
 set_option maxHeartbeats 500000 in
+-- reason for change
 set_option synthInstance.maxHeartbeats 100000 in
 set_option backward.isDefEq.respectTransparency false in
 open Module in
-theorem IntermediateField.finrank_sup_mul_finrank_inf_eq {k L : Type*} [Field k] [Field L] [Algebra k L]
-    (E F : IntermediateField k L) [FiniteDimensional k E]  [FiniteDimensional k F] [IsGalois k E] :
+theorem IntermediateField.finrank_sup_mul_finrank_inf_eq {k L : Type*} [Field k] [Field L] [Algebra
+  k L]
+    (E F : IntermediateField k L) [FiniteDimensional k E] [FiniteDimensional k F] [IsGalois k E] :
     finrank k ↑(E ⊔ F) * finrank k ↑(E ⊓ F) = finrank k E * finrank k F := by
   let : Algebra E ↑(E ⊔ F) := (inclusion le_sup_left).toRingHom.toAlgebra
   have : FiniteDimensional k ↑(E ⊓ F) := FiniteDimensional.of_injective
@@ -256,7 +261,8 @@ theorem IntermediateField.finrank_sup_dvd_mul_of_isGalois {F E : Type*} [Field F
   have : IsGalois F B' := IsGalois.of_algEquiv (restrictAlgEquiv le_sup_right)
   have : B' ⊔ A' = ⊤ :=
     lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top, sup_comm])
-  have := mul_dvd_mul_left (finrank F A') <| finrank_dvd_finrank_of_isGalois_of_sup_eq_top A' B' this
+  have := mul_dvd_mul_left (finrank F A') <| finrank_dvd_finrank_of_isGalois_of_sup_eq_top A' B'
+    this
   rwa [finrank_mul_finrank', finrank_restrict, finrank_restrict] at this
 
 theorem IntermediateField.lift_iInf {F E : Type*} [Field F] [Field E] [Algebra F E]

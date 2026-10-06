@@ -9,6 +9,8 @@ public import SKW.Prereqs.Unramified
 public import Mathlib.Algebra.FiniteSupport.Basic
 public import Mathlib.Algebra.GroupWithZero.Torsion
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
@@ -119,7 +121,8 @@ lemma kw_abelian_kummer (σ : Gal(F/ℚ)) :
   have hmain := AlgEquiv.congr_fun this <| rootOfSplitsXPowSubC hp.out.pos (μ : F) L
   simp only [AlgEquiv.mul_apply, AlgEquiv.coe_restrictScalars] at hmain
   rw [hτα, MulAction.subgroup_smul_def, Units.smul_def, Algebra.smul_def, map_mul,
-    AlgEquiv.liftNormal_commutes, Rat.galEquivZMod_apply_of_pow_eq p _ _ hζ.pow_eq_one, map_pow] at hmain
+    AlgEquiv.liftNormal_commutes, Rat.galEquivZMod_apply_of_pow_eq p _ _ hζ.pow_eq_one,
+      map_pow] at hmain
   obtain ⟨c, j, hj, h⟩ := exists_eq_algebraMap_mul_pow_of_pow_eq_algebraMap hF hIrr (α := α)
     (β := σ.liftNormal L α) (by rw [rootOfSplitsXPowSubC_pow])
     (by rw [← map_pow, hα, IsScalarTower.algebraMap_apply (𝓞 F) F, AlgEquiv.liftNormal_commutes])
@@ -127,8 +130,10 @@ lemma kw_abelian_kummer (σ : Gal(F/ℚ)) :
     contrapose! hα₀
     rwa [hα₀, zero_mul, map_eq_zero] at h
   rw [h, map_mul, map_pow, hτα, AlgEquiv.commutes, MulAction.subgroup_smul_def, Units.smul_def,
-    Algebra.smul_def, mul_pow, ← mul_assoc, ← mul_assoc, mul_left_inj' (pow_ne_zero j hα₀), mul_comm,
-    mul_right_inj' hc, ← map_pow, ← map_pow, (FaithfulSMul.algebraMap_injective F L).eq_iff] at hmain
+    Algebra.smul_def, mul_pow, ← mul_assoc, ← mul_assoc, mul_left_inj' (pow_ne_zero j hα₀),
+      mul_comm,
+    mul_right_inj' hc, ← map_pow, ← map_pow,
+      (FaithfulSMul.algebraMap_injective F L).eq_iff] at hmain
   refine ⟨c, by rwa [_root_.map_ne_zero] at hc, ?_⟩
   apply FaithfulSMul.algebraMap_injective F L
   rw [← AlgEquiv.liftNormal_commutes, ← rootOfSplitsXPowSubC_pow (n := p) (algebraMap (𝓞 F) F μ) L,
@@ -152,8 +157,10 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮)
       map_intCast, AlgEquiv.smul_def, map_pow, map_intCast, AlgEquiv.smul_def, hξ, map_pow, hβ,
       ← mul_assoc, ← mul_pow, map_pow]
   have hf𝔮 : FiniteMultiplicity 𝔮 𝔮 := FiniteMultiplicity.of_prime_left h𝔮 h𝔮.ne_zero
-  have hfμ : FiniteMultiplicity 𝔮 (span {μ}) := FiniteMultiplicity.of_prime_left h𝔮 <| by simpa using hμ
-  have hfβ : FiniteMultiplicity 𝔮 (span {β}) := FiniteMultiplicity.of_prime_left h𝔮 <| by simpa using hβ₀
+  have hfμ : FiniteMultiplicity 𝔮 (span {μ}) := FiniteMultiplicity.of_prime_left h𝔮 <| by simpa
+    using hμ
+  have hfβ : FiniteMultiplicity 𝔮 (span {β}) := FiniteMultiplicity.of_prime_left h𝔮 <| by simpa
+    using hβ₀
   have hσ𝔞 : multiplicity 𝔮 (σ • 𝔞) = 0 := by
     rw [← hσ, pointwise_smul_def', pointwise_smul_def', multiplicity_map_eq]
     have := congr_arg (multiplicity 𝔮 · ) h𝔞
@@ -171,16 +178,17 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮)
     ← span_singleton_mul_span_singleton, multiplicity_mul h𝔮, ← span_singleton_pow,
     ← span_singleton_pow, FiniteMultiplicity.multiplicity_pow h𝔮 hfβ,
     FiniteMultiplicity.multiplicity_pow h𝔮 hfμ, hσ𝔞, add_zero] at h₁
-  replace h₁ := congr_arg ((↑) : _ → ZMod p) h₁
-  simp only [Nat.cast_add, Nat.cast_mul, CharP.cast_eq_zero, zero_mul, ZMod.natCast_val, ZMod.cast_id', id_eq,
-    zero_add] at h₁
-  rw [mul_eq_right₀] at h₁
-  · rwa [← (Rat.galEquivZMod p F).apply_eq_iff_eq, map_one, Units.ext_iff, Units.val_one]
-  · rwa [ne_eq, ZMod.natCast_eq_zero_iff]
-  have h₃ := congr_arg ( · ^ (Rat.galEquivZMod p F σ).val.val) h𝔞
-  · apply h𝔮.finiteMultiplicity_mul
-    · exact span_singleton_pow β _ ▸ FiniteMultiplicity.pow h𝔮 hfβ
-    · exact span_singleton_pow  μ _ ▸ FiniteMultiplicity.pow h𝔮 hfμ
+  · replace h₁ := congr_arg ((↑) : _ → ZMod p) h₁
+    simp only [Nat.cast_add, Nat.cast_mul, CharP.cast_eq_zero, zero_mul, ZMod.natCast_val,
+      ZMod.cast_id', id_eq,
+      zero_add] at h₁
+    rw [mul_eq_right₀] at h₁
+    · rwa [← (Rat.galEquivZMod p F).apply_eq_iff_eq, map_one, Units.ext_iff, Units.val_one]
+    · rwa [ne_eq, ZMod.natCast_eq_zero_iff]
+  · have h₃ := congr_arg ( · ^ (Rat.galEquivZMod p F σ).val.val) h𝔞
+    · apply h𝔮.finiteMultiplicity_mul
+      · exact span_singleton_pow β _ ▸ FiniteMultiplicity.pow h𝔮 hfβ
+      · exact span_singleton_pow  μ _ ▸ FiniteMultiplicity.pow h𝔮 hfμ
   · exact FiniteMultiplicity.of_prime_left h𝔮 <| by simpa [smul_eq_zero_iff_eq]
   · apply h𝔮.finiteMultiplicity_mul
     · exact FiniteMultiplicity.pow h𝔮 hf𝔮
@@ -343,62 +351,6 @@ lemma kw_kummer₀ (hL : Module.finrank ℚ L = p * (p - 1)) :
 end ScalarTowerBridge
 
 
--- noncomputable section
-
--- variable (p : ℕ) [hp : Fact p.Prime]
--- variable {L : Type*} [Field L] [NumberField L]
--- variable (F : IntermediateField ℚ L) [IsCyclotomicExtension {p} ℚ F]
--- variable (K : IntermediateField ℚ L)
-
--- /-- `K/ℚ` is unramified outside `p`: every prime `q ≠ p` is unramified in `𝓞 K`. -/
--- def UnramifiedOutside (K : Type*) [Field K] (p : ℕ) : Prop :=
---   ∀ (q : ℕ), q.Prime → q ≠ p → Algebra.IsUnramifiedIn (𝓞 K) (span {(q : ℤ)})
-
--- /- Superseded by the tower form `kw_kummer₀` (in section `ScalarTowerBridge` below):
--- set_option backward.isDefEq.respectTransparency false in
--- lemma kw_kummer₀ [IsGalois ℚ K] (hK : Module.finrank ℚ K = p) (htop : K ⊔ F = ⊤) :
---     IsGalois F L ∧ IsCyclic Gal(L/F) ∧ finrank F L = p := by
---   have hFL : IsGalois F L := IsGalois.sup_right K F htop
---   have hF := Nat.totient_prime hp.out ▸ IsCyclotomicExtension.Rat.finrank p F
---   have hdisj : K.LinearDisjoint F := by
---     rw [LinearDisjoint.iff_inf_eq_bot, ← IntermediateField.finrank_eq_one_iff]
---     have : p.Coprime (p - 1) := by have := hp.out.one_le; aesop
---     have h₁ : finrank ℚ ↑(K ⊓ F) ∣ p := by
---       rw [← hK]
---       apply finrank_dvd_of_le_right inf_le_left
---     have h₂ : finrank ℚ ↑(K ⊓ F) ∣ p - 1 := by
---       rw [← hF]
---       apply finrank_dvd_of_le_right inf_le_right
---     exact Nat.dvd_one.mp (this ▸ Nat.dvd_gcd h₁ h₂)
---   have hrF : finrank F L = p := hK ▸ LinearDisjoint.finrank_right_eq_finrank hdisj htop
---   have hCL : IsCyclic Gal(L/F) :=
---     isCyclic_of_prime_card <| hrF ▸ IsGalois.card_aut_eq_finrank F L
---   exact ⟨hFL, ⟨hCL, hrF⟩⟩
--- -/
-
--- /-- `L` is unramified outside `p`. -/
--- lemma kw_kummer' (hKram : UnramifiedOutside K p) (htop : K ⊔ F = ⊤) :
---     UnramifiedOutside L p := by
---   intro q hq hqp
---   have hq0 : span {(q : ℤ)} ≠ ⊥ := by simpa using hq.ne_zero
---   rw [Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one]
---   intro 𝔮 _ hlo
---   haveI := hlo
---   haveI : 𝔮.IsMaximal := ‹𝔮.IsPrime›.isMaximal (Ideal.ne_bot_of_liesOver_of_ne_bot hq0 𝔮)
---   have := Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) (span {(q : ℤ)})
---   have := Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 F) 𝔮) (span {(q : ℤ)})
---   rw [← Ideal.ramificationIdx_eq_ramificationIdx (span {(q : ℤ)}) 𝔮 hq0]
---   refine Ideal.ramificationIdx_sup_eq_one htop (p := span {(q : ℤ)})
---     (P₁ := under (𝓞 K) 𝔮) (P₂ := under (𝓞 F) 𝔮) ?_ ?_ hq0
---   · have := IsMaximal.under (𝓞 K) 𝔮
---     rw [Ideal.ramificationIdx_eq_ramificationIdx _ _ hq0]
---     exact (hKram q hq hqp).ramificationIdx_eq_one
---       (Ideal.LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) (span {(q : ℤ)}))
---   · have : Fact q.Prime := ⟨hq⟩
---     have : ¬ q ∣ p := by rwa [Nat.prime_dvd_prime_iff_eq hq hp.out]
---     rw [Ideal.ramificationIdx_eq_ramificationIdx _ _ hq0]
---     exact Rat.ramificationIdx_eq_of_not_dvd q F (under (𝓞 F) 𝔮) this
-
 /- Original lattice versions, superseded by the tower forms (sections below):
 variable [IsGalois F L] [hCF : IsCyclic Gal(L/F)] (hrF : finrank F L = p)
 
@@ -483,7 +435,8 @@ lemma kw_abelian_kummer (σ : Gal(F/ℚ)) :
   have hmain := AlgEquiv.congr_fun this <| rootOfSplitsXPowSubC hp.out.pos (μ : F) L
   simp only [AlgEquiv.mul_apply, AlgEquiv.coe_restrictScalars] at hmain
   rw [hτα, MulAction.subgroup_smul_def, Units.smul_def, Algebra.smul_def, map_mul,
-    AlgEquiv.liftNormal_commutes, Rat.galEquivZMod_apply_of_pow_eq p _ _ hζ.pow_eq_one, map_pow] at hmain
+    AlgEquiv.liftNormal_commutes, Rat.galEquivZMod_apply_of_pow_eq p _ _ hζ.pow_eq_one,
+      map_pow] at hmain
   obtain ⟨c, j, hj, h⟩ := exists_eq_algebraMap_mul_pow_of_pow_eq_algebraMap hF hIrr (α := α)
     (β := σ.liftNormal L α) (by rw [rootOfSplitsXPowSubC_pow])
     (by rw [← map_pow, hα, IsScalarTower.algebraMap_apply (𝓞 F) F, AlgEquiv.liftNormal_commutes])
@@ -491,8 +444,10 @@ lemma kw_abelian_kummer (σ : Gal(F/ℚ)) :
     contrapose! hα₀
     rwa [hα₀, zero_mul, map_eq_zero] at h
   rw [h, map_mul, map_pow, hτα, AlgEquiv.commutes, MulAction.subgroup_smul_def, Units.smul_def,
-    Algebra.smul_def, mul_pow, ← mul_assoc, ← mul_assoc, mul_left_inj' (pow_ne_zero j hα₀), mul_comm,
-    mul_right_inj' hc, ← map_pow, ← map_pow, (FaithfulSMul.algebraMap_injective F L).eq_iff] at hmain
+    Algebra.smul_def, mul_pow, ← mul_assoc, ← mul_assoc, mul_left_inj' (pow_ne_zero j hα₀),
+      mul_comm,
+    mul_right_inj' hc, ← map_pow, ← map_pow,
+      (FaithfulSMul.algebraMap_injective F L).eq_iff] at hmain
   refine ⟨c, by rwa [_root_.map_ne_zero] at hc, ?_⟩
   apply FaithfulSMul.algebraMap_injective F L
   rw [← AlgEquiv.liftNormal_commutes, ← rootOfSplitsXPowSubC_pow (n := p) (algebraMap (𝓞 F) F μ) L,
@@ -519,8 +474,10 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮) (hv : ¬ p ∣
       map_intCast, AlgEquiv.smul_def, map_pow, map_intCast, AlgEquiv.smul_def, hξ, map_pow, hβ,
       ← mul_assoc, ← mul_pow, map_pow]
   have hf𝔮 : FiniteMultiplicity 𝔮 𝔮 := FiniteMultiplicity.of_prime_left h𝔮 h𝔮.ne_zero
-  have hfμ : FiniteMultiplicity 𝔮 (span {μ}) := FiniteMultiplicity.of_prime_left h𝔮 <| by simpa using hμ
-  have hfβ : FiniteMultiplicity 𝔮 (span {β}) := FiniteMultiplicity.of_prime_left h𝔮 <| by simpa using hβ₀
+  have hfμ : FiniteMultiplicity 𝔮 (span {μ}) := FiniteMultiplicity.of_prime_left h𝔮 <| by simpa
+    using hμ
+  have hfβ : FiniteMultiplicity 𝔮 (span {β}) := FiniteMultiplicity.of_prime_left h𝔮 <| by simpa
+    using hβ₀
   have hσ𝔞 : multiplicity 𝔮 (σ • 𝔞) = 0 := by
     rw [← hσ, pointwise_smul_def', pointwise_smul_def', multiplicity_map_eq]
     have := congr_arg (multiplicity 𝔮 · ) h𝔞
@@ -538,7 +495,8 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮) (hv : ¬ p ∣
     ← span_singleton_pow, FiniteMultiplicity.multiplicity_pow h𝔮 hfβ,
     FiniteMultiplicity.multiplicity_pow h𝔮 hfμ, hσ𝔞, add_zero] at h₁
   replace h₁ := congr_arg ((↑) : _ → ZMod p) h₁
-  simp only [Nat.cast_add, Nat.cast_mul, CharP.cast_eq_zero, zero_mul, ZMod.natCast_val, ZMod.cast_id', id_eq,
+  simp only [Nat.cast_add, Nat.cast_mul, CharP.cast_eq_zero, zero_mul, ZMod.natCast_val,
+    ZMod.cast_id', id_eq,
     zero_add] at h₁
   rw [mul_eq_right₀] at h₁
   · rwa [← (Rat.galEquivZMod p F).apply_eq_iff_eq, map_one, Units.ext_iff, Units.val_one]

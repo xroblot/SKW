@@ -12,6 +12,8 @@ public import Mathlib.NumberTheory.RamificationInertia.Galois
 public import SKW.Prereqs.Cotangent
 public import SKW.Prereqs.AlgebraMisc
 
+set_option linter.style.header false
+
 /-!
 # Tame ramification: the tame character
 
@@ -19,7 +21,8 @@ Filtration-free construction and properties of the tame character of a prime, fo
 blueprint section "Tame ramification".
 
 The setting is the one of `Mathlib.RingTheory.Frobenius` / `Mathlib.RingTheory.Invariant.Basic`: a
-group `G` acting on `S` over a base ring `R` (`[MulSemiringAction G S] [SMulCommClass G R S]`) and an
+group `G` acting on `S` over a base ring `R` (`[MulSemiringAction G S] [SMulCommClass G R S]`) and
+  an
 ideal `Q : Ideal S`. The decomposition group is `MulAction.stabilizer G Q`; the inertia group is
 `Q.inertia (MulAction.stabilizer G Q)`, a *normal* subgroup of it, characterized as the kernel of
 the action on the residue field `S ⧸ Q` (`IsFractionRing.ker_stabilizerHom`). The base residue
@@ -79,13 +82,14 @@ theorem tameCharacter_apply (Q : Ideal S) (τ : Q.inertia (MulAction.stabilizer 
 open Module
 
 /-- (Rigidity, L2) Multiplicativity of `τ` propagates the order-two vanishing along the `Q`-adic
-filtration: from `τ • x ≡ x mod Q ^ 2` on `Q`, one gets `τ • x ≡ x mod Q ^ (n + 2)` on `Q ^ (n+1)`. -/
+filtration: from `τ • x ≡ x mod Q ^ 2` on `Q`,
+  one gets `τ • x ≡ x mod Q ^ (n + 2)` on `Q ^ (n+1)`. -/
 theorem sub_mem_pow_of_sub_mem (Q : Ideal S) (τ : Q.inertia (MulAction.stabilizer G Q))
     (h : ∀ x ∈ Q, τ • x - x ∈ Q ^ 2) (n : ℕ) {x : S} (hx : x ∈ Q ^ n) :
     τ • x - x ∈ Q ^ (n + 1) := by
   induction n generalizing x with
   | zero =>
-    simp_all
+    simp_all only [pow_zero, one_eq_top, Submodule.mem_top, zero_add, pow_one]
     exact τ.prop x
   | succ n hind =>
       rw [pow_succ] at hx
@@ -123,7 +127,8 @@ theorem sub_mem_pow_of_coprime (Q : Ideal S) [Q.IsMaximal]
             rw [pow_succ τ, ← smul_smul, ← this]
             exact Ideal.add_mem _ (smul_mem_pow_of_mem_stabilizer _ _ (hstep _ hind)) hind'
       simp_rw [← Quotient.mk_eq_mk_iff_sub_mem] at h₁
-      have h₂ : ∑ k ∈ Finset.range (orderOf τ), Ideal.Quotient.mk (Q ^ (n + 1)) (τ ^ k • δ) = 0 := by
+      have h₂ : ∑ k ∈ Finset.range (orderOf τ),
+        Ideal.Quotient.mk (Q ^ (n + 1)) (τ ^ k • δ) = 0 := by
         simp only [δ_def, smul_sub, smul_smul, ← pow_succ]
         rw [← map_sum, Finset.sum_range_sub (fun k ↦ τ ^ k • x), pow_orderOf_eq_one τ, pow_zero,
           sub_self, map_zero]
@@ -132,7 +137,8 @@ theorem sub_mem_pow_of_coprime (Q : Ideal S) [Q.IsMaximal]
       exact Quotient.isUnit_mk_pow_of_notMem _ hord
 
 /-- The localization of a Dedekind domain at a nonzero maximal ideal is a discrete valuation ring.
-A local instance so that `Ideal.finrank_cotangent_eq_one` applies to the cotangent line `Q ⧸ Q ^ 2`. -/
+A local instance so that `Ideal.finrank_cotangent_eq_one` applies to the cotangent line
+  `Q ⧸ Q ^ 2`. -/
 private instance [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q] :
     IsDiscreteValuationRing (Localization.AtPrime Q) :=
   IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain S (NeZero.ne Q) _
@@ -150,7 +156,8 @@ theorem cotangentInertiaAction_apply_eq_smul [IsDedekindDomain S] (Q : Ideal S) 
 /-- (Rigidity, L1) If `θ(τ) = 1` then `τ` fixes the cotangent line `Q ⧸ Q ^ 2`: for `x ∈ Q`,
 `τ • x ≡ x mod Q ^ 2`. Uses that `Q ⧸ Q ^ 2` is one-dimensional over the field `S ⧸ Q`, so
 `det = 1` forces the action to be the identity. -/
-theorem sub_mem_sq_of_tameCharacter_eq_one [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
+theorem sub_mem_sq_of_tameCharacter_eq_one [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero
+  Q]
     (τ : Q.inertia (MulAction.stabilizer G Q)) (h : tameCharacter G Q τ = 1) {x : S} (hx : x ∈ Q) :
     τ • x - x ∈ Q ^ 2 := by
   let := Ideal.Quotient.field Q
@@ -177,8 +184,8 @@ theorem eq_one_of_tameCharacter_eq_one [IsDedekindDomain S] [FaithfulSMul G S] (
     (h : tameCharacter G Q τ = 1) : τ = 1 := by
   apply eq_one_of_forall_sub_mem_pow
   apply sub_mem_pow_of_coprime
-  apply sub_mem_pow_of_sub_mem
-  · exact fun x a ↦ sub_mem_sq_of_tameCharacter_eq_one Q τ h a
+  · apply sub_mem_pow_of_sub_mem
+    exact fun x a ↦ sub_mem_sq_of_tameCharacter_eq_one Q τ h a
   · exact hord
 
 variable (G) in
@@ -212,7 +219,8 @@ theorem tameCharacter_conj [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZ
 
 /-- **Tame inertia is cyclic**: if the order of the inertia group is prime to the residue
 characteristic (tame ramification), the inertia group is cyclic. -/
-theorem isCyclic_inertia [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Finite (S ⧸ Q)] [FaithfulSMul G S]
+theorem isCyclic_inertia [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Finite (S ⧸
+  Q)] [FaithfulSMul G S]
     (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
     IsCyclic (Q.inertia (MulAction.stabilizer G Q)) :=
   isCyclic_of_injective _ (tameCharacter_injective G Q htame)
@@ -261,7 +269,8 @@ theorem card_inertia_notMem_of_not_dvd (Q : Ideal S) (h : ¬ (under ℤ Q).absNo
   contrapose! h
   exact dvd_trans h <| Subgroup.card_subgroup_dvd_card _
 
-/-- **Abelian tame ramification, full-group form** of `card_inertia_dvd_card_sub_one`: for an abelian
+/-- **Abelian tame ramification,
+  full-group form** of `card_inertia_dvd_card_sub_one`: for an abelian
 action the order of the full-group inertia (the ramification index) divides `N𝔭 - 1`. -/
 theorem card_inertia_dvd_card_sub_one' [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
     [FaithfulSMul G S] [Finite G] [Algebra.IsInvariant R S G] [Finite (S ⧸ Q)] [IsMulCommutative G]
@@ -297,7 +306,8 @@ inertia*, of `H₁` and `H₂`. Intended use: `G = Gal(L/F)`, `H₁ = Gal(L/K₁
 Abhyankar bound `e(L) ∣ Nat.lcm (e K₁) (e K₂)`.
 
 Note: this is a thin adapter over `card_dvd_lcm_of_isCyclic_of_inf_eq_bot`, not general enough to
-reuse elsewhere. If a caller appears, inline it at the use site; if none does, delete it and call the
+reuse elsewhere. If a caller appears, inline it at the use site; if none does,
+  delete it and call the
 general lemma directly. -/
 theorem card_inertia_dvd_lcm_index (Q : Ideal S) (hI : IsCyclic (Q.inertia G))
     {H₁ H₂ : Subgroup G} (h : H₁ ⊓ H₂ = ⊥) :

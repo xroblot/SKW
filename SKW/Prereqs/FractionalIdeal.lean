@@ -6,6 +6,8 @@ public import Mathlib.Algebra.Ring.Action.Basic
 public import Mathlib.Algebra.Ring.Action.Group
 public import Mathlib.RingTheory.Localization.FractionRing
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
@@ -18,7 +20,8 @@ automorphisms, compatibly via `SMulDistribClass G R P` (i.e. `algebraMap R P` is
 produces a `MulDistribMulAction G (FractionalIdeal S P)` (`FractionalIdeal.mulDistribMulAction`).
 
 The compatibility is exactly `SMulDistribClass G R P`, whose `smul_distrib_smul` field is the
-semilinearity law and which makes `algebraMap.smul'` (`algebraMap R P (g • r) = g • algebraMap R P r`)
+semilinearity law and which makes `algebraMap.smul'`
+  (`algebraMap R P (g • r) = g • algebraMap R P r`)
 available. For a tower of Galois extensions this class holds as an instance, so no compatibility
 argument is needed at the call site.
 -/
@@ -33,12 +36,13 @@ variable {R : Type*} [CommRing R] {S : Submonoid R} {P : Type*} [CommRing P] [Al
 /-- The image of a submodule `N ⊆ P` under the ring automorphism induced by `g`. -/
 def smulSubmodule (g : G) (N : Submodule R P) : Submodule R P where
   carrier := (g • · : P → P) '' N
-  add_mem' := by rintro _ _ ⟨a, ha, rfl⟩ ⟨b, hb, rfl⟩; exact ⟨a + b, N.add_mem ha hb, smul_add g a b⟩
+  add_mem' := by rintro _ _ ⟨a, ha, rfl⟩ ⟨b, hb, rfl⟩; exact ⟨a + b, N.add_mem ha hb,
+    smul_add g a b⟩
   zero_mem' := ⟨0, N.zero_mem, smul_zero g⟩
   smul_mem' c y hy := by
     obtain ⟨x, hx, rfl⟩ := hy
     refine ⟨(g⁻¹ • c) • x, N.smul_mem _ hx, ?_⟩
-    show g • ((g⁻¹ • c) • x) = c • (g • x)
+    change g • ((g⁻¹ • c) • x) = c • (g • x)
     rw [smul_distrib_smul, smul_inv_smul]
 
 theorem mem_smulSubmodule {g : G} {N : Submodule R P} {y : P} :
@@ -185,7 +189,7 @@ theorem coeIdeal_smul (g : G) (I : Ideal R) :
   · rintro ⟨b, hb, rfl⟩
     refine ⟨algebraMap R (FractionRing R) (g⁻¹ • b),
       ⟨g⁻¹ • b, (Ideal.mem_pointwise_smul_iff_inv_smul_mem).mp hb, rfl⟩, ?_⟩
-    show g • algebraMap R (FractionRing R) (g⁻¹ • b) = algebraMap R (FractionRing R) b
+    change g • algebraMap R (FractionRing R) (g⁻¹ • b) = algebraMap R (FractionRing R) b
     rw [fractionRing_smul_algebraMap, smul_inv_smul]
   · rintro ⟨_, ⟨a, ha, rfl⟩, rfl⟩
     exact ⟨g • a, Ideal.smul_mem_pointwise_smul g a I ha,

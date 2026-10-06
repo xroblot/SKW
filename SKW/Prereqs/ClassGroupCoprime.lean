@@ -3,6 +3,8 @@ module
 public import Mathlib.RingTheory.ClassGroup.Basic
 public import Mathlib.RingTheory.DedekindDomain.Factorization
 
+set_option linter.style.header false
+
 open scoped nonZeroDivisors
 
 @[expose] public section
@@ -44,7 +46,8 @@ theorem exists_mk0_eq_and_isCoprime (C : ClassGroup R) {J : Ideal R} (hJ : J ≠
   refine ⟨⟨I, hImem⟩, ?_, ?_⟩
   · have key : mk0 I₀ * mk0 ⟨I, hImem⟩ = 1 := by
       rw [← map_mul]
-      exact (congrArg mk0 (Subtype.ext hI.symm : I₀ * ⟨I, hImem⟩ = ⟨Ideal.span {a}, hspan_mem⟩)).trans
+      exact (congrArg mk0 (Subtype.ext hI.symm : I₀ * ⟨I, hImem⟩ = ⟨Ideal.span {a},
+        hspan_mem⟩)).trans
         ((mk0_eq_one_iff hspan_mem).mpr ⟨⟨a, rfl⟩⟩)
     rw [hI₀] at key
     exact (inv_mul_eq_one.mp key).symm

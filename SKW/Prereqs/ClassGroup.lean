@@ -4,6 +4,8 @@ public import Mathlib.RingTheory.ClassGroup.Basic
 public import Mathlib.RingTheory.Ideal.Pointwise
 public import SKW.Prereqs.FractionalIdeal
 
+set_option linter.style.header false
+
 open scoped nonZeroDivisors Pointwise
 
 @[expose] public section

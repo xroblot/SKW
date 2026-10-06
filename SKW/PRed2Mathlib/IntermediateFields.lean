@@ -2,6 +2,8 @@ module
 
 public import Mathlib.FieldTheory.IntermediateField.Algebraic
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!

@@ -7,6 +7,8 @@ public import Mathlib.NumberTheory.RamificationInertia.Galois
 
 public import SKW.PRed2Mathlib.NumberTheory
 
+set_option linter.style.header false
+
 @[expose] public section
 
 open NumberField
@@ -19,12 +21,14 @@ theorem NumberField.exists_integer_multiple {K : Type*} [Field K] [NumberField K
     IsLocalization.exists_integer_multiple (Algebra.algebraMapSubmonoid (𝓞 K) (nonZeroDivisors ℤ)) x
   exact ⟨b, nonZeroDivisors.ne_zero hb, hb'⟩
 
-theorem NumberField.Units.natAbs_norm (K : Type*) [Field K] [NumberField K] (x : (RingOfIntegers K)ˣ) :
+theorem NumberField.Units.natAbs_norm (K : Type*) [Field K] [NumberField K] (x : (RingOfIntegers
+  K)ˣ) :
     (Algebra.norm ℤ x.val).natAbs = 1 := by
   apply Rat.natCast_injective
   rw [Nat.cast_natAbs, Int.cast_abs, Algebra.coe_norm_int, NumberField.Units.norm, Nat.cast_one]
 
-theorem NumberField.isUnit_iff_natAbs_norm {K : Type*} [Field K] [NumberField K] {x : RingOfIntegers K} :
+theorem NumberField.isUnit_iff_natAbs_norm {K : Type*} [Field K] [NumberField K] {x :
+  RingOfIntegers K} :
     IsUnit x ↔ (Algebra.norm ℤ x).natAbs = 1 := by
   rw [isUnit_iff_norm, ← Rat.natCast_injective.eq_iff, RingOfIntegers.coe_norm,
     Nat.cast_natAbs, Nat.cast_one, ← Algebra.coe_norm_int, Int.cast_abs]
@@ -32,7 +36,8 @@ theorem NumberField.isUnit_iff_natAbs_norm {K : Type*} [Field K] [NumberField K]
 /-! ### Galois / galRestrict -/
 
 theorem smul_eq_galRestrict_apply (A : Type*) {K L B : Type*} [CommRing A] [IsIntegrallyClosed A]
-    [Field K] [Field L] [CommRing B] [Algebra A K] [IsFractionRing A K] [Algebra B L] [IsFractionRing B L]
+    [Field K] [Field L] [CommRing B] [Algebra A K] [IsFractionRing A K] [Algebra B L]
+      [IsFractionRing B L]
     [Algebra A B] [Algebra K L] [Algebra A L] [IsScalarTower A K L] [IsScalarTower A B L]
     [IsIntegralClosure B A L] [Algebra.IsAlgebraic K L] [MulSemiringAction Gal(L/K) B]
     [SMulDistribClass Gal(L/K) B L] (σ : Gal(L/K)) (x : B) :

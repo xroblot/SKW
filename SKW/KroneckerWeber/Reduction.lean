@@ -25,6 +25,8 @@ public import SKW.Prereqs.TameRamification
 public import SKW.Prereqs.Unramified
 public import SKW.Prereqs.NumberField
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
@@ -80,7 +82,8 @@ lemma kw_minkowski (K : Type*) [Field K] [NumberField K] (h : Module.finrank ℚ
     ∃ q : ℕ, q.Prime ∧ ∃ 𝔮 : Ideal (𝓞 K), 𝔮.IsMaximal ∧ 𝔮.LiesOver (Ideal.span {(q : ℤ)}) ∧
       1 < 𝔮.ramificationIdx ℤ := by
   obtain ⟨𝔮, hq, hq'⟩ := exists_not_isUnramifiedAt_int (K := K) (𝒪 := 𝓞 K) h.ne'
-  refine ⟨absNorm (Ideal.under ℤ 𝔮), Nat.absNorm_under_prime 𝔮, 𝔮, hq, Int.liesOver_span_absNorm 𝔮, ?_⟩
+  refine ⟨absNorm (Ideal.under ℤ 𝔮), Nat.absNorm_under_prime 𝔮, 𝔮, hq,
+    Int.liesOver_span_absNorm 𝔮, ?_⟩
   rwa [← Algebra.not_isUnramifiedAt_iff]
 
 /-- **Tame Abhyankar (ramification index, hard direction).** For a Galois `K/ℚ`, two Galois
@@ -131,9 +134,9 @@ theorem ramificationIdx_sup_dvd_lcm {K : Type*} [Field K] [NumberField K] [IsGal
 degree with `K ⊔ E = ⊤`, a tame prime `𝔔 ∣ q` of `𝓞 L` has its inertia group complemented by
 `Gal(L/E) = E.fixingSubgroup`: `IsComplement' (inertia Gal(L/ℚ) 𝔔) E.fixingSubgroup`. Packages the
 tame-inertia + Abhyankar + tower steps; this is the one genuinely hard leaf. -/
-lemma inertia_isComplement_fixingSubgroup {L : Type*} [Field L] [NumberField L] [IsAbelianGalois ℚ L]
-    (K E : IntermediateField ℚ L) [IsGalois ℚ K] [IsGalois ℚ E] (htop : K ⊔ E = ⊤) {q : ℕ}
-    (hq : q.Prime) (hqp : q ≠ p) [IsCyclotomicExtension {q} ℚ E] {m : ℕ}
+lemma inertia_isComplement_fixingSubgroup {L : Type*} [Field L] [NumberField L]
+    [IsAbelianGalois ℚ L] (K E : IntermediateField ℚ L) [IsGalois ℚ K] [IsGalois ℚ E]
+    (htop : K ⊔ E = ⊤) {q : ℕ} (hq : q.Prime) (hqp : q ≠ p) [IsCyclotomicExtension {q} ℚ E] {m : ℕ}
     (hK : Module.finrank ℚ K = p ^ m) (htame : ¬ q ∣ Module.finrank ℚ L) (𝔔 : Ideal (𝓞 L))
     [𝔔.IsMaximal] [𝔔.LiesOver (span {(q : ℤ)})] :
     Subgroup.IsComplement' (Ideal.inertia Gal(L/ℚ) 𝔔) E.fixingSubgroup := by
@@ -156,8 +159,9 @@ lemma inertia_isComplement_fixingSubgroup {L : Type*} [Field L] [NumberField L] 
         · have : (under (𝓞 K) 𝔔).LiesOver 𝔮 := Ideal.LiesOver.tower_bot 𝔔 (under (𝓞 K) 𝔔) 𝔮
           simp [← (liesOver_iff _ _).mp this, 𝔮, Int.card_ideal_quot]
         · apply card_inertia_notMem_of_not_dvd
-          simp [- Nat.card_eq_fintype_card, ← (liesOver_iff _ _).mp ‹𝔔.LiesOver 𝔮›,
-            IsGalois.card_aut_eq_finrank, 𝔮, hK]
+          simp only [under_under, ← (liesOver_iff _ _).mp ‹𝔔.LiesOver 𝔮›, absNorm_span_singleton,
+            Algebra.norm_self, MonoidHom.id_apply, Int.natAbs_natCast, IsGalois.card_aut_eq_finrank,
+            hK, 𝔮]
           exact fun h ↦ hqp <| (Nat.prime_dvd_prime_iff_eq hq hp.out).mp <| hq.dvd_of_dvd_pow h
       · rw [IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime q]
     · rw [ramificationIdx_tower (R := ℤ) (under (𝓞 E) 𝔔),
@@ -178,8 +182,8 @@ lemma inertia_isComplement_fixingSubgroup {L : Type*} [Field L] [NumberField L] 
     IsCyclotomicExtension.Rat.finrank q E, Nat.totient_prime hq]
 
 set_option synthInstance.maxHeartbeats 500000 in
+-- reason for change
 set_option maxHeartbeats 500000 in
---set_option backward.isDefEq.respectTransparency false in
 /-- Ramification reduction: given `K/ℚ` cyclic of prime power degree `pᵐ` with `q ≠ p` ramified,
 there is a cyclic `F/ℚ` of degree `pᵐ` (in the same ambient field `A`), unramified at `q` and not
 ramified at any prime where `K` is unramified, such that `K · ℚ(ζ_q) = F · ℚ(ζ_q)`. This removes `q`
@@ -202,7 +206,8 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   let L := ↑(K ⊔ E)
   let 𝔮 : Ideal ℤ := span {(q : ℤ)}
   have : Fact q.Prime := ⟨hq⟩
-  have : 𝔮.IsPrime := (Ideal.span_singleton_prime (by exact_mod_cast hq.ne_zero)).mpr (Nat.prime_iff_prime_int.mp hq)
+  have : 𝔮.IsPrime := (Ideal.span_singleton_prime (by exact_mod_cast hq.ne_zero)).mpr
+    (Nat.prime_iff_prime_int.mp hq)
   have hKab : IsAbelianGalois ℚ K := IsAbelianGalois.of_isCyclic ℚ K
   have hEab : IsAbelianGalois ℚ E := IsCyclotomicExtension.isAbelianGalois {q} ℚ E
   have : IsAbelianGalois ℚ L := IsAbelianGalois.sup K E
@@ -230,12 +235,14 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
         grind
   obtain ⟨𝔔, hmax, h𝔔⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral 𝔮 (S := 𝓞 L)
   -- `hcompl` (L1): `I := inertia G 𝔔` is complemented by `E'.fixingSubgroup = Gal(L/E')`. Then
-  -- `hFsup : fixedField I ⊔ E' = ⊤` and `eF : G ⧸ I ≃* E'.fixingSubgroup` (`I` normal, `G` abelian).
+  -- `hFsup : fixedField I ⊔ E' = ⊤` and `eF : G ⧸ I ≃* E'.fixingSubgroup`
+  -- (`I` normal, `G` abelian).
   -- The output field is `F := fixedField I` (the inertia field of `𝔔`), lifted to `A`.
   have hcompl := inertia_isComplement_fixingSubgroup K' E' hK'top hq hqp hK'deg htame 𝔔
   obtain ⟨hFsup, ⟨eF⟩⟩ :=
     IsGaloisGroup.fixedPoints_sup_eq_top_of_isComplement Gal(L/ℚ) ℚ L hcompl
-  refine ⟨lift (fixedField (Ideal.inertia Gal(L/ℚ) 𝔔)), inferInstance, inferInstance, ?_, ?_, ?_, ?_, ?_⟩
+  refine ⟨lift (fixedField (Ideal.inertia Gal(L/ℚ) 𝔔)), inferInstance,
+    inferInstance, ?_, ?_, ?_, ?_, ?_⟩
   · rw [(liftAlgEquiv _).symm.autCongr.isCyclic, (IsGalois.normalAutEquivQuotient _).symm.isCyclic,
       eF.isCyclic, ← IntermediateField.fixingSubgroup, (fixingSubgroupEquiv E').isCyclic]
     exact isCyclic_of_injective _ <| restrictRestrictAlgEquivMapHom_injective K' E' hK'top
@@ -257,8 +264,8 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
     have hq'q : q' ≠ q := fun h ↦ hram (h ▸ hunram)
     have : Fact q'.Prime := ⟨hq'⟩
     have hK'u : Algebra.IsUnramifiedIn (𝓞 K') (span {(q' : ℤ)}) :=
-      hunram.of_algEquiv
-        ((RingOfIntegers.mapAlgEquiv (restrictAlgEquiv (le_sup_left : K ≤ K ⊔ E))).restrictScalars ℤ)
+      hunram.of_algEquiv ((RingOfIntegers.mapAlgEquiv
+        (restrictAlgEquiv (le_sup_left : K ≤ K ⊔ E))).restrictScalars ℤ)
     have hE'u : Algebra.IsUnramifiedIn (𝓞 E') (span {(q' : ℤ)}) :=
       isUnramifiedIn_of_isCyclotomicExtension q' (by rwa [Nat.prime_dvd_prime_iff_eq hq' hq])
     have hq₀ : span {(q' : ℤ)} ≠ ⊥ := by simpa using hq'.ne_zero
@@ -324,7 +331,8 @@ lemma kw_reduce_to_unramified_outside_p_aux {A : Type*} [Field A] [CharZero A] (
 /-- Consumer of `kw_ramification_reduction`: iterating it over the finitely many primes `q ≠ p`
 ramified in `K`, one obtains a cyclic `F/ℚ` of the same prime power degree, unramified outside `p`,
 with `K ⊔ ℚ⟮ξ n⟯ = F ⊔ ℚ⟮ξ n⟯` for some `n` (so `K` is cyclotomic iff `F` is). The "unramified
-outside `p`" condition is spelled out inline as `∀ q ≠ p prime, Algebra.IsUnramifiedIn (𝓞 F) (q)`. -/
+outside `p`" condition is spelled out inline as
+`∀ q ≠ p prime, Algebra.IsUnramifiedIn (𝓞 F) (q)`. -/
 lemma kw_reduce_to_unramified_outside_p {A : Type*} [Field A] [CharZero A] (ξ : ℕ → A)
     (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K]
     [IsCyclic Gal(K/ℚ)] (m : ℕ) (hK : Module.finrank ℚ K = p ^ m) :
@@ -371,8 +379,9 @@ open IntermediateField in
 omit hp in
 /-- The subfield cut out by a subgroup `H` of `Gal(C/ℚ)`, for `C/ℚ` abelian and unramified outside
 `p`: if `H` has index `pᵐ` and cyclic quotient, then `Fix H` is a cyclic extension of `ℚ` of degree
-`pᵐ`, unramified outside `p` (and contained in `C`, which is `IntermediateField.lift_le`). This is the construction shared by the odd and
-the `p = 2` cases: only the choice of `H`, and the proof that the quotient is cyclic, differ. -/
+`pᵐ`, unramified outside `p` (and contained in `C`, which is `IntermediateField.lift_le`).
+This is the construction shared by the odd and the `p = 2` cases: only the choice of `H`, and
+the proof that the quotient is cyclic, differ. -/
 lemma fixedField_spec_of_index_eq_prime_pow {A : Type*} [Field A] [CharZero A]
     (C : IntermediateField ℚ A) [NumberField C] [IsAbelianGalois ℚ C]
     (hCram : UnramifiedOutside C p) {m : ℕ} (H : Subgroup Gal(C/ℚ))

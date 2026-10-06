@@ -8,6 +8,8 @@ public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 
 public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
 
+set_option linter.style.header false
+
 @[expose] public section
 
 open NumberField
@@ -18,19 +20,10 @@ theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [IsDedekindDomain S] [Inf
     [Module.Free ℤ S] (I : Ideal S) :
     Ideal.absNorm I = Nat.card (S ⧸ I) := rfl
 
--- theorem Ideal.isCoprime_of_coprime_absNorm {S : Type*} [CommRing S] [IsDedekindDomain S]
---     [Module.Free ℤ S] {I J : Ideal S} (h : I.absNorm.Coprime J.absNorm) :
---     IsCoprime I J := by
---   refine isCoprime_iff_exists.mpr ⟨(absNorm I) * (absNorm I).gcdA (absNorm J), ?_,
---     (absNorm J) * (absNorm I).gcdB (absNorm J), ?_, ?_⟩
---   · exact mul_mem_right _ I (absNorm_mem I)
---   · exact mul_mem_right _ J (absNorm_mem J)
---   · simp only [← Int.cast_natCast (R := S), ← Int.cast_mul, ← Int.cast_add,
---       ← Nat.gcd_eq_gcd_ab I.absNorm J.absNorm, h, Nat.cast_one, Int.cast_one]
 
 @[simps]
 def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike F R S]
-    [RingHomClass F R S]  (e : F) : Ideal R ≃+* Ideal S where
+    [RingHomClass F R S] (e : F) : Ideal R ≃+* Ideal S where
   toFun := Ideal.map e
   invFun := Ideal.comap e
   __ := Ideal.mapHom e
@@ -54,7 +47,8 @@ theorem Ideal.residueFieldEquiv_symm_algebraMap {R : Type*} [CommRing R] (I : Id
   rw [← residueFieldEquiv_mk, RingEquiv.symm_apply_apply]
 
 open Pointwise in
-theorem Ideal.pointwise_smul_def' {M R : Type*} [Group M] [CommSemiring R] [MulSemiringAction M R] {a : M}
+theorem Ideal.pointwise_smul_def' {M R : Type*} [Group M] [CommSemiring R] [MulSemiringAction M R]
+  {a : M}
     (S : Ideal R) :
     a • S = mapEquiv (MulSemiringAction.toRingEquiv M R a) S := rfl
 
@@ -84,7 +78,8 @@ instance (K : Type*) [Field K] [NumberField K] :
 -- `le_comap_pow_ramificationIdx`. The name is currently taken by a deprecated alias for the primed
 -- lemma, and converting here without it would force Dedekind hypotheses on an otherwise
 -- `CommRing`-level statement. The call site `GaussSum.lean` bridges in the meantime.
-theorem Ideal.pow_liesOver_of_liesOver {R S : Type*} [CommRing R] [CommRing S] [Algebra R S] (p : Ideal R) (P : Ideal S) [P.LiesOver p]
+theorem Ideal.pow_liesOver_of_liesOver {R S : Type*} [CommRing R] [CommRing S] [Algebra R S] (p :
+  Ideal R) (P : Ideal S) [P.LiesOver p]
     {i : ℕ} (hi : i + 1 ≤ Ideal.ramificationIdx' p P) :
     (P ^ (i + 1)).LiesOver p := by
   rw [liesOver_iff]
@@ -142,21 +137,24 @@ theorem Ideal.IsDedekindDomain.prime_of_maximal {R : Type*} [CommRing R] [CharZe
 -- does, the `rw` below goes, and `ramificationIdx'_ne_zero` becomes
 -- `ramificationIdx_pos_of_isDedekindDomain'`.
 theorem Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' {R : Type*} [CommRing R]
-    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul R S]
+    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul
+      R S]
     {v : Ideal R} {w : Ideal S} (I : Ideal R) (hv : Irreducible v) (hw : Irreducible w)
     (hw_bot : w ≠ ⊥) [w.LiesOver v] :
     emultiplicity w (map (algebraMap R S) I) = w.ramificationIdx R * emultiplicity v I := by
   have : w.IsPrime := (prime_iff_isPrime hw_bot).mp hw.prime
   rw [← Ideal.ramificationIdx'_eq_ramificationIdx v w hv.ne_zero]
   by_cases hI : I = ⊥
-  · rw [hI, map_bot, ← zero_eq_bot, ← zero_eq_bot, emultiplicity_zero_right, emultiplicity_zero_right, ENat.mul_top]
+  · rw [hI, map_bot, ← zero_eq_bot, ← zero_eq_bot, emultiplicity_zero_right,
+    emultiplicity_zero_right, ENat.mul_top]
     simp only [ne_eq, Nat.cast_eq_zero]
     apply ramificationIdx'_ne_zero (map_ne_bot_of_ne_bot <| hv.ne_zero) (isPrime_of_prime hw.prime)
     rw [map_le_iff_le_comap, over_def w v]
   · exact emultiplicity_map_eq_ramificationIdx'_mul hI hv hw hw_bot
 
 theorem Ideal.IsDedekindDomain.ramificationIdx_mul_emultiplicity_under_eq {R : Type*} [CommRing R]
-    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul R S]
+    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul
+      R S]
     [Algebra.IsIntegral R S] {w : Ideal S} (hw : Irreducible w) (hw_bot : w ≠ ⊥) {I : Ideal R} :
     w.ramificationIdx R * emultiplicity (under R w) I =
         emultiplicity w (map (algebraMap R S) I) := by
@@ -174,7 +172,8 @@ theorem Ideal.smul_eq_bot_iff {M : Type*} {R : Type*} [Group M] [Semiring R] [Mu
 
 open Pointwise in
 @[simp]
-theorem Ideal.smul_top {M : Type*} {R : Type*} [Monoid M] [CommRing R] [MulSemiringAction M R] {m : M} :
+theorem Ideal.smul_top {M : Type*} {R : Type*} [Monoid M] [CommRing R] [MulSemiringAction M R] {m :
+  M} :
     m • (⊤ : Ideal R) = ⊤ := by
   rw [← one_eq_top, smul_one]
 
@@ -191,7 +190,8 @@ theorem Ideal.smul_span {M : Type*} {R : Type*} [Group M] [Semiring R] [MulSemir
 
 open Pointwise in
 /-- An element of the stabilizer of `I` preserves `I`. -/
-theorem Ideal.smul_mem_of_mem_stabilizer {M R : Type*} [Group M] [CommRing R] [MulSemiringAction M R]
+theorem Ideal.smul_mem_of_mem_stabilizer {M R : Type*} [Group M] [CommRing R] [MulSemiringAction M
+  R]
     (I : Ideal R) (σ : MulAction.stabilizer M I) {x : R} (hx : x ∈ I) : σ • x ∈ I := by
   nth_rewrite 1 [← MulAction.mem_stabilizer_iff.mp σ.prop]
   exact smul_mem_pointwise_smul σ x I hx

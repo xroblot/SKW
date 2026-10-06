@@ -11,6 +11,8 @@ public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 public import SKW.Prereqs.OtherPR
 public import SKW.Prereqs.NumberField
 
+set_option linter.style.header false
+
 /-!
 # Transfer of `Algebra.IsUnramifiedIn` along an algebra isomorphism
 

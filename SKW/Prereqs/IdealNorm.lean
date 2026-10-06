@@ -2,6 +2,8 @@ module
 
 public import Mathlib.RingTheory.Ideal.Norm.AbsNorm
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!

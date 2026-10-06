@@ -5,10 +5,13 @@ public import Mathlib.GroupTheory.PGroup
 public import Mathlib.GroupTheory.QuotientGroup.Simple
 public import Mathlib.GroupTheory.SpecificGroups.Cyclic
 
+set_option linter.style.header false
+
 /-!
 # PRed to Mathlib: maximal subgroups of abelian `p`-groups
 
-The declarations in this file were extracted from `SKW.Prereqs.AlgebraMisc` and submitted upstream as
+The declarations in this file were extracted from `SKW.Prereqs.AlgebraMisc` and submitted upstream
+  as
 Mathlib PR [#41652](https://github.com/leanprover-community/mathlib4/pull/41652):
 `CommGroup.isCoatom_iff_index_eq_prime`, `IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic`.
 

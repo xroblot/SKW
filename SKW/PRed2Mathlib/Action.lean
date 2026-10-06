@@ -4,6 +4,8 @@ public import Mathlib.Algebra.GroupWithZero.NonZeroDivisors
 public import Mathlib.Algebra.Group.Action.Defs
 public import Mathlib.Algebra.GroupWithZero.Action.Defs
 
+set_option linter.style.header false
+
 @[expose] public section
 
 variable {G M : Type*} [Group G] [MonoidWithZero M] [MulDistribMulAction G M]

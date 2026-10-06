@@ -6,6 +6,8 @@ public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
 public import Mathlib.RingTheory.DedekindDomain.Dvr
 public import SKW.Prereqs.Ideals
 
+set_option linter.style.header false
+
 /-!
 # The cotangent line of a maximal ideal
 
@@ -112,7 +114,8 @@ theorem Ideal.finrank_cotangent_eq_one [IsDomain R] [IsDiscreteValuationRing R_I
 
 A group `M` acting on `R` by ring automorphisms acts additively on the cotangent space
 `I.Cotangent` through its stabilizer subgroup `MulAction.stabilizer M I`: an element `g` preserving
-`I` sends `I.toCotangent x ↦ I.toCotangent ⟨g • x, _⟩` (`DistribMulAction`). The same stabilizer acts
+`I` sends `I.toCotangent x ↦ I.toCotangent ⟨g • x, _⟩` (`DistribMulAction`). The same stabilizer
+  acts
 on the residue ring `R ⧸ I` (`MulSemiringAction`), and the cotangent action is *semilinear* over it:
 `g • (c • v) = (g • c) • (g • v)` (`stabilizer_smul_smul`). Conjugation identities are then free via
 `mul_smul`.

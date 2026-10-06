@@ -3,6 +3,8 @@ module
 public import Mathlib.Data.List.Indexes
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-! ### Finset / MulAction -/
@@ -96,9 +98,10 @@ theorem Nat.eq_sum_digits_mul_pow (b n : ℕ) :
 
 theorem Nat.eq_mapIdx_digitsAppend_sum (b l n : ℕ) :
     n = (List.mapIdx (fun i a ↦ a * b ^ i) (b.digitsAppend l n)).sum := by
-  simpa [digitsAppend_def, List.mapIdx_append, List.mapIdx_replicate] using Nat.eq_mapIdx_digits_sum b n
+  simpa [digitsAppend_def, List.mapIdx_append,
+    List.mapIdx_replicate] using Nat.eq_mapIdx_digits_sum b n
 
-theorem Nat.eq_sum_digitsAppend_mul_pow {b n : ℕ} (l : ℕ) (hb : 1 < b) (hn : n < b ^ l):
+theorem Nat.eq_sum_digitsAppend_mul_pow {b n : ℕ} (l : ℕ) (hb : 1 < b) (hn : n < b ^ l) :
     haveI : (b.digitsAppend l n).length = l := length_digitsAppend hb l hn
     n = ∑ i : Fin l, (b.digitsAppend l n)[i] * b ^ i.val := by
   convert Nat.eq_mapIdx_digitsAppend_sum b l n
@@ -123,7 +126,8 @@ theorem Nat.sub_one_mul_sum_fract_div_eq_digits_sum {b l a : ℕ} (hb : 1 < b) [
     · bound
     · refine (Rat.div_lt_iff ?_).mpr ?_
       · positivity
-      · rw [one_mul, ← Nat.cast_pow, ← Nat.cast_one, ← Nat.cast_sub (by grind), Rat.natCast_lt_natCast]
+      · rw [one_mul, ← Nat.cast_pow, ← Nat.cast_one, ← Nat.cast_sub (by grind),
+        Rat.natCast_lt_natCast]
         · obtain ⟨i₀, h₀⟩ : ∃ i : Fin l, (b.digitsAppend l a)[i] < b - 1 := by
             suffices ∃ d ∈ b.digitsAppend l a, d < b - 1 by
               obtain ⟨d, hd₁, hd₂⟩ := this
@@ -162,23 +166,23 @@ theorem Nat.sub_one_mul_sum_fract_div_eq_digits_sum {b l a : ℕ} (hb : 1 < b) [
             exact Nat.lt_of_mem_digitsAppend hb l _ <| List.mem_of_getElem rfl
           · refine mul_lt_mul_of_pos_right (by simpa) (by positivity)
     rw [Nat.cast_sub, Nat.cast_pow, Nat.cast_one, ← sub_div]
-    suffices (b ^ l - 1 : ℤ) ∣ b ^ j.val * a -
-        ∑ i : Fin l, (b.digitsAppend l a)[i] * b ^ (i + j).val by
-      obtain ⟨c, hc⟩ := this
-      refine ⟨c, ?_⟩
-      rw [div_eq_iff, mul_comm (c : ℚ)]
-      simp_rw [add_comm j]
-      exact_mod_cast hc
-      grind
-    rw [congr_arg ((↑) : ℕ → ℤ) <| Nat.eq_sum_digitsAppend_mul_pow l hb ha', Nat.cast_sum,
-      Finset.mul_sum, Nat.cast_sum, ← Finset.sum_sub_distrib]
-    refine Finset.dvd_sum fun i _ ↦ ?_
-    rw [Nat.cast_mul, Nat.cast_mul, Nat.cast_pow, Nat.cast_pow, mul_comm, mul_assoc, ← pow_add,
-      ← mul_sub, Fin.val_add]
-    nth_rewrite 1 [← Nat.mod_add_div (i + j) l, pow_add]
-    rw [← _root_.mul_sub_one, ← mul_assoc]
-    refine Int.dvd_mul_of_dvd_right ?_
-    exact pow_one_sub_dvd_pow_mul_sub_one _ _ _
+    · suffices (b ^ l - 1 : ℤ) ∣ b ^ j.val * a -
+          ∑ i : Fin l, (b.digitsAppend l a)[i] * b ^ (i + j).val by
+        obtain ⟨c, hc⟩ := this
+        refine ⟨c, ?_⟩
+        rw [div_eq_iff, mul_comm (c : ℚ)]
+        · simp_rw [add_comm j]
+          exact_mod_cast hc
+        grind
+      rw [congr_arg ((↑) : ℕ → ℤ) <| Nat.eq_sum_digitsAppend_mul_pow l hb ha', Nat.cast_sum,
+        Finset.mul_sum, Nat.cast_sum, ← Finset.sum_sub_distrib]
+      refine Finset.dvd_sum fun i _ ↦ ?_
+      rw [Nat.cast_mul, Nat.cast_mul, Nat.cast_pow, Nat.cast_pow, mul_comm, mul_assoc, ← pow_add,
+        ← mul_sub, Fin.val_add]
+      nth_rewrite 1 [← Nat.mod_add_div (i + j) l, pow_add]
+      rw [← _root_.mul_sub_one, ← mul_assoc]
+      refine Int.dvd_mul_of_dvd_right ?_
+      exact pow_one_sub_dvd_pow_mul_sub_one _ _ _
     bound
   simp_rw [this, Fin.getElem_fin, Nat.cast_sum, Nat.cast_mul, Nat.cast_pow, ← Finset.sum_div]
   rw [Finset.sum_comm]
@@ -189,22 +193,23 @@ theorem Nat.sub_one_mul_sum_fract_div_eq_digits_sum {b l a : ℕ} (hb : 1 < b) [
       geom_sum_eq (Nat.cast_ne_one.mpr hb.ne')]
   rw [← Finset.sum_mul, mul_div_assoc, div_div_cancel_left', mul_comm, mul_assoc, inv_mul_cancel₀,
     mul_one, Nat.cast_list_sum, ← Fin.sum_univ_fun_getElem, ← Fin.sum_congr' _ hL]
-  rfl
+  · rfl
   · rw [sub_ne_zero, Nat.cast_ne_one]
     exact hb.ne'
   grind
 
 theorem mul_fract_div_eq_mod (a b : ℤ) (hb : 0 < b) :
     b * Int.fract ((a / b : ℚ)) = (a % b : ℤ) := by
-  rw [Int.fract, mul_sub, mul_div_cancel₀ _ (by aesop), ← Int.cast_mul, ← Int.cast_sub, Int.cast_inj,
+  rw [Int.fract, mul_sub, mul_div_cancel₀ _ (by aesop), ← Int.cast_mul, ← Int.cast_sub,
+    Int.cast_inj,
     eq_comm, mul_comm]
   refine (Int.emod_eq_iff hb.ne').mpr ⟨?_, ?_, ?_⟩
   · have := Int.sub_floor_div_mul_nonneg (a : ℚ) (b := (b : ℚ)) ?_
-    exact_mod_cast this
-    exact_mod_cast hb
+    · exact_mod_cast this
+    · exact_mod_cast hb
   · have := Int.sub_floor_div_mul_lt (a : ℚ) (b := (b : ℚ)) ?_
-    rw [Int.natAbs_of_nonneg hb.le]
-    exact_mod_cast this
+    · rw [Int.natAbs_of_nonneg hb.le]
+      exact_mod_cast this
     exact_mod_cast hb
   · rw [sub_sub_cancel_left, Int.dvd_neg, mul_comm]
     exact Int.dvd_mul_right b _

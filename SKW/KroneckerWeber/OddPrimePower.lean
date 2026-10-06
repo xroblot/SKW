@@ -12,6 +12,8 @@ public import SKW.Prereqs.Unramified
 public import SKW.Prereqs.NumberField
 public import SKW.Prereqs.IntermediateField
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
@@ -86,7 +88,8 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
 
 set_option backward.isDefEq.respectTransparency false in
 theorem prop_kw_exponent_p_eq (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ : A}
-    (hξ : IsPrimitiveRoot ξ (p ^ 2)) (K₁ K₂ : IntermediateField ℚ A) [NumberField K₁] [IsGalois ℚ K₁]
+    (hξ : IsPrimitiveRoot ξ (p ^ 2)) (K₁ K₂ : IntermediateField ℚ A) [NumberField K₁] [IsGalois ℚ
+      K₁]
     [hC₁ : IsCyclic Gal(K₁/ℚ)] (hK₁ : Module.finrank ℚ K₁ = p) (hKram₁ : UnramifiedOutside K₁ p)
     [NumberField K₂] [IsGalois ℚ K₂] [hC₂ : IsCyclic Gal(K₂/ℚ)] (hK₂ : Module.finrank ℚ K₂ = p)
     (hKram₂ : UnramifiedOutside K₂ p) :
@@ -102,13 +105,15 @@ theorem prop_kw_exponent_p_eq (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {
       rw [← eq_iff_finrank_eq_of_le le_sup_left, left_eq_sup] at this
       rw [eq_comm]
       exact eq_of_le_of_finrank_eq this (by rw [hK₁, hK₂])
-  rw [← Module.finrank_mul_finrank' (R := ℚ) (S := K₁) ↑(K₁ ⊔ K₂), left_eq_mul₀ Module.finrank_pos.ne']
+  rw [← Module.finrank_mul_finrank' (R := ℚ) (S := K₁) ↑(K₁ ⊔ K₂),
+    left_eq_mul₀ Module.finrank_pos.ne']
   have h_ineq := finrank_le_of_le_right <| sup_le h₁ h₂
   rw [Rat.finrank (p ^ 2) ℚ⟮ξ⟯, ← Module.finrank_mul_finrank' (R := ℚ) (S := K₁) ↑(K₁ ⊔ K₂), hK₁,
     Nat.totient_prime_pow hp.out (by simp), Nat.add_one_sub_one, pow_one,
     Nat.mul_le_mul_left_iff (NeZero.pos p)] at h_ineq
   have h_div := finrank_sup_dvd_mul_of_isGalois K₁ K₂
-  rw [← Module.finrank_mul_finrank' (R := ℚ) (S := K₁) ↑(K₁ ⊔ K₂), Nat.mul_dvd_mul_iff_left Module.finrank_pos, hK₂,
+  rw [← Module.finrank_mul_finrank' (R := ℚ) (S := K₁) ↑(K₁ ⊔ K₂),
+    Nat.mul_dvd_mul_iff_left Module.finrank_pos, hK₂,
     Nat.dvd_prime hp.out] at h_div
   exact h_div.resolve_right fun h ↦ by grind [hp.out.ne_zero]
 

@@ -5,6 +5,8 @@ public import Mathlib.Data.Nat.Factorization.Basic
 public import Mathlib.Algebra.IsPrimePow
 public import SKW.Prereqs.AlgebraMisc
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
@@ -33,7 +35,8 @@ variable {G : Type*} [CommGroup G]
 
 /-- Auxiliary form of `mem_iSup_primaryComponent_primeFactors`, with `orderOf x` abstracted as `n`,
 so that the proof can recurse on the prime-power factorization of `n`. -/
-theorem mem_iSup_primaryComponent_primeFactors_aux {n : ℕ} {x : G} (hn : 0 < n) (hx : orderOf x = n) :
+theorem mem_iSup_primaryComponent_primeFactors_aux {n : ℕ} {x : G} (hn : 0 < n) (hx : orderOf x =
+  n) :
     x ∈ ⨆ q ∈ n.primeFactors, primaryComponent G q := by
   induction n using Nat.recOnPrimePow generalizing x with
   | zero =>

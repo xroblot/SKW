@@ -3,6 +3,8 @@ module
 public import Mathlib.LinearAlgebra.Dimension.Free
 public import Mathlib.LinearAlgebra.Determinant
 
+set_option linter.style.header false
+
 @[expose] public section
 
 open Module

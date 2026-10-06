@@ -10,6 +10,8 @@ public import Mathlib.NumberTheory.RamificationInertia.Unramified
 public import Mathlib.NumberTheory.RamificationInertia.HilbertTheory
 public import Mathlib.FieldTheory.Galois.Abelian
 
+set_option linter.style.header false
+
 @[expose] public section
 
 open NumberField Ideal IntermediateField
@@ -35,7 +37,8 @@ theorem IsInertiaField.ramificationIdx_eq (K L : Type*) {A B : Type*} [Field K] 
     ramificationIdx 𝓟E A = 1 := by
   sorry
 
-/-- In an abelian Galois number field `L/ℚ`, the inertia field of a prime `𝔔` lying over the rational
+/-- In an abelian Galois number field `L/ℚ`,
+  the inertia field of a prime `𝔔` lying over the rational
 prime `q` is unramified at `q` (the inertia field is Galois here, so unramifiedness holds at every
 prime over `q`, not just the one below `𝔔`). Extracted from the inertia-field API of Mathlib PR
 [#36733](https://github.com/leanprover-community/mathlib4/pull/36733). -/

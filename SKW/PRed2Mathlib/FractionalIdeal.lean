@@ -3,10 +3,13 @@ module
 public import Mathlib.RingTheory.FractionalIdeal.Operations
 public import Mathlib.Algebra.GroupWithZero.Torsion
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
-# PRed to Mathlib: `FractionalIdeal.spanSingletonHom` / `FractionalIdeal.isMulTorsionFree_of_le_nonZeroDivisors`
+# PRed to Mathlib: `FractionalIdeal.spanSingletonHom` /
+  `FractionalIdeal.isMulTorsionFree_of_le_nonZeroDivisors`
 
 The declarations in this file were extracted from `SKW.Prereqs.FractionalIdeal` and submitted
 upstream as Mathlib PR [#40636](https://github.com/leanprover-community/mathlib4/pull/40636).
@@ -30,7 +33,8 @@ def FractionalIdeal.spanSingletonHom :
 
 /-- If the ideal monoid of `R` is torsion-free and `S ≤ R⁰`, then the monoid of fractional
 ideals of `R` (localized at `S`) is also torsion-free. -/
-theorem FractionalIdeal.isMulTorsionFree_of_le_nonZeroDivisors (h : S ≤ R⁰) [IsMulTorsionFree (Ideal R)] :
+theorem FractionalIdeal.isMulTorsionFree_of_le_nonZeroDivisors (h : S ≤ R⁰) [IsMulTorsionFree
+  (Ideal R)] :
     IsMulTorsionFree (FractionalIdeal S P) where
   eq_of_pow_eq_pow_of_commute {n} hn {I J} _ hIJ := by
     let a := algebraMap R P I.den

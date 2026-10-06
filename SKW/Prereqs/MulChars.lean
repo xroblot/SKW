@@ -3,6 +3,8 @@ module
 public import Mathlib.NumberTheory.MulChar.Basic
 public import Mathlib.NumberTheory.GaussSum
 
+set_option linter.style.header false
+
 
 @[expose] public section
 

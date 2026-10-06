@@ -4,6 +4,8 @@ public import Mathlib.FieldTheory.Galois.IsGaloisGroup
 public import Mathlib.FieldTheory.Normal.Basic
 public import Mathlib.FieldTheory.Galois.Abelian
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
@@ -44,7 +46,8 @@ theorem IsScalarTower.adjoin_range_toAlgHom' (F K E : Type*) [Field F] [Field K]
   exact IntermediateField.ext fun x ↦ by simp [adjoin, this]
 
 open Polynomial in
-theorem IsGalois.map_minpoly_dvd_prod_minpoly (F K : Type*) {E : Type*} [Field F] [Field K] [Field E]
+theorem IsGalois.map_minpoly_dvd_prod_minpoly (F K : Type*) {E : Type*} [Field F] [Field K] [Field
+  E]
     [Algebra F K] [Algebra F E] [Algebra K E] [IsScalarTower F K E] [IsGalois F K]
     [FiniteDimensional F K] (α : E) :
     map (algebraMap F K) (minpoly F α) ∣ ∏ σ : Gal(K/F), map σ (minpoly K α) := by
@@ -62,27 +65,6 @@ theorem IsGalois.map_minpoly_dvd_prod_minpoly (F K : Type*) {E : Type*} [Field F
     Polynomial.map_prod, eval_prod, ← Finset.univ.mul_prod_erase _ (Finset.mem_univ AlgEquiv.refl)]
   simp
 
--- open IntermediateField in
--- /-- If `K` is generated over `F` by `S`, then the field generated over `K` by `T` (viewed
--- as an `F`-extension) equals the field generated over `F` by `S ∪ T`.
--- Intermediate field analog of `Algebra.adjoin_eq_adjoin_union`. -/
--- theorem IntermediateField.adjoin_eq_adjoin_union' {F E : Type*} [Field F] [Field E] [Algebra F E]
---     {K : IntermediateField F E} {S : Set E} (hK : adjoin F S = K) (T : Set E) :
---     restrictScalars F (adjoin K T) = adjoin F (S ∪ T) := by
---   rw [restrictScalars_adjoin_eq_sup, ← hK, ← adjoin_union]
-
--- open IntermediateField in
--- /-- If `K` is generated over `F` by `S`, then the field generated over `K` by `T` (viewed
--- as an `F`-extension) equals the field generated over `F` by `S ∪ T`.
--- Intermediate field analog of `Algebra.adjoin_eq_adjoin_union`. -/
--- theorem IntermediateField.adjoin_eq_adjoin_union {F E : Type*} [Field F] [Field E]
---     [Algebra F E] {K : IntermediateField F E}
---     {S : Set K} (hS : adjoin F S = ⊤) (T : Set E) :
---     restrictScalars F (adjoin K T) = adjoin F (algebraMap K E '' S ∪ T) := by
---   rw [restrictScalars_adjoin_eq_sup, adjoin_union, ← IsScalarTower.coe_toAlgHom' F K E,
---     ← adjoin_map, hS, ← AlgHom.fieldRange_eq_map]
---   congr
---   ext; simp
 
 open IntermediateField in
 /-- If all generators of an intermediate field adjoin are integral over the base, then so is

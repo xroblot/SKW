@@ -2,6 +2,8 @@ module
 
 public import SKW.Misc
 
+set_option linter.style.header false
+
 @[expose] public section
 
 variable {R : Type*} [CommRing R] (n : ℕ) (I : Ideal R)
@@ -21,21 +23,23 @@ theorem rootsOfUnity.coe_mapQuot (x : rootsOfUnity n R) :
 variable {n I} (hbij : Function.Bijective (rootsOfUnity.mapQuot n I))
 
 noncomputable def teichmuller : MulChar (R ⧸ I) R :=
-  MulChar.ofUnitHom <| (rootsOfUnity n R).subtype.comp (MulEquiv.ofBijective _ hbij).symm.toMonoidHom
+  MulChar.ofUnitHom <| (rootsOfUnity n R).subtype.comp (MulEquiv.ofBijective _
+    hbij).symm.toMonoidHom
 
 attribute [local instance] Ideal.Quotient.field
 
-open Classical
-
+open scoped Classical in
 theorem teichmuller_apply (x : R ⧸ I) :
     teichmuller hbij x =
       if hx : IsUnit x then
-        (((MulEquiv.ofBijective (rootsOfUnity.mapQuot n I) hbij).symm hx.unit).val : R) else 0 := rfl
+        (((MulEquiv.ofBijective (rootsOfUnity.mapQuot n I) hbij).symm hx.unit).val : R) else 0 :=
+          rfl
 
 theorem teichmuller_eq_one (hI : I = ⊤) :
     teichmuller hbij = 1 := by
   rw [← Ideal.Quotient.subsingleton_iff] at hI
-  exact MulChar.eq_one_iff.mpr fun x ↦ by simp [teichmuller_apply, isUnit_iff_eq_one, Units.eq_one x]
+  exact MulChar.eq_one_iff.mpr fun x ↦ by simp [teichmuller_apply, isUnit_iff_eq_one,
+    Units.eq_one x]
 
 theorem teichmuller_apply_zero (hI : I ≠ ⊤) :
     teichmuller hbij 0 = 0 := by
@@ -78,7 +82,8 @@ theorem orderOf_teichmuller_zpow [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ n
   nth_rewrite 2 [← orderOf_teichmuller hbij hζ]
   exact orderOf_dvd_of_mem_zpowers <| Subgroup.zpow_mem_zpowers (teichmuller hbij) a
 
-theorem exists_nat_teichmuller_zpow_eq_pow [IsDomain R] [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ n)
+theorem exists_nat_teichmuller_zpow_eq_pow [IsDomain R] [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ
+  n)
     (a : ℤ) (x : (R ⧸ I)ˣ) :
     ∃ m : ℕ, (teichmuller hbij ^ a) x = ζ ^ m := by
   have : ((teichmuller hbij ^ a) x) ^ n = 1 := by

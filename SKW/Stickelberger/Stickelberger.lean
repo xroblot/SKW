@@ -10,6 +10,8 @@ public import SKW.Prereqs.ClassGroup
 public import SKW.Prereqs.ClassGroupCoprime
 public import SKW.Prereqs.IdealNorm
 
+set_option linter.style.header false
+
 @[expose] public section
 
 open Ideal NumberField IntermediateField Pointwise IsCyclotomicExtension.Rat
@@ -21,7 +23,8 @@ variable (m : ℕ) (k : Type*) [Field k] [NumberField k] [NeZero m]
 attribute [local instance] Ideal.Quotient.field
 
 set_option backward.isDefEq.respectTransparency false in
-theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f - 1))] [NeZero (p ^ f - 1)]
+theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f - 1))] [NeZero (p ^ f
+  - 1)]
     (hdm : d * m = p ^ f - 1) (hf : orderOf (p : ZMod m) = f) (L : Type*) [Field L] [NumberField L]
     [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
     Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val) := by
@@ -35,7 +38,8 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
     IsPrimitiveRoot.coe_submonoidClass_iff.mp hη₀
   let η := this.toInteger
   have hη : IsPrimitiveRoot η (p ^ f - 1) := this.toInteger_isPrimitiveRoot
-  have : IsCyclotomicExtension {p ^ f - 1} ℚ K := hη₀.intermediateField_adjoin_isCyclotomicExtension ℚ
+  have : IsCyclotomicExtension {p ^ f - 1} ℚ K :=
+    hη₀.intermediateField_adjoin_isCyclotomicExtension ℚ
   let ζ₀ := ξ ^ (p ^ f - 1)
   have hζ₀ : IsPrimitiveRoot ζ₀ p := hξ.pow (NeZero.pos _) (by rw [mul_comm])
   let F := ℚ⟮ζ₀⟯
@@ -48,7 +52,8 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
     refine IsPrimitiveRoot.intermediateField_adjoin_isCyclotomicExtension ℚ ?_
     exact hξ.pow (NeZero.pos _) (by rw [← mul_assoc, hdm, mul_comm])
   let : Algebra F E :=
-    (inclusion (IsCyclotomicExtension.le_of_dvd p (m * p) _ _ (dvd_mul_left p m))).toRingHom.toAlgebra
+    (inclusion (IsCyclotomicExtension.le_of_dvd p (m * p) _ _ (dvd_mul_left p
+      m))).toRingHom.toAlgebra
   have : IsScalarTower F E L := IsScalarTower.of_algebraMap_eq' rfl
   let k₀ := ℚ⟮ξ ^ (p * d)⟯
   have : IsCyclotomicExtension {m} ℚ k₀ := by
@@ -57,7 +62,8 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
   let e := RingOfIntegers.mapRingEquiv <| (IsCyclotomicExtension.algEquiv {m} ℚ k₀ k).toRingEquiv
   set 𝔭₀ := Ideal.map e.symm 𝔭 with def_p₀
   have : 𝔭₀.IsMaximal := map_isMaximal_of_equiv e.symm
-  have : 𝔭₀.LiesOver (span {(p : ℤ)}) := map_equiv_liesOver 𝔭 (span {(p : ℤ)}) (e.toIntAlgEquiv).symm
+  have : 𝔭₀.LiesOver (span {(p : ℤ)}) := map_equiv_liesOver 𝔭 (span {(p : ℤ)})
+    (e.toIntAlgEquiv).symm
   obtain ⟨𝓟, h𝓟, _⟩ := exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔭₀
   let P := under (𝓞 K) 𝓟
   have : 𝓟.LiesOver (span {(p : ℤ)}) := LiesOver.trans 𝓟 𝔭₀ _
@@ -77,11 +83,13 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
   obtain ⟨Γ, hΓ₀, hΓ⟩ := exists_mem_gaussSum_pow_eq hbij hζ hη 𝓟 m d hdm E k₀
   refine ⟨e Γ, ?_⟩
   simp_rw [Ideal.submodule_span_eq, ← Set.image_singleton, ← map_span,
-    GaussSum_factorization hbij hζ hη 𝓟 m d hf hdm 𝔭₀ _ hΓ₀ hΓ, ← mapHom_apply, map_prod, mapHom_apply]
+    GaussSum_factorization hbij hζ hη 𝓟 m d hf hdm 𝔭₀ _ hΓ₀ hΓ, ← mapHom_apply, map_prod,
+      mapHom_apply]
   have (a : (ZMod m)ˣ) : ((galEquivZMod m k).symm a)⁻¹ • 𝔭 =
         Ideal.map e (((galEquivZMod m k₀).symm a)⁻¹ • 𝔭₀) := by
     ext x
-    rw [← comap_symm e, pointwise_smul_eq_comap 𝔭₀, def_p₀, map_symm, mem_comap, mem_comap, mem_comap]
+    rw [← comap_symm e, pointwise_smul_eq_comap 𝔭₀, def_p₀, map_symm, mem_comap, mem_comap,
+      mem_comap]
     rw [MulSemiringAction.toRingAut_apply, MulSemiringAction.toRingEquiv_apply_symm_apply, inv_inv]
     rw [mem_inv_pointwise_smul_iff]
     change _ ↔ e.toRingHom _ ∈ _
@@ -94,11 +102,13 @@ theorem Stickelberger'' :
     Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val) := by
   let f := orderOf (p : ZMod m)
   have : NeZero f := ⟨orderOf_ne_zero_iff.mpr <|
-      IsUnit.isOfFinOrder <| (ZMod.isUnit_iff_coprime p m).mpr <| hp.out.coprime_iff_not_dvd.mpr hp'⟩
+      IsUnit.isOfFinOrder <| (ZMod.isUnit_iff_coprime p m).mpr <| hp.out.coprime_iff_not_dvd.mpr
+        hp'⟩
   let d := (p ^ f - 1) / m
   have hdm : d * m = p ^ f - 1 := by
     have : m ∣ p ^ f - 1 := by
-      rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub NeZero.one_le, Nat.cast_one, sub_eq_zero, Nat.cast_pow]
+      rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub NeZero.one_le, Nat.cast_one, sub_eq_zero,
+        Nat.cast_pow]
       exact pow_orderOf_eq_one _
     rw [mul_comm, Nat.mul_div_eq_iff_dvd.mpr this]
   have hpf : NeZero (p ^ f - 1) :=
@@ -107,7 +117,8 @@ theorem Stickelberger'' :
     by_contra! h
     rw [← hdm, h, zero_mul] at hpf
     exact neZero_zero_iff_false.mp hpf⟩
-  obtain ⟨ξ₀, hξ₀⟩ := HasEnoughRootsOfUnity.exists_isPrimitiveRoot (AlgebraicClosure k) (p * (p ^ f - 1))
+  obtain ⟨ξ₀,
+    hξ₀⟩ := HasEnoughRootsOfUnity.exists_isPrimitiveRoot (AlgebraicClosure k) (p * (p ^ f - 1))
   have : NumberField ℚ⟮ξ₀⟯ := {
     to_finiteDimensional := adjoin.finiteDimensional <| hξ₀.isIntegral' (NeZero.pos _) }
   have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ ℚ⟮ξ₀⟯ :=
@@ -120,7 +131,8 @@ theorem Stickelberger' (I : Ideal (𝓞 k)) (hI₁ : Odd I.absNorm) (hI₂ : m.g
     contrapose! hI₁
     simp [hI₁]
   rw [← Ideal.mem_isPrincipalSubmonoid_iff, ← Ideal.prod_normalizedFactors_eq_self hI]
-  simp_rw  (config := {singlePass := true}) [← smul_pow', ← Multiset.map_id', ← Multiset.prod_map_pow]
+  simp_rw  (config := {singlePass := true}) [← smul_pow', ← Multiset.map_id',
+    ← Multiset.prod_map_pow]
   simp_rw [pointwise_smul_def, ← mapHom_apply, map_multiset_prod, Multiset.map_map]
   rw [← Multiset.prod_map_prod]
   refine Submonoid.multiset_prod_mem _ _ (fun f hf ↦ mem_isPrincipalSubmonoid_iff.mp ?_)

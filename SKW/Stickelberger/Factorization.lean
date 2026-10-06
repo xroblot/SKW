@@ -5,6 +5,8 @@ public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 
 public import SKW.Stickelberger.valGauss
 
+set_option linter.style.header false
+
 @[expose] public section
 
 open Ideal NumberField IntermediateField Pointwise IsCyclotomicExtension.Rat
@@ -36,8 +38,10 @@ variable {E : IntermediateField ℚ L} [IsCyclotomicExtension {m * p} ℚ E] (�
 variable {k : IntermediateField ℚ L} (𝔭 : Ideal (𝓞 k))
 
 include hη hdm in
-theorem smul_gaussSum_eq_gaussSum' [NeZero f] [NeZero m] [Fact (Odd p)] [IsCyclotomicExtension {p} ℚ F]
-    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [IsCyclotomicExtension {p ^ f - 1} ℚ K] [P.LiesOver 𝒑]
+theorem smul_gaussSum_eq_gaussSum' [NeZero f] [NeZero m] [Fact (Odd p)] [IsCyclotomicExtension {p}
+  ℚ F]
+    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [IsCyclotomicExtension {p ^ f - 1} ℚ K]
+      [P.LiesOver 𝒑]
     [Algebra F E] [IsScalarTower F E L] (τ : Gal(L/E)) :
     τ • (GaussSum hbij hζ d ^ m) = GaussSum hbij hζ d ^ m := by
   have : IsGalois ℚ L := IsCyclotomicExtension.isGalois {p * (p ^ f - 1)} ℚ L
@@ -91,9 +95,10 @@ theorem smul_gaussSum_eq_mul_gaussSum [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ
   · simp [hu]
   · simp_rw [GaussSum, gaussSum, Finset.smul_sum, smul_mul']
     congr! with x
-    · rw [smul_eq_galRestrict_apply (𝓞 K), map_teichmuller_zpow_eq hbij _ _ 1 one_ne_zero hη (by simp),
+    · rw [smul_eq_galRestrict_apply (𝓞 K),
+      map_teichmuller_zpow_eq hbij _ _ 1 one_ne_zero hη (by simp),
         Nat.cast_one, mul_one]
-    · rw [smul_eq_galRestrict_apply (𝓞 K), algebraMap_comp_addCharTrace,
+    · rw [smul_eq_galRestrict_apply (𝓞 K), compAddChar_traceChar,
         monoidHom_comp_addCharTrace_eq_mulShift _ _ _ e]
       · simp [hu]
       · rwa [smul_eq_galRestrict_apply (𝓞 K)] at h
@@ -123,7 +128,8 @@ theorem smul_gaussSum_eq_gaussSum [NeZero m] [P.LiesOver 𝒑] (τ : Gal(L/K)) :
 set_option backward.isDefEq.respectTransparency false in
 variable (E k) in
 include 𝓟 hη hdm in
-theorem exists_mem_gaussSum_pow_eq [NeZero f] [NeZero m] [Fact (Odd p)] [Algebra F E] [IsScalarTower F E L]
+theorem exists_mem_gaussSum_pow_eq [NeZero f] [NeZero m] [Fact (Odd p)] [Algebra F E]
+  [IsScalarTower F E L]
     [P.LiesOver 𝒑] [IsCyclotomicExtension {m} ℚ k] [IsCyclotomicExtension {p} ℚ F] [𝓟.IsPrime]
     [𝓟.LiesOver P]
     [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [IsCyclotomicExtension {p ^ f - 1} ℚ K] :
@@ -147,12 +153,14 @@ theorem exists_mem_gaussSum_pow_eq [NeZero f] [NeZero m] [Fact (Odd p)] [Algebra
     obtain ⟨x, hx⟩ := (IsGaloisGroup.isInvariant (A := 𝓞 E)).isInvariant
       (GaussSum hbij hζ d ^ m)
         fun τ : Gal(L/E) ↦ smul_gaussSum_eq_gaussSum' hbij hζ hη m d hdm τ
-    simp [← hx, ← IsScalarTower.algebraMap_apply (𝓞 E) (𝓞 L) L, IsScalarTower.algebraMap_apply (𝓞 E) E L,
+    simp [← hx, ← IsScalarTower.algebraMap_apply (𝓞 E) (𝓞 L) L,
+      IsScalarTower.algebraMap_apply (𝓞 E) E L,
       IntermediateField.algebraMap_apply]
   · rw [RingOfIntegers.coe_eq_algebraMap]
     obtain ⟨x, hx⟩ := (IsGaloisGroup.isInvariant (A := 𝓞 K)).isInvariant
       (GaussSum hbij hζ d ^ m) fun τ : Gal(L/K) ↦ smul_gaussSum_eq_gaussSum hbij hζ hη m d hdm τ
-    simp [← hx, ← IsScalarTower.algebraMap_apply (𝓞 K) (𝓞 L) L, IsScalarTower.algebraMap_apply (𝓞 K) K L,
+    simp [← hx, ← IsScalarTower.algebraMap_apply (𝓞 K) (𝓞 L) L,
+      IsScalarTower.algebraMap_apply (𝓞 K) K L,
       IntermediateField.algebraMap_apply]
 
 omit [NeZero (p ^ f - 1)] in
@@ -160,12 +168,14 @@ include hdm in
 theorem ramificationIdx_eq_one [NeZero f] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
     [𝓟.LiesOver 𝔓] [𝔓.LiesOver 𝒑] [𝔓.IsPrime] [𝓟.IsPrime] :
     𝓟.ramificationIdx (𝓞 E) = 1 := by
-  have hpq : ¬ p ∣ p ^ f - 1 := (Nat.Prime.coprime_iff_not_dvd hp.out).mp (coprime_pow_sub_one p f).symm
+  have hpq : ¬ p ∣ p ^ f - 1 := (Nat.Prime.coprime_iff_not_dvd hp.out).mp (coprime_pow_sub_one p
+    f).symm
   have hpm : ¬ p ∣ m := hp.out.coprime_iff_not_dvd.mp <|
     (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro_left d hdm
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 𝔓 𝒑
   have htower := Ideal.ramificationIdx_tower (R := ℤ) 𝔓 𝓟
-  rw [@IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
+  rw [@IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _
+    _ _
       (by ring) hpq,
     @IsCyclotomicExtension.Rat.ramificationIdx_eq (m * p) m p 0 hp E _ _ 𝔓 _ _ _
       (by ring) hpm] at htower
@@ -175,7 +185,8 @@ theorem ramificationIdx_eq_one [NeZero f] [IsCyclotomicExtension {p * (p ^ f - 1
 
 omit [NeZero (p ^ f - 1)] in
 include hdm in
-theorem ramificationIdx_eq_sub_one₀ [NeZero f] [NeZero m] [Algebra k E] [𝔓.LiesOver 𝔭] [𝔭.LiesOver 𝒑]
+theorem ramificationIdx_eq_sub_one₀ [NeZero f] [NeZero m] [Algebra k E] [𝔓.LiesOver 𝔭] [𝔭.LiesOver
+  𝒑]
     [𝔓.IsPrime] [IsCyclotomicExtension {m} ℚ k] [𝔭.IsPrime] :
     𝔓.ramificationIdx (𝓞 k) = p - 1 := by
   have hpm : ¬ p ∣ m := hp.out.coprime_iff_not_dvd.mp <|
@@ -194,25 +205,29 @@ theorem ramificationIdx_eq_sub_one [NeZero f] [NeZero m] [𝔭.LiesOver 𝒑]
     [IsCyclotomicExtension {m} ℚ k] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [𝔭.IsPrime]
     [𝓟.IsPrime] [𝓟.LiesOver 𝔭] :
     𝓟.ramificationIdx (𝓞 k) = p - 1 := by
-  have hpq : ¬ p ∣ p ^ f - 1 := (Nat.Prime.coprime_iff_not_dvd hp.out).mp (coprime_pow_sub_one p f).symm
+  have hpq : ¬ p ∣ p ^ f - 1 := (Nat.Prime.coprime_iff_not_dvd hp.out).mp (coprime_pow_sub_one p
+    f).symm
   have hpm : ¬ p ∣ m := hp.out.coprime_iff_not_dvd.mp <|
     (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro_left d hdm
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 𝔭 𝒑
   have htower := Ideal.ramificationIdx_tower (R := ℤ) 𝔭 𝓟
-  rw [@IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _ _ _
+  rw [@IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _
+    _ _
       (by ring) hpq,
     IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p k 𝔭 hpm,
     one_mul] at htower
   simpa using htower.symm
 
 variable (p) in
-theorem galEquivZMod_stabilizer' [IsCyclotomicExtension {m} ℚ k] [NeZero m] [𝔭.IsMaximal] [𝔭.LiesOver 𝒑]
+theorem galEquivZMod_stabilizer' [IsCyclotomicExtension {m} ℚ k] [NeZero m] [𝔭.IsMaximal]
+  [𝔭.LiesOver 𝒑]
     (hp' : p.Coprime m) :
     MulEquiv.mapSubgroup (galEquivZMod m k) (MulAction.stabilizer Gal(k/ℚ) 𝔭) =
       Subgroup.zpowers (ZMod.unitOfCoprime p hp') := galEquivZMod_stabilizer m k p 𝔭 hp'
 
 theorem galEquivZMod_mul_smul_of_zpowers [IsCyclotomicExtension {m} ℚ k] [NeZero m] [𝔭.IsMaximal]
-    [𝔭.LiesOver 𝒑] (a : (ZMod m)ˣ) (hp' : p.Coprime m) (b : Subgroup.zpowers (ZMod.unitOfCoprime p hp')) :
+    [𝔭.LiesOver 𝒑] (a : (ZMod m)ˣ) (hp' : p.Coprime m) (b : Subgroup.zpowers (ZMod.unitOfCoprime p
+      hp')) :
     (galEquivZMod m k).symm (a * b) • 𝔭 = (galEquivZMod m k).symm a • 𝔭 := by
   have : ((galEquivZMod m k).symm a • 𝔭).LiesOver 𝒑 := LiesOver.smul _
   have : ((galEquivZMod m k).symm a • 𝔭).IsMaximal := by
@@ -226,24 +241,29 @@ theorem galEquivZMod_mul_smul_of_zpowers [IsCyclotomicExtension {m} ℚ k] [NeZe
 include hη hdm in
 theorem mul_valGauss_eq_mul_sum [NeZero f] [NeZero m] [NeZero d] [𝓟.LiesOver P] [P.LiesOver 𝒑]
     [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
-    [IsCyclotomicExtension {p ^ f - 1} ℚ K] [Fact (Odd p)] [𝓟.IsPrime] (a : ℕ) (ha : d * a ≤ p ^ f - 2) :
+    [IsCyclotomicExtension {p ^ f - 1} ℚ K] [Fact (Odd p)] [𝓟.IsPrime] (a : ℕ) (ha : d * a ≤ p ^ f
+      - 2) :
     m * (valGauss hbij hζ 𝓟 (d * a : ℕ)) = (p - 1 : ℕ) * ∑ i ∈ Finset.range f, (a * p ^ i % m) := by
   rw [← Nat.cast_mul, ← ENat.natCast_toNat (valGauss_ne_top₀' hbij hζ hη 𝓟 _), ← Nat.cast_mul,
     Nat.cast_inj]
   qify
   rw [← Nat.cast_mul d, valGauss_toNat_eq_sum_digits hbij hζ hη _ _ ha,
     ← Nat.sub_one_mul_sum_fract_div_eq_digits_sum hp.out.one_lt (l := f) ha]
-  simp_rw [← hdm, Nat.cast_mul, div_mul_eq_div_div, mul_div_assoc _ _ (d :ℚ), ← mul_div_assoc (d : ℚ),
+  simp_rw [← hdm, Nat.cast_mul, div_mul_eq_div_div, mul_div_assoc _ _ (d :ℚ),
+    ← mul_div_assoc (d : ℚ),
     mul_div_cancel_left₀ (a : ℚ) (a := ↑d) (by simpa using NeZero.ne _)]
-  rw [← mul_assoc, mul_comm (m : ℚ), mul_assoc, Finset.mul_sum, Nat.cast_sub hp.out.one_le, Nat.cast_one]
+  rw [← mul_assoc, mul_comm (m : ℚ), mul_assoc, Finset.mul_sum, Nat.cast_sub hp.out.one_le,
+    Nat.cast_one]
   congr with j
   rw [← Nat.cast_pow, ← Nat.cast_mul, ← Rat.intCast_natCast, ← Rat.intCast_natCast,
-    mul_fract_div_eq_mod _ _ (Int.natCast_pos.mpr (NeZero.pos m)), Nat.cast_mul, Nat.cast_pow, mul_comm]
+    mul_fract_div_eq_mod _ _ (Int.natCast_pos.mpr (NeZero.pos m)), Nat.cast_mul, Nat.cast_pow,
+      mul_comm]
 
 include hη hdm in
 theorem gaFEquiv_symm_smul_algebraMap_eq [NeZero f] [NeZero m] [IsCyclotomicExtension {m} ℚ k]
     [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p ^ f - 1} ℚ K]
-    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] (a : (ZMod m)ˣ) (b : (ZMod (p ^ f - 1))ˣ) (x : 𝓞 k)
+    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] (a : (ZMod m)ˣ) (b : (ZMod (p ^ f - 1))ˣ) (x : 𝓞
+      k)
     (hb : b.val.cast = a.val) :
     (galFEquiv p f (F := F) K).symm b • (algebraMap (𝓞 k) (𝓞 L)) x =
       (algebraMap (𝓞 k) (𝓞 L)) ((galEquivZMod m k).symm a • x) := by
@@ -256,10 +276,12 @@ theorem gaFEquiv_symm_smul_algebraMap_eq [NeZero f] [NeZero m] [IsCyclotomicExte
   let ε : k := IsCyclotomicExtension.zeta m ℚ k
   have hε : IsPrimitiveRoot ε m := IsCyclotomicExtension.zeta_spec m ℚ k
   apply AlgHom.ext_of_adjoin_eq_top (adjoin_singleton_eq_top hε)
-  simp only [Set.eqOn_singleton, AlgHom.coe_comp, AlgHom.coe_restrictScalars', AlgEquiv.coe_toAlgHom,
+  simp only [Set.eqOn_singleton, AlgHom.coe_comp, AlgHom.coe_restrictScalars',
+    AlgEquiv.coe_toAlgHom,
     IsScalarTower.coe_toAlgHom', Function.comp_apply, ← smul_eq_galRestrict_apply (𝓞 F),
     ← smul_eq_galRestrict_apply ℤ]
-  rw [galEquivZMod_smul_of_pow_eq m, MulEquiv.apply_symm_apply, galLFEquiv_apply_of_pow_eq_one p f hη,
+  rw [galEquivZMod_smul_of_pow_eq m, MulEquiv.apply_symm_apply,
+    galLFEquiv_apply_of_pow_eq_one p f hη,
     MulEquiv.apply_symm_apply, ← map_pow, (FaithfulSMul.algebraMap_injective _ _).eq_iff]
   · have : a.val.val % m = b.val.val % m := by simp [← hb, ← ZMod.natCast_val]
     rw [← pow_mod_orderOf _ b.val.val, ← pow_mod_orderOf _ a.val.val,
@@ -273,7 +295,7 @@ include hη 𝓟 hdm in
 theorem emultiplicity_galEquivZMod_symm_smul_gaussSum [IsCyclotomicExtension {m} ℚ k]
     [IsCyclotomicExtension {p ^ f - 1} ℚ K] [NeZero m] [NeZero d]
     [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [IsCyclotomicExtension {p} ℚ F]
-    [NeZero f] [𝓟.IsPrime] [NeZero 𝓟] [Fact (Odd p)] [𝓟.LiesOver P]  [𝓟.LiesOver 𝔭] [P.LiesOver 𝒑]
+    [NeZero f] [𝓟.IsPrime] [NeZero 𝓟] [Fact (Odd p)] [𝓟.LiesOver P] [𝓟.LiesOver 𝔭] [P.LiesOver 𝒑]
     [𝔭.LiesOver 𝒑] (a : (ZMod m)ˣ) {Γ : 𝓞 k} (hΓ₀ : Γ ≠ 0)
     (hΓ : (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 k) (𝓞 L) Γ) :
     emultiplicity (((galEquivZMod m k).symm a⁻¹) • 𝔭) (span {Γ}) =
@@ -301,33 +323,35 @@ theorem emultiplicity_galEquivZMod_symm_smul_gaussSum [IsCyclotomicExtension {m}
     ← Set.image_singleton, ← map_span,
     ← Ideal.IsDedekindDomain.ramificationIdx_mul_emultiplicity_under_eq h𝓟' h𝓟₀, ← Nat.cast_mul,
     valGauss_periodic' hbij hζ hη _ _ _ this, mul_valGauss_eq_mul_sum hbij hζ hη _ m _ hdm] at hmain
-  have : under (𝓞 k) (σ • 𝓟) = ((galEquivZMod m k).symm a⁻¹) • 𝔭 := by
-    ext
-    unfold σ
-    rw [over_def 𝓟 𝔭, mem_pointwise_smul_iff_inv_smul_mem, map_inv, map_inv, inv_inv, under_def, under_def,
-      Ideal.mem_comap, Ideal.mem_comap, mem_pointwise_smul_iff_inv_smul_mem, inv_inv,
-      gaFEquiv_symm_smul_algebraMap_eq hη m d hdm _ _ _ hb]
-  rw [this] at hmain
-  have : ((σ • 𝓟).LiesOver ((galEquivZMod m k).symm a⁻¹ • 𝔭)) := (liesOver_iff _ _).mpr this.symm
-  have : ((σ • 𝓟).ramificationIdx (𝓞 k)) = p - 1 := ramificationIdx_eq_sub_one (σ • 𝓟) m d hdm ((galEquivZMod m k).symm a⁻¹ • 𝔭)
-  rw [this, FiniteMultiplicity.emultiplicity_eq_multiplicity, ← Nat.cast_mul, ← Nat.cast_mul,
-    ← Nat.cast_mul, ← Nat.cast_mul, Nat.cast_inj] at hmain
-  have : p - 1 ≠ 0 := by
-    rw [Nat.sub_ne_zero_iff_lt]
-    exact hp.out.one_lt
-  rw [FiniteMultiplicity.emultiplicity_eq_multiplicity, Nat.cast_inj, ← mul_right_inj' this,
-    ← mul_right_inj' (NeZero.ne d), ← hmain]
-  · refine Ideal.finiteMultiplicity ?_ ?_
-    · simpa using IsPrime.ne_top'
-    · simpa using hΓ₀
-  · refine Ideal.finiteMultiplicity ?_ ?_
-    · simpa using IsPrime.ne_top'
-    · simpa using hΓ₀
+  · have : under (𝓞 k) (σ • 𝓟) = ((galEquivZMod m k).symm a⁻¹) • 𝔭 := by
+      ext
+      unfold σ
+      rw [over_def 𝓟 𝔭, mem_pointwise_smul_iff_inv_smul_mem, map_inv, map_inv, inv_inv, under_def,
+        under_def, Ideal.mem_comap, Ideal.mem_comap, mem_pointwise_smul_iff_inv_smul_mem, inv_inv,
+        gaFEquiv_symm_smul_algebraMap_eq hη m d hdm _ _ _ hb]
+    rw [this] at hmain
+    have : ((σ • 𝓟).LiesOver ((galEquivZMod m k).symm a⁻¹ • 𝔭)) := (liesOver_iff _ _).mpr this.symm
+    have : ((σ • 𝓟).ramificationIdx (𝓞 k)) = p - 1 := ramificationIdx_eq_sub_one (σ • 𝓟) m d hdm
+      ((galEquivZMod m k).symm a⁻¹ • 𝔭)
+    rw [this, FiniteMultiplicity.emultiplicity_eq_multiplicity, ← Nat.cast_mul, ← Nat.cast_mul,
+      ← Nat.cast_mul, ← Nat.cast_mul, Nat.cast_inj] at hmain
+    · have : p - 1 ≠ 0 := by
+        rw [Nat.sub_ne_zero_iff_lt]
+        exact hp.out.one_lt
+      rw [FiniteMultiplicity.emultiplicity_eq_multiplicity, Nat.cast_inj, ← mul_right_inj' this,
+        ← mul_right_inj' (NeZero.ne d), ← hmain]
+      · refine Ideal.finiteMultiplicity ?_ ?_
+        · simpa using IsPrime.ne_top'
+        · simpa using hΓ₀
+    · refine Ideal.finiteMultiplicity ?_ ?_
+      · simpa using IsPrime.ne_top'
+      · simpa using hΓ₀
   · have := (Nat.mul_lt_mul_left (NeZero.pos d)).mpr <| ZMod.val_lt a.val
     rw [hdm] at this
     exact Nat.le_sub_one_of_lt this
 
-variable [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p ^ f - 1} ℚ K] [NeZero f] [𝓟.IsPrime]
+variable [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p ^ f - 1} ℚ K] [NeZero f]
+  [𝓟.IsPrime]
 
 include hη 𝓟 in
 theorem emultplicity_gaussSum_eq_zero [P.LiesOver 𝒑] {𝔭 : Ideal (𝓞 k)} [NeZero 𝓟]
@@ -426,5 +450,6 @@ theorem GaussSum_factorization [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
       contrapose! hP₀'
       rw [(smul_eq_iff_eq_inv_smul _).mp hP₀']
       exact LiesOver.smul σ⁻¹
-    rw [emultplicity_gaussSum_eq_zero hbij hζ hη 𝓠 m d hΓ hQ₀ hP₀', emultiplicity_galEquivZMod_symm_smul m 𝔭 hQ₀, Nat.cast_sum]
+    rw [emultplicity_gaussSum_eq_zero hbij hζ hη 𝓠 m d hΓ hQ₀ hP₀',
+      emultiplicity_galEquivZMod_symm_smul m 𝔭 hQ₀, Nat.cast_sum]
     simp [ite_eq_right this]

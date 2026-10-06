@@ -20,6 +20,8 @@ public import SKW.Prereqs.CMField
 public import SKW.Prereqs.CyclotomicField
 public import SKW.Prereqs.ZModUnits
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
@@ -197,10 +199,10 @@ theorem maximalReal_eq_lift_fixedField :
   rw [maximalReal]
   congr
   ext x
-  simp only [mem_fixedField_iff, mem_zpowers_iff_mem_range_orderOf, IsCMField.orderOf_ratComplexConj,
-    Finset.mem_image, Finset.mem_range, Order.lt_two_iff, Nat.le_one_iff_eq_zero_or_eq_one,
-    exists_eq_or_imp, pow_zero, existsAndEq, pow_one, true_and, or_imp, forall_and, forall_eq',
-    AlgEquiv.one_apply, true_and, IsCMField.ratComplexConj_apply,
+  simp only [mem_fixedField_iff, mem_zpowers_iff_mem_range_orderOf,
+    IsCMField.orderOf_ratComplexConj, Finset.mem_image, Finset.mem_range, Order.lt_two_iff,
+    Nat.le_one_iff_eq_zero_or_eq_one, exists_eq_or_imp, pow_zero, existsAndEq, pow_one, true_and,
+    or_imp, forall_and, forall_eq', AlgEquiv.one_apply, IsCMField.ratComplexConj_apply,
     IsCMField.complexConj_eq_self_iff]
   rfl
 
@@ -289,6 +291,7 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   exact prop_kw_2_quadratic_real_unique F₁ hf₁ hr₁ F₂ hf₂ hr₂
 
 set_option maxHeartbeats 400000 in
+-- reason for change
 open IntermediateField in
 /-- Every cyclic extension of `ℚ` of degree `2ᵐ` unramified outside `2` is cyclotomic: contained in
 `ℚ(ζ_{2^{m+2}}) = ℚ⟮ξ (2^(m+2))⟯` inside the ambient field `A`.
@@ -336,7 +339,8 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     rw [← Nat.dvd_prime_pow Nat.prime_two, ← hl₂]
     exact finrank_dvd_of_le_right <| maximalReal_le L
   have : NumberField M := by
-    refine { to_charZero := charZero M, to_finiteDimensional := FiniteDimensional.of_finrank_pos ?_ }
+    refine
+      { to_charZero := charZero M, to_finiteDimensional := FiniteDimensional.of_finrank_pos ?_ }
     rw [hk₂]
     exact Nat.two_pow_pos k
   have hML : M ≠ L := fun h ↦ by
@@ -364,7 +368,7 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     let : Algebra ℚ⟮ξ 4⟯ L := (inclusion le_sup_right).toRingHom.toAlgebra
     rw [IsCMField.restrictNormalHom_ratComplexConj]
     rw [Subgroup.eq_top_of_card_eq (Subgroup.zpowers _)]
-    rw [Subgroup.comap_top]
+    · rw [Subgroup.comap_top]
     rw [Nat.card_zpowers]
     rw [IsCMField.orderOf_ratComplexConj]
     rw [IsGalois.card_aut_eq_finrank]

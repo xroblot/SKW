@@ -8,6 +8,8 @@ public import SKW.Prereqs.CMField
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.CMField
 
+set_option linter.style.header false
+
 @[expose] public section
 
 theorem IsPrimitiveRoot.isIntegral' {n : ℕ} {K L : Type*} [CommRing K] [CommRing L] [Algebra K L]
@@ -22,7 +24,8 @@ theorem orderOf_eq_mul_orderOf_pow {M : Type*} [Monoid M] {y : M} {m : ℕ} (hm 
   have h₁ : m / Nat.gcd (orderOf y) m = 1 := by
     rw [Nat.eq_one_iff_not_exists_prime_dvd]
     refine fun q hq hqd ↦ hq.one_lt.ne' <| Nat.dvd_one.mp ?_
-    refine (Nat.coprime_div_gcd_div_gcd (Nat.gcd_pos_of_pos_right _ hm.bot_lt)).symm ▸ Nat.dvd_gcd hqd ?_
+    refine (Nat.coprime_div_gcd_div_gcd (Nat.gcd_pos_of_pos_right _ hm.bot_lt)).symm ▸ Nat.dvd_gcd
+      hqd ?_
     rw [← orderOf_pow' y hm]
     exact h q hq (hqd.trans (Nat.div_dvd_of_dvd (Nat.gcd_dvd_right _ _)))
   have h₂ : Nat.gcd (orderOf y) m = m := by
@@ -62,7 +65,8 @@ theorem IsCyclotomicExtension.Rat.discr_coprime (n₁ n₂ : ℕ) [NeZero n₁] 
     IsCoprime (NumberField.discr K₁) (NumberField.discr K₂) := by
   rw [Int.isCoprime_iff_nat_coprime, natAbs_discr  n₁ K₁, natAbs_discr  n₂ K₂]
   refine Nat.Coprime.coprime_div_left ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
-  refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
+  refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos
+    _))
   exact Nat.Coprime.pow_left _ (Nat.Coprime.pow_right _ h)
 
 theorem IntermediateField.linearDisjoint_iff'' {F E : Type*} [Field F] [Field E] [Algebra F E]
@@ -122,22 +126,26 @@ theorem IsCyclotomicExtension.Rat.gcd_inf {K : Type*} [Field K] [NumberField K]
   · have : IsGalois ℚ F₁ := h₁.isGalois
     have := isCyclotomicExtension_lcm_sup ℚ K n₁ n₂ F₁ F₂
     have : Module.finrank ℚ ↑(F₁ ⊔ F₂) ≠ 0 := Module.finrank_pos.ne'
-    rw [← mul_right_inj' this, finrank_sup_mul_finrank_inf_eq, IsCyclotomicExtension.Rat.finrank n₁ F₁,
-      IsCyclotomicExtension.Rat.finrank n₂ F₂, IsCyclotomicExtension.Rat.finrank (n₁.lcm n₂) ↑(F₁ ⊔ F₂),
+    rw [← mul_right_inj' this, finrank_sup_mul_finrank_inf_eq,
+      IsCyclotomicExtension.Rat.finrank n₁ F₁,
+      IsCyclotomicExtension.Rat.finrank n₂ F₂,
+        IsCyclotomicExtension.Rat.finrank (n₁.lcm n₂) ↑(F₁ ⊔ F₂),
       IsCyclotomicExtension.Rat.finrank d ℚ⟮ζ⟯, ← Nat.totient_mul_totient_eq]
   · obtain ⟨ζ₂, hζ₂⟩ := h₂.1 rfl (NeZero.ne n₂)
     replace hζ₂ := hζ₂.map_of_injective (FaithfulSMul.algebraMap_injective F₂ K)
     rw [(isCyclotomicExtension_singleton_iff_eq_adjoin n₁ ℚ K _ hζ₁).mp h₁,
-      (isCyclotomicExtension_singleton_iff_eq_adjoin n₂ ℚ K _ hζ₂).mp h₂, adjoin_simple_le_iff, mem_inf]
+      (isCyclotomicExtension_singleton_iff_eq_adjoin n₂ ℚ K _ hζ₂).mp h₂, adjoin_simple_le_iff,
+        mem_inf]
     constructor
     · exact pow_mem (mem_adjoin_simple_self ℚ _) s
-    · obtain ⟨t, _, ht⟩ := hζ₂.eq_pow_of_pow_eq_one <| (hζ.pow_eq_one_iff_dvd n₂).mpr (n₁.gcd_dvd_right n₂)
+    · obtain ⟨t, _,
+      ht⟩ := hζ₂.eq_pow_of_pow_eq_one <| (hζ.pow_eq_one_iff_dvd n₂).mpr (n₁.gcd_dvd_right n₂)
       rw [← ht]
       exact pow_mem (mem_adjoin_simple_self ℚ _) t
 
 open IsCyclotomicExtension.Rat NumberField
 
-theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_apply {E F :Type*} [Field E] [Field F]
+theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_apply {E F : Type*} [Field E] [Field F]
     [NumberField E] [NumberField F] {n : ℕ} [NeZero n] [hE : IsCyclotomicExtension {n} ℚ E]
     [hF : IsCyclotomicExtension {n} ℚ F] (f : E →+* F) (a : (ZMod n)ˣ) (x : E) :
     f ((galEquivZMod n E).symm a x) = (galEquivZMod n F).symm a (f x) := by
@@ -158,7 +166,7 @@ theorem IsFractionRing.map_apply_algebraMap {A B K L : Type*} [CommRing A] [Comm
     {j : A →+* B} (hj : Function.Injective j) (x : A) :
     IsFractionRing.map hj (algebraMap A K x) = algebraMap B L (j x) := by simp [map]
 
-theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_smul {E F :Type*} [Field E] [Field F]
+theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_smul {E F : Type*} [Field E] [Field F]
     [NumberField E] [NumberField F] {n : ℕ} [NeZero n]
     [hE : IsCyclotomicExtension {n} ℚ E] [hF : IsCyclotomicExtension {n} ℚ F]
     {f : 𝓞 E →+* 𝓞 F} (hf : Function.Injective f) (a : (ZMod n)ˣ) (x : 𝓞 E) :
@@ -198,7 +206,7 @@ theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_neg_one_apply (n : ℕ) [NeZ
     rw [← AlgEquiv.restrictScalars_apply ℚ (complexConj F), ← h]
   refine AlgEquiv.coe_toAlgHom_injective <| AlgHom.ext_of_adjoin_eq_top
     (IsCyclotomicExtension.adjoin_primitive_root_eq_top hζ) (Set.eqOn_singleton.mpr ?_)
-  show (galEquivZMod n F).symm (-1) (zeta n ℚ F) = (complexConj F).restrictScalars ℚ (zeta n ℚ F)
+  change (galEquivZMod n F).symm (-1) (zeta n ℚ F) = (complexConj F).restrictScalars ℚ (zeta n ℚ F)
   rw [galEquivZMod_symm_apply_of_pow_eq n F (z := -1) (by simp) (zeta_pow n ℚ F), zpow_neg_one,
     AlgEquiv.restrictScalars_apply, (isConj_complexConj F φ).eq_inv_of_isPrimitiveRoot hζ]
 

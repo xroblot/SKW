@@ -11,6 +11,8 @@ public import Mathlib.GroupTheory.QuotientGroup.Basic
 
 public import SKW.PRed2Mathlib.AlgebraMisc
 
+set_option linter.style.header false
+
 @[expose] public section
 
 theorem Algebra.adjoin_singleton_add {R A : Type*} [CommRing R] [Ring A] [Algebra R A] (x : A)
@@ -63,7 +65,8 @@ theorem orderOf_zpow_dvd {G : Type*} [Group G] (x : G) (n : ℤ) :
 /-! ### Cyclic groups in a product -/
 
 /-- The group-theoretic heart of the tame Abhyankar lemma: a cyclic group that embeds into a product
-`A × B` of finite groups has order dividing `Nat.lcm (Nat.card A) (Nat.card B)`. (A generator maps to
+`A × B` of finite groups has order dividing `Nat.lcm (Nat.card A) (Nat.card B)`. (A generator maps
+  to
 some `(a, b)` of order `lcm (orderOf a) (orderOf b)`, and each component order divides the
 corresponding cardinality.) -/
 theorem card_dvd_lcm_of_isCyclic_of_injective {G A B : Type*} [Group G] [Group A] [Group B]
@@ -94,7 +97,8 @@ theorem Subgroup.subgroupOf_inf {G : Type*} [Group G] (A B C : Subgroup G) :
 
 /-- `A.subgroupOf B` and `B.subgroupOf A` are isomorphic (both realize `A ⊓ B`). Mathlib only has
 `subgroupOfEquivOfLe`; this composes two copies of it through `A ⊓ B`. -/
-@[to_additive /-- `A.addSubgroupOf B` and `B.addSubgroupOf A` are isomorphic (both realize `A ⊓ B`). -/]
+@[to_additive /-- `A.addSubgroupOf B` and `B.addSubgroupOf A` are isomorphic (both realize
+  `A ⊓ B`). -/]
 def Subgroup.subgroupOfEquivComm {G : Type*} [Group G] (A B : Subgroup G) :
     A.subgroupOf B ≃* B.subgroupOf A :=
   ((MulEquiv.subgroupCongr (Subgroup.inf_subgroupOf_right A B).symm).trans

@@ -2,6 +2,8 @@ module
 
 public import Mathlib.RingTheory.UniqueFactorizationDomain.Multiplicity
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
@@ -75,17 +77,17 @@ theorem UniqueFactorizationMonoid.associated_iff_emultiplicity_eq' {R : Type*}
       rw [pow_dvd_iff_le_emultiplicity, ← h]
       exact le_top
   · by_cases hb : b = 0
-    rw [hb, associated_zero_iff_eq_zero]
-    constructor
-    · intro h
-      simp [h]
-    · intro h
-      rw [WfDvdMonoid.eq_zero_iff_forall_prime_pow_dvd hp]
-      specialize h p hp
-      simp only [emultiplicity_zero_right] at h
-      intro n
-      rw [pow_dvd_iff_le_emultiplicity, h]
-      exact le_top
+    · rw [hb, associated_zero_iff_eq_zero]
+      constructor
+      · intro h
+        simp [h]
+      · intro h
+        rw [WfDvdMonoid.eq_zero_iff_forall_prime_pow_dvd hp]
+        specialize h p hp
+        simp only [emultiplicity_zero_right] at h
+        intro n
+        rw [pow_dvd_iff_le_emultiplicity, h]
+        exact le_top
     · rw [← dvd_dvd_iff_associated, dvd_iff_emultiplicity_le ha, dvd_iff_emultiplicity_le hb,
         ← forall₂_and]
       simp_rw [le_antisymm_iff]

@@ -6,6 +6,8 @@ public import SKW.KroneckerWeber.OddPrimePower
 public import SKW.KroneckerWeber.TwoPower
 public import SKW.Prereqs.Instances
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
@@ -60,7 +62,8 @@ lemma kw_cyclic_primePow_le_cyclotomic {p : ℕ} (hp : p.Prime) {A : Type*} [Fie
       (hξ (c.lcm n₀)).adjoinSimple_isCyclotomicExtension _ _ _
     have : IsCyclotomicExtension {c.lcm n₀} ℚ ↑(ℚ⟮ξ c⟯ ⊔ ℚ⟮ξ n₀⟯) := by
       have : IsCyclotomicExtension {c} ℚ ℚ⟮ξ c⟯ := (hξ c).adjoinSimple_isCyclotomicExtension _ _ _
-      have : IsCyclotomicExtension {n₀} ℚ ℚ⟮ξ n₀⟯ := (hξ n₀).adjoinSimple_isCyclotomicExtension _ _ _
+      have : IsCyclotomicExtension {n₀} ℚ ℚ⟮ξ n₀⟯ := (hξ n₀).adjoinSimple_isCyclotomicExtension _ _
+        _
       exact isCyclotomicExtension_lcm_sup ℚ A _ _ _ _
     exact IntermediateField.isCyclotomicExtension_eq {c.lcm n₀} ℚ _ _ _
   rw [this, hKF]
@@ -70,7 +73,7 @@ set_option backward.isDefEq.respectTransparency false in
 lemma kw_reduce_to_prime_power_aux {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K]
     [IsAbelianGalois ℚ K] {ι : Type*} (S : Finset ι) (C : ι → IntermediateField ℚ A)
-    (hC : ∀ i, ∃ n, 0 < n ∧ C i ≤ ℚ⟮ξ n⟯) (htop : ⨆ i ∈ S, C i = K):
+    (hC : ∀ i, ∃ n, 0 < n ∧ C i ≤ ℚ⟮ξ n⟯) (htop : ⨆ i ∈ S, C i = K) :
     ∃ n : ℕ, 0 < n ∧ K ≤ ℚ⟮ξ n⟯ := by
   classical
   induction S using Finset.induction generalizing K with
@@ -101,7 +104,8 @@ set_option backward.isDefEq.respectTransparency false in
 /-- Reduction of Kronecker-Weber to the cyclic prime power case (in `IntermediateField ℚ A`
 currency): if every cyclic subextension of `K` of prime power degree lies in a cyclotomic field
 `ℚ⟮ξ n⟯` (with `n > 0`), then so does `K`. The proof decomposes `K` as a compositum of such
-subextensions (`IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top`) and recombines the cyclotomic fields, using that
+subextensions (`IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top`) and recombines the
+  cyclotomic fields, using that
 `ℚ⟮ξ m⟯ ≤ ℚ⟮ξ n⟯` whenever `m ∣ n`. -/
 lemma kw_reduce_to_prime_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K]

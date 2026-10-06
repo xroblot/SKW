@@ -17,6 +17,8 @@ public import SKW.Prereqs.CyclotomicField
 public import SKW.Prereqs.NumberField
 public import SKW.Prereqs.Unramified
 
+set_option linter.style.header false
+
 @[expose] public section
 
 /-!
@@ -67,7 +69,8 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
     refine ⟨ξ, hξ₀, ?_⟩
     rw [← (Commute.all _ _).pow_left_inj hp.out.ne_zero, mul_pow]
     rw [SubmonoidClass.coe_pow, ← coeIdeal_pow, pow_right_comm, h𝔞, coeIdeal_pow,
-      coeIdeal_span_singleton, spanSingleton_pow, spanSingleton_pow, spanSingleton_mul_spanSingleton,
+      coeIdeal_span_singleton, spanSingleton_pow, spanSingleton_pow,
+        spanSingleton_mul_spanSingleton,
       ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_span, coeIdeal_span_singleton,
       algebraMap.smul', AlgEquiv.smul_def]
   have h₃ := Stickelberger p F (ClassGroup.mk0 𝔞₀)
@@ -78,9 +81,11 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
       ClassGroup.mk0 𝔞₀ ^ (a⁻¹.val.val * a.val.val) = ClassGroup.mk0 𝔞₀ := by
     rw [pow_eq_pow_mod _ h₂, ← ZMod.val_mul, Units.inv_mul, ZMod.val_one, pow_one]
   simp_rw [← map_inv, ClassGroup.smul_mk0, h₁, map_pow, ← pow_mul, h₄] at h₃
-  rw [Finset.prod_const, Finset.card_univ, ZMod.card_units_eq_totient, Nat.totient_prime hp.out] at h₃
+  rw [Finset.prod_const, Finset.card_univ, ZMod.card_units_eq_totient,
+    Nat.totient_prime hp.out] at h₃
   have h₅ := h₂.trans h₃.symm
-  rwa [← zpow_natCast, ← zpow_natCast, ← orderOf_dvd_sub_iff_zpow_eq_zpow, Nat.cast_sub hp.out.one_le,
+  rwa [← zpow_natCast, ← zpow_natCast, ← orderOf_dvd_sub_iff_zpow_eq_zpow,
+    Nat.cast_sub hp.out.one_le,
     Nat.cast_one, sub_sub_cancel, Int.natCast_dvd_ofNat, Nat.dvd_one, orderOf_eq_one_iff] at h₅
 
 include hrF hIrr hμ in
@@ -91,7 +96,8 @@ lemma kw_conj_mul_eq_pow {α : 𝓞 F} {η : (𝓞 F)ˣ} (h : μ = α ^ p * η) 
       (galEquivZMod p F).symm (-1) (μ : F) = ξ ^ p * (μ : F) ^ (-1 : ℤ) := by
     obtain ⟨ξ', hξ'₀, hξ'⟩ := kw_abelian_kummer p F hrF hIrr ((galEquivZMod p F).symm (-1))
     refine ⟨ξ' * μ, mul_ne_zero hξ'₀ (by simpa), ?_⟩
-    rw [hξ', mul_pow, ← zpow_natCast (μ : F), ← zpow_natCast (μ : F), mul_assoc, ← zpow_add₀ (by simpa),
+    rw [hξ', mul_pow, ← zpow_natCast (μ : F), ← zpow_natCast (μ : F), mul_assoc,
+      ← zpow_add₀ (by simpa),
       MulEquiv.apply_symm_apply, show (p : ℤ) + -1 = (p - 1 : ℕ) by
         rw [Int.add_neg_one, Nat.cast_sub hp.out.one_le, Nat.cast_one],
       Units.coe_neg_one, ZMod.neg_val, ite_eq_right one_ne_zero, ZMod.val_one]
@@ -110,7 +116,8 @@ include hrF hIrr hμ in
 /-- Tower form of `kw_exists_realUnit_torsion`. -/
 lemma kw_exists_realUnit_torsion [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {η : (𝓞 F)ˣ}
     (h : μ = α ^ p * η) :
-    ∃ (ζ : Units.torsion F) (δ : F), ζ.val.val ^ p = 1 ∧ δ ≠ 0 ∧ (η : F) ^ 4 = (ζ.val : F) * δ ^ p := by
+    ∃ (ζ : Units.torsion F) (δ : F),
+      ζ.val.val ^ p = 1 ∧ δ ≠ 0 ∧ (η : F) ^ 4 = (ζ.val : F) * δ ^ p := by
   obtain ⟨ζ, ε, hε, h', hζ⟩ :
       ∃ (ζ : Units.torsion F) (ε : (𝓞 F)ˣ),
         ε ∈ IsCMField.realUnits F ∧ η ^ 4 = ζ * ε ∧ ζ.val.val ^ p = 1 := by
@@ -157,7 +164,8 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : �
     obtain ⟨u, v, huv⟩ := (hp'.coprime_two_left.pow_left 2).isCoprime
     refine hIrr (x ^ u * μ ^ v) ?_
     rw [mul_pow, ← zpow_natCast, ← zpow_natCast, ← zpow_mul, ← zpow_mul, mul_comm u, zpow_mul,
-      zpow_natCast, hx, ← zpow_natCast, ← zpow_mul, mul_comm _ u, ← zpow_add₀ (by simpa), huv, zpow_one]
+      zpow_natCast, hx, ← zpow_natCast, ← zpow_mul, mul_comm _ u, ← zpow_add₀ (by simpa), huv,
+        zpow_one]
   have h₃ : IsSplittingField F L (X ^ p - C (ζ.val : F)) := by
     rw [h, RingOfIntegers.coe_eq_algebraMap, map_mul, mul_pow, hηδ, map_pow, pow_right_comm,
       ← mul_assoc, mul_right_comm, ← mul_pow, mul_comm] at h₁ h₂
@@ -172,9 +180,11 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : �
   have hξ := rootOfSplitsXPowSubC_pow (ζ.val : F) L (n := p)
   have hξ' : IsPrimitiveRoot ξ (p ^ 2) := by
     rw [pow_two]
-    exact (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) L)).of_pow_eq hξ hp.out.ne_zero
+    exact (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) L)).of_pow_eq hξ
+      hp.out.ne_zero
       (by aesop)
-  have : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ := hξ'.intermediateField_adjoin_isCyclotomicExtension ℚ
+  have : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ := hξ'.intermediateField_adjoin_isCyclotomicExtension
+    ℚ
   suffices IsCyclotomicExtension {p ^ 2} ℚ (⊤ : IntermediateField ℚ L) from
     IsCyclotomicExtension.equiv _ ℚ (⊤ : IntermediateField ℚ L) topEquiv
   have := (isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ _ ⊤ hξ').mpr
@@ -188,12 +198,6 @@ end IsScalarTower
 
 end
 
--- noncomputable section
-
--- variable (p : ℕ) [hp : Fact p.Prime]
--- variable {L : Type*} [Field L] [NumberField L]
--- variable (F : IntermediateField ℚ L)
--- variable {𝔞 : Ideal (𝓞 F)} {μ : 𝓞 F}
 
 /- Original (IntermediateField ℚ L) versions, superseded by the tower forms below:
 /-- If `𝔞` is principal, `μ = αᵖ · η` for some `α ∈ 𝓞_F` and unit `η ∈ 𝓞_F×`. -/
@@ -228,7 +232,8 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
     refine ⟨ξ, hξ₀, ?_⟩
     rw [← (Commute.all _ _).pow_left_inj hp.out.ne_zero, mul_pow]
     rw [SubmonoidClass.coe_pow, ← coeIdeal_pow, pow_right_comm, h𝔞, coeIdeal_pow,
-      coeIdeal_span_singleton, spanSingleton_pow, spanSingleton_pow, spanSingleton_mul_spanSingleton,
+      coeIdeal_span_singleton, spanSingleton_pow, spanSingleton_pow,
+        spanSingleton_mul_spanSingleton,
       ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_span, coeIdeal_span_singleton,
       algebraMap.smul', AlgEquiv.smul_def]
   have h₃ := Stickelberger p F (ClassGroup.mk0 𝔞₀)
@@ -239,9 +244,11 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
       ClassGroup.mk0 𝔞₀ ^ (a⁻¹.val.val * a.val.val) = ClassGroup.mk0 𝔞₀ := by
     rw [pow_eq_pow_mod _ h₂, ← ZMod.val_mul, Units.inv_mul, ZMod.val_one, pow_one]
   simp_rw [← map_inv, ClassGroup.smul_mk0, h₁, map_pow, ← pow_mul, h₄] at h₃
-  rw [Finset.prod_const, Finset.card_univ, ZMod.card_units_eq_totient, Nat.totient_prime hp.out] at h₃
+  rw [Finset.prod_const, Finset.card_univ, ZMod.card_units_eq_totient,
+    Nat.totient_prime hp.out] at h₃
   have h₅ := h₂.trans h₃.symm
-  rwa [← zpow_natCast, ← zpow_natCast, ← orderOf_dvd_sub_iff_zpow_eq_zpow, Nat.cast_sub hp.out.one_le,
+  rwa [← zpow_natCast, ← zpow_natCast, ← orderOf_dvd_sub_iff_zpow_eq_zpow,
+    Nat.cast_sub hp.out.one_le,
     Nat.cast_one, sub_sub_cancel, Int.natCast_dvd_ofNat, Nat.dvd_one, orderOf_eq_one_iff] at h₅
 
 include hrF hIrr hμ in
@@ -253,7 +260,8 @@ lemma kw_conj_mul_eq_pow {α : 𝓞 F} {η : (𝓞 F)ˣ} (h : μ = α ^ p * η) 
       (galEquivZMod p F).symm (-1) (μ : F) = ξ ^ p * (μ : F) ^ (-1 : ℤ) := by
     obtain ⟨ξ', hξ'₀, hξ'⟩ := kw_abelian_kummer p F hrF hIrr ((galEquivZMod p F).symm (-1))
     refine ⟨ξ' * μ, mul_ne_zero hξ'₀ (by simpa), ?_⟩
-    rw [hξ', mul_pow, ← zpow_natCast (μ : F), ← zpow_natCast (μ : F), mul_assoc, ← zpow_add₀ (by simpa),
+    rw [hξ', mul_pow, ← zpow_natCast (μ : F), ← zpow_natCast (μ : F), mul_assoc,
+      ← zpow_add₀ (by simpa),
       MulEquiv.apply_symm_apply, show (p : ℤ) + -1 = (p - 1 : ℕ) by
         rw [Int.add_neg_one, Nat.cast_sub hp.out.one_le, Nat.cast_one],
       Units.coe_neg_one, ZMod.neg_val, ite_eq_right one_ne_zero, ZMod.val_one]
@@ -273,7 +281,8 @@ include hrF hIrr hμ in
 with `ζ` a `p`-th root of unity and `δ ∈ F` (a root of unity times a `p`-th power). -/
 lemma kw_exists_realUnit_torsion [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {η : (𝓞 F)ˣ}
     (h : μ = α ^ p * η) :
-    ∃ (ζ : Units.torsion F) (δ : F), ζ.val.val ^ p = 1 ∧ δ ≠ 0 ∧ (η : F) ^ 4 = (ζ.val : F) * δ ^ p := by
+    ∃ (ζ : Units.torsion F) (δ : F),
+      ζ.val.val ^ p = 1 ∧ δ ≠ 0 ∧ (η : F) ^ 4 = (ζ.val : F) * δ ^ p := by
   obtain ⟨ζ, ε, hε, h', hζ⟩ :
       ∃ (ζ : Units.torsion F) (ε : (𝓞 F)ˣ),
         ε ∈ IsCMField.realUnits F ∧ η ^ 4 = ζ * ε ∧ ζ.val.val ^ p = 1 := by
@@ -306,7 +315,8 @@ include hrF hIrr hμ in
 /-- The unit `η` is a `p`-th power times a root of unity, so `L = F(ᵖ√μ) = ℚ(ζ_{p²})`. -/
 lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGalois ℚ K]
     [IsCyclic Gal(K/ℚ)] (hK : Module.finrank ℚ K = p) (hKram : UnramifiedOutside K p)
-    (hL : IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ))) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) :
+    (hL : IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ))) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span
+      {μ}) :
     IsCyclotomicExtension {p ^ 2} ℚ L := by
   have : IsCMField F :=
     IsCyclotomicExtension.Rat.isCMField F (S := {p}) <|
@@ -322,7 +332,8 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGaloi
     obtain ⟨u, v, huv⟩ := (hp'.coprime_two_left.pow_left 2).isCoprime
     refine hIrr (x ^ u * μ ^ v) ?_
     rw [mul_pow, ← zpow_natCast, ← zpow_natCast, ← zpow_mul, ← zpow_mul, mul_comm u, zpow_mul,
-      zpow_natCast, hx, ← zpow_natCast, ← zpow_mul, mul_comm _ u, ← zpow_add₀ (by simpa), huv, zpow_one]
+      zpow_natCast, hx, ← zpow_natCast, ← zpow_mul, mul_comm _ u, ← zpow_add₀ (by simpa), huv,
+        zpow_one]
   have h₃ : IsSplittingField F L (X ^ p - C (ζ.val : F)) := by
     rw [h, RingOfIntegers.coe_eq_algebraMap, map_mul, mul_pow, hηδ, map_pow, pow_right_comm,
       ← mul_assoc, mul_right_comm, ← mul_pow, mul_comm] at h₁ h₂
@@ -337,9 +348,11 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGaloi
   have hξ := rootOfSplitsXPowSubC_pow (ζ.val : F) L (n := p)
   have hξ' : IsPrimitiveRoot ξ (p ^ 2) := by
     rw [pow_two]
-    exact (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) L)).of_pow_eq hξ hp.out.ne_zero
+    exact (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) L)).of_pow_eq hξ
+      hp.out.ne_zero
       (by aesop)
-  have : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ := hξ'.intermediateField_adjoin_isCyclotomicExtension ℚ
+  have : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ := hξ'.intermediateField_adjoin_isCyclotomicExtension
+    ℚ
   suffices IsCyclotomicExtension {p ^ 2} ℚ (⊤ : IntermediateField ℚ L) from
     IsCyclotomicExtension.equiv _ ℚ (⊤ : IntermediateField ℚ L) topEquiv
   have := (isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ _ ⊤ hξ').mpr
