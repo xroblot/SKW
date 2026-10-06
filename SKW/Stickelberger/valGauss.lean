@@ -112,7 +112,7 @@ theorem valGauss_add_valGauss_sub_self [NeZero f] [𝓟.LiesOver 𝒑] [P.LiesOv
   split_ifs with h
   · rw [valGauss_eq_zero hbij hζ hη 𝓟 _ h, valGauss_eq_zero hbij hζ hη 𝓟 _ (by rwa [Int.dvd_neg]),
       zero_add, ENat.natCast_zero]
-  · haveI : 𝓟.IsPrime := Ideal.isPrime_of_prime h𝓟
+  · have : 𝓟.IsPrime := Ideal.isPrime_of_prime h𝓟
     rw [valGauss, valGauss, ← emultiplicity_mul h𝓟, span_mul_span, Set.singleton_mul_singleton,
       GaussSum_mul_GaussSum_neg hbij hζ _ h, ← Set.singleton_mul_singleton, ← span_mul_span,
       emultiplicity_mul h𝓟, emultiplicity_of_isUnit_right h𝓟.not_isUnit, zero_add, ← span_singleton_pow,

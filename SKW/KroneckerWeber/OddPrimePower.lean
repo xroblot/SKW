@@ -50,8 +50,8 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
   have : IsAbelianGalois ℚ K := IsAbelianGalois.of_isCyclic ℚ K
   have : IsAbelianGalois ℚ ℚ⟮ζ⟯ := isAbelianGalois {p} ℚ ℚ⟮ζ⟯
   let M : IntermediateField ℚ A := K ⊔ ℚ⟮ζ⟯
-  letI : Algebra ℚ⟮ζ⟯ M := (inclusion (le_sup_right : ℚ⟮ζ⟯ ≤ M)).toAlgebra
-  haveI : IsScalarTower ℚ ℚ⟮ζ⟯ M :=
+  let : Algebra ℚ⟮ζ⟯ M := (inclusion (le_sup_right : ℚ⟮ζ⟯ ≤ M)).toAlgebra
+  have : IsScalarTower ℚ ℚ⟮ζ⟯ M :=
     IsScalarTower.of_algebraMap_eq fun x => ((inclusion (le_sup_right : ℚ⟮ζ⟯ ≤ M)).commutes x).symm
   have hMram : UnramifiedOutside M p := unramifiedOutside_sup p K ℚ⟮ζ⟯ hKram
     (fun q hq hqp ↦
