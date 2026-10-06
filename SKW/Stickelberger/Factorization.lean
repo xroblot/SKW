@@ -91,7 +91,7 @@ theorem smul_gaussSum_eq_mul_gaussSum [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ
   rw [← mul_assoc, ← map_mul, ← MulChar.mul_apply, zpow_neg, ← zpow_natCast, zpow_natCast,
     inv_mul_cancel, MulChar.one_apply (by exact Units.isUnit u), map_one, one_mul]
   convert gaussSum_mulShift ((teichmuller hbij ^ (-(d : ℤ))).ringHomComp (algebraMap (𝓞 K) (𝓞 L)))
-    ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace P hζ)) u
+    ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace hζ)) u
   · simp [hu]
   · simp_rw [GaussSum, gaussSum, Finset.smul_sum, smul_mul']
     congr! with x
@@ -99,7 +99,7 @@ theorem smul_gaussSum_eq_mul_gaussSum [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ
       map_teichmuller_zpow_eq hbij _ _ 1 one_ne_zero hη (by simp),
         Nat.cast_one, mul_one]
     · rw [smul_eq_galRestrict_apply (𝓞 K), compAddChar_traceChar,
-        monoidHom_comp_addCharTrace_eq_mulShift _ _ _ e]
+        map_traceChar_apply_eq_mulShift _ _ e]
       · simp [hu]
       · rwa [smul_eq_galRestrict_apply (𝓞 K)] at h
   · rfl

@@ -142,7 +142,7 @@ theorem zeta_sub_one_not_mem_sq [𝓟.LiesOver P] [𝓟.LiesOver 𝒑]
 
 def GaussSum [P.LiesOver 𝒑] (a : ℤ) : 𝓞 L :=
   gaussSum ((teichmuller hbij ^ (- a)).ringHomComp (algebraMap (𝓞 K) (𝓞 L)))
-    ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace P hζ))
+    ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace hζ))
 
 include hη in
 omit [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p ^ f - 1} ℚ K] in
@@ -156,7 +156,7 @@ theorem GaussSum_mem [𝓟.LiesOver 𝒑] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ �
     GaussSum hbij hζ a ∈ 𝓟 := by
   have h𝓟 := zeta_sub_one_mem hζ 𝓟
   simp_rw [← Quotient.eq_zero_iff_mem, GaussSum, gaussSum, map_sum, map_mul,
-    compAddChar_traceChar, addCharTrace_mk_eq_one _ _ h𝓟, mul_one, ← map_sum]
+    compAddChar_traceChar, addCharTrace_mk_eq_one _ h𝓟, mul_one, ← map_sum]
   rw [MulChar.sum_eq_zero_of_ne_one (teichmuller_pow_comp_algebraMap_ne_one hbij (- a)
     (by rwa [Int.dvd_neg])), map_zero]
 
@@ -178,7 +178,7 @@ theorem GaussSum_mul_GaussSum_neg [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : �
   rw [GaussSum, GaussSum, ← mul_gaussSum_inv_eq_gaussSum, compAddChar_traceChar,
     mul_right_comm, neg_neg, zpow_neg, ← MulChar.ringHomComp_inv, mul_assoc,
     gaussSum_mul_gaussSum_eq_card (teichmuller_pow_comp_algebraMap_ne_one hbij a ha)
-    (isPrimitive_traceChar P (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) (𝓞 L)))),
+    (isPrimitive_traceChar (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) (𝓞 L)))),
     Fintype.card_eq_nat_card, ← absNorm_eq_card, ← Ideal.pow_inertiaDeg p P,
     MulChar.ringHomComp_inv, MulChar.ringHomComp_apply,
     Nat.cast_pow, inertia_deg_eq p f P]
@@ -267,7 +267,7 @@ theorem mk_sq_gausssum_eq [hp' : Fact (Odd p)] [𝓟.LiesOver P] [P.LiesOver �
     refine inv_ne_one.mpr ?_
     exact teichmuller_ne_one hbij
   simp_rw [GaussSum, gaussSum, zpow_neg, zpow_one, MulChar.ringHomComp_apply, map_sum, map_mul,
-    compAddChar_traceChar, addCharTrace_mk_sq_eq P hζ₀ h𝓟, mul_add, mul_one,
+    compAddChar_traceChar, addCharTrace_mk_sq_eq hζ₀ h𝓟, mul_add, mul_one,
     Finset.sum_add_distrib, ← map_sum, MulChar.sum_eq_zero_of_ne_one h, map_zero, zero_add,
     Algebra.smul_def, ← mul_assoc, ← Finset.sum_mul, mk_sq_gausssum_eq_aux]
   simp
@@ -359,9 +359,9 @@ theorem galLFEquiv_apply_teichmuller_zpow [Fact (Odd p)] (σ : Gal(L/F)) (a : �
 
 omit [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal] in
 theorem galLFEquiv_apply_addCharTrace [P.LiesOver 𝒑] (σ : Gal(L/F)) (x : 𝓞 K ⧸ P) :
-    σ • ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace P hζ) x) =
-      (algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace P hζ) x := by
-  obtain ⟨a, ha, ha'⟩ := exists_nat_traceChar_eq_pow P hζ x
+    σ • ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace hζ) x) =
+      (algebraMap (𝓞 F) (𝓞 L)).compAddChar (addCharTrace hζ) x := by
+  obtain ⟨a, ha, ha'⟩ := exists_nat_traceChar_eq_pow hζ x
   simp [smul_eq_galRestrict_apply (𝓞 F) σ, Function.comp_apply, ha]
 
 variable {p f}
