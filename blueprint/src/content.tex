@@ -83,7 +83,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 
 \begin{definition}
   \label{def:addchar}
-  \lean{addCharTrace}
+  \lean{AddChar.traceChar}
   \leanok
   The \emph{additive character} $\psi : \cO_K/P \to \mu_p(\cO_L)$ is defined by
   \[
@@ -95,7 +95,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addCharTrace_ne_one}
   \uses{def:addchar}
-  \lean{traceChar_ne_one}
+  \lean{AddChar.traceChar_ne_one}
   \leanok
   The character $\psi$ is nontrivial, i.e., $\psi \neq 1$.
 \end{lemma}
@@ -110,7 +110,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addCharTrace_isPrimitive}
   \uses{lem:addCharTrace_ne_one}
-  \lean{isPrimitive_traceChar}
+  \lean{AddChar.isPrimitive_traceChar}
   \leanok
   The character $\psi$ is primitive.
 \end{lemma}
@@ -124,7 +124,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addCharTrace_frob_apply}
   \uses{def:addchar}
-  \lean{traceChar_apply_pow}
+  \lean{AddChar.traceChar_apply_pow}
   \leanok
   For all $x \in \cO_K/P$, $\psi(x^p) = \psi(x)$.
 \end{lemma}
@@ -140,7 +140,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addCharTrace_mk_sq_eq}
   \uses{def:addchar}
-  \lean{addCharTrace_mk_sq_eq}
+  \lean{AddChar.mk_traceChar_apply_eq_one_add_smul}
   \leanok
   Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta_p - 1 \in \fP$.
   Then
@@ -167,7 +167,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addCharTrace_mk_eq_one}
   \uses{lem:addCharTrace_mk_sq_eq}
-  \lean{addCharTrace_mk_eq_one}
+  \lean{AddChar.mk_traceChar_apply_eq_one}
   \leanok
   Let $\fP$ be a prime ideal of $\cO_L$ with $\zeta_p - 1 \in \fP$.
   Then $\psi(x) \equiv 1 \pmod{\fP}$ for all $x \in \cO_K/P$.

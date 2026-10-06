@@ -45,7 +45,7 @@ theorem valGauss_eq_zero [P.LiesOver 𝒑] [𝓟.IsPrime] (a : ℤ) (h : ↑(p ^
     gaussSum_one_left, span_singleton_neg, span_singleton_one, emultiplicity_top]
   · exact IsPrime.ne_top'
   · rw [ne_eq, MonoidHom.compAddChar_eq_one_iff (FaithfulSMul.algebraMap_injective _ _)]
-    exact traceChar_ne_one hζ
+    exact AddChar.traceChar_ne_one hζ
   · rwa [orderOf_teichmuller hbij hη, Int.dvd_neg]
 
 theorem valGauss_zero [P.LiesOver 𝒑] [𝓟.IsPrime] :
