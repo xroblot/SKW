@@ -128,9 +128,13 @@ headers or motivation essays (`feedback_short_docstrings`).
 - The renames of step 4 must reach every call site.
 - Replacing an aggregate import with explicit ones can break *other* files that were
   getting declarations transitively through this one. This is the step where that shows up.
-- The check is the **whole-project build**, not the file's:
+- The call sites are not only Lean code: the **blueprint** cites declarations by name in
+  `\lean{...}`, and `checkdecls` validates each one against the built library, so a rename
+  that misses `blueprint/src/content.tex` turns CI red even though the project builds.
+- The check is the **whole-project build**, not the file's, plus the blueprint:
   ```bash
   lake build
+  grep -n "<old name>" blueprint/src/content.tex
   ```
 - Then commit (ask first, as always).
 

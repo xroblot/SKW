@@ -95,7 +95,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addCharTrace_ne_one}
   \uses{def:addchar}
-  \lean{addCharTrace_ne_one}
+  \lean{traceChar_ne_one}
   \leanok
   The character $\psi$ is nontrivial, i.e., $\psi \neq 1$.
 \end{lemma}
@@ -110,7 +110,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addCharTrace_isPrimitive}
   \uses{lem:addCharTrace_ne_one}
-  \lean{addCharTrace_isPrimitive}
+  \lean{isPrimitive_traceChar}
   \leanok
   The character $\psi$ is primitive.
 \end{lemma}
@@ -124,7 +124,7 @@ $\zeta_p$. We fix such a $\zeta_p \in \cO_L$.
 \begin{lemma}
   \label{lem:addCharTrace_frob_apply}
   \uses{def:addchar}
-  \lean{addCharTrace_frob_apply}
+  \lean{traceChar_apply_pow}
   \leanok
   For all $x \in \cO_K/P$, $\psi(x^p) = \psi(x)$.
 \end{lemma}
