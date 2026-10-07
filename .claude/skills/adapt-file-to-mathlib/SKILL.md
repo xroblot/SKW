@@ -54,7 +54,7 @@ with it. Find what it still needs from SKW:
   *associated with this file* and ships in the same PR. Note it, and say so in a comment
   on the SKW import that provides it (see step 3).
 - **Big enough to stand alone**: flag it as a **priority upstream candidate**, and record
-  that in `~/Desktop/Claude/plan_kronecker_weber.md` (the on-disk plan), since the file
+  that in `~/Desktop/Claude/Lean/KroneckerWeber/plan_kronecker_weber.md` (the on-disk plan), since the file
   cannot go upstream before it does.
 
 Record the disposition in the plan either way: the next pass should not have to

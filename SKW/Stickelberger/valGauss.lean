@@ -28,7 +28,7 @@ variable [P.IsMaximal] (𝓟 : Ideal (𝓞 L)) [hp : Fact (p.Prime)]
 
 local instance : Fintype (𝓞 K ⧸ P) := Fintype.ofFinite (𝓞 K ⧸ P)
 
-attribute [local instance] Ideal.Quotient.field
+attribute [local instance] Ideal.Quotient.field ZMod.algebra
 
 def valGauss [P.LiesOver 𝒑] (a : ℤ) : ℕ∞ := emultiplicity 𝓟 (span {(GaussSum hbij hζ a : 𝓞 L)})
 
@@ -44,7 +44,8 @@ theorem valGauss_eq_zero [P.LiesOver 𝒑] [𝓟.IsPrime] (a : ℤ) (h : ↑(p ^
   rw [valGauss, GaussSum, orderOf_dvd_iff_zpow_eq_one.mp, MulChar.ringHomComp_one,
     gaussSum_one_left, span_singleton_neg, span_singleton_one, emultiplicity_top]
   · exact IsPrime.ne_top'
-  · rw [ne_eq, MonoidHom.compAddChar_eq_one_iff (FaithfulSMul.algebraMap_injective _ _)]
+  · have : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
+    rw [ne_eq, MonoidHom.compAddChar_eq_one_iff (FaithfulSMul.algebraMap_injective _ _)]
     exact AddChar.traceChar_ne_one hζ
   · rwa [orderOf_teichmuller hbij hη, Int.dvd_neg]
 
