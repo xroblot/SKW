@@ -1,26 +1,16 @@
 module
 
 public import SKW.Misc
+public import SKW.PRed2Mathlib.Teichmuller
 
 set_option linter.style.header false
 
 @[expose] public section
 
-variable {R : Type*} [CommRing R] (n : ℕ) (I : Ideal R)
+variable {R : Type*} [CommRing R] {n : ℕ} {I : Ideal R}
+  (hbij : Function.Bijective (rootsOfUnity.mapQuot n I))
 
-/--
-For `I` an ideal of `R`, the group morphism from the roots of unity of `R`
-of order `n` to `(R ⧸ I)ˣ`.
--/
-def rootsOfUnity.mapQuot : (rootsOfUnity n R) →* (R ⧸ I)ˣ :=
-  (Units.map (Ideal.Quotient.mk I).toMonoidHom).domRestrict _
-
-
-@[simp]
-theorem rootsOfUnity.coe_mapQuot (x : rootsOfUnity n R) :
-    (rootsOfUnity.mapQuot n I x).val = Ideal.Quotient.mk I x.val := rfl
-
-variable {n I} (hbij : Function.Bijective (rootsOfUnity.mapQuot n I))
+namespace MulChar
 
 noncomputable def teichmuller : MulChar (R ⧸ I) R :=
   MulChar.ofUnitHom <| (rootsOfUnity n R).subtype.comp (MulEquiv.ofBijective _
@@ -106,3 +96,5 @@ theorem map_teichmuller_zpow_eq [IsDomain R] [NeZero n] {S : Type*}
     rw [MulChar.ringHomComp_apply, ht, map_pow, map_pow, hσ,MulChar.ringHomComp_apply,
       zpow_mul, zpow_natCast, MulChar.pow_apply' _ hm, ht, map_pow, map_pow, pow_right_comm]
   · simp [MulChar.map_nonunit _ hx]
+
+end MulChar

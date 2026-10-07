@@ -79,25 +79,26 @@ include hη in
 theorem smul_gaussSum_eq_mul_gaussSum [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ} (he : ¬ p ∣ e)
     (h : τ • algebraMap (𝓞 F) (𝓞 L) ζ = algebraMap (𝓞 F) (𝓞 L) ζ ^ e) :
     τ • GaussSum hbij hζ d =
-      algebraMap (𝓞 K) (𝓞 L) ((teichmuller hbij ^ d) e) * GaussSum hbij hζ d := by
+      algebraMap (𝓞 K) (𝓞 L) ((MulChar.teichmuller hbij ^ d) e) * GaussSum hbij hζ d := by
   have : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
   let u : (𝓞 K ⧸ P)ˣ := IsUnit.unit (a := e) (by
     rw [isUnit_iff_ne_zero]
     simpa [CharP.cast_eq_zero_iff, Ideal.ringChar_quot, ← (liesOver_iff P 𝒑).mp inferInstance])
   have hu : (u : 𝓞 K ⧸ P) = (e : 𝓞 K ⧸ P) := IsUnit.unit_spec _
-  have : algebraMap (𝓞 K) (𝓞 L) ((teichmuller hbij ^ (-(d : ℤ))) ↑e) ≠ 0 := by
+  have : algebraMap (𝓞 K) (𝓞 L) ((MulChar.teichmuller hbij ^ (-(d : ℤ))) ↑e) ≠ 0 := by
     rw [map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective _ _)]
-    exact teichmuller_zpow_apply_ne_zero hbij (-d) u
+    exact MulChar.teichmuller_zpow_apply_ne_zero hbij (-d) u
   refine mul_left_cancel₀ this ?_
   rw [← mul_assoc, ← map_mul, ← MulChar.mul_apply, zpow_neg, ← zpow_natCast, zpow_natCast,
     inv_mul_cancel, MulChar.one_apply (by exact Units.isUnit u), map_one, one_mul]
-  convert gaussSum_mulShift ((teichmuller hbij ^ (-(d : ℤ))).ringHomComp (algebraMap (𝓞 K) (𝓞 L)))
+  convert gaussSum_mulShift
+    ((MulChar.teichmuller hbij ^ (-(d : ℤ))).ringHomComp (algebraMap (𝓞 K) (𝓞 L)))
     ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ)) u
   · simp [hu]
   · simp_rw [GaussSum, gaussSum, Finset.smul_sum, smul_mul']
     congr! with x
     · rw [smul_eq_galRestrict_apply (𝓞 K),
-      map_teichmuller_zpow_eq hbij _ _ 1 one_ne_zero hη (by simp),
+      MulChar.map_teichmuller_zpow_eq hbij _ _ 1 one_ne_zero hη (by simp),
         Nat.cast_one, mul_one]
     · rw [smul_eq_galRestrict_apply (𝓞 K), AddChar.compAddChar_traceChar_algebraMap,
         AddChar.map_traceChar_apply_eq_mulShift _ _ e]
@@ -121,9 +122,10 @@ theorem smul_gaussSum_eq_gaussSum [NeZero m] [P.LiesOver 𝒑] (τ : Gal(L/K)) :
     rw [isUnit_iff_ne_zero]
     simpa [CharP.cast_eq_zero_iff, Ideal.ringChar_quot, ← (liesOver_iff P 𝒑).mp inferInstance]
   rw [smul_pow', smul_gaussSum_eq_mul_gaussSum hbij hζ hη _ _ he₁ he₂, mul_pow, ← map_pow,
-    ← MulChar.pow_apply' _ (NeZero.ne m), ← pow_mul, hdm, show teichmuller hbij ^ (p ^ f - 1) = 1 by
-        convert pow_orderOf_eq_one (teichmuller hbij)
-        exact (orderOf_teichmuller hbij hη).symm,
+    ← MulChar.pow_apply' _ (NeZero.ne m), ← pow_mul, hdm,
+    show MulChar.teichmuller hbij ^ (p ^ f - 1) = 1 by
+        convert pow_orderOf_eq_one (MulChar.teichmuller hbij)
+        exact (MulChar.orderOf_teichmuller hbij hη).symm,
     MulChar.one_apply this, map_one, one_mul]
 
 set_option backward.isDefEq.respectTransparency false in

@@ -47,7 +47,7 @@ theorem valGauss_eq_zero [P.LiesOver 𝒑] [𝓟.IsPrime] (a : ℤ) (h : ↑(p ^
   · have : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
     rw [ne_eq, MonoidHom.compAddChar_eq_one_iff (FaithfulSMul.algebraMap_injective _ _)]
     exact AddChar.traceChar_ne_one hζ
-  · rwa [orderOf_teichmuller hbij hη, Int.dvd_neg]
+  · rwa [MulChar.orderOf_teichmuller hbij hη, Int.dvd_neg]
 
 theorem valGauss_zero [P.LiesOver 𝒑] [𝓟.IsPrime] :
     valGauss hbij hζ 𝓟 0 = 0 :=
@@ -126,7 +126,7 @@ theorem valGauss_add_valGauss_sub_self [NeZero f] [𝓟.LiesOver 𝒑] [P.LiesOv
     · rw [ramificationIdx_eq_p_sub_one (p := p) f 𝓟, ENat.natCast_mul]
     · rw [isUnit_iff, span_singleton_eq_top]
       exact RingHom.isUnit_map (algebraMap (𝓞 K) (𝓞 L)) <|
-        isUnit_teichmuller_zpow_apply hbij (- a) isUnit_neg_one.unit
+        MulChar.isUnit_teichmuller_zpow_apply hbij (- a) isUnit_neg_one.unit
 
 variable [IsCyclotomicExtension {p} ℚ F]
 
