@@ -35,6 +35,9 @@ multiplicative section of the reduction map.
 
 * `MulChar.orderOf_teichmuller`: the Teichmüller character has order `n`.
 
+* `MulChar.teichmuller_zpow_eq_one_iff`: a power of the Teichmüller character is trivial exactly
+  when `n` divides its exponent.
+
 * `MulChar.isUnit_teichmuller_zpow_apply`: the values of its powers at units are units.
 
 * `MulChar.exists_nat_teichmuller_zpow_eq_pow`: over a domain containing a primitive `n`-th root
@@ -74,23 +77,8 @@ theorem teichmuller_apply (x : R ⧸ I) :
 theorem teichmuller_eq_one (hI : I = ⊤) :
     teichmuller hbij = 1 := by
   rw [← Ideal.Quotient.subsingleton_iff] at hI
-  exact MulChar.eq_one_iff.mpr fun x ↦ by simp [teichmuller_apply, isUnit_iff_eq_one,
-    Units.eq_one x]
-
-theorem teichmuller_apply_zero (hI : I ≠ ⊤) :
-    teichmuller hbij 0 = 0 := by
-  have : Nontrivial (R ⧸ I) := Submodule.Quotient.nontrivial_iff.mpr hI
-  rw [teichmuller_apply, dite_eq_right not_isUnit_zero]
-
-/-- The values at units of the powers of the Teichmüller character are units. -/
-theorem isUnit_teichmuller_zpow_apply [I.IsMaximal] (a : ℤ) (x : (R ⧸ I)ˣ) :
-    IsUnit ((teichmuller hbij ^ a) x) := by
-  rw [MulChar.zpow_apply_coe, teichmuller_apply, dite_eq_left (Units.isUnit _)]
-  exact Units.isUnit _
-
-theorem teichmuller_zpow_apply_ne_zero [Nontrivial R] [I.IsMaximal] (a : ℤ) (x : (R ⧸ I)ˣ) :
-    (teichmuller hbij ^ a) x ≠ 0 :=
-  (isUnit_teichmuller_zpow_apply hbij a x).ne_zero
+  exact MulChar.eq_one_iff.mpr fun x ↦ by
+    simp [teichmuller_apply, isUnit_iff_eq_one, Units.eq_one x]
 
 /-- The Teichmüller character is a section of the reduction map `R → R ⧸ I`. -/
 theorem mk_teichmuller_apply [I.IsMaximal] (x : R ⧸ I) :
@@ -99,43 +87,61 @@ theorem mk_teichmuller_apply [I.IsMaximal] (x : R ⧸ I) :
   · have := Ideal.Quotient.subsingleton_iff.mpr hI
     rw [teichmuller_eq_one _ hI, MulChar.one_apply (isUnit_of_subsingleton x),
       Subsingleton.eq_one x, map_one]
-  by_cases hx : x = 0
-  · rw [hx, teichmuller_apply_zero _ hI, map_zero]
-  lift x to (R ⧸ I)ˣ using Ne.isUnit hx
-  simp [teichmuller_apply, IsUnit.unit_of_val_units, ← rootsOfUnity.coe_mapQuot]
+  obtain rfl | ⟨u, rfl⟩ := GroupWithZero.eq_zero_or_unit x
+  · simp
+  · simp [teichmuller_apply, IsUnit.unit_of_val_units, ← rootsOfUnity.coe_mapQuot]
+
+/-- The `n`-th power of the Teichmüller character is trivial. -/
+theorem teichmuller_pow_eq_one : teichmuller hbij ^ n = 1 := by
+  ext
+  simp [teichmuller, MulChar.pow_apply_coe, ← mem_rootsOfUnity']
+
+theorem teichmuller_zpow_eq_one {a : ℤ} (ha : (n : ℤ) ∣ a) : teichmuller hbij ^ a = 1 := by
+  obtain ⟨c, rfl⟩ := ha
+  rw [zpow_mul, zpow_natCast, teichmuller_pow_eq_one, one_zpow]
 
 /-- The Teichmüller character has order `n`. -/
 theorem orderOf_teichmuller [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ n) :
     orderOf (teichmuller hbij) = n := by
-  refine (orderOf_eq_iff (NeZero.pos _)).mpr ⟨?_, fun m h₁ h₂ ↦ MulChar.ne_one_iff.mpr ?_⟩
-  · ext
-    simpa [teichmuller, MulChar.pow_apply_coe] using (mem_rootsOfUnity' _ _).mp <| SetLike.coe_mem _
+  refine (orderOf_eq_iff (NeZero.pos _)).mpr ⟨teichmuller_pow_eq_one hbij,
+    fun m h₁ h₂ ↦ MulChar.ne_one_iff.mpr ?_⟩
   · refine ⟨rootsOfUnity.mapQuot n I hζ.toRootsOfUnity, ?_⟩
     rw [teichmuller, MulChar.pow_apply_coe, MulChar.ofUnitHom_coe, MonoidHom.comp_apply,
       MulEquiv.coe_toMonoidHom, MulEquiv.ofBijective_symm_apply_apply, Subgroup.subtype_apply,
       IsPrimitiveRoot.val_toRootsOfUnity_coe, ne_eq, hζ.pow_eq_one_iff_dvd]
     exact Nat.not_dvd_of_pos_of_lt h₂ h₁
 
-theorem orderOf_teichmuller_zpow_dvd [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ n) (a : ℤ) :
-    orderOf (teichmuller hbij ^ a) ∣ n := by
-  nth_rewrite 2 [← orderOf_teichmuller hbij hζ]
-  exact orderOf_dvd_of_mem_zpowers <| Subgroup.zpow_mem_zpowers (teichmuller hbij) a
+/-- The Teichmüller character is nontrivial as soon as `n ≠ 1`. -/
+theorem teichmuller_ne_one [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ n) (hn : n ≠ 1) :
+    teichmuller hbij ≠ 1 :=
+  orderOf_eq_one_iff.not.mp <| by rwa [orderOf_teichmuller hbij hζ]
 
-theorem exists_nat_teichmuller_zpow_eq_pow [IsDomain R] [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ
-  n)
-    (a : ℤ) (x : (R ⧸ I)ˣ) :
+/-- A power of the Teichmüller character is trivial exactly when `n` divides its exponent. -/
+theorem teichmuller_zpow_eq_one_iff [NeZero n] {ζ : R} (hζ : IsPrimitiveRoot ζ n) {a : ℤ} :
+    teichmuller hbij ^ a = 1 ↔ (n : ℤ) ∣ a := by
+  rw [← orderOf_dvd_iff_zpow_eq_one, orderOf_teichmuller hbij hζ]
+
+theorem orderOf_teichmuller_zpow_dvd (a : ℤ) : orderOf (teichmuller hbij ^ a) ∣ n :=
+  (orderOf_dvd_of_mem_zpowers <| Subgroup.zpow_mem_zpowers (teichmuller hbij) a).trans
+    (orderOf_dvd_of_pow_eq_one (teichmuller_pow_eq_one hbij))
+
+/-- The values at units of the powers of the Teichmüller character are units. -/
+theorem isUnit_teichmuller_zpow_apply [I.IsMaximal] (a : ℤ) (x : (R ⧸ I)ˣ) :
+    IsUnit ((teichmuller hbij ^ a) x) := by
+  rw [MulChar.zpow_apply_coe, teichmuller_apply, dite_eq_left (Units.isUnit _)]
+  exact Units.isUnit _
+
+theorem exists_nat_teichmuller_zpow_eq_pow [IsDomain R] [NeZero n] {ζ : R}
+    (hζ : IsPrimitiveRoot ζ n) (a : ℤ) (x : (R ⧸ I)ˣ) :
     ∃ m : ℕ, (teichmuller hbij ^ a) x = ζ ^ m := by
-  have : ((teichmuller hbij ^ a) x) ^ n = 1 := by
-    obtain ⟨t, ht⟩ := orderOf_teichmuller_zpow_dvd hbij hζ a
-    have := DFunLike.congr_fun (pow_orderOf_eq_one (teichmuller hbij ^ a)) ↑x
-    rw [MulChar.pow_apply_coe, MulChar.one_apply_coe] at this
-    nth_rewrite 2 [ht]
-    rw [pow_mul, this, one_pow]
-  obtain ⟨a, -, ha⟩ := hζ.eq_pow_of_pow_eq_one this
-  exact ⟨a, ha.symm⟩
+  suffices ((teichmuller hbij ^ a) x) ^ n = 1 by
+    obtain ⟨a, -, ha⟩ := hζ.eq_pow_of_pow_eq_one this
+    exact ⟨a, ha.symm⟩
+  simpa [← MulChar.pow_apply_coe] using DFunLike.congr_fun
+    (orderOf_dvd_iff_pow_eq_one.mp (orderOf_teichmuller_zpow_dvd hbij a)) x.val
 
 /-- A ring homomorphism sending `ζ` to `ζ ^ m` multiplies by `m` the exponent of a power of the
-Teichmüller character, after both have been pushed into `S`. -/
+Teichmüller character. -/
 theorem map_ringHomComp_teichmuller_zpow_apply [IsDomain R] [NeZero n] {S : Type*}
     [CommRing S] {F : Type*} [FunLike F S S] [RingHomClass F S S] (σ : F) (f : R →+* S)
     (m : ℕ) {ζ : R} (hm : m ≠ 0) (hζ : IsPrimitiveRoot ζ n) (hσ : σ (f ζ) = (f ζ) ^ m) (a : ℤ)

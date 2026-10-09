@@ -17,7 +17,7 @@ open NumberField
 /-! ### Ideal -/
 
 theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [IsDedekindDomain S] [Infinite S]
-    [Module.Free ℤ S] (I : Ideal S) :
+    (I : Ideal S) :
     Ideal.absNorm I = Nat.card (S ⧸ I) := rfl
 
 
@@ -97,7 +97,7 @@ instance Ideal.Quotient.isScalarTower_of_liesOver_liesOver {A B C : Type*} [Comm
   simp [this, Ideal.Quotient.algebraMap_mk_of_liesOver, ← IsScalarTower.algebraMap_apply]
 
 theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDedekindDomain R]
-    [Infinite R] [Module.Free ℤ R] [Algebra.IsIntegral ℤ R] (I : Ideal R) [I.IsPrime] {p k : ℕ}
+    [Infinite R] [Algebra.IsIntegral ℤ R] (I : Ideal R) [I.IsPrime] {p k : ℕ}
     [hp : Fact (Nat.Prime p)] (hI : Ideal.absNorm I ∣ p ^ k) :
     I.LiesOver (Ideal.span {(p : ℤ)}) := by
   have : NeZero I := ⟨by

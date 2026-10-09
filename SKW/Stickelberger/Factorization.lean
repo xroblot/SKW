@@ -72,7 +72,7 @@ theorem smul_gaussSum_eq_gaussSum' [NeZero f] [NeZero m] [Fact (Odd p)] [IsCyclo
       (Nat.mod_lt _ <| NeZero.pos (p ^ f - 1)) this
     rwa [Int.natCast_mod, Int.natCast_mod, Int.natCast_mul, ← Int.ModEq,
       Int.modEq_iff_add_fac, mul_comm] at this
-  rw [hk, GaussSum_periodic hbij hζ hη]
+  rw [hk, GaussSum_periodic hbij hζ]
   exact Dvd.intro k rfl
 
 include hη in
@@ -87,7 +87,7 @@ theorem smul_gaussSum_eq_mul_gaussSum [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ
   have hu : (u : 𝓞 K ⧸ P) = (e : 𝓞 K ⧸ P) := IsUnit.unit_spec _
   have : algebraMap (𝓞 K) (𝓞 L) ((MulChar.teichmuller hbij ^ (-(d : ℤ))) ↑e) ≠ 0 := by
     rw [map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective _ _)]
-    exact MulChar.teichmuller_zpow_apply_ne_zero hbij (-d) u
+    exact (MulChar.isUnit_teichmuller_zpow_apply hbij (-d) u).ne_zero
   refine mul_left_cancel₀ this ?_
   rw [← mul_assoc, ← map_mul, ← MulChar.mul_apply, zpow_neg, ← zpow_natCast, zpow_natCast,
     inv_mul_cancel, MulChar.one_apply (by exact Units.isUnit u), map_one, one_mul]
@@ -123,9 +123,7 @@ theorem smul_gaussSum_eq_gaussSum [NeZero m] [P.LiesOver 𝒑] (τ : Gal(L/K)) :
     simpa [CharP.cast_eq_zero_iff, Ideal.ringChar_quot, ← (liesOver_iff P 𝒑).mp inferInstance]
   rw [smul_pow', smul_gaussSum_eq_mul_gaussSum hbij hζ hη _ _ he₁ he₂, mul_pow, ← map_pow,
     ← MulChar.pow_apply' _ (NeZero.ne m), ← pow_mul, hdm,
-    show MulChar.teichmuller hbij ^ (p ^ f - 1) = 1 by
-        convert pow_orderOf_eq_one (MulChar.teichmuller hbij)
-        exact (MulChar.orderOf_teichmuller hbij hη).symm,
+    MulChar.teichmuller_pow_eq_one hbij,
     MulChar.one_apply this, map_one, one_mul]
 
 set_option backward.isDefEq.respectTransparency false in
@@ -142,7 +140,7 @@ theorem exists_mem_gaussSum_pow_eq [NeZero f] [NeZero m] [Fact (Odd p)] [Algebra
     refine ⟨⟨⟨(GaussSum hbij hζ d ^ m : 𝓞 L), this⟩,
       coe_isIntegral_iff.mp <| RingOfIntegers.isIntegral_coe _⟩, ?_, rfl⟩
     rw [← map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective (𝓞 k) (𝓞 L))]
-    exact_mod_cast pow_ne_zero m <| GaussSum_ne_zero hbij hζ hη 𝓟 _
+    exact_mod_cast pow_ne_zero m <| GaussSum_ne_zero hbij hζ 𝓟 _
   have : k = E ⊓ K := by
     have : p.Coprime d := (coprime_pow_sub_one p f).symm.of_dvd_right (Dvd.intro m hdm)
     convert isCyclotomicExtension_eq {m} ℚ L k _
@@ -241,16 +239,16 @@ theorem galEquivZMod_mul_smul_of_zpowers [IsCyclotomicExtension {m} ℚ k] [NeZe
     ← Subgroup.mem_map_equiv, ← MulEquiv.coe_mapSubgroup, galEquivZMod_stabilizer' p]
   exact b.prop
 
-include hη hdm in
+include hdm in
 theorem mul_valGauss_eq_mul_sum [NeZero f] [NeZero m] [NeZero d] [𝓟.LiesOver P] [P.LiesOver 𝒑]
     [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
     [IsCyclotomicExtension {p ^ f - 1} ℚ K] [Fact (Odd p)] [𝓟.IsPrime] (a : ℕ) (ha : d * a ≤ p ^ f
       - 2) :
     m * (valGauss hbij hζ 𝓟 (d * a : ℕ)) = (p - 1 : ℕ) * ∑ i ∈ Finset.range f, (a * p ^ i % m) := by
-  rw [← Nat.cast_mul, ← ENat.natCast_toNat (valGauss_ne_top₀' hbij hζ hη 𝓟 _), ← Nat.cast_mul,
+  rw [← Nat.cast_mul, ← ENat.natCast_toNat (valGauss_ne_top₀' hbij hζ 𝓟 _), ← Nat.cast_mul,
     Nat.cast_inj]
   qify
-  rw [← Nat.cast_mul d, valGauss_toNat_eq_sum_digits hbij hζ hη _ _ ha,
+  rw [← Nat.cast_mul d, valGauss_toNat_eq_sum_digits hbij hζ _ _ ha,
     ← Nat.sub_one_mul_sum_fract_div_eq_digits_sum hp.out.one_lt (l := f) ha]
   simp_rw [← hdm, Nat.cast_mul, div_mul_eq_div_div, mul_div_assoc _ _ (d :ℚ),
     ← mul_div_assoc (d : ℚ),
@@ -325,7 +323,7 @@ theorem emultiplicity_galEquivZMod_symm_smul_gaussSum [IsCyclotomicExtension {m}
   rw [← Ideal.span_singleton_pow, emultiplicity_pow h𝓟, emultiplicity_smul_GaussSum hbij hζ hη,
     ← Set.image_singleton, ← map_span,
     ← Ideal.IsDedekindDomain.ramificationIdx_mul_emultiplicity_under_eq h𝓟' h𝓟₀, ← Nat.cast_mul,
-    valGauss_periodic' hbij hζ hη _ _ _ this, mul_valGauss_eq_mul_sum hbij hζ hη _ m _ hdm] at hmain
+    valGauss_periodic' hbij hζ _ _ _ this, mul_valGauss_eq_mul_sum hbij hζ _ m _ hdm] at hmain
   · have : under (𝓞 k) (σ • 𝓟) = ((galEquivZMod m k).symm a⁻¹) • 𝔭 := by
       ext
       unfold σ
@@ -356,7 +354,7 @@ theorem emultiplicity_galEquivZMod_symm_smul_gaussSum [IsCyclotomicExtension {m}
 variable [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p ^ f - 1} ℚ K] [NeZero f]
   [𝓟.IsPrime]
 
-include hη 𝓟 in
+include 𝓟 in
 theorem emultplicity_gaussSum_eq_zero [P.LiesOver 𝒑] {𝔭 : Ideal (𝓞 k)} [NeZero 𝓟]
     [𝓟.LiesOver 𝔭] {Γ : 𝓞 k} (hΓ : (GaussSum hbij hζ d) ^ m = algebraMap (𝓞 k) (𝓞 L) Γ)
     (hP₀ : Prime 𝔭) (hP₀' : ¬ 𝔭.LiesOver 𝒑) :
@@ -366,7 +364,7 @@ theorem emultplicity_gaussSum_eq_zero [P.LiesOver 𝒑] {𝔭 : Ideal (𝓞 k)} 
     have : ¬ 𝓟.LiesOver 𝒑 := by
       contrapose! hP₀'
       exact LiesOver.tower_bot 𝓟 𝔭 𝒑
-    have := valGauss_eq_zero_of_not_liesOver hbij hζ hη 𝓟 this d
+    have := valGauss_eq_zero_of_not_liesOver hbij hζ 𝓟 this d
     rw [valGauss] at this
     rw [← span_singleton_pow, emultiplicity_pow h𝓟, this, mul_zero]
   rw [hΓ, ← Set.image_singleton, ← map_span] at this
@@ -453,6 +451,6 @@ theorem GaussSum_factorization [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
       contrapose! hP₀'
       rw [(smul_eq_iff_eq_inv_smul _).mp hP₀']
       exact LiesOver.smul σ⁻¹
-    rw [emultplicity_gaussSum_eq_zero hbij hζ hη 𝓠 m d hΓ hQ₀ hP₀',
+    rw [emultplicity_gaussSum_eq_zero hbij hζ 𝓠 m d hΓ hQ₀ hP₀',
       emultiplicity_galEquivZMod_symm_smul m 𝔭 hQ₀, Nat.cast_sum]
     simp [ite_eq_right this]

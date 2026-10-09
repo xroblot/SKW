@@ -35,9 +35,8 @@ theorem NumberField.isUnit_iff_natAbs_norm {K : Type*} [Field K] [NumberField K]
 
 /-! ### Galois / galRestrict -/
 
-theorem smul_eq_galRestrict_apply (A : Type*) {K L B : Type*} [CommRing A] [IsIntegrallyClosed A]
-    [Field K] [Field L] [CommRing B] [Algebra A K] [IsFractionRing A K] [Algebra B L]
-      [IsFractionRing B L]
+theorem smul_eq_galRestrict_apply (A : Type*) {K L B : Type*} [CommRing A] [Field K] [Field L]
+    [CommRing B] [Algebra A K] [IsFractionRing A K] [Algebra B L] [IsFractionRing B L]
     [Algebra A B] [Algebra K L] [Algebra A L] [IsScalarTower A K L] [IsScalarTower A B L]
     [IsIntegralClosure B A L] [Algebra.IsAlgebraic K L] [MulSemiringAction Gal(L/K) B]
     [SMulDistribClass Gal(L/K) B L] (σ : Gal(L/K)) (x : B) :
