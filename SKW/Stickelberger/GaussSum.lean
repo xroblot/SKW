@@ -4,6 +4,9 @@ public import Mathlib.NumberTheory.JacobiSum.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 
+public import SKW.Prereqs.CyclotomicField
+public import SKW.Prereqs.Ideals
+public import SKW.Prereqs.NumberTheory
 public import SKW.Stickelberger.AddCharTrace
 public import SKW.Stickelberger.Teichmuller
 
@@ -232,7 +235,7 @@ theorem mk_sq_gausssum_eq_aux [(𝓟 ^ 2).LiesOver 𝒑] [P.LiesOver 𝒑] [(�
   classical
   simp_rw [Ideal.Quotient.mk_algebraMap,
     IsScalarTower.algebraMap_apply (𝓞 K) (𝓞 K ⧸ P) (𝓞 L ⧸ 𝓟 ^ 2),
-    Quotient.algebraMap_eq, MulChar.inv_apply', MulChar.teichmuller_mk_eq,
+    Quotient.algebraMap_eq, MulChar.inv_apply', MulChar.mk_teichmuller_apply,
     IsScalarTower.algebraMap_apply (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) (𝓞 L ⧸ 𝓟 ^ 2),
     FiniteField.algebraMap_trace_eq_sum_pow, ← map_mul, Finset.mul_sum]
   rw [← map_sum, Finset.sum_comm]
@@ -396,7 +399,7 @@ theorem galLFEquiv_apply_teichmuller_zpow [Fact (Odd p)] (σ : Gal(L/F)) (a : �
       ((MulChar.teichmuller hbij) ^ (- a * (galFEquiv p f K σ).val.val : ℤ)).ringHomComp
         (algebraMap (𝓞 K) (𝓞 L)) x := by
   rw [smul_eq_galRestrict_apply (𝓞 F) σ,
-    MulChar.map_teichmuller_zpow_eq hbij _ _ (galFEquiv p f K σ).val.val
+    MulChar.map_ringHomComp_teichmuller_zpow_apply hbij _ _ (galFEquiv p f K σ).val.val
       (galFEquiv_val_ne_zero p f σ) hη]
   rw [← smul_eq_galRestrict_apply, galLFEquiv_apply_eta p f hη]
 

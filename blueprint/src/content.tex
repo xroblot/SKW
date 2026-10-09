@@ -43,8 +43,8 @@ We fix a maximal ideal $P$ of $\cO_K$ lying above $p$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:map_teichmuller_zpow_eq}
-  \lean{MulChar.map_teichmuller_zpow_eq}
+  \label{lem:map_ringHomComp_teichmuller_zpow_apply}
+  \lean{MulChar.map_ringHomComp_teichmuller_zpow_apply}
   \leanok
   \uses{def:teichmuller}
   Let $R$ be a ring containing $\cO_K$ and let $\sigma$ be a ring endomorphism of $R$ such that
@@ -325,7 +325,7 @@ isomorphism.
 
 \begin{lemma}
   \label{lem:gal_gaussSum_eq_gaussSum}
-  \uses{def:gauss_sum_s, lem:map_teichmuller_zpow_eq}
+  \uses{def:gauss_sum_s, lem:map_ringHomComp_teichmuller_zpow_apply}
   \lean{gal_gaussSum_eq_gaussSum}
   \leanok
   For all $\sigma \in \Gal(L/F)$ and $a \in \ZZ$,
@@ -337,7 +337,7 @@ isomorphism.
 \begin{proof}
   \leanok
   Since $\sigma \in \Gal(L/F)$, it fixes $\zeta_p$, hence $\psi$.
-  By \ref{lem:map_teichmuller_zpow_eq}, $\sigma(\omega(x)) = \omega(x)^{\fn(\sigma)}$
+  By \ref{lem:map_ringHomComp_teichmuller_zpow_apply}, $\sigma(\omega(x)) = \omega(x)^{\fn(\sigma)}$
   for all $x$. Therefore
   \[
     \sigma(g_a) = \sum_{x \in \cO_K/P} \sigma(\omega(x)^{-a}) \cdot \psi(x)

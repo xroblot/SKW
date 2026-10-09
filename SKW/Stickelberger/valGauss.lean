@@ -2,6 +2,8 @@ module
 
 public import Mathlib.Data.ENat.BigOperators
 
+public import SKW.Prereqs.Digits
+public import SKW.Prereqs.MulChars
 public import SKW.Stickelberger.GaussSum
 
 set_option linter.style.header false

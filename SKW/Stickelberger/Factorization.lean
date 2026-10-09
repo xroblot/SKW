@@ -98,7 +98,7 @@ theorem smul_gaussSum_eq_mul_gaussSum [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ
   · simp_rw [GaussSum, gaussSum, Finset.smul_sum, smul_mul']
     congr! with x
     · rw [smul_eq_galRestrict_apply (𝓞 K),
-      MulChar.map_teichmuller_zpow_eq hbij _ _ 1 one_ne_zero hη (by simp),
+      MulChar.map_ringHomComp_teichmuller_zpow_apply hbij _ _ 1 one_ne_zero hη (by simp),
         Nat.cast_one, mul_one]
     · rw [smul_eq_galRestrict_apply (𝓞 K), AddChar.compAddChar_traceChar_algebraMap,
         AddChar.map_traceChar_apply_eq_mulShift _ _ e]
