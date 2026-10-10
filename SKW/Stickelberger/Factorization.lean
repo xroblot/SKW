@@ -87,7 +87,7 @@ theorem smul_gaussSum_eq_mul_gaussSum [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ
   have hu : (u : 𝓞 K ⧸ P) = (e : 𝓞 K ⧸ P) := IsUnit.unit_spec _
   have : algebraMap (𝓞 K) (𝓞 L) ((MulChar.teichmuller hbij ^ (-(d : ℤ))) ↑e) ≠ 0 := by
     rw [map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective _ _)]
-    exact (MulChar.isUnit_teichmuller_zpow_apply hbij (-d) u).ne_zero
+    exact (IsUnit.map (MulChar.teichmuller hbij ^ (-(d : ℤ))) u.isUnit).ne_zero
   refine mul_left_cancel₀ this ?_
   rw [← mul_assoc, ← map_mul, ← MulChar.mul_apply, zpow_neg, ← zpow_natCast, zpow_natCast,
     inv_mul_cancel, MulChar.one_apply (by exact Units.isUnit u), map_one, one_mul]
@@ -98,7 +98,7 @@ theorem smul_gaussSum_eq_mul_gaussSum [P.LiesOver 𝒑] (τ : Gal(L/K)) {e : ℕ
   · simp_rw [GaussSum, gaussSum, Finset.smul_sum, smul_mul']
     congr! with x
     · rw [smul_eq_galRestrict_apply (𝓞 K),
-      MulChar.map_ringHomComp_teichmuller_zpow_apply hbij _ _ 1 one_ne_zero hη (by simp),
+      MulChar.map_ringHomComp_teichmuller_zpow_apply hbij _ _ 1 hη (by simp),
         Nat.cast_one, mul_one]
     · rw [smul_eq_galRestrict_apply (𝓞 K), AddChar.compAddChar_traceChar_algebraMap,
         AddChar.map_traceChar_apply_eq_mulShift _ _ e]

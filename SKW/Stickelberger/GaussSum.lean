@@ -156,7 +156,7 @@ omit [NeZero (p ^ f - 1)] [IsCyclotomicExtension {p} ℚ F]
 theorem GaussSum_periodic [P.LiesOver 𝒑] {k : ℤ} (hk : ↑(p ^ f - 1 : ℕ) ∣ k) (a : ℤ) :
     GaussSum hbij hζ (a + k) = GaussSum hbij hζ a := by
   rw [GaussSum, GaussSum, neg_add, zpow_add,
-    MulChar.teichmuller_zpow_eq_one hbij (Int.dvd_neg.mpr hk), mul_one]
+    MulChar.teichmuller_zpow_eq_one_of_dvd hbij (Int.dvd_neg.mpr hk), mul_one]
 
 theorem GaussSum_mem [𝓟.LiesOver 𝒑] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) :
     GaussSum hbij hζ a ∈ 𝓟 := by
@@ -201,7 +201,7 @@ theorem norm_GaussSum [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ ↑(p ^ f 
     map_pow, Algebra.norm_algebraMap_of_basis (NumberField.RingOfIntegers.basis L),
     ← pow_mul, Int.natAbs_pow, Int.natAbs_natCast, ← isUnit_neg_one.unit_spec,
     NumberField.isUnit_iff_natAbs_norm.mp <| RingHom.isUnit_map (algebraMap (𝓞 K) (𝓞 L))
-    <| MulChar.isUnit_teichmuller_zpow_apply hbij (- a) isUnit_neg_one.unit, one_mul] at this
+    <| IsUnit.map (MulChar.teichmuller hbij ^ (- a)) isUnit_neg_one.unit.isUnit, one_mul] at this
   obtain ⟨k, -, hk⟩ := (Nat.dvd_prime_pow hp.out).mp (Dvd.intro _ this)
   refine ⟨k, ?_, hk⟩
   obtain ⟨Q, hQ, _⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝒑
@@ -342,13 +342,6 @@ def galFEquiv : Gal(L/F) ≃* (ZMod (p ^ f - 1))ˣ :=
   haveI := IsCyclotomicExtension.isAbelianGalois {p * (p ^ f - 1)} ℚ L
   (galEquiv₀ p f F K).trans <| IsCyclotomicExtension.Rat.galEquivZMod (p ^ f - 1) K
 
-theorem galFEquiv_val_ne_zero [Fact (Odd p)] (σ : Gal(L/F)) :
-    (galFEquiv p f K σ).val.val ≠ 0 := by
-  have : Nontrivial (ZMod (p ^ f - 1)) := by
-    have := three_le_p_pow p f
-    exact ZMod.nontrivial_iff.mpr (by aesop)
-  exact (ZMod.val_ne_zero _).mpr <| Units.ne_zero (galFEquiv p f K σ)
-
 include hη in
 set_option backward.isDefEq.respectTransparency false in
 theorem galLFEquiv_apply_eta (σ : Gal(L/F)) :
@@ -391,8 +384,7 @@ theorem galLFEquiv_apply_teichmuller_zpow [Fact (Odd p)] (σ : Gal(L/F)) (a : �
       ((MulChar.teichmuller hbij) ^ (- a * (galFEquiv p f K σ).val.val : ℤ)).ringHomComp
         (algebraMap (𝓞 K) (𝓞 L)) x := by
   rw [smul_eq_galRestrict_apply (𝓞 F) σ,
-    MulChar.map_ringHomComp_teichmuller_zpow_apply hbij _ _ (galFEquiv p f K σ).val.val
-      (galFEquiv_val_ne_zero p f σ) hη]
+    MulChar.map_ringHomComp_teichmuller_zpow_apply hbij _ _ (galFEquiv p f K σ).val.val hη]
   rw [← smul_eq_galRestrict_apply, galLFEquiv_apply_eta p f hη]
 
 omit [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal] in

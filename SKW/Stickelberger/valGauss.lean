@@ -42,7 +42,7 @@ theorem valGauss_frob [P.LiesOver 𝒑] (a : ℤ) :
 omit [NeZero (p ^ f - 1)] in
 theorem valGauss_eq_zero [P.LiesOver 𝒑] [𝓟.IsPrime] (a : ℤ) (h : ↑(p ^ f - 1 : ℕ) ∣ a) :
     valGauss hbij hζ 𝓟 a = 0 := by
-  rw [valGauss, GaussSum, MulChar.teichmuller_zpow_eq_one hbij (Int.dvd_neg.mpr h),
+  rw [valGauss, GaussSum, MulChar.teichmuller_zpow_eq_one_of_dvd hbij (Int.dvd_neg.mpr h),
     MulChar.ringHomComp_one,
     gaussSum_one_left, span_singleton_neg, span_singleton_one, emultiplicity_top]
   · exact IsPrime.ne_top'
@@ -131,7 +131,7 @@ theorem valGauss_add_valGauss_sub_self [NeZero f] [𝓟.LiesOver 𝒑] [P.LiesOv
     · rw [ramificationIdx_eq_p_sub_one (p := p) f 𝓟, ENat.natCast_mul]
     · rw [isUnit_iff, span_singleton_eq_top]
       exact RingHom.isUnit_map (algebraMap (𝓞 K) (𝓞 L)) <|
-        MulChar.isUnit_teichmuller_zpow_apply hbij (- a) isUnit_neg_one.unit
+        IsUnit.map (MulChar.teichmuller hbij ^ (- a)) isUnit_neg_one.unit.isUnit
 
 variable [IsCyclotomicExtension {p} ℚ F]
 
