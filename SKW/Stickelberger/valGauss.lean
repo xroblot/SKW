@@ -22,7 +22,7 @@ variable {p f}
 
 variable {L : Type*} [Field L] [NumberField L] {F K : IntermediateField ℚ L} {P : Ideal (𝓞 K)}
 
-variable (hbij : Function.Bijective (rootsOfUnity.mapQuot (p ^ f - 1) P))
+variable [P.HasTeichmullerLift (p ^ f - 1)]
 
 variable {ζ : 𝓞 F} (hζ : IsPrimitiveRoot ζ p) {η : 𝓞 K} (hη : IsPrimitiveRoot η (p ^ f - 1))
 
@@ -32,17 +32,19 @@ local instance : Fintype (𝓞 K ⧸ P) := Fintype.ofFinite (𝓞 K ⧸ P)
 
 attribute [local instance] Ideal.Quotient.field ZMod.algebra
 
-def valGauss [P.LiesOver 𝒑] (a : ℤ) : ℕ∞ := emultiplicity 𝓟 (span {(GaussSum hbij hζ a : 𝓞 L)})
+variable (f P)
+
+def valGauss [P.LiesOver 𝒑] (a : ℤ) : ℕ∞ := emultiplicity 𝓟 (span {(GaussSum f P hζ a : 𝓞 L)})
 
 omit [NeZero (p ^ f - 1)] in
 theorem valGauss_frob [P.LiesOver 𝒑] (a : ℤ) :
-    valGauss hbij hζ 𝓟 (p * a) = valGauss hbij hζ 𝓟 a := by
+    valGauss f P hζ 𝓟 (p * a) = valGauss f P hζ 𝓟 a := by
   rw [valGauss, valGauss, GaussSum_frob]
 
 omit [NeZero (p ^ f - 1)] in
 theorem valGauss_eq_zero [P.LiesOver 𝒑] [𝓟.IsPrime] (a : ℤ) (h : ↑(p ^ f - 1 : ℕ) ∣ a) :
-    valGauss hbij hζ 𝓟 a = 0 := by
-  rw [valGauss, GaussSum, MulChar.teichmuller_zpow_eq_one_of_dvd hbij (Int.dvd_neg.mpr h),
+    valGauss f P hζ 𝓟 a = 0 := by
+  rw [valGauss, GaussSum, MulChar.teichmuller_zpow_eq_one_of_dvd (Int.dvd_neg.mpr h),
     MulChar.ringHomComp_one,
     gaussSum_one_left, span_singleton_neg, span_singleton_one, emultiplicity_top]
   · exact IsPrime.ne_top'
@@ -52,29 +54,29 @@ theorem valGauss_eq_zero [P.LiesOver 𝒑] [𝓟.IsPrime] (a : ℤ) (h : ↑(p ^
 
 omit [NeZero (p ^ f - 1)] in
 theorem valGauss_zero [P.LiesOver 𝒑] [𝓟.IsPrime] :
-    valGauss hbij hζ 𝓟 0 = 0 :=
-  valGauss_eq_zero hbij hζ 𝓟 0 <| Int.dvd_zero _
+    valGauss f P hζ 𝓟 0 = 0 :=
+  valGauss_eq_zero f P hζ 𝓟 0 <| Int.dvd_zero _
 
 omit [NeZero (p ^ f - 1)] in
 theorem valGauss_periodic [P.LiesOver 𝒑] {k : ℤ} (hk : ↑(p ^ f - 1 : ℕ) ∣ k) (a : ℤ) :
-    valGauss hbij hζ 𝓟 (a + k) = valGauss hbij hζ 𝓟 a := by
-  rw [valGauss, valGauss, GaussSum_periodic hbij hζ hk]
+    valGauss f P hζ 𝓟 (a + k) = valGauss f P hζ 𝓟 a := by
+  rw [valGauss, valGauss, GaussSum_periodic f P hζ hk]
 
 omit [NeZero (p ^ f - 1)] in
 theorem valGauss_periodic' [P.LiesOver 𝒑] (a b : ℤ) (h : a ≡ b [ZMOD (p ^ f - 1 : ℕ)]) :
-    valGauss hbij hζ 𝓟 a = valGauss hbij hζ 𝓟 b := by
+    valGauss f P hζ 𝓟 a = valGauss f P hζ 𝓟 b := by
   obtain ⟨k, hk⟩ := Int.modEq_iff_add_fac.mp h
-  rw [hk, valGauss_periodic hbij hζ _ (dvd_mul_right _ k)]
+  rw [hk, valGauss_periodic f P hζ _ (dvd_mul_right _ k)]
 
 variable [IsCyclotomicExtension {p ^ f - 1} ℚ K]
 
 theorem valGauss_eq_zero_of_not_liesOver [NeZero f] [IsCyclotomicExtension {p} ℚ F]
     [𝓟.IsPrime] (h𝓟 : ¬ 𝓟.LiesOver 𝒑) [P.LiesOver 𝒑] (a : ℤ) :
-    valGauss hbij hζ 𝓟 a = 0 := by
+    valGauss f P hζ 𝓟 a = 0 := by
   by_cases ha : ↑(p ^ f - 1 : ℕ) ∣ a
-  · exact valGauss_eq_zero hbij hζ 𝓟 _ ha
+  · exact valGauss_eq_zero f P hζ 𝓟 _ ha
   · contrapose! h𝓟
-    obtain ⟨k, hk₁, hk₂⟩ := norm_GaussSum hbij hζ _ ha
+    obtain ⟨k, hk₁, hk₂⟩ := norm_GaussSum f P hζ _ ha
     apply Ideal.liesOver_of_absNorm_dvd_prime_pow
     rw [valGauss, emultiplicity_ne_zero, dvd_span_singleton] at h𝓟
     have := Ideal.absNorm_dvd_norm_of_mem h𝓟
@@ -84,45 +86,45 @@ include hη in
 theorem emultiplicity_smul_GaussSum [NeZero f] [IsCyclotomicExtension {p} ℚ F]
     [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [P.LiesOver 𝒑] [Fact (Odd p)] (σ : Gal(L/F))
     (a : ℤ) :
-    emultiplicity (σ • 𝓟) (span {(GaussSum hbij hζ a : 𝓞 L)}) =
-      valGauss hbij hζ 𝓟 (a * (galFEquiv p f K σ⁻¹).val.val) := by
+    emultiplicity (σ • 𝓟) (span {(GaussSum f P hζ a : 𝓞 L)}) =
+      valGauss f P hζ 𝓟 (a * (galFEquiv p f K σ⁻¹).val.val) := by
   rw [← emultiplicity_map_eq (Ideal.mapEquiv (MulSemiringAction.toRingEquiv Gal(L/F) (𝓞 L) σ⁻¹))
     (a := σ • 𝓟), mapEquiv_apply, mapEquiv_apply]
   erw [← pointwise_smul_def]
   rw [inv_smul_smul, valGauss]
-  have := gal_gaussSum_eq_gaussSum hbij hζ hη σ⁻¹ a
+  have := gal_gaussSum_eq_gaussSum P hζ hη σ⁻¹ a
   rw [← this, map_span, Set.image_singleton, MulSemiringAction.toRingEquiv_apply_apply]
 
 variable [𝓟.IsPrime]
 
 theorem valGauss_subadditive [NeZero 𝓟] [P.LiesOver 𝒑] (a b : ℤ) :
-    valGauss hbij hζ 𝓟 (a + b) ≤ valGauss hbij hζ 𝓟 a + valGauss hbij hζ 𝓟 b := by
+    valGauss f P hζ 𝓟 (a + b) ≤ valGauss f P hζ 𝓟 a + valGauss f P hζ 𝓟 b := by
   have h𝓟 : Prime 𝓟 := prime_of_isPrime (NeZero.ne 𝓟) inferInstance
   by_cases h : ↑(p ^ f - 1 : ℕ) ∣ a + b
-  · rw [valGauss_eq_zero hbij hζ 𝓟 _ h]
+  · rw [valGauss_eq_zero f P hζ 𝓟 _ h]
     exact zero_le
   · rw [valGauss, valGauss, valGauss, ← emultiplicity_mul h𝓟, span_mul_span,
-      Set.singleton_mul_singleton, GaussSum_mul_GaussSum _ _ _ _ h, ← Set.singleton_mul_singleton,
-      ← span_mul_span, emultiplicity_mul h𝓟]
+      Set.singleton_mul_singleton, GaussSum_mul_GaussSum _ _ _ _ _ _ h,
+      ← Set.singleton_mul_singleton, ← span_mul_span, emultiplicity_mul h𝓟]
     exact self_le_add_right _ _
 
 variable [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
 
 theorem valGauss_add_valGauss_sub_self [NeZero f] [𝓟.LiesOver 𝒑] [P.LiesOver 𝒑] {k : ℤ}
     (hk : ↑(p ^ f - 1 : ℕ) ∣ k) (a : ℤ) :
-    valGauss hbij hζ 𝓟 a + valGauss hbij hζ 𝓟 (k - a) =
+    valGauss f P hζ 𝓟 a + valGauss f P hζ 𝓟 (k - a) =
       if ↑(p ^ f - 1 : ℕ) ∣ a then 0 else f * (p - 1) := by
   have h₀ : 𝒑 ≠ ⊥ := by simpa using hp.out.ne_zero
   have : NeZero 𝓟 := ⟨ne_bot_of_liesOver_of_ne_bot h₀ _⟩
   have h𝓟 : Prime 𝓟 := prime_of_isPrime (NeZero.ne 𝓟) inferInstance
   have h₁ : Ideal.map (algebraMap ℤ (𝓞 L)) 𝒑 ≠ 0 := map_ne_bot_of_ne_bot h₀
-  rw [show k - a = -a + k by ring, valGauss_periodic hbij hζ 𝓟 hk]
+  rw [show k - a = -a + k by ring, valGauss_periodic f P hζ 𝓟 hk]
   split_ifs with h
-  · rw [valGauss_eq_zero hbij hζ 𝓟 _ h, valGauss_eq_zero hbij hζ 𝓟 _ (by rwa [Int.dvd_neg]),
+  · rw [valGauss_eq_zero f P hζ 𝓟 _ h, valGauss_eq_zero f P hζ 𝓟 _ (by rwa [Int.dvd_neg]),
       zero_add, ENat.natCast_zero]
   · have : 𝓟.IsPrime := Ideal.isPrime_of_prime h𝓟
     rw [valGauss, valGauss, ← emultiplicity_mul h𝓟, span_mul_span, Set.singleton_mul_singleton,
-      GaussSum_mul_GaussSum_neg hbij hζ _ h, ← Set.singleton_mul_singleton, ← span_mul_span,
+      GaussSum_mul_GaussSum_neg f P hζ _ h, ← Set.singleton_mul_singleton, ← span_mul_span,
       emultiplicity_mul h𝓟, emultiplicity_of_isUnit_right h𝓟.not_isUnit, zero_add,
       ← span_singleton_pow, emultiplicity_pow h𝓟, show (p : 𝓞 L) = algebraMap ℤ (𝓞 L) p by simp,
       ← Set.image_singleton, ← map_span,
@@ -131,19 +133,19 @@ theorem valGauss_add_valGauss_sub_self [NeZero f] [𝓟.LiesOver 𝒑] [P.LiesOv
     · rw [ramificationIdx_eq_p_sub_one (p := p) f 𝓟, ENat.natCast_mul]
     · rw [isUnit_iff, span_singleton_eq_top]
       exact RingHom.isUnit_map (algebraMap (𝓞 K) (𝓞 L)) <|
-        IsUnit.map (MulChar.teichmuller hbij ^ (- a)) isUnit_neg_one.unit.isUnit
+        IsUnit.map ((MulChar.teichmuller P (p ^ f - 1)) ^ (- a)) isUnit_neg_one.unit.isUnit
 
 variable [IsCyclotomicExtension {p} ℚ F]
 
 variable [NeZero f] [Fact (Odd p)]
 
 theorem valGauss_one [𝓟.LiesOver P] [P.LiesOver 𝒑] :
-    valGauss hbij hζ 𝓟 1 = 1 := by
+    valGauss f P hζ 𝓟 1 = 1 := by
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
   rw [valGauss, show (1 : ℕ∞) = (1 : ℕ) by rfl, emultiplicity_eq_coe]
   constructor
   · rw [pow_one, dvd_span_singleton]
-    apply GaussSum_mem hbij hζ 𝓟
+    apply GaussSum_mem f P hζ 𝓟
     rw [Int.natCast_dvd_ofNat, Nat.dvd_one, Nat.pred_eq_succ_iff, zero_add]
     exact Nat.ne_of_lt' <| three_le_p_pow p f
   · rw [one_add_one_eq_two, dvd_span_singleton, ← Quotient.eq_zero_iff_mem, mk_sq_gausssum_eq,
@@ -151,74 +153,74 @@ theorem valGauss_one [𝓟.LiesOver P] [P.LiesOver 𝒑] :
     exact zeta_sub_one_not_mem_sq p f hζ 𝓟
 
 theorem valGauss_le_self [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) :
-    valGauss hbij hζ 𝓟 a ≤ a := by
+    valGauss f P hζ 𝓟 a ≤ a := by
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
   have h₀ : 𝒑 ≠ ⊥ := by simpa using hp.out.ne_zero
   have : NeZero 𝓟 := ⟨ne_bot_of_liesOver_of_ne_bot h₀ _⟩
   induction a with
-  | zero => simpa using valGauss_zero hbij hζ 𝓟
+  | zero => simpa using valGauss_zero f P hζ 𝓟
   | succ n hn =>
       rw [Nat.cast_add_one, Nat.cast_add_one]
-      refine (valGauss_subadditive hbij hζ 𝓟 n 1).trans ?_
+      refine (valGauss_subadditive f P hζ 𝓟 n 1).trans ?_
       rwa [valGauss_one, ENat.add_le_add_iff_right ENat.one_ne_top]
 
 theorem valGauss_ne_top₀' [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) :
-    valGauss hbij hζ 𝓟 a ≠ ⊤ :=
-  lt_top_iff_ne_top.mp <| lt_of_le_of_lt (valGauss_le_self hbij hζ 𝓟 a) (ENat.natCast_lt_top a)
+    valGauss f P hζ 𝓟 a ≠ ⊤ :=
+  lt_top_iff_ne_top.mp <| lt_of_le_of_lt (valGauss_le_self f P hζ 𝓟 a) (ENat.natCast_lt_top a)
 
 theorem valGauss_ne_top₀ [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℤ) :
-    valGauss hbij hζ 𝓟 a ≠ ⊤ := by
+    valGauss f P hζ 𝓟 a ≠ ⊤ := by
   have : (0 : ℤ) < (p ^ f - 1 : ℕ) := Int.natCast_pos.mpr <| NeZero.pos _
   rw [← toIcoDiv_zsmul_sub_toIcoMod this 0 a, Int.zsmul_eq_mul, add_comm,
-    valGauss_periodic hbij hζ 𝓟 (Int.dvd_mul_left _ _)]
+    valGauss_periodic f P hζ 𝓟 (Int.dvd_mul_left _ _)]
   lift toIcoMod this 0 a to ℕ using left_le_toIcoMod this 0 a with x
-  exact valGauss_ne_top₀' hbij hζ 𝓟 _
+  exact valGauss_ne_top₀' f P hζ 𝓟 _
 
 include 𝓟 in
 theorem GaussSum_ne_zero [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℤ) :
-    GaussSum hbij hζ a ≠ 0 := by
-  have := valGauss_ne_top₀ hbij hζ 𝓟 a
+    GaussSum f P hζ a ≠ 0 := by
+  have := valGauss_ne_top₀ f P hζ 𝓟 a
   contrapose! this
   simp [valGauss, this]
 
 theorem valGauss_ne_top (𝓠 : Ideal (𝓞 L)) (hQ : Prime 𝓠) [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℤ) :
-    valGauss hbij hζ 𝓠 a ≠ ⊤ := by
+    valGauss f P hζ 𝓠 a ≠ ⊤ := by
   rw [valGauss, ne_eq, emultiplicity_eq_top, ← WfDvdMonoid.ne_zero_iff_finiteMultiplicity hQ, ne_eq,
     not_not, Ideal.zero_eq_bot, Ideal.span_singleton_eq_bot]
-  exact GaussSum_ne_zero hbij hζ 𝓟 a
+  exact GaussSum_ne_zero f P hζ 𝓟 a
 
 theorem valGauss_le_sum_digits_aux [𝓟.LiesOver P] [P.LiesOver 𝒑] (L : List ℕ) :
-    valGauss hbij hζ 𝓟 (Nat.ofDigits p L : ℕ) ≤ L.sum := by
+    valGauss f P hζ 𝓟 (Nat.ofDigits p L : ℕ) ≤ L.sum := by
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
   have h₀ : 𝒑 ≠ ⊥ := by simpa using hp.out.ne_zero
   have : NeZero 𝓟 := ⟨ne_bot_of_liesOver_of_ne_bot h₀ _⟩
   induction L with
-  | nil => simpa [Nat.ofDigits] using valGauss_zero hbij hζ 𝓟
+  | nil => simpa [Nat.ofDigits] using valGauss_zero f P hζ 𝓟
   | cons head tail ih =>
       rw [List.sum_cons, Nat.cast_add, Nat.ofDigits_cons, Nat.cast_add]
-      refine (valGauss_subadditive hbij hζ 𝓟 _ _).trans ?_
+      refine (valGauss_subadditive f P hζ 𝓟 _ _).trans ?_
       gcongr
-      · exact valGauss_le_self hbij hζ ..
+      · exact valGauss_le_self f P hζ ..
       · rwa [Nat.cast_mul, valGauss_frob]
 
 theorem valGauss_toNat_le_sum_digits [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) :
-    (valGauss hbij hζ 𝓟 a).toNat ≤ (Nat.digits p a).sum := by
+    (valGauss f P hζ 𝓟 a).toNat ≤ (Nat.digits p a).sum := by
   apply ENat.toNat_le_of_le_natCast
-  convert valGauss_le_sum_digits_aux hbij hζ 𝓟 (Nat.digits p a)
+  convert valGauss_le_sum_digits_aux f P hζ 𝓟 (Nat.digits p a)
   rw [Nat.ofDigits_digits]
 
 theorem two_mul_sum_valGauss_toNat' [𝓟.LiesOver P] [P.LiesOver 𝒑] :
-    2 * ∑ a ∈ Finset.range (p ^ f), (valGauss hbij hζ 𝓟 a).toNat =
+    2 * ∑ a ∈ Finset.range (p ^ f), (valGauss f P hζ 𝓟 a).toNat =
       (p ^ f - 2) * f * (p - 1) := by
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
   rw [← ENat.natCast_inj, Nat.cast_mul, Nat.cast_sum, Nat.cast_ofNat]
-  simp_rw [ENat.natCast_toNat_eq_self.mpr (valGauss_ne_top₀ hbij hζ 𝓟 _)]
+  simp_rw [ENat.natCast_toNat_eq_self.mpr (valGauss_ne_top₀ f P hζ 𝓟 _)]
   have h : 1 ≤ p ^ f := NeZero.one_le
   rw [two_mul, ← Fin.sum_univ_eq_sum_range, show p ^ f = p ^ f - 1 + 1 by rw [Nat.sub_add_cancel h]]
   nth_rewrite 2 [← Equiv.sum_comp Fin.revPerm]
   rw [← Finset.sum_add_distrib]
   simp_rw [Fin.revPerm_apply, Fin.val_rev, Nat.reduceSubDiff, Nat.cast_sub (Fin.is_le _),
-    valGauss_add_valGauss_sub_self hbij hζ 𝓟 dvd_rfl, Nat.cast_ite, Nat.cast_zero, Nat.cast_mul,
+    valGauss_add_valGauss_sub_self f P hζ 𝓟 dvd_rfl, Nat.cast_ite, Nat.cast_zero, Nat.cast_mul,
     Int.natCast_dvd_natCast]
   rw [← Finset.univ.sum_erase_add _ (Finset.mem_univ 0),
     ← Finset.sum_erase_add _ _ (a := Fin.ofNat (p ^ f - 1 + 1) (p ^ f - 1)) (by aesop),
@@ -231,20 +233,20 @@ theorem two_mul_sum_valGauss_toNat' [𝓟.LiesOver P] [P.LiesOver 𝒑] :
   exact Nat.not_dvd_of_pos_of_lt (by grind) (by grind)
 
 theorem two_mul_sum_valGauss_toNat [𝓟.LiesOver P] [P.LiesOver 𝒑] :
-    2 * ∑ a ∈ Finset.range (p ^ f - 1), (valGauss hbij hζ 𝓟 a).toNat =
+    2 * ∑ a ∈ Finset.range (p ^ f - 1), (valGauss f P hζ 𝓟 a).toNat =
       f * (p - 1) * (p ^ f - 2) := by
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
   rw [← Finset.sum_insert_of_eq_zero_if_notMem (a := p ^ f - 1), ← Finset.range_add_one,
         Nat.sub_add_cancel NeZero.one_le, ← ENat.natCast_inj, Nat.cast_mul, Nat.cast_sum,
         Nat.cast_ofNat]
-  · simp_rw [ENat.natCast_toNat_eq_self.mpr (valGauss_ne_top₀ hbij hζ 𝓟 _)]
+  · simp_rw [ENat.natCast_toNat_eq_self.mpr (valGauss_ne_top₀ f P hζ 𝓟 _)]
     have h : 1 ≤ p ^ f := NeZero.one_le
     rw [two_mul, ← Fin.sum_univ_eq_sum_range, show p ^ f = p ^ f - 1 + 1 by
       rw [Nat.sub_add_cancel h]]
     nth_rewrite 2 [← Equiv.sum_comp Fin.revPerm]
     rw [← Finset.sum_add_distrib]
     simp_rw [Fin.revPerm_apply, Fin.val_rev, Nat.reduceSubDiff, Nat.cast_sub (Fin.is_le _),
-      valGauss_add_valGauss_sub_self hbij hζ 𝓟 dvd_rfl, Nat.cast_ite, Nat.cast_zero,
+      valGauss_add_valGauss_sub_self f P hζ 𝓟 dvd_rfl, Nat.cast_ite, Nat.cast_zero,
       Nat.cast_mul, Int.natCast_dvd_natCast]
     rw [← Finset.univ.sum_erase_add _ (Finset.mem_univ 0),
       ← Finset.sum_erase_add _ _ (a := Fin.ofNat (p ^ f - 1 + 1) (p ^ f - 1)) (by aesop),
@@ -256,14 +258,14 @@ theorem two_mul_sum_valGauss_toNat [𝓟.LiesOver P] [P.LiesOver 𝒑] :
     simp at hx
     exact Nat.not_dvd_of_pos_of_lt (by grind) (by grind)
   · intro _
-    rw [valGauss_eq_zero hbij hζ 𝓟 _ dvd_rfl, ENat.toNat_zero]
+    rw [valGauss_eq_zero f P hζ 𝓟 _ dvd_rfl, ENat.toNat_zero]
 
 theorem valGauss_toNat_eq_sum_digits [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) (ha : a ≤ p ^ f - 2) :
-    (valGauss hbij hζ 𝓟 a).toNat = (Nat.digits p a).sum := by
+    (valGauss f P hζ 𝓟 a).toNat = (Nat.digits p a).sum := by
   revert a
   simp_rw [← Finset.mem_range_succ_iff, Nat.succ_eq_add_one, show p ^ f - 2 + 1 = p ^ f - 1 by
     rw [Nat.sub_succ', Nat.sub_add_cancel (NeZero.one_le)]]
-  refine (Finset.sum_eq_sum_iff_of_le fun a _ ↦ valGauss_toNat_le_sum_digits hbij hζ 𝓟 a).mp ?_
+  refine (Finset.sum_eq_sum_iff_of_le fun a _ ↦ valGauss_toNat_le_sum_digits f P hζ 𝓟 a).mp ?_
   rw [← Nat.add_right_cancel_iff (n := (p.digits (p ^ f - 1)).sum), ← Nat.mul_right_inj two_ne_zero,
     eq_comm]
   calc
@@ -275,19 +277,19 @@ theorem valGauss_toNat_eq_sum_digits [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : �
       rw [Nat.digits_base_pow_sub_one hp.out.one_lt, List.sum_replicate, smul_eq_mul, mul_comm 2,
         ← mul_add, Nat.sub_add_cancel (Nat.le_of_succ_le (three_le_p_pow p f)), ← mul_assoc,
         mul_assoc f, ← Nat.pow_add_one, Nat.sub_add_cancel NeZero.one_le, Nat.mul_right_comm]
-    _ = 2 * (∑ i ∈ Finset.range (p ^ f - 1), (valGauss hbij hζ 𝓟 i).toNat +
+    _ = 2 * (∑ i ∈ Finset.range (p ^ f - 1), (valGauss f P hζ 𝓟 i).toNat +
         (p.digits (p ^ f - 1)).sum) := by
-      rw [mul_add, two_mul_sum_valGauss_toNat hbij hζ]
+      rw [mul_add, two_mul_sum_valGauss_toNat f P hζ]
 
 theorem valGauss_toNat_eq_sum_digits_mod [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ)
     (ha : ¬ a ≡ -1 [ZMOD (p ^f - 1 : ℕ)]) :
-    (valGauss hbij hζ 𝓟 a).toNat = (Nat.digits p (a % (p ^ f - 1))).sum := by
+    (valGauss f P hζ 𝓟 a).toNat = (Nat.digits p (a % (p ^ f - 1))).sum := by
   have : ∃ k, (a : ℤ) = (a % (p ^ f - 1) : ℕ) + k * (p ^ f - 1: ℕ) := by
     obtain ⟨k, hk⟩ := Int.modEq_iff_add_fac.mp <| Int.mod_modEq (a : ℤ) (p ^ f - 1 : ℕ)
     refine ⟨k, by rwa [Int.natCast_mod, mul_comm k]⟩
   obtain ⟨k, hk⟩ := this
-  rw [hk, valGauss_periodic hbij hζ _ (dvd_mul_left _ k),
-    valGauss_toNat_eq_sum_digits hbij hζ]
+  rw [hk, valGauss_periodic f P hζ _ (dvd_mul_left _ k),
+    valGauss_toNat_eq_sum_digits f P hζ]
   contrapose! ha
   suffices a % (p ^ f - 1) = (p ^ f - 1) - 1 by
     apply Int.ModEq.trans (Int.mod_modEq (a : ℤ) _).symm ?_
@@ -296,6 +298,6 @@ theorem valGauss_toNat_eq_sum_digits_mod [𝓟.LiesOver P] [P.LiesOver 𝒑] (a 
   exact le_antisymm (Nat.le_sub_one_of_lt <| Nat.mod_lt a (NeZero.pos _)) (Nat.le_of_succ_le ha)
 
 theorem valGauss_eq_sum_digits [𝓟.LiesOver P] [P.LiesOver 𝒑] (a : ℕ) (ha : a ≤ p ^ f - 2) :
-    valGauss hbij hζ 𝓟 a = (Nat.digits p a).sum := by
-  rw [← valGauss_toNat_eq_sum_digits hbij hζ 𝓟 a ha,  ENat.natCast_toNat]
-  exact valGauss_ne_top₀' hbij hζ 𝓟 a
+    valGauss f P hζ 𝓟 a = (Nat.digits p a).sum := by
+  rw [← valGauss_toNat_eq_sum_digits f P hζ 𝓟 a ha,  ENat.natCast_toNat]
+  exact valGauss_ne_top₀' f P hζ 𝓟 a

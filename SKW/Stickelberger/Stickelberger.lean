@@ -69,7 +69,8 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
   have : 𝓟.LiesOver (span {(p : ℤ)}) := LiesOver.trans 𝓟 𝔭₀ _
   have : P.LiesOver (span {(p : ℤ)}) := LiesOver.tower_bot 𝓟 P _
   have : P.IsMaximal := IsMaximal.under (𝓞 K) 𝓟
-  have hbij : Function.Bijective (rootsOfUnity.mapQuot (p ^ f - 1) P) := by
+  have : P.HasTeichmullerLift (p ^ f - 1) := by
+    refine ⟨?_⟩
     change Function.Bijective <| rootsOfUnityMapQuot P (p ^ f - 1)
     have hNP : absNorm P = p ^ f := by
       rw [← Ideal.pow_inertiaDeg p P, inertia_deg_eq p f]
@@ -80,10 +81,10 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
       · rw [hNP]
         exact Nat.Coprime.pow_left _ (coprime_pow_sub_one p f).symm
     · rw [IsPrimitiveRoot.card_rootsOfUnity hη, Nat.card_units (𝓞 K ⧸ P), ← absNorm_eq_card, hNP]
-  obtain ⟨Γ, hΓ₀, hΓ⟩ := exists_mem_gaussSum_pow_eq hbij hζ hη 𝓟 m d hdm E k₀
+  obtain ⟨Γ, hΓ₀, hΓ⟩ := exists_mem_gaussSum_pow_eq f P hζ hη 𝓟 m d hdm E k₀
   refine ⟨e Γ, ?_⟩
   simp_rw [Ideal.submodule_span_eq, ← Set.image_singleton, ← map_span,
-    GaussSum_factorization hbij hζ hη 𝓟 m d hf hdm 𝔭₀ _ hΓ₀ hΓ, ← mapHom_apply, map_prod,
+    GaussSum_factorization f P hζ hη 𝓟 m d hf hdm 𝔭₀ _ hΓ₀ hΓ, ← mapHom_apply, map_prod,
       mapHom_apply]
   have (a : (ZMod m)ˣ) : ((galEquivZMod m k).symm a)⁻¹ • 𝔭 =
         Ideal.map e (((galEquivZMod m k₀).symm a)⁻¹ • 𝔭₀) := by
