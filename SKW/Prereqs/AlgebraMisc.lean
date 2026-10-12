@@ -5,6 +5,7 @@ public import Mathlib.GroupTheory.SpecificGroups.Cyclic
 public import Mathlib.GroupTheory.FiniteAbelian.Basic
 public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 public import Mathlib.RingTheory.IntegralDomain
+public import Mathlib.Algebra.CharP.Reduced
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.Algebra.Group.Subgroup.Order
 public import Mathlib.GroupTheory.QuotientGroup.Basic
@@ -61,6 +62,18 @@ theorem orderOf_zpow_dvd {G : Type*} [Group G] (x : G) (n : ℤ) :
     orderOf (x ^ n) ∣ orderOf x := by
   rw [← orderOf_pow_natAbs]
   exact orderOf_pow_dvd _
+
+/-- The order of a unit of finite order of a reduced commutative ring is not divisible by the
+exponential characteristic `p`, when `p ≠ 1`. -/
+theorem not_dvd_orderOf_units_of_expChar {R : Type*} [CommRing R] [IsReduced R] (p : ℕ)
+    [ExpChar R p] (hp : p ≠ 1) (u : Rˣ) (hu : IsOfFinOrder u) : ¬ p ∣ orderOf u := by
+  refine fun ⟨m, hm⟩ ↦ hp ?_
+  rsuffices ⟨c, hc⟩ : m * p ∣ m
+  · rw [mul_assoc, left_eq_mul₀ (by grind [orderOf_ne_zero_iff])] at hc
+    exact Nat.eq_one_of_mul_eq_one_right hc
+  rw [mul_comm, ← hm, ← orderOf_units, orderOf_dvd_iff_pow_eq_one,
+    ← ExpChar.pow_prime_pow_mul_eq_one_iff p 1, pow_one, ← orderOf_dvd_iff_pow_eq_one,
+    orderOf_units, hm]
 
 /-! ### Cyclic groups in a product -/
 

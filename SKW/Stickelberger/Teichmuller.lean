@@ -7,7 +7,7 @@ module
 
 public import Mathlib.NumberTheory.MulChar.Basic
 public import Mathlib.RingTheory.Ideal.Quotient.Basic
-public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
 
 -- for `MulEquiv.ofBijective_symm_apply_apply`, the `MulEquiv` half of a pair Mathlib only has
 -- for `Equiv`; too small for a PR of its own, so it ships with this file.
@@ -56,6 +56,30 @@ variable {R : Type*} [CommRing R]
 a unique `n`-th root of unity of `R`. -/
 class Ideal.HasTeichmullerLift (I : Ideal R) (n : ℕ) : Prop where
   bijective_mapQuot : Function.Bijective (rootsOfUnity.mapQuot n I)
+
+/-- If the domain `R` has enough `n`-th roots of unity, the integer `n` does not lie in `I` and
+the group of units of `R ⧸ I` has order `n`, then `I` has Teichmüller lifts of order `n`. -/
+theorem Ideal.HasTeichmullerLift.of_card [IsDomain R] {I : Ideal R} (n : ℕ) [NeZero n]
+    [HasEnoughRootsOfUnity R n] (hn : (n : R) ∉ I) (hcard : Nat.card (R ⧸ I)ˣ = n) :
+    I.HasTeichmullerLift n :=
+  have : Finite (R ⧸ I)ˣ := Nat.finite_of_card_ne_zero (hcard ▸ NeZero.ne n)
+  ⟨(Nat.bijective_iff_injective_and_card _).mpr ⟨rootsOfUnity.injective_mapQuot n I hn, by
+    rw [HasEnoughRootsOfUnity.natCard_rootsOfUnity, hcard]⟩⟩
+
+/-- If the domain `R` has enough `n`-th roots of unity and the units of the quotient of `R` by the
+prime ideal `I` form a group of order `n`, then `I` has Teichmüller lifts of order `n`. -/
+theorem Ideal.HasTeichmullerLift.of_card_of_isPrime [IsDomain R] {I : Ideal R} (n : ℕ) [NeZero n]
+    [HasEnoughRootsOfUnity R n] [I.IsPrime] (hcard : Nat.card (R ⧸ I)ˣ = n) :
+    I.HasTeichmullerLift n := by
+  refine .of_card n (fun hmem ↦ ?_) hcard
+  replace hmem : (n : R ⧸ I) = 0 := Ideal.Quotient.eq_zero_iff_mem.mpr hmem
+  have : NeZero (ringChar (R ⧸ I)) :=
+    ⟨fun h ↦ NeZero.ne n <| Nat.zero_dvd.mp <| h ▸ ringChar.dvd hmem⟩
+  have : Fact (ringChar (R ⧸ I)).Prime := CharP.char_is_prime_of_pos (R ⧸ I) _
+  have : Finite (R ⧸ I)ˣ := Nat.finite_of_card_ne_zero (hcard ▸ NeZero.ne n)
+  obtain ⟨g, hg⟩ := IsCyclic.exists_ofOrder_eq_natCard (α := (R ⧸ I)ˣ)
+  exact not_dvd_orderOf_units_of_expChar (ringChar (R ⧸ I)) CharP.ringChar_ne_one g
+    (isOfFinOrder_of_finite g) (by rwa [hg, hcard, ← ringChar.spec])
 
 namespace MulChar
 

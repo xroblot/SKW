@@ -33,3 +33,12 @@ def rootsOfUnity.mapQuot : (rootsOfUnity n R) →* (R ⧸ I)ˣ :=
 @[simp]
 theorem rootsOfUnity.coe_mapQuot (x : rootsOfUnity n R) :
     (rootsOfUnity.mapQuot n I x).val = Ideal.Quotient.mk I x.val := rfl
+
+/-- If `n` does not lie in `I`, then reduction modulo `I` is injective on the roots of unity of `R`
+of order `n`. To be added to
+[#44588](https://github.com/leanprover-community/mathlib4/pull/44588), where it generalizes
+`Ideal.rootsOfUnityMapQuot_injective` away from number fields; stated here with a `sorry` for now.
+-/
+theorem rootsOfUnity.injective_mapQuot [IsDomain R] (hn : (n : R) ∉ I) :
+    Function.Injective (rootsOfUnity.mapQuot n I) := by
+  sorry

@@ -69,18 +69,11 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
   have : 𝓟.LiesOver (span {(p : ℤ)}) := LiesOver.trans 𝓟 𝔭₀ _
   have : P.LiesOver (span {(p : ℤ)}) := LiesOver.tower_bot 𝓟 P _
   have : P.IsMaximal := IsMaximal.under (𝓞 K) 𝓟
-  have : P.HasTeichmullerLift (p ^ f - 1) := by
-    refine ⟨?_⟩
-    change Function.Bijective <| rootsOfUnityMapQuot P (p ^ f - 1)
-    have hNP : absNorm P = p ^ f := by
-      rw [← Ideal.pow_inertiaDeg p P, inertia_deg_eq p f]
-    refine (Nat.bijective_iff_injective_and_card _).mpr ⟨?_, ?_⟩
-    · apply rootsOfUnityMapQuot_injective
-      · rw [hNP]
-        exact ne_of_gt <|  Nat.lt_of_add_left_lt <| three_le_p_pow p f
-      · rw [hNP]
-        exact Nat.Coprime.pow_left _ (coprime_pow_sub_one p f).symm
-    · rw [IsPrimitiveRoot.card_rootsOfUnity hη, Nat.card_units (𝓞 K ⧸ P), ← absNorm_eq_card, hNP]
+  have hNP : absNorm P = p ^ f := by
+    rw [← Ideal.pow_inertiaDeg p P, inertia_deg_eq p f]
+  have : HasEnoughRootsOfUnity (𝓞 K) (p ^ f - 1) := ⟨⟨η, hη⟩, rootsOfUnity.isCyclic _ _⟩
+  have : P.HasTeichmullerLift (p ^ f - 1) := .of_card_of_isPrime (p ^ f - 1)
+    (by rw [Nat.card_units (𝓞 K ⧸ P), ← absNorm_eq_card, hNP])
   obtain ⟨Γ, hΓ₀, hΓ⟩ := exists_mem_gaussSum_pow_eq f P hζ hη 𝓟 m d hdm E k₀
   refine ⟨e Γ, ?_⟩
   simp_rw [Ideal.submodule_span_eq, ← Set.image_singleton, ← map_span,
