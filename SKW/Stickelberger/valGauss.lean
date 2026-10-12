@@ -84,7 +84,7 @@ theorem valGauss_eq_zero_of_not_liesOver [NeZero f] [IsCyclotomicExtension {p} �
 
 include hη in
 theorem emultiplicity_smul_GaussSum [NeZero f] [IsCyclotomicExtension {p} ℚ F]
-    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [P.LiesOver 𝒑] [Fact (Odd p)] (σ : Gal(L/F))
+    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [P.LiesOver 𝒑] (σ : Gal(L/F))
     (a : ℤ) :
     emultiplicity (σ • 𝓟) (span {(GaussSum f P hζ a : 𝓞 L)}) =
       valGauss f P hζ 𝓟 (a * (galFEquiv p f K σ⁻¹).val.val) := by

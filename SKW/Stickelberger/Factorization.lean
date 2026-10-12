@@ -40,7 +40,7 @@ variable {k : IntermediateField ℚ L} (𝔭 : Ideal (𝓞 k))
 variable (f P)
 
 include hη hdm in
-theorem smul_gaussSum_eq_gaussSum' [NeZero f] [NeZero m] [Fact (Odd p)] [IsCyclotomicExtension {p}
+theorem smul_gaussSum_eq_gaussSum' [NeZero f] [NeZero m] [IsCyclotomicExtension {p}
   ℚ F]
     [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [IsCyclotomicExtension {p ^ f - 1} ℚ K]
       [P.LiesOver 𝒑]

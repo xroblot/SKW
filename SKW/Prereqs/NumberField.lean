@@ -21,7 +21,7 @@ instance NumberField.sup {E F : Type*} [Field E] [Field F] [Algebra E F] (K L : 
 
 instance NumberField.inf {E F : Type*} [Field E] [Field F] [Algebra E F] (K L : IntermediateField E
   F)
-    [NumberField K] [NumberField L] :
+    [NumberField K] :
     NumberField ↑(K ⊓ L) :=
   haveI : CharZero E := (algebraMap E K).charZero
   { to_charZero := IntermediateField.charZero (K ⊓ L)

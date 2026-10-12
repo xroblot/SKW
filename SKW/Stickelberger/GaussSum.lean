@@ -382,7 +382,7 @@ theorem galLFEquiv_eq_of_smul_eq_pow (σ : Gal(L/F)) {a : ℕ}
 
 include hη in
 omit [P.IsMaximal] in
-theorem galLFEquiv_apply_teichmuller_zpow [Fact (Odd p)] (σ : Gal(L/F)) (a : ℤ) (x : 𝓞 K ⧸ P) :
+theorem galLFEquiv_apply_teichmuller_zpow (σ : Gal(L/F)) (a : ℤ) (x : 𝓞 K ⧸ P) :
     σ • (((MulChar.teichmuller P (p ^ f - 1)) ^ (- a)).ringHomComp (algebraMap (𝓞 K) (𝓞 L)) x) =
       ((MulChar.teichmuller P (p ^ f - 1)) ^ (- a * (galFEquiv p f K σ).val.val : ℤ)).ringHomComp
         (algebraMap (𝓞 K) (𝓞 L)) x := by
@@ -398,7 +398,7 @@ theorem galLFEquiv_apply_traceChar [CharP (𝓞 K ⧸ P) p] (σ : Gal(L/F)) (x :
 
 variable {p f} in
 include hη in
-theorem gal_gaussSum_eq_gaussSum [Fact (Odd p)] [P.LiesOver 𝒑] (σ : Gal(L/F)) (a : ℤ) :
+theorem gal_gaussSum_eq_gaussSum [P.LiesOver 𝒑] (σ : Gal(L/F)) (a : ℤ) :
     σ • GaussSum f P hζ a = GaussSum f P hζ (a * (galFEquiv p f K σ).val.val) := by
   simp_rw [GaussSum, gaussSum, Finset.smul_sum, smul_mul', galLFEquiv_apply_traceChar,
     galLFEquiv_apply_teichmuller_zpow p f P hη, neg_mul]

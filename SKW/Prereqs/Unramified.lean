@@ -82,7 +82,7 @@ open NumberField in
 is the subfield `K` (a sub-extension of an unramified-outside-`p` extension is unramified outside
 `p`). -/
 lemma UnramifiedOutside.tower_bot {K L : Type*} [Field K] [Field L] [NumberField K] [NumberField L]
-    [Algebra K L] [IsScalarTower ℚ K L] (h : UnramifiedOutside L p) : UnramifiedOutside K p :=
+    [Algebra K L] (h : UnramifiedOutside L p) : UnramifiedOutside K p :=
   fun q hq hqp ↦ (h q hq hqp).tower_bot
 
 open NumberField in
