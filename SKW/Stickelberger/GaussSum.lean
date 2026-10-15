@@ -1,417 +1,316 @@
 module
 
 public import Mathlib.NumberTheory.JacobiSum.Basic
-public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
-public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 
-public import SKW.Prereqs.CyclotomicField
-public import SKW.Prereqs.Ideals
-public import SKW.Prereqs.NumberTheory
 public import SKW.Stickelberger.AddCharTrace
-public import SKW.Stickelberger.Teichmuller
+public import SKW.Stickelberger.Misc
 
 set_option linter.style.header false
+
+/-!
+# Gauss sums
+
+This file holds the Gauss sums attached to the Teichmüller character, with the properties of them
+that `SKW.Stickelberger.{Factorization, valGauss, Stickelberger}` rely on. The statements carry no
+proof for the moment; the earlier proofs are kept in `SKW.Stickelberger.rGaussSum`, which is not
+part of the build. The auxiliary results that have nothing to do with Gauss sums live in
+`SKW.Stickelberger.Misc`.
+-/
 
 @[expose] public section
 
 noncomputable section
 
+namespace Stickelberger
+
 open Ideal NumberField IntermediateField
 
-
-
-variable (p f : ℕ)
+variable {p : ℕ} (n : ℕ)
 
 local notation3 "𝒑" => span {(p : ℤ)}
 
-theorem three_le_p_pow [NeZero f] [hp : Fact (p.Prime)] [hp' : Fact (Odd p)] : 3 ≤ p ^ f := by
-  refine le_trans (Nat.le_pow (NeZero.pos f)) ?_
-  exact (Nat.pow_le_pow_iff_left (NeZero.ne f)).mpr <| (Nat.Prime.odd_iff hp.out).mp hp'.out
+variable {L : Type*} [Field L] [NumberField L] {K F : IntermediateField ℚ L}
 
-theorem coprime_pow_sub_one [NeZero f] [Fact (p.Prime)] : (p ^ f - 1).Coprime p := by
-  rw [← Nat.coprime_pow_right_iff (NeZero.pos f), Nat.coprime_self_sub_left NeZero.one_le]
-  exact Nat.gcd_one_left _
+variable (P : Ideal (𝓞 K)) (𝓟 : Ideal (𝓞 L)) [P.HasTeichmullerLift n]
 
-variable [NeZero (p ^ f - 1)]
-
-theorem not_dvd_pow_self_sub_one [hp : Fact (p.Prime)] : ¬ p ∣ p ^ f - 1 := by
-  rw [Nat.dvd_sub_iff_right NeZero.one_le (p.div_pow_of_pos f _), Nat.dvd_one]
-  · exact hp.out.ne_one
-  · by_contra! h
-    aesop
-
-variable {p f}
-
-variable {L : Type*} [Field L] [NumberField L] {F K : IntermediateField ℚ L} {P : Ideal (𝓞 K)}
-
-variable [P.HasTeichmullerLift (p ^ f - 1)]
-
-variable {ζ : 𝓞 F} (hζ : IsPrimitiveRoot ζ p) [IsCyclotomicExtension {p} ℚ F]
-    {η : 𝓞 K} (hη : IsPrimitiveRoot η (p ^ f - 1)) [IsCyclotomicExtension {p ^ f - 1} ℚ K]
-
-variable (𝓟 : Ideal (𝓞 L))
-
-theorem teichmuller_pow_comp_algebraMap_ne_one (a : ℤ) (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) :
-    ((MulChar.teichmuller P (p ^ f - 1)) ^ a).ringHomComp (algebraMap (𝓞 K) (𝓞 L)) ≠ 1 := by
-  have hη := (IsCyclotomicExtension.zeta_spec (p ^ f - 1) ℚ K).toInteger_isPrimitiveRoot
-  exact (MulChar.ringHomComp_ne_one_iff (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 L))).mpr
-    ((MulChar.teichmuller_zpow_eq_one_iff hη).not.mpr ha)
-
-theorem teichmuller_ne_one [NeZero f] [Fact (p.Prime)] [Fact (Odd p)] :
-    MulChar.teichmuller P (p ^ f - 1) ≠ 1 := by
-  have hη := (IsCyclotomicExtension.zeta_spec (p ^ f - 1) ℚ K).toInteger_isPrimitiveRoot
-  exact MulChar.teichmuller_ne_one hη <| by have := three_le_p_pow p f; lia
-
-theorem ringChar_quotient_eq [hP : P.LiesOver 𝒑] : ringChar (𝓞 K ⧸ P) = p := by
-  have := Ideal.ringChar_quot P
-  rwa [← (liesOver_iff _ _).mp hP, absNorm_eq_card, Int.card_ideal_quot] at this
-
-variable [P.IsMaximal]
-
-local instance : Fintype (𝓞 K ⧸ P) := Fintype.ofFinite (𝓞 K ⧸ P)
-
-attribute [local instance] Ideal.Quotient.field
-
-variable [hp : Fact (p.Prime)] [𝓟.IsPrime]
-
-local instance : Fintype (ℤ ⧸ 𝒑) := Fintype.ofFinite _
-
-local instance [P.LiesOver 𝒑] : ExpChar (𝓞 K ⧸ P) p :=
-  have : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
-  expChar_prime _ p
-
-include hζ in
-theorem zeta_sub_one_mem [𝓟.LiesOver 𝒑] : algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∈ 𝓟 := by
-  rw [← map_one (f := algebraMap (𝓞 F) (𝓞 L)), ← map_sub, ← mem_comap,
-    ← Ideal.under_def, IsCyclotomicExtension.Rat.eq_span_zeta_sub_one_of_liesOver' p F
-      (IsPrimitiveRoot.coe_submonoidClass_iff.mpr hζ) (under (𝓞 F) 𝓟)]
-  exact Submodule.mem_span_singleton_self _
-
-variable (p f P)
-
-theorem ramificationIdx_eq_p_sub_one [𝓟.LiesOver 𝒑] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
-    𝓟.ramificationIdx ℤ = p - 1 := by
-  simpa using @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L
-    _ _ 𝓟 _ _ _
-    (by ring) (not_dvd_pow_self_sub_one p f)
-
-omit [P.HasTeichmullerLift (p ^ f - 1)] in
-theorem ramificationIdx_eq_p_sub_one' [𝓟.LiesOver P] [P.LiesOver 𝒑]
-    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
-    𝓟.ramificationIdx (𝓞 K) = p - 1 := by
-  have h𝓟 : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
-  have tower := Ideal.ramificationIdx_tower (R := ℤ) P 𝓟
-  rw [@IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _
-    _ _
-      (by ring) (not_dvd_pow_self_sub_one p f),
-    IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p K P (not_dvd_pow_self_sub_one p f),
-    one_mul] at tower
-  simpa using tower.symm
-
-theorem ramificationIdx_under_eq_one [𝓟.LiesOver 𝒑] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
-    𝓟.ramificationIdx (𝓞 F) = 1 := by
-  have h𝓟 : 𝓟 ≠ ⊥ := ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using hp.out.ne_zero) 𝓟
-  have tower := Ideal.ramificationIdx_tower (R := ℤ) (under (𝓞 F) 𝓟) 𝓟
-  rw [@IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _
-    _ _  (by ring) (not_dvd_pow_self_sub_one p f),
-    IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p F _] at tower
-  simp at tower
-  have hne : p - 1 ≠ 0 := Nat.sub_ne_zero_iff_lt.mpr hp.out.one_lt
-  nlinarith [Nat.pos_of_ne_zero hne]
-
-omit [P.HasTeichmullerLift (p ^ f - 1)] in
-theorem inertia_deg_eq [NeZero f] [P.LiesOver 𝒑] : P.inertiaDeg ℤ = f := by
-  rw [IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd (m := p ^ f - 1) p K P,
-    ZMod.orderOf_mod_self_pow_sub_one _ _ hp.out.one_lt]
-  exact (Nat.Prime.coprime_iff_not_dvd hp.out).mp (coprime_pow_sub_one p f).symm
-
-include hζ in
-omit [IsCyclotomicExtension {p ^ f - 1} ℚ K] [P.IsMaximal] in
-theorem zeta_sub_one_not_mem_sq [𝓟.LiesOver 𝒑] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
-    algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∉ 𝓟 ^ 2:= by
-  have hspan : span {ζ - 1} = under (𝓞 F) 𝓟 :=
-    (IsCyclotomicExtension.Rat.eq_span_zeta_sub_one_of_liesOver' p F
-      (IsPrimitiveRoot.coe_submonoidClass_iff.mpr hζ) (under (𝓞 F) 𝓟)).symm
-  have h : Ideal.map (algebraMap (𝓞 F) (𝓞 L)) (span {ζ - 1}) ≠ ⊥ := by
-    apply map_ne_bot_of_ne_bot
-    simpa [sub_eq_zero] using hζ.ne_one hp.out.one_lt
-  rw [← map_one (f := algebraMap (𝓞 F) (𝓞 L)), ← map_sub, ← dvd_span_singleton,
-    ← Set.image_singleton, ← map_span, FiniteMultiplicity.pow_dvd_iff_le_multiplicity
-    (Ideal.finiteMultiplicity IsPrime.ne_top' h), hspan,
-    ← IsDedekindDomain.ramificationIdx_eq_multiplicity (under (𝓞 F) 𝓟) 𝓟 (hspan ▸ h),
-    ramificationIdx_under_eq_one p f]
-  exact Nat.not_succ_le_self 1
+variable {ζ : 𝓞 F} (hζ : IsPrimitiveRoot ζ p)
 
 attribute [local instance] ZMod.algebra
 
-variable {p}
+attribute [local instance] Ideal.Quotient.field
 
-def GaussSum [P.LiesOver 𝒑] (a : ℤ) : 𝓞 L :=
-  have : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
-  gaussSum (((MulChar.teichmuller P (p ^ f - 1)) ^ (- a)).ringHomComp (algebraMap (𝓞 K) (𝓞 L)))
+theorem cast_trace_eq_algebraMap_trace [P.LiesOver 𝒑] [CharP (𝓞 K ⧸ P) p]
+    [Algebra (ℤ ⧸ 𝒑) (𝓞 L ⧸ 𝓟 ^ 2)] (x : 𝓞 K ⧸ P) :
+    (Algebra.trace (ZMod p) (𝓞 K ⧸ P) x).cast =
+      algebraMap _ (𝓞 L ⧸ 𝓟 ^ 2) (Algebra.trace (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) x) := by
+  rw [← ZMod.cast_trace_eq_trace (Int.quotientSpanNatEquivZMod p), ZMod.map_cast]
+
+@[nolint defsWithUnderscore]
+local instance [NeZero P] : Fintype (𝓞 K ⧸ P) := Fintype.ofFinite (𝓞 K ⧸ P)
+
+section Teichmuller
+
+variable [NeZero n] [IsCyclotomicExtension {n} ℚ K]
+
+protected theorem teichmuller_ne_one (hn : n ≠ 1) :
+    MulChar.teichmuller P n ≠ 1 :=
+  MulChar.teichmuller_ne_one (IsCyclotomicExtension.zeta_spec n ℚ K).toInteger_isPrimitiveRoot hn
+
+theorem teichmuller_ringHomComp_zpow_ne_one {a : ℤ}
+    (ha : ¬ (n : ℤ) ∣ a) :
+    (MulChar.teichmuller P n ^ a).ringHomComp (algebraMap (𝓞 K) (𝓞 L)) ≠ 1 := by
+  rw [MulChar.ringHomComp_ne_one_iff]
+  · rwa [ne_eq, MulChar.teichmuller_zpow_eq_one_iff] --  Int.dvd_neg]
+    exact (IsCyclotomicExtension.zeta_spec n ℚ K).toInteger_isPrimitiveRoot
+  · exact RingOfIntegers.algebraMap.injective K L
+
+end Teichmuller
+
+/-- Docstring. -/
+protected def gaussSum [NeZero p] [P.LiesOver 𝒑] (a : ℤ) : 𝓞 L :=
+  haveI : NeZero P := ⟨Ideal.ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using NeZero.ne p) _⟩
+  haveI : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
+  gaussSum (((MulChar.teichmuller P n) ^ (- a)).ringHomComp (algebraMap (𝓞 K) (𝓞 L)))
     ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ))
 
-omit [NeZero (p ^ f - 1)] [IsCyclotomicExtension {p} ℚ F]
-  [IsCyclotomicExtension {p ^ f - 1} ℚ K] in
-theorem GaussSum_periodic [P.LiesOver 𝒑] {k : ℤ} (hk : ↑(p ^ f - 1 : ℕ) ∣ k) (a : ℤ) :
-    GaussSum f P hζ (a + k) = GaussSum f P hζ a := by
-  rw [GaussSum, GaussSum, neg_add, zpow_add,
+local notation3 "𝓖" => Stickelberger.gaussSum
+
+protected def jacobiSum [P.IsMaximal] (a b : ℤ) : 𝓞 K :=
+  jacobiSum (MulChar.teichmuller P n ^ (-a)) (MulChar.teichmuller P n ^ (-b))
+
+local notation3 "𝓙" => Stickelberger.jacobiSum
+
+section
+
+-- The notation `𝒑` cannot be used in a `variable` command, since it refers to the variable `p`.
+variable [NeZero p] [P.LiesOver (span {(p : ℤ)})]
+
+theorem gaussSum_def (a : ℤ) :
+    haveI : NeZero P := ⟨Ideal.ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using NeZero.ne p) _⟩
+    haveI : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
+    𝓖 n P hζ a =
+      gaussSum (((MulChar.teichmuller P n) ^ (- a)).ringHomComp (algebraMap (𝓞 K) (𝓞 L)))
+      ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ)) := rfl
+
+theorem gaussSum_periodic {k : ℤ} (hk : (n : ℤ) ∣ k) (a : ℤ) :
+    𝓖 n P hζ (a + k) = 𝓖 n P hζ a := by
+  rw [gaussSum_def, gaussSum_def, neg_add, zpow_add,
     MulChar.teichmuller_zpow_eq_one_of_dvd (Int.dvd_neg.mpr hk), mul_one]
 
-theorem GaussSum_mem [𝓟.LiesOver 𝒑] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) :
-    GaussSum f P hζ a ∈ 𝓟 := by
-  have h𝓟 := zeta_sub_one_mem hζ 𝓟
-  simp_rw [← Quotient.eq_zero_iff_mem, GaussSum, gaussSum, map_sum, map_mul,
-    AddChar.compAddChar_traceChar_algebraMap,
-    AddChar.mk_traceChar_apply_eq_one _ h𝓟, mul_one, ← map_sum]
-  rw [MulChar.sum_eq_zero_of_ne_one (teichmuller_pow_comp_algebraMap_ne_one (- a)
+section
+
+variable [NeZero n] [IsCyclotomicExtension {n} ℚ K]
+
+theorem gaussSum_mem_span_zeta_sub_one (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
+    𝓖 n P hζ a ∈ Ideal.span {algebraMap (𝓞 F) (𝓞 L) ζ - 1} := by
+  have : NeZero P := ⟨Ideal.ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using NeZero.ne p) _⟩
+  simp_rw [gaussSum_def, gaussSum, AddChar.compAddChar_traceChar_algebraMap,
+    ← Quotient.eq_zero_iff_mem, map_sum, map_mul,
+    AddChar.mk_traceChar_apply_eq_one _ (mem_span_singleton_self _), mul_one, ← map_sum]
+  rw [MulChar.sum_eq_zero_of_ne_one (teichmuller_ringHomComp_zpow_ne_one n P
     (by rwa [Int.dvd_neg])), map_zero]
 
-omit [NeZero (p ^ f - 1)] [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p ^ f - 1} ℚ K] in
-theorem GaussSum_frob [P.LiesOver 𝒑] (a : ℤ) :
-    GaussSum f P hζ (p * a) = GaussSum f P hζ a := by
-  rw [GaussSum, GaussSum, gaussSum, gaussSum, eq_comm, ← (AlgEquiv.bijective _).sum_comp
-    (e := FiniteField.frobeniusAlgEquiv (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) p)]
-  refine Fintype.sum_congr _ _ fun x ↦ ?_
+theorem gaussSum_mul_gaussSum [P.IsMaximal] (a b : ℤ) (h : ¬ (n : ℤ) ∣ a + b) :
+    𝓖 n P hζ a * 𝓖 n P hζ b =
+      𝓖 n P hζ (a + b) * algebraMap (𝓞 K) (𝓞 L) (𝓙 n P a b) := by
+  rw [gaussSum_def, gaussSum_def, gaussSum_def, ← jacobiSum_mul_nontrivial,
+    ← MulChar.ringHomComp_mul, ← zpow_add, neg_add, jacobiSum_ringHomComp,
+    Stickelberger.jacobiSum]
+  rw [← MulChar.ringHomComp_mul, ← zpow_add, ← neg_add]
+  exact teichmuller_ringHomComp_zpow_ne_one n P (by rwa [Int.dvd_neg])
+
+end
+
+end
+
+section
+
+variable [Fact p.Prime] [P.IsMaximal] [P.LiesOver (span {(p : ℤ)})]
+
+theorem gaussSum_zero :
+    𝓖 n P hζ 0 = -1 := by
+  have : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
+  rw [gaussSum_def, neg_zero, zpow_zero, MulChar.ringHomComp_one, gaussSum_one_left]
+  rw [AddChar.compAddChar_traceChar_algebraMap]
+  exact AddChar.traceChar_ne_one _
+
+theorem gaussSum_of_dvd (a : ℤ) (ha : (n : ℤ) ∣ a) :
+    𝓖 n P hζ a = -1 := by
+  rwa [← zero_add a, gaussSum_periodic, gaussSum_zero]
+
+theorem gaussSum_frob (a : ℤ) :
+    𝓖 n P hζ (p * a) = 𝓖 n P hζ a := by
+  have : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
+  have : Fintype (ℤ ⧸ 𝒑) := Fintype.ofFinite _
+  rw [gaussSum_def, gaussSum_def, gaussSum, gaussSum, eq_comm,
+    ← ((FiniteField.frobeniusAlgEquiv (ℤ ⧸ 𝒑) _ p).bijective).sum_comp]
+  refine Fintype.sum_congr _ _ fun _ ↦ ?_
   rw [FiniteField.frobeniusAlgEquiv_apply, Fintype.card_eq_nat_card, Int.card_ideal_quot,
     MonoidHom.coe_compAddChar, Function.comp_apply, Function.comp_apply,
-    AddChar.traceChar_apply_pow, map_pow, ← MulChar.pow_apply' _ hp.out.ne_zero,
+    AddChar.traceChar_apply_pow, map_pow, ← MulChar.pow_apply' _ (Fact.out : p.Prime).ne_zero,
     MulChar.ringHomComp_pow, ← zpow_natCast, ← zpow_mul, neg_mul, mul_comm a]
 
-omit [IsCyclotomicExtension {p} ℚ F] in
-theorem GaussSum_mul_GaussSum_neg [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) :
-    GaussSum f P hζ a * GaussSum f P hζ (- a) =
-      algebraMap (𝓞 K) (𝓞 L) (((MulChar.teichmuller P (p ^ f - 1)) ^ (- a)) (- 1)) * p ^ f := by
+section
+
+variable [NeZero n] [IsCyclotomicExtension {n} ℚ K]
+
+theorem gaussSum_mul_gaussSum_neg (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
+    𝓖 n P hζ a * 𝓖 n P hζ (-a) =
+      algebraMap (𝓞 K) (𝓞 L) (((MulChar.teichmuller P n) ^ (- a)) (- 1)) * p ^ P.inertiaDeg ℤ := by
   have : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
-  rw [GaussSum, GaussSum, ← mul_gaussSum_inv_eq_gaussSum, AddChar.compAddChar_traceChar_algebraMap,
-    mul_right_comm, neg_neg, zpow_neg, ← MulChar.ringHomComp_inv, mul_assoc,
-    gaussSum_mul_gaussSum_eq_card (teichmuller_pow_comp_algebraMap_ne_one a ha)
-    (AddChar.isPrimitive_traceChar
-      (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) (𝓞 L)))),
-    Fintype.card_eq_nat_card, ← absNorm_eq_card, ← Ideal.pow_inertiaDeg p P,
-    MulChar.ringHomComp_inv, MulChar.ringHomComp_apply,
-    Nat.cast_pow, inertia_deg_eq p f P]
+  rw [gaussSum_def, gaussSum_def, ← mul_gaussSum_inv_eq_gaussSum,
+    AddChar.compAddChar_traceChar_algebraMap, neg_neg, zpow_neg, ← MulChar.ringHomComp_inv,
+    mul_right_comm, mul_assoc, gaussSum_mul_gaussSum_eq_card, Fintype.card_eq_nat_card,
+    ← absNorm_eq_card, ← Ideal.pow_inertiaDeg p P, Nat.cast_pow, MulChar.ringHomComp_inv,
+    MulChar.ringHomComp_apply]
+  · exact teichmuller_ringHomComp_zpow_ne_one n P ha
+  · apply AddChar.isPrimitive_traceChar _
 
-theorem norm_GaussSum [NeZero f] [P.LiesOver 𝒑] (a : ℤ) (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) :
-    ∃ k : ℕ, 1 ≤ k ∧ (Algebra.norm ℤ (GaussSum f P hζ a)).natAbs = p ^ k := by
-  have := congr_arg (fun x ↦ Int.natAbs (Algebra.norm ℤ x)) <| GaussSum_mul_GaussSum_neg f P hζ a
-    ha
-  rw [map_mul, map_mul, Int.natAbs_mul, Int.natAbs_mul,
-    show (p : 𝓞 L) = algebraMap ℤ (𝓞 L) p by simp,
-    map_pow, Algebra.norm_algebraMap_of_basis (NumberField.RingOfIntegers.basis L),
-    ← pow_mul, Int.natAbs_pow, Int.natAbs_natCast, ← isUnit_neg_one.unit_spec,
-    NumberField.isUnit_iff_natAbs_norm.mp <| RingHom.isUnit_map (algebraMap (𝓞 K) (𝓞 L))
-    <| IsUnit.map ((MulChar.teichmuller P (p ^ f - 1)) ^ (- a)) isUnit_neg_one.unit.isUnit,
-    one_mul] at this
-  obtain ⟨k, -, hk⟩ := (Nat.dvd_prime_pow hp.out).mp (Dvd.intro _ this)
-  refine ⟨k, ?_, hk⟩
-  obtain ⟨Q, hQ, _⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝒑
-  by_contra!
-  refine Ideal.IsMaximal.ne_top hQ ?_
-  refine Ideal.eq_top_of_isUnit_mem _ (GaussSum_mem f P hζ Q a ha) ?_
-  rw [isUnit_iff_natAbs_norm, hk, Nat.lt_one_iff.mp this, pow_zero]
+omit [P.IsMaximal] in
+theorem not_isUnit_gaussSum (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
+    ¬ IsUnit (𝓖 n P hζ a) := by
+  have hp : p.Prime := Fact.out
+  have h : span {(algebraMap (𝓞 F) (𝓞 L)) (ζ - 1)} ≠ ⊤ := by
+    rw [ne_eq, span_singleton_eq_top, isUnit_map_iff, hζ.isUnit_sub_one_iff hp.one_lt, not_not]
+    exact ⟨p, 1, hp.prime, zero_lt_one, by rw [pow_one]⟩
+  contrapose! h
+  rw [map_sub, map_one]
+  exact Ideal.eq_top_of_isUnit_mem _ (gaussSum_mem_span_zeta_sub_one n P hζ a ha) h
 
-theorem GaussSum_ne_zero_of_not_dvd [NeZero f] [P.LiesOver 𝒑] (a : ℤ)
-    (ha : ¬ ↑(p ^ f - 1 : ℕ) ∣ a) :
-    GaussSum f P hζ a ≠ 0 := by
-  rw [← Algebra.norm_ne_zero_iff (R := ℤ), ← Int.natAbs_ne_zero]
-  obtain ⟨k, hk, hk'⟩ := norm_GaussSum f P hζ a ha
-  have := hp.out
-  aesop
+theorem norm_gaussSum (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
+    ∃ k, 1 ≤ k ∧ (Algebra.norm ℤ (𝓖 n P hζ a)).natAbs = p ^ k := by
+  have h := congr_arg (Int.natAbs <| Algebra.norm ℤ ·) <| gaussSum_mul_gaussSum_neg n P hζ _ ha
+  rw [map_mul, map_mul, Int.natAbs_mul, Int.natAbs_mul, zpow_neg,
+    ← map_natCast (algebraMap ℤ (𝓞 L)), map_pow,
+    Algebra.norm_algebraMap_of_basis (NumberField.RingOfIntegers.basis L), ← pow_mul,
+    isUnit_iff_natAbs_norm.mp (RingHom.isUnit_map (algebraMap (𝓞 K) (𝓞 L)) _), one_mul,
+    Int.natAbs_pow, Int.natAbs_natCast] at h
+  · obtain ⟨k, -, hk⟩ := (Nat.dvd_prime_pow Fact.out).mp (Dvd.intro _ h)
+    refine ⟨k, ?_, hk⟩
+    by_contra! h
+    refine not_isUnit_gaussSum n P hζ a ha ?_
+    rw [isUnit_iff_natAbs_norm, hk,  Nat.lt_one_iff.mp h, pow_zero]
+  · rw [MulChar.inv_apply', inv_neg, inv_one]
+    exact isUnit_neg_one.map _
 
-set_option synthInstance.maxHeartbeats 30000 in
--- reason for change
-omit [NeZero (p ^ f - 1)] [IsCyclotomicExtension {p ^ f - 1} ℚ K] [𝓟.IsPrime] in
-theorem mk_sq_gausssum_eq_aux [(𝓟 ^ 2).LiesOver 𝒑] [P.LiesOver 𝒑] [(𝓟 ^ 2).LiesOver P] :
-    ∑ x, Ideal.Quotient.mk (𝓟 ^ 2)
-        (algebraMap (𝓞 K) (𝓞 L) ((MulChar.teichmuller P (p ^ f - 1)) ⁻¹ x)) *
-      algebraMap (ℤ ⧸ 𝒑) (𝓞 L ⧸ 𝓟 ^ 2) (Algebra.trace (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) x) = - 1 := by
+end
+
+end
+
+section IsCycloF
+
+variable [Fact p.Prime] [NumberField F] [IsCyclotomicExtension {p} ℚ F]
+    [P.LiesOver (span {(p : ℤ)})]
+
+theorem gaussSum_mem [NeZero n] [IsCyclotomicExtension {n} ℚ K]
+    [𝓟.IsPrime] [𝓟.LiesOver 𝒑] (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
+    𝓖 n P hζ a ∈ 𝓟 :=
+  (span_singleton_le_iff_mem 𝓟).mpr (zeta_sub_one_mem hζ 𝓟) <|
+    gaussSum_mem_span_zeta_sub_one n P hζ a ha
+
+variable [P.IsMaximal]
+
+omit [P.HasTeichmullerLift n] in
+private theorem sum_teichmuller_inv_mul_cast_trace_aux (i : ℕ) :
+    ∑ a : 𝓞 K ⧸ P, a⁻¹ * a ^ p ^ i = if P.inertiaDeg ℤ ∣ i then -1 else 0  := by
+  rw [← Nat.succ_pred_eq_of_pos (NeZero.pos (p ^ i)), FiniteField.sum_inv_mul_pow_succ]
+  obtain rfl | hi := Nat.eq_zero_or_pos i
+  · simp
+  · rw [Fintype.card_eq_nat_card, ← absNorm_eq_card, ← Ideal.pow_inertiaDeg p P,
+      Nat.pred_eq_sub_one,
+      if_congr (Nat.pow_sub_one_dvd_pow_sub_one_iff (Fact.out : p.Prime).one_lt) rfl rfl]
+
+private theorem sum_teichmuller_inv_mul_cast_trace [CharP (𝓞 K ⧸ P) p] [(𝓟 ^ 2).LiesOver P] :
+    ∑ x : 𝓞 K ⧸ P, algebraMap (𝓞 K) (𝓞 L ⧸ 𝓟 ^ 2) ((MulChar.teichmuller P n)⁻¹ x) *
+      (Algebra.trace (ZMod p) (𝓞 K ⧸ P) x).cast = - 1 := by
   classical
-  simp_rw [Ideal.Quotient.mk_algebraMap,
-    IsScalarTower.algebraMap_apply (𝓞 K) (𝓞 K ⧸ P) (𝓞 L ⧸ 𝓟 ^ 2),
-    Quotient.algebraMap_eq, MulChar.inv_apply', MulChar.mk_teichmuller_apply,
+  have : (𝓟 ^ 2).LiesOver 𝒑 := LiesOver.trans (𝓟 ^ 2) P 𝒑
+  simp_rw [cast_trace_eq_algebraMap_trace,
     IsScalarTower.algebraMap_apply (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) (𝓞 L ⧸ 𝓟 ^ 2),
-    FiniteField.algebraMap_trace_eq_sum_pow, ← map_mul, Finset.mul_sum]
-  rw [← map_sum, Finset.sum_comm]
-  have (i : ℕ) :  ∑ x : 𝓞 K ⧸ P, x⁻¹ * x ^ Nat.card (ℤ ⧸ 𝒑) ^ i =
-      ∑ x : (𝓞 K ⧸ P)ˣ, (x : 𝓞 K ⧸ P) ^ (Nat.card (ℤ ⧸ 𝒑) ^ i - 1) := by
-    rw [← Finset.sum_sdiff ({0} : Finset _).subset_univ, Finset.sum_singleton, inv_zero, zero_mul,
-      add_zero, Finset.sum_subtype (p := fun x ↦ x ≠ 0) («F» := inferInstance) _ (by simp)]
-    refine Finset.sum_equiv unitsEquivNeZero.symm (by simp) fun ⟨x, hx⟩ _ ↦ ?_
-    simp only [ne_eq, unitsEquivNeZero_symm_apply, Units.val_mk0]
-    rw [mul_comm, ← zpow_natCast, ← zpow_sub_one₀ hx, ← Nat.cast_pred, zpow_natCast]
-    refine Nat.pow_pos Nat.card_pos
-  simp_rw [this, FiniteField.sum_pow_units]
-  rw [← Nat.succ_pred_eq_of_pos Module.finrank_pos, ← Ideal.inertiaDeg_eq_of_isMaximal 𝒑 P,
-    Finset.sum_range_succ',
-    pow_zero, Nat.sub_self, ite_eq_left (Nat.dvd_zero _), Finset.sum_eq_zero, zero_add, map_neg,
-      map_one]
-  intro i hi
+    FiniteField.algebraMap_trace_eq_sum_pow (ℤ ⧸ 𝒑) (𝓞 K ⧸ P), map_sum, Finset.mul_sum,
+    IsScalarTower.algebraMap_apply (𝓞 K) (𝓞 K ⧸ P) (𝓞 L ⧸ 𝓟 ^ 2), MulChar.inv_apply',
+    Quotient.algebraMap_eq, MulChar.mk_teichmuller_apply]
+  rw [Finset.sum_comm]
+  simp_rw [← map_mul, ← map_sum, Int.card_ideal_quot, sum_teichmuller_inv_mul_cast_trace_aux]
+  rw [inertiaDeg_eq_of_isMaximal 𝒑 P, ← Nat.succ_pred_eq_of_pos (n := Module.finrank _ _)
+    Module.finrank_pos, Finset.sum_range_succ', Finset.sum_eq_zero, zero_add,
+    ite_eq_left (Nat.dvd_zero _), map_neg, map_one]
+  intro _ _
   rw [ite_eq_right]
-  rw [Fintype.card_eq_nat_card, ← Ideal.absNorm_eq_card, Int.card_ideal_quot,
-    ← Ideal.pow_inertiaDeg p P]
-  apply Nat.not_dvd_of_pos_of_lt
-  · rw [Nat.sub_pos_iff_lt]
-    exact Nat.one_lt_pow i.succ_ne_zero hp.out.one_lt
-  · gcongr
-    · exact NeZero.one_le
-    · exact hp.out.one_lt
-    · rwa [Nat.pred_eq_sub_one, Finset.mem_range, ← Nat.add_lt_iff_lt_sub_right] at hi
+  exact (Nat.le_of_dvd (Nat.succ_pos _)).mt (by grind)
 
-omit [NeZero (p ^ f - 1)] [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p ^ f - 1} ℚ K]
-  [𝓟.IsPrime] [P.IsMaximal] in
-/-- The trace over `ZMod p`, cast through its natural representative, agrees with the trace over
-`ℤ ⧸ 𝒑`: the bridge between the base of `AddChar.traceChar` and the base used here. -/
-theorem algebraMap_trace_val_eq [(𝓟 ^ 2).LiesOver 𝒑] [P.LiesOver 𝒑] [CharP (𝓞 K ⧸ P) p]
-    (x : 𝓞 K ⧸ P) :
-    algebraMap ℕ (𝓞 L ⧸ 𝓟 ^ 2) (Algebra.trace (ZMod p) (𝓞 K ⧸ P) x).val =
-      algebraMap (ℤ ⧸ 𝒑) (𝓞 L ⧸ 𝓟 ^ 2) (Algebra.trace (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) x) := by
-  have ht : Algebra.trace (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) x =
-      ((Int.quotientSpanNatEquivZMod p (Algebra.trace (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) x)).val : ℤ ⧸ 𝒑) := by
-    have := RingHom.congr_fun (Int.quotientSpanNatEquivZMod_comp_castRingHom p)
-      (Int.quotientSpanNatEquivZMod p (Algebra.trace (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) x)).val
-    rwa [RingHom.comp_apply, eq_intCast, Int.cast_natCast, ZMod.natCast_val, ZMod.cast_id,
-      RingHom.coe_coe, RingEquiv.symm_apply_apply] at this
-  rw [ht, map_natCast,
-    Algebra.trace_eq_of_ringEquiv (Int.quotientSpanNatEquivZMod p) (by ext; simp) x]
-  simp
-
-omit [NeZero (p ^ f - 1)] [IsCyclotomicExtension {p ^ f - 1} ℚ K] [𝓟.IsPrime] in
-theorem mk_sq_gausssum_eq_aux' [(𝓟 ^ 2).LiesOver 𝒑] [P.LiesOver 𝒑] [(𝓟 ^ 2).LiesOver P]
-    [CharP (𝓞 K ⧸ P) p] :
-    ∑ x, Ideal.Quotient.mk (𝓟 ^ 2)
-        (algebraMap (𝓞 K) (𝓞 L) ((MulChar.teichmuller P (p ^ f - 1)) ⁻¹ x)) *
-      algebraMap ℕ (𝓞 L ⧸ 𝓟 ^ 2) (Algebra.trace (ZMod p) (𝓞 K ⧸ P) x).val = - 1 := by
-  simp_rw [algebraMap_trace_val_eq]
-  exact mk_sq_gausssum_eq_aux f P 𝓟
-
-variable [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [NeZero f]
-
-theorem mk_sq_gausssum_eq [hp' : Fact (Odd p)] [𝓟.LiesOver P] [P.LiesOver 𝒑] :
-    Ideal.Quotient.mk (𝓟 ^ 2) (GaussSum f P hζ 1) = -(algebraMap (𝓞 F) (𝓞 L) ζ - 1 :) := by
+theorem mk_sq_gaussSum_eq [hp' : Fact (Odd p)] [IsCyclotomicExtension {n} ℚ K]
+    [𝓟.IsPrime] [𝓟.LiesOver P] (hn : 1 < n) (h𝓟 : 2 ≤ 𝓟.ramificationIdx (𝓞 K)) :
+    Ideal.Quotient.mk (𝓟 ^ 2) (𝓖 n P hζ 1) = -(algebraMap (𝓞 F) (𝓞 L) ζ - 1 :) := by
   classical
-  have hζ₀ := hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) (𝓞 L))
-  have : 3 ≤ p := (Nat.Prime.odd_iff hp.out).mp hp'.out
+  have : NeZero n := ⟨Nat.ne_zero_of_lt hn⟩
+  have : NeZero P := ⟨Ideal.ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using NeZero.ne p) _⟩
+  have : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
+  have h3 : 3 ≤ p := (Nat.Prime.odd_iff Fact.out).mp hp'.out
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
   have : (𝓟 ^ 2).LiesOver P := by
     refine pow_liesOver_of_liesOver P 𝓟 ?_
-    rw [Ideal.ramificationIdx'_eq_ramificationIdx P 𝓟 (Ideal.IsMaximal.ne_bot_of_isIntegral_int P),
-      ramificationIdx_eq_p_sub_one' p f P]
-    grind
+    rw [Ideal.ramificationIdx'_eq_ramificationIdx _ _ (NeZero.ne P)]
+    exact h𝓟
   have : (𝓟 ^ 2).LiesOver 𝒑 := LiesOver.trans (𝓟 ^ 2) P 𝒑
+  have hζ₀ := hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) (𝓞 L))
   have h𝓟 := zeta_sub_one_mem hζ 𝓟
-  have h : (MulChar.teichmuller P (p ^ f - 1))⁻¹ ≠ 1 := by
-    have hη := (IsCyclotomicExtension.zeta_spec (p ^ f - 1) ℚ K).toInteger_isPrimitiveRoot
-    refine inv_ne_one.mpr ?_
-    exact teichmuller_ne_one
-  simp_rw [GaussSum, gaussSum, zpow_neg, zpow_one, MulChar.ringHomComp_apply, map_sum, map_mul,
+  have h : (MulChar.teichmuller P n)⁻¹ ≠ 1 :=
+    inv_ne_one.mpr <| MulChar.teichmuller_ne_one
+      (IsCyclotomicExtension.zeta_spec n ℚ K).toInteger_isPrimitiveRoot hn.ne'
+  rw [gaussSum_def, gaussSum]
+  simp_rw [zpow_neg, zpow_one, MulChar.ringHomComp_apply, map_sum, map_mul,
     AddChar.compAddChar_traceChar_algebraMap,
-    AddChar.mk_traceChar_apply_eq_one_add_smul hζ₀ h𝓟, mul_add,
-    mul_one,
+    AddChar.mk_traceChar_apply_eq_one_add_smul hζ₀ h𝓟, mul_add, mul_one,
     Finset.sum_add_distrib, ← map_sum, MulChar.sum_eq_zero_of_ne_one h, map_zero, zero_add,
-    Algebra.smul_def, ← mul_assoc, ← Finset.sum_mul, mk_sq_gausssum_eq_aux']
-  simp
+    Algebra.smul_def, ← mul_assoc, ← Finset.sum_mul, Quotient.mk_algebraMap, eq_natCast,
+    ZMod.natCast_val, sum_teichmuller_inv_mul_cast_trace, map_neg, map_sub,
+    Quotient.mk_algebraMap, map_one, neg_mul, one_mul]
 
-variable (p)
+end IsCycloF
+section Galois
 
-include p f in
-set_option backward.isDefEq.respectTransparency false in
-theorem K_sup_F_eq_top : K ⊔ F = (⊤ : IntermediateField ℚ L) := by
-  have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ (⊤ : IntermediateField ℚ L) :=
-      IsCyclotomicExtension.equiv _ _ _ topEquiv.symm
-  have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ ↑(K ⊔ F) := by
-        rw [mul_comm, ← Nat.Coprime.lcm_eq_mul (coprime_pow_sub_one p f)]
-        exact isCyclotomicExtension_lcm_sup ℚ L (p ^ f - 1) p K F
-  exact isCyclotomicExtension_eq {p * (p ^ f - 1)}  ℚ L _ _
+variable (p) [NeZero p] [NeZero n] [Fact (n.Coprime p)] [IsCyclotomicExtension {p * n} ℚ L]
 
-include p f in
-omit [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] in
-theorem K_inf_F_eq_bot : K ⊓ F = ⊥ := by
-  apply LinearDisjoint.inf_eq_bot
-  exact IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (p ^ f - 1) p K F
-    (coprime_pow_sub_one p f)
-
-set_option backward.isDefEq.respectTransparency false in
-variable (F K) in
-def galEquiv₀ : Gal(L/F) ≃* Gal(K/ℚ) :=
-  haveI := IsCyclotomicExtension.isAbelianGalois {p * (p ^ f - 1)} ℚ L
-  (MulEquiv.ofBijective (IntermediateField.restrictRestrictAlgEquivMapHom ℚ K F L)
-    ⟨restrictRestrictAlgEquivMapHom_injective K F (K_sup_F_eq_top p f),
-    restrictRestrictAlgEquivMapHom_surjective K F (K_inf_F_eq_bot p f)⟩)
-
-set_option backward.isDefEq.respectTransparency false in
-variable (K) in
-def galFEquiv : Gal(L/F) ≃* (ZMod (p ^ f - 1))ˣ :=
-  haveI := IsCyclotomicExtension.isAbelianGalois {p * (p ^ f - 1)} ℚ L
-  (galEquiv₀ p f F K).trans <| IsCyclotomicExtension.Rat.galEquivZMod (p ^ f - 1) K
-
-include hη in
-set_option backward.isDefEq.respectTransparency false in
-theorem galLFEquiv_apply_eta (σ : Gal(L/F)) :
-    σ • (algebraMap (𝓞 K) (𝓞 L) η) = (algebraMap (𝓞 K) (𝓞 L)) η ^ (galFEquiv p f K σ).val.val := by
-  have : IsGalois ℚ K := IsCyclotomicExtension.isGalois {p ^ f - 1} ℚ K
-  have : Normal ℚ K := inferInstance
-  convert RingHom.congr_arg (algebraMap (𝓞 K) (𝓞 L))
-    <| IsCyclotomicExtension.Rat.galEquivZMod_smul_of_pow_eq (p ^ f - 1) K
-    (AlgEquiv.restrictNormalHom K (AlgEquiv.restrictScalars ℚ σ)) hη.pow_eq_one
-  · apply FaithfulSMul.algebraMap_injective (𝓞 L) L
-    rw [algebraMap.smul', AlgEquiv.smul_def, ← IsScalarTower.algebraMap_apply,
-      IsScalarTower.algebraMap_apply (𝓞 K) K L]
-    exact (AlgEquiv.restrictNormalHom_apply K (AlgEquiv.restrictScalars ℚ σ) η).symm
-  · rw [map_pow]; congr 2
-
-include hη in
-set_option backward.isDefEq.respectTransparency false in
-theorem galLFEquiv_apply_of_pow_eq_one (σ : Gal(L/F)) {x : 𝓞 L} (hx : x ^ (p ^ f - 1) = 1) :
-    σ • x = x ^ (galFEquiv p f K σ).val.val := by
-  obtain ⟨a, -, rfl⟩ :=
-    (hη.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 L))).eq_pow_of_pow_eq_one hx
-  rw [smul_pow', galLFEquiv_apply_eta p f hη, pow_right_comm]
-
-include hη in
-theorem galLFEquiv_eq_of_smul_eq_pow (σ : Gal(L/F)) {a : ℕ}
-    (h : σ • algebraMap (𝓞 K) (𝓞 L) η = algebraMap (𝓞 K) (𝓞 L) η ^ a) :
-    (galFEquiv p f K σ).val.val = a % (p ^ f - 1) := by
-  rw [galLFEquiv_apply_eta p f hη, ← map_pow, ← map_pow,
-    (FaithfulSMul.algebraMap_injective (𝓞 K) (𝓞 L)).eq_iff, ← pow_mod_orderOf _ a] at h
-  have := hη.pow_inj (ZMod.val_lt _) ?_ h
-  · nth_rewrite 1 [← hη.eq_orderOf] at this
-    exact this
-  · rw [← hη.eq_orderOf]
-    exact Nat.mod_lt a <| NeZero.pos (p ^ f - 1)
-
-include hη in
-omit [P.IsMaximal] in
-theorem galLFEquiv_apply_teichmuller_zpow (σ : Gal(L/F)) (a : ℤ) (x : 𝓞 K ⧸ P) :
-    σ • (((MulChar.teichmuller P (p ^ f - 1)) ^ (- a)).ringHomComp (algebraMap (𝓞 K) (𝓞 L)) x) =
-      ((MulChar.teichmuller P (p ^ f - 1)) ^ (- a * (galFEquiv p f K σ).val.val : ℤ)).ringHomComp
-        (algebraMap (𝓞 K) (𝓞 L)) x := by
-  rw [smul_eq_galRestrict_apply (𝓞 F) σ,
-    MulChar.map_ringHomComp_teichmuller_zpow_apply _ _ (galFEquiv p f K σ).val.val hη]
-  rw [← smul_eq_galRestrict_apply, galLFEquiv_apply_eta p f hη]
-
-omit [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal] in
-theorem galLFEquiv_apply_traceChar [CharP (𝓞 K ⧸ P) p] (σ : Gal(L/F)) (x : 𝓞 K ⧸ P) :
-    σ • ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ) x) =
+theorem smul_traceChar [CharP (𝓞 K ⧸ P) p] (σ : Gal(L/F)) (x : 𝓞 K ⧸ P) :
+    σ • (algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ) x =
       (algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ) x := by
-  simp [smul_eq_galRestrict_apply (𝓞 F) σ, Function.comp_apply]
+  rw [AddChar.compAddChar_traceChar_algebraMap, smul_eq_galRestrict_apply (𝓞 F),
+    AddChar.map_traceChar_apply_eq_mulShift _ _ 1, Nat.cast_one, AddChar.mulShift_one]
+  rw [AlgEquiv.commutes, pow_one]
 
-variable {p f} in
-include hη in
+variable [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {n} ℚ K]
+
+theorem galLFEquiv_apply_of_isPrimitiveRoot (σ : Gal(L/F)) {η : 𝓞 K} (hη : IsPrimitiveRoot η n) :
+    σ • (algebraMap (𝓞 K) (𝓞 L) η) =
+      (algebraMap (𝓞 K) (𝓞 L)) η ^ (galFEquiv p n K F σ).val.val := by
+  have : Normal ℚ K := (IsCyclotomicExtension.isGalois {n} ℚ K).to_normal
+  apply RingOfIntegers.coe_injective
+  rw [algebraMap.smul', map_pow, ← IsScalarTower.algebraMap_apply, AlgEquiv.smul_def,
+    IsScalarTower.algebraMap_apply (𝓞 K) K L, ← map_pow]
+  have := RingHom.congr_arg (algebraMap K L) <|
+     IsCyclotomicExtension.Rat.galEquivZMod_apply_of_pow_eq n K
+      ((σ.restrictScalars ℚ).restrictNormalHom K) (x := (algebraMap (𝓞 K) K) η)
+        (by rw [← map_pow, hη.pow_eq_one, map_one])
+  rwa [IntermediateField.algebraMap_apply, AlgEquiv.restrictNormalHom_apply] at this
+
+theorem smul_teichmuller (σ : Gal(L/F)) (a : ℤ) (x : 𝓞 K ⧸ P) :
+    σ • (MulChar.teichmuller P n ^ (-a)).ringHomComp (algebraMap (𝓞 K) (𝓞 L)) x =
+      (MulChar.teichmuller P n ^ (-(a * (galFEquiv p n K F σ).val.val))).ringHomComp
+        (algebraMap (𝓞 K) (𝓞 L)) x := by
+  let η : 𝓞 K := (IsCyclotomicExtension.zeta_spec n ℚ K).toInteger
+  have hη := (IsCyclotomicExtension.zeta_spec n ℚ K).toInteger_isPrimitiveRoot
+  rw [smul_eq_galRestrict_apply (𝓞 F), MulChar.map_ringHomComp_teichmuller_zpow_apply _ _
+    (galFEquiv p n K F σ).val.val hη, neg_mul]
+  rw [← smul_eq_galRestrict_apply]
+  exact galLFEquiv_apply_of_isPrimitiveRoot p n σ hη
+
 theorem gal_gaussSum_eq_gaussSum [P.LiesOver 𝒑] (σ : Gal(L/F)) (a : ℤ) :
-    σ • GaussSum f P hζ a = GaussSum f P hζ (a * (galFEquiv p f K σ).val.val) := by
-  simp_rw [GaussSum, gaussSum, Finset.smul_sum, smul_mul', galLFEquiv_apply_traceChar,
-    galLFEquiv_apply_teichmuller_zpow p f P hη, neg_mul]
+    σ • 𝓖 n P hζ a = 𝓖 n P hζ (a * (galFEquiv p n  K F σ).val.val) := by
+  have : NeZero P := ⟨Ideal.ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using NeZero.ne p) _⟩
+  rw [gaussSum_def, gaussSum_def, gaussSum, gaussSum, Finset.smul_sum]
+  exact Finset.sum_congr rfl fun _ _ ↦ by rw [smul_mul', smul_traceChar, smul_teichmuller p]
 
-def JacobiSum (a b : ℤ) : 𝓞 K :=
-  jacobiSum ((MulChar.teichmuller P (p ^ f - 1)) ^ (-a))
-    ((MulChar.teichmuller P (p ^ f - 1)) ^ (-b))
+end Galois
 
-omit [NeZero f] [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] in
-theorem GaussSum_mul_GaussSum [P.LiesOver 𝒑] (a b : ℤ) (h : ¬ ↑(p ^ f - 1 : ℕ) ∣ a + b) :
-    GaussSum f P hζ a * GaussSum f P hζ b =
-      GaussSum f P hζ (a + b) * algebraMap (𝓞 K) (𝓞 L) (JacobiSum p f P a b) := by
-  rw [GaussSum, GaussSum, GaussSum, ← jacobiSum_mul_nontrivial, ← MulChar.ringHomComp_mul,
-    ← zpow_add, neg_add, jacobiSum_ringHomComp, JacobiSum]
-  rw [← MulChar.ringHomComp_mul, ← zpow_add, ← neg_add]
-  exact teichmuller_pow_comp_algebraMap_ne_one _ (by rwa [Int.dvd_neg])
+end Stickelberger

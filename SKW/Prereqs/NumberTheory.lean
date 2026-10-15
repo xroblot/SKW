@@ -1,5 +1,6 @@
 module
 
+public import Mathlib.FieldTheory.Finite.Basic
 public import Mathlib.NumberTheory.ArithmeticFunction.Defs
 public import Mathlib.NumberTheory.NumberField.Units.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
@@ -46,21 +47,43 @@ theorem smul_eq_galRestrict_apply (A : Type*) {K L B : Type*} [CommRing A] [Fiel
 
 /-! ### ZMod -/
 
+-- TODO(SKW): upstream, next to `ZMod.ringHom_map_cast` in `Mathlib/Data/ZMod/Basic.lean`, which
+-- is the statement for a ring homomorphism into `ZMod n`, probably with `@[simp]` like it.
+/-- A ring homomorphism commutes with the cast from `ZMod n`. -/
+theorem ZMod.map_cast {n : ℕ} {R S : Type*} [Ring R] [Ring S] (f : R →+* S) (k : ZMod n) :
+    f (ZMod.cast k) = ZMod.cast k := by
+  cases n
+  · exact map_intCast f k
+  · exact map_natCast f k.val
+
+-- TODO(SKW): no obvious home in Mathlib, `Mathlib/RingTheory/Trace/Basic.lean`, next to
+-- `Algebra.trace_eq_of_equiv_equiv`, knowing nothing about `ZMod`.
+/-- The trace does not care whether the base ring is `ZMod p` or a ring isomorphic to it. -/
+theorem ZMod.cast_trace_eq_trace {p : ℕ} {A C : Type*} [CommRing A] [CommRing C]
+    [Algebra A C] [Algebra (ZMod p) C] (e : A ≃+* ZMod p) (x : C) :
+    ZMod.cast (Algebra.trace (ZMod p) C x) = Algebra.trace A C x := by
+  have : Subsingleton (A →+* C) := ⟨fun f g ↦ RingHom.ext fun y ↦ by
+    obtain ⟨z, rfl⟩ := e.symm.surjective y
+    exact congr($(Subsingleton.elim (f.comp (e.symm : ZMod p →+* A)) (g.comp e.symm)) z)⟩
+  rw [Algebra.trace_eq_of_equiv_equiv e (RingEquiv.refl C) (Subsingleton.elim _ _) x]
+  exact e.eq_symm_apply.mpr (ZMod.ringHom_map_cast (e : A →+* ZMod p) _)
+
+-- TODO(SKW): upstream, next to `Nat.pow_sub_one_mod_pow_sub_one` in
+-- `Mathlib/Data/Nat/GCD/Basic.lean`.
+/-- For `1 < a`, the number `a ^ m - 1` divides `a ^ n - 1` precisely when `m` divides `n`. -/
+theorem Nat.pow_sub_one_dvd_pow_sub_one_iff {a : ℕ} (ha : 1 < a) {n m : ℕ} :
+    a ^ m - 1 ∣ a ^ n - 1 ↔ m ∣ n := by
+  rw [Nat.dvd_iff_mod_eq_zero, Nat.pow_sub_one_mod_pow_sub_one, Nat.sub_eq_zero_iff_le,
+    ← pow_zero a, Nat.pow_le_pow_iff_right ha, Nat.le_zero, Nat.dvd_iff_mod_eq_zero]
+
 theorem ZMod.orderOf_mod_self_pow_sub_one (a k : ℕ) (ha : 1 < a) :
     orderOf (a : ZMod (a ^ k - 1)) = k := by
-  have h₁ {n : ℕ} (hn : 0 < n) : 2 ≤ a ^ n := (Nat.le_pow hn).trans <| Nat.pow_le_pow_left ha n
-  have h₂ {a k b : ℕ} (hb : 1 ≤ b) : (b : ZMod (a ^ k - 1)) = 1 ↔ a ^ k - 1 ∣ b - 1 := by
-    rw [← Nat.cast_one (R := ZMod (a ^ k - 1)), ZMod.natCast_eq_natCast_iff,
-      Nat.ModEq.comm, Nat.modEq_iff_dvd, ← Nat.cast_sub hb, Int.natCast_dvd_natCast]
-  obtain rfl | hk := Nat.eq_zero_or_pos k
-  · refine orderOf_eq_zero_iff'.mpr fun n hn ↦ ?_
-    rw [← Nat.cast_pow, ne_eq, h₂ (one_le_two.trans (h₁ hn)), pow_zero, tsub_self, zero_dvd_iff]
-    grind
-  refine (orderOf_eq_iff hk).mpr ⟨?_, fun m hm hm' ↦ ?_⟩
-  · rw [← Nat.cast_pow, h₂ (one_le_two.trans (h₁ hk))]
-  · rw [← Nat.cast_pow, ne_eq, h₂ (one_le_two.trans (h₁ hm'))]
-    refine Nat.not_dvd_of_pos_of_lt (by aesop) ?_
-    rwa [Nat.sub_lt_sub_iff_right (one_le_two.trans (h₁ hm')), Nat.pow_lt_pow_iff_right ha]
+  have key (n : ℕ) : (a : ZMod (a ^ k - 1)) ^ n = 1 ↔ k ∣ n := by
+    rw [← Nat.cast_pow, ← Nat.cast_one (R := ZMod (a ^ k - 1)), ZMod.natCast_eq_natCast_iff,
+      Nat.ModEq.comm, Nat.modEq_iff_dvd, ← Nat.cast_sub (Nat.one_le_pow _ _ (by lia : 0 < a)),
+      Int.natCast_dvd_natCast, Nat.pow_sub_one_dvd_pow_sub_one_iff ha]
+  exact Nat.dvd_antisymm (orderOf_dvd_iff_pow_eq_one.mpr ((key k).mpr dvd_rfl))
+    ((key _).mp (pow_orderOf_eq_one _))
 
 /-! ### ArithmeticFunction.phi -/
 
@@ -83,3 +106,66 @@ theorem Nat.totient_mul_totient_eq (m n : ℕ) :
     ArithmeticFunction.isMultiplicative_phi (x := m) (y := n)
   rwa [ArithmeticFunction.phi_apply, ArithmeticFunction.phi_apply, ArithmeticFunction.phi_apply,
     ArithmeticFunction.phi_apply, ← Nat.cast_mul, ← Nat.cast_mul, Nat.cast_inj, eq_comm] at this
+
+/-! ### FiniteField -/
+
+namespace FiniteField
+
+open Finset
+
+variable (K : Type*) [Field K] [Fintype K]
+
+local notation "q" => Fintype.card K
+
+-- TODO(SKW): upstream `sum_sdiff_zero`, `sum_pow` and `sum_univ_id_eq_ite` into
+-- `Mathlib/FieldTheory/Finite/Basic.lean`, right after `FiniteField.sum_pow_units`; the proof of
+-- `sum_pow_lt_card_sub_one'` below then replaces the one of
+-- `FiniteField.sum_pow_lt_card_sub_one`, whose name it takes over there.
+/-- A sum over the nonzero elements of a finite field is a sum over its units. -/
+theorem sum_sdiff_zero {M : Type*} [AddCommMonoid M] [DecidableEq K] (f : K → M) :
+    ∑ x ∈ univ \ {0}, f x = ∑ x : Kˣ, f x := by
+  let φ : Kˣ ↪ K := ⟨fun x ↦ x, Units.val_injective⟩
+  have : univ.map φ = univ \ {0} := by
+    ext x
+    simpa only [mem_map, mem_univ, Function.Embedding.coeFn_mk, true_and, mem_sdiff,
+      mem_singleton, φ] using! isUnit_iff_ne_zero
+  simp [← this, univ.sum_map φ, φ]
+
+/-- The sum of `x ^ i`, with `i ≠ 0`, as `x` ranges over a finite field of cardinality `q`
+is equal to `-1` if `q - 1 ∣ i`, and to `0` otherwise. -/
+theorem sum_pow (i : ℕ) (hi : i ≠ 0) :
+    ∑ x : K, x ^ i = if q - 1 ∣ i then -1 else 0 := by
+  classical
+  rw [← sum_sdiff ({0} : Finset K).subset_univ, sum_singleton, zero_pow hi, add_zero,
+    sum_sdiff_zero, sum_pow_units K i]
+
+/-- The sum of all the elements of a finite field of cardinality `q` is equal to `1` if `q = 2`,
+and to `0` otherwise. -/
+theorem sum_univ_id_eq_ite :
+    ∑ x : K, x = if q = 2 then 1 else 0 := by
+  rw [show ∑ x : K, x = ∑ x : K, x ^ 1 by simp, sum_pow K 1 one_ne_zero]
+  simp only [Nat.dvd_one, Nat.pred_eq_succ_iff, zero_add]
+  split_ifs with hq
+  · rw [neg_eq_iff_add_eq_zero]
+    exact_mod_cast hq ▸ cast_card_eq_zero K
+  · rfl
+
+/-- The sum of `x⁻¹ * x ^ (i + 1)` as `x` ranges over a finite field of cardinality `q` is equal
+to `-1` if `q - 1 ∣ i`, and to `0` otherwise. -/
+theorem sum_inv_mul_pow_succ (i : ℕ) :
+    ∑ x : K, x⁻¹ * x ^ (i + 1) = if q - 1 ∣ i then -1 else 0 := by
+  classical
+  rw [← sum_sdiff ({0} : Finset K).subset_univ, sum_singleton, inv_zero, zero_mul, add_zero,
+    sum_congr rfl (g := (· ^ i)), sum_sdiff_zero, sum_pow_units K i]
+  grind
+
+/-- The sum of `x ^ i` as `x` ranges over a finite field of cardinality `q`
+is equal to `0` if `i < q - 1`. -/
+theorem sum_pow_lt_card_sub_one' (i : ℕ) (h : i < q - 1) : ∑ x : K, x ^ i = 0 := by
+  obtain rfl | hi := eq_or_ne i 0
+  · simp
+  rw [sum_pow K _ hi, ite_eq_right]
+  contrapose! h
+  exact Nat.le_of_dvd (Nat.pos_of_ne_zero hi) h
+
+end FiniteField

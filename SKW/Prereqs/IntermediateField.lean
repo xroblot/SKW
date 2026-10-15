@@ -190,6 +190,8 @@ theorem IntermediateField.finrank_sup_mul_finrank_inf_eq {k L : Type*} [Field k]
   · rw [LinearEquiv.finrank_eq (M := ↑(E ⊔ F)) (N := ↑(E' ⊔ F'))]
     exact (LinearEquiv.refl ↑(E ⊓ F) ↑(E ⊔ F)).trans h.symm
 
+universe u
+
 open IntermediateField in
 /-- Every finite-dimensional abelian Galois extension `K/F` is the compositum of cyclic
 subextensions of prime power degree. (The character codomain is `AlgebraicClosure ℚ`, which has

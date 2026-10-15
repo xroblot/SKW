@@ -4,7 +4,10 @@ defaultTargets = ["SKW"]
 
 [[lean_lib]]
 name = "SKW"
-leanOptions = [{ name = "weak.linter.mathlibStandardSet", value = true }]
+leanOptions = [
+  { name = "weak.linter.mathlibStandardSet", value = true },
+  { name = "autoImplicit", value = false },
+]
 
 [[require]]
 name = "checkdecls"

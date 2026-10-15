@@ -59,7 +59,8 @@ theorem mk_traceChar_apply_eq_one_add_smul {𝓟 : Ideal R} (h : ζ - 1 ∈ 𝓟
       1 + (Algebra.trace (ZMod p) A x).val • Ideal.Quotient.mk (𝓟 ^ 2) (ζ - 1) := by
   have := Polynomial.eval_add_of_sq_eq_zero (Polynomial.X ^ (Algebra.trace (ZMod p) A x).val) 1
     (Ideal.Quotient.mk (𝓟 ^ 2) (ζ - 1))
-    (by rw [← map_pow, Ideal.Quotient.eq_zero_iff_mem]; exact Ideal.pow_mem_pow h 2)
+    (by rw [← map_pow, Ideal.Quotient.eq_zero_iff_mem]
+        exact Ideal.pow_mem_pow h 2)
   simpa [traceChar_apply, add_comm, Polynomial.derivative_X_pow] using this
 
 /-- Pushing `traceChar` along an injective ring homomorphism `f : R → S` gives the character

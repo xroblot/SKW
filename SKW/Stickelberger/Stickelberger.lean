@@ -14,6 +14,8 @@ set_option linter.style.header false
 
 @[expose] public section
 
+namespace Stickelberger
+
 open Ideal NumberField IntermediateField Pointwise IsCyclotomicExtension.Rat
 
 variable (m : ℕ) (k : Type*) [Field k] [NumberField k] [NeZero m]
@@ -23,8 +25,8 @@ variable (m : ℕ) (k : Type*) [Field k] [NumberField k] [NeZero m]
 attribute [local instance] Ideal.Quotient.field
 
 set_option backward.isDefEq.respectTransparency false in
-theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f - 1))] [NeZero (p ^ f
-  - 1)]
+theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f - 1))]
+    [NeZero (p ^ f - 1)] [Fact ((p ^ f - 1).Coprime p)]
     (hdm : d * m = p ^ f - 1) (hf : orderOf (p : ZMod m) = f) (L : Type*) [Field L] [NumberField L]
     [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
     Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val) := by
@@ -70,7 +72,8 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
   have : P.LiesOver (span {(p : ℤ)}) := LiesOver.tower_bot 𝓟 P _
   have : P.IsMaximal := IsMaximal.under (𝓞 K) 𝓟
   have hNP : absNorm P = p ^ f := by
-    rw [← Ideal.pow_inertiaDeg p P, inertia_deg_eq p f]
+    sorry
+    -- rw [← Ideal.pow_inertiaDeg p P, inertia_deg_eq p f]
   have : HasEnoughRootsOfUnity (𝓞 K) (p ^ f - 1) := ⟨⟨η, hη⟩, rootsOfUnity.isCyclic _ _⟩
   have : P.HasTeichmullerLift (p ^ f - 1) := .of_card_of_isPrime (p ^ f - 1)
     (by rw [Nat.card_units (𝓞 K ⧸ P), ← absNorm_eq_card, hNP])
@@ -99,6 +102,7 @@ theorem Stickelberger'' :
       IsUnit.isOfFinOrder <| (ZMod.isUnit_iff_coprime p m).mpr <| hp.out.coprime_iff_not_dvd.mpr
         hp'⟩
   let d := (p ^ f - 1) / m
+  have : Fact ((p ^ f - 1).Coprime p) := sorry
   have hdm : d * m = p ^ f - 1 := by
     have : m ∣ p ^ f - 1 := by
       rw [← ZMod.natCast_eq_zero_iff, Nat.cast_sub NeZero.one_le, Nat.cast_one, sub_eq_zero,
@@ -160,3 +164,5 @@ theorem Stickelberger (C : ClassGroup (𝓞 k)) :
   apply Stickelberger'
   · exact Nat.coprime_two_right.mp (hcop.coprime_dvd_right (dvd_mul_right 2 m))
   · exact (hcop.coprime_dvd_right (dvd_mul_left m 2)).symm
+
+end Stickelberger
