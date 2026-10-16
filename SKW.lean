@@ -32,7 +32,6 @@ import SKW.Stickelberger.Factorization
 import SKW.Stickelberger.GaussSum
 import SKW.Stickelberger.Stickelberger
 import SKW.Stickelberger.Teichmuller
-import SKW.Stickelberger.valGauss
 import SKW.KroneckerWeber.Basic
 import SKW.KroneckerWeber.ClassGroup
 import SKW.KroneckerWeber.Reduction

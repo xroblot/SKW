@@ -243,5 +243,36 @@ theorem isCyclic_of_subgroup_card_injective {G : Type*} [Group G] [Finite G]
     _ ≤ ∑ d ∈ n.divisors, d.totient := Finset.sum_le_sum fun d _ ↦ key d
     _ = n := Nat.sum_totient n
 
+-- TODO(SKW): upstream into `Mathlib/RingTheory/Multiplicity.lean`, next to
+-- `FiniteMultiplicity.mul_left` and `FiniteMultiplicity.mul_right`, which are both instances of it.
+/-- Finiteness of the multiplicity passes to a divisor. -/
+theorem FiniteMultiplicity.of_dvd {α : Type*} [Monoid α] {p a b : α} (hab : a ∣ b) :
+    FiniteMultiplicity p b → FiniteMultiplicity p a :=
+  fun ⟨n, hn⟩ ↦ ⟨n, fun h ↦ hn (h.trans hab)⟩
+
+-- TODO(SKW): upstream, same place.
+/-- Finiteness of the multiplicity in a nonzero power passes to the base. -/
+theorem FiniteMultiplicity.of_pow {α : Type*} [Monoid α] {p a : α} {k : ℕ} (hk : k ≠ 0) :
+    FiniteMultiplicity p (a ^ k) → FiniteMultiplicity p a :=
+  of_dvd (dvd_pow_self a hk)
+
+-- TODO(SKW): upstream, next to `multiplicity_eq_of_associated_right`.
+/-- Finiteness of the multiplicity only depends on the associate class of the second argument. -/
+theorem FiniteMultiplicity.congr_right {α : Type*} [Monoid α] {p a b : α} (h : Associated a b) :
+    FiniteMultiplicity p a ↔ FiniteMultiplicity p b :=
+  ⟨of_dvd h.symm.dvd, of_dvd h.dvd⟩
+
+-- TODO(SKW): upstream, replacing `FiniteMultiplicity.multiplicity_pow`, whose name becomes a
+-- deprecated alias; the finiteness hypothesis is dead weight with the junk value `0`.
+/-- The multiplicity of a prime in a power, with no finiteness hypothesis. -/
+theorem multiplicity_pow {α : Type*} [CommMonoidWithZero α] [IsCancelMulZero α] {p a : α}
+    (hp : Prime p) {k : ℕ} :
+    multiplicity p (a ^ k) = k * multiplicity p a := by
+  by_cases h : FiniteMultiplicity p a
+  · exact h.multiplicity_pow hp
+  obtain rfl | hk := eq_or_ne k 0
+  · simp
+  · rw [multiplicity_eq_zero_of_not_finiteMultiplicity h, mul_zero,
+      multiplicity_eq_zero_of_not_finiteMultiplicity fun h' ↦ h (h'.of_pow hk)]
 
 end

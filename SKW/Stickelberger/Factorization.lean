@@ -3,7 +3,11 @@ module
 public import Mathlib.NumberTheory.RamificationInertia.Galois
 public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 
-public import SKW.Stickelberger.valGauss
+public import Mathlib.Data.ENat.BigOperators
+
+public import SKW.Prereqs.Digits
+public import SKW.Prereqs.MulChars
+public import SKW.Stickelberger.GaussSum
 
 set_option linter.style.header false
 
@@ -151,7 +155,14 @@ theorem exists_mem_gaussSum_pow_eq [NeZero f] [NeZero m] [Fact (Odd p)] [Algebra
     refine ⟨⟨⟨(𝓖 (p ^ f - 1) P hζ d ^ m : 𝓞 L), this⟩,
       coe_isIntegral_iff.mp <| RingOfIntegers.isIntegral_coe _⟩, ?_, rfl⟩
     rw [← map_ne_zero_iff _ (FaithfulSMul.algebraMap_injective (𝓞 k) (𝓞 L))]
-    exact_mod_cast pow_ne_zero m <| GaussSum_ne_zero f P hζ 𝓟 _
+    -- TODO(SKW): transitional, see the note at the top of the file.
+    have h3 : 3 ≤ p := (Nat.Prime.odd_iff hp.out).mp Fact.out
+    have hn : 1 < p ^ f - 1 := by have := three_le_p_pow p f; lia
+    have h𝓟 : 2 ≤ 𝓟.ramificationIdx (𝓞 K) := by
+      rw [ramificationIdx_eq_p_sub_one' (p := p) (f := f) (P := P) (𝓟 := 𝓟)]
+      lia
+    have hζ𝓟 : algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∉ 𝓟 ^ 2 := sorry
+    exact_mod_cast pow_ne_zero m <| gaussSum_ne_zero (p ^ f - 1) P 𝓟 hζ hn h𝓟 hζ𝓟 _
   have : k = E ⊓ K := by
     have : p.Coprime d := (coprime_pow_sub_one p f).symm.of_dvd_right (Dvd.intro m hdm)
     convert isCyclotomicExtension_eq {m} ℚ L k _
@@ -255,11 +266,21 @@ theorem mul_valGauss_eq_mul_sum [NeZero f] [NeZero m] [NeZero d] [𝓟.LiesOver 
     [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
     [IsCyclotomicExtension {p ^ f - 1} ℚ K] [Fact (Odd p)] [𝓟.IsPrime] (a : ℕ) (ha : d * a ≤ p ^ f
       - 2) :
-    m * (valGauss f P hζ 𝓟 (d * a : ℕ)) = (p - 1 : ℕ) * ∑ i ∈ Finset.range f, (a * p ^ i % m) := by
-  rw [← Nat.cast_mul, ← ENat.natCast_toNat (valGauss_ne_top₀' f P hζ 𝓟 _), ← Nat.cast_mul,
-    Nat.cast_inj]
+    m * (valGauss (p ^ f - 1) P 𝓟 hζ (d * a : ℕ)) =
+      (p - 1 : ℕ) * ∑ i ∈ Finset.range f, (a * p ^ i % m) := by
+  -- TODO(SKW): transitional, see the note at the top of the file.
+  have h3 : 3 ≤ p := (Nat.Prime.odd_iff hp.out).mp Fact.out
+  have hn : 1 < p ^ f - 1 := by have := three_le_p_pow p f; lia
+  have h𝓟 : 2 ≤ 𝓟.ramificationIdx (𝓞 K) := by
+    rw [ramificationIdx_eq_p_sub_one' (p := p) (f := f) (P := P) (𝓟 := 𝓟)]
+    lia
+  have hζ𝓟 : algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∉ 𝓟 ^ 2 := sorry
+  have hq : p ^ f - 1 + 1 = p ^ P.inertiaDeg ℤ := sorry
+  rw [← Nat.cast_mul, ← ENat.natCast_toNat
+    (valGauss_ne_top_natCast (p ^ f - 1) P 𝓟 hζ hn h𝓟 hζ𝓟 _), ← Nat.cast_mul, Nat.cast_inj]
   qify
-  rw [← Nat.cast_mul d, valGauss_toNat_eq_sum_digits f P hζ _ _ ha,
+  rw [← Nat.cast_mul d,
+    valGauss_toNat_eq_sum_digits (p ^ f - 1) P 𝓟 hζ hn hq h𝓟 hζ𝓟 _ (by lia),
     ← Nat.sub_one_mul_sum_fract_div_eq_digits_sum hp.out.one_lt (l := f) ha]
   simp_rw [← hdm, Nat.cast_mul, div_mul_eq_div_div, mul_div_assoc _ _ (d :ℚ),
     ← mul_div_assoc (d : ℚ),
@@ -332,10 +353,12 @@ theorem emultiplicity_galEquivZMod_symm_smul_gaussSum [IsCyclotomicExtension {m}
       Nat.cast_inj, ← ZMod.natCast_eq_natCast_iff', ZMod.natCast_val, hb, ZMod.natCast_zmod_val]
     rw [Int.natCast_ne_zero]
     exact NeZero.ne _
-  rw [← Ideal.span_singleton_pow, emultiplicity_pow h𝓟, emultiplicity_smul_gaussSum f P hζ,
+  rw [← Ideal.span_singleton_pow, emultiplicity_pow h𝓟,
+    emultiplicity_smul_gaussSum p (p ^ f - 1) P 𝓟 hζ,
     ← Set.image_singleton, ← map_span,
     ← Ideal.IsDedekindDomain.ramificationIdx_mul_emultiplicity_under_eq h𝓟' h𝓟₀, ← Nat.cast_mul,
-    valGauss_periodic' f P hζ _ _ _ this, mul_valGauss_eq_mul_sum f P hζ _ m _ hdm] at hmain
+    valGauss_periodic' (p ^ f - 1) P 𝓟 hζ _ _ this,
+    mul_valGauss_eq_mul_sum f P hζ _ m _ hdm] at hmain
   · have : under (𝓞 k) (σ • 𝓟) = ((galEquivZMod m k).symm a⁻¹) • 𝔭 := by
       ext
       unfold σ
@@ -366,7 +389,7 @@ theorem emultiplicity_galEquivZMod_symm_smul_gaussSum [IsCyclotomicExtension {m}
 variable [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p ^ f - 1} ℚ K] [NeZero f]
   [𝓟.IsPrime]
 
-omit [Fact ((p ^ f - 1).Coprime p)] in
+omit [Fact ((p ^ f - 1).Coprime p)] [NeZero f] in
 include 𝓟 in
 theorem emultplicity_gaussSum_eq_zero [P.LiesOver 𝒑] {𝔭 : Ideal (𝓞 k)} [NeZero 𝓟]
     [𝓟.LiesOver 𝔭] {Γ : 𝓞 k} (hΓ : (𝓖 (p ^ f - 1) P hζ d) ^ m = algebraMap (𝓞 k) (𝓞 L) Γ)
@@ -377,7 +400,7 @@ theorem emultplicity_gaussSum_eq_zero [P.LiesOver 𝒑] {𝔭 : Ideal (𝓞 k)} 
     have : ¬ 𝓟.LiesOver 𝒑 := by
       contrapose! hP₀'
       exact LiesOver.tower_bot 𝓟 𝔭 𝒑
-    have := valGauss_eq_zero_of_not_liesOver f P hζ 𝓟 this d
+    have := valGauss_eq_zero_of_not_liesOver (p ^ f - 1) P 𝓟 hζ this d
     rw [valGauss] at this
     rw [← span_singleton_pow, emultiplicity_pow h𝓟, this, mul_zero]
   rw [hΓ, ← Set.image_singleton, ← map_span] at this

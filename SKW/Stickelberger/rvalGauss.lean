@@ -8,13 +8,21 @@ public import SKW.Stickelberger.GaussSum
 
 set_option linter.style.header false
 
+/-!
+# The valuation of the Gauss sums: the former proofs
+
+This file is the state of `SKW.Stickelberger.valGauss` before its results were restated over an
+abstract `n` at the end of `SKW.Stickelberger.GaussSum`, kept for reference. Nothing imports it,
+and its declarations duplicate those of `SKW.Stickelberger.GaussSum`.
+-/
+
 @[expose] public section
 
 noncomputable section
 
-namespace Stickelberger
+namespace Stickelberger2
 
-open Ideal NumberField IntermediateField Pointwise
+open Ideal NumberField IntermediateField Pointwise Stickelberger
 
 variable (p f : ℕ) [NeZero (p ^ f - 1)]
 
