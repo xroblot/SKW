@@ -11,11 +11,20 @@ public import SKW.Stickelberger.GaussSum
 
 set_option linter.style.header false
 
+/-!
+# The factorization of the Gauss sums: the former proofs
+
+This file is the state of `SKW.Stickelberger.Factorization` before its results were restated with
+`multiplicity` and over an abstract `n` where possible at the end of `SKW.Stickelberger.GaussSum`,
+kept for reference. Nothing imports it, and its declarations duplicate those of
+`SKW.Stickelberger.GaussSum`.
+-/
+
 @[expose] public section
 
-open Ideal NumberField IntermediateField Pointwise IsCyclotomicExtension.Rat
+open Ideal NumberField IntermediateField Pointwise IsCyclotomicExtension.Rat Stickelberger
 
-namespace Stickelberger
+namespace Stickelberger2
 
 noncomputable section
 
@@ -493,4 +502,4 @@ theorem GaussSum_factorization [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
 
 end
 
-end Stickelberger
+end Stickelberger2

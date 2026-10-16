@@ -28,7 +28,6 @@ import SKW.Prereqs.NumberTheory
 import SKW.Prereqs.Cotangent
 import SKW.Prereqs.TameRamification
 import SKW.Stickelberger.AddCharTrace
-import SKW.Stickelberger.Factorization
 import SKW.Stickelberger.GaussSum
 import SKW.Stickelberger.Stickelberger
 import SKW.Stickelberger.Teichmuller

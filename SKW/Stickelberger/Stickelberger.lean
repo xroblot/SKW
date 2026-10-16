@@ -5,7 +5,7 @@ public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import Mathlib.RingTheory.Ideal.IsPrincipal
 public import Mathlib.NumberTheory.NumberField.Ideal.Basic
 
-public import SKW.Stickelberger.Factorization
+public import SKW.Stickelberger.GaussSum
 public import SKW.Prereqs.ClassGroup
 public import SKW.Prereqs.ClassGroupCoprime
 public import SKW.Prereqs.IdealNorm
@@ -77,10 +77,10 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
   have : HasEnoughRootsOfUnity (𝓞 K) (p ^ f - 1) := ⟨⟨η, hη⟩, rootsOfUnity.isCyclic _ _⟩
   have : P.HasTeichmullerLift (p ^ f - 1) := .of_card_of_isPrime (p ^ f - 1)
     (by rw [Nat.card_units (𝓞 K ⧸ P), ← absNorm_eq_card, hNP])
-  obtain ⟨Γ, hΓ₀, hΓ⟩ := exists_mem_gaussSum_pow_eq f P hζ hη 𝓟 m d hdm E k₀
+  obtain ⟨Γ, hΓ₀, hΓ⟩ := exists_mem_gaussSum_pow_eq (p ^ f - 1) P hζ m d k₀ hdm E
   refine ⟨e Γ, ?_⟩
   simp_rw [Ideal.submodule_span_eq, ← Set.image_singleton, ← map_span,
-    GaussSum_factorization f P hζ hη 𝓟 m d hf hdm 𝔭₀ _ hΓ₀ hΓ, ← mapHom_apply, map_prod,
+    gaussSum_factorization P 𝓟 hζ m d 𝔭₀ f hf hdm _ hΓ₀ hΓ, ← mapHom_apply, map_prod,
       mapHom_apply]
   have (a : (ZMod m)ˣ) : ((galEquivZMod m k).symm a)⁻¹ • 𝔭 =
         Ideal.map e (((galEquivZMod m k₀).symm a)⁻¹ • 𝔭₀) := by
