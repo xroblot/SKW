@@ -334,8 +334,8 @@ section FiniteMultiplicity
 
 variable {n P 𝓟 hζ}
 
-variable [Fact p.Prime] [NeZero n] [IsCyclotomicExtension {n} ℚ K] [P.LiesOver (span {(p : ℤ)})]
-  [𝓟.IsMaximal] [P.IsMaximal]
+variable [Fact p.Prime] [P.IsMaximal] [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMaximal]
+  [NeZero n] [IsCyclotomicExtension {n} ℚ K]
 
 theorem finiteMultiplicity_gaussSum {a : ℤ} :
     FiniteMultiplicity 𝓟 (span {𝓖 n P hζ a}) :=
@@ -368,7 +368,6 @@ theorem valGauss_periodic (a b : ℤ) (h : a ≡ b [ZMOD (n : ℕ)]) :
   rw [valGauss, valGauss, gaussSum_periodic _ _ _ (dvd_mul_right _ _)]
 
 end ValGauss
-
 
 section ValGaussGalois
 
@@ -403,9 +402,9 @@ theorem valGauss_zero :
 
 section
 
-variable [NeZero n] [IsCyclotomicExtension {n} ℚ K]
+variable [𝓟.IsMaximal] [NeZero n] [IsCyclotomicExtension {n} ℚ K]
 
-theorem valGauss_add_valGauss [𝓟.IsMaximal] {a b : ℤ} (h : ¬ (n : ℤ) ∣ a + b) :
+theorem valGauss_add_valGauss {a b : ℤ} (h : ¬ (n : ℤ) ∣ a + b) :
     valGauss n P 𝓟 hζ a + valGauss n P 𝓟 hζ b = valGauss n P 𝓟 hζ (a + b) +
        multiplicity 𝓟 (span {algebraMap (𝓞 K) (𝓞 L) (𝓙 n P a b)}) := by
   rw [valGauss, valGauss, valGauss, ← multiplicity_mul (prime_of_maximal 𝓟),
@@ -416,7 +415,7 @@ theorem valGauss_add_valGauss [𝓟.IsMaximal] {a b : ℤ} (h : ¬ (n : ℤ) ∣
   · exact (prime_of_maximal 𝓟).finiteMultiplicity_mul finiteMultiplicity_gaussSum
       finiteMultiplicity_gaussSum
 
-theorem valGauss_subadditive [𝓟.IsMaximal] (a b : ℤ) :
+theorem valGauss_subadditive (a b : ℤ) :
     valGauss n P 𝓟 hζ (a + b) ≤ valGauss n P 𝓟 hζ a + valGauss n P 𝓟 hζ b := by
   by_cases h : (n : ℤ) ∣ a + b
   · rw [valGauss_eq_zero h]
@@ -424,7 +423,7 @@ theorem valGauss_subadditive [𝓟.IsMaximal] (a b : ℤ) :
   · rw [valGauss_add_valGauss h]
     exact Nat.le_add_right _ _
 
-theorem valGauss_add_valGauss_neg_self [NeZero p] [𝓟.IsMaximal] [𝓟.LiesOver 𝒑] {a : ℤ}
+theorem valGauss_add_valGauss_neg_self [𝓟.LiesOver 𝒑] {a : ℤ}
     (ha : ¬ (n : ℤ) ∣ a) :
     valGauss n P 𝓟 hζ a + valGauss n P 𝓟 hζ (-a) = P.inertiaDeg ℤ * 𝓟.ramificationIdx ℤ := by
   rw [valGauss, valGauss, ← multiplicity_mul (prime_of_maximal 𝓟),
@@ -440,7 +439,7 @@ theorem valGauss_add_valGauss_neg_self [NeZero p] [𝓟.IsMaximal] [𝓟.LiesOve
   · exact (prime_of_maximal 𝓟).finiteMultiplicity_mul finiteMultiplicity_gaussSum
       finiteMultiplicity_gaussSum
 
-theorem valGauss_add_valGauss_sub_self [𝓟.IsMaximal] [𝓟.LiesOver 𝒑] {k : ℤ} (hk : (n : ℤ) ∣ k)
+theorem valGauss_add_valGauss_sub_self [𝓟.LiesOver 𝒑] {k : ℤ} (hk : (n : ℤ) ∣ k)
     (a : ℤ) :
     valGauss n P 𝓟 hζ a + valGauss n P 𝓟 hζ (k - a) =
       if (n : ℤ) ∣ a then 0 else P.inertiaDeg ℤ *  𝓟.ramificationIdx ℤ := by
@@ -449,7 +448,11 @@ theorem valGauss_add_valGauss_sub_self [𝓟.IsMaximal] [𝓟.LiesOver 𝒑] {k 
   · rw [valGauss_periodic (k - a) (-a), valGauss_add_valGauss_neg_self h]
     rwa [Int.modEq_iff_dvd, sub_sub_eq_add_sub, neg_add_cancel, zero_sub, Int.dvd_neg]
 
-variable [NumberField F] [IsCyclotomicExtension {p} ℚ F]
+end
+
+section
+
+variable [NumberField F] [IsCyclotomicExtension {p} ℚ F] [NeZero n] [IsCyclotomicExtension {n} ℚ K]
 
 -- Used in `SKW.Stickelberger.Factorization`.
 theorem valGauss_eq_zero_of_not_liesOver (h𝓟 : ¬ 𝓟.LiesOver 𝒑) (a : ℤ) :
@@ -462,9 +465,8 @@ end ValGaussPrime
 
 section ValGaussOne
 
-variable [Fact p.Prime] [IsCyclotomicExtension {n} ℚ K] [NumberField F]
-    [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal] [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMaximal]
-    [𝓟.LiesOver P]
+variable [Fact p.Prime] [NumberField F] [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal]
+    [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMaximal] [𝓟.LiesOver P] [IsCyclotomicExtension {n} ℚ K]
 
 variable {n P 𝓟}
 
@@ -497,11 +499,13 @@ end ValGaussOne
 
 section ValGaussDigits
 
-variable [hp : Fact p.Prime] [NeZero n] [IsCyclotomicExtension {n} ℚ K] [P.IsMaximal]
-    [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMaximal] [𝓟.LiesOver P]
+variable [Fact p.Prime] [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal]
+    [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMaximal] [𝓟.LiesOver P] [NeZero n]
+    [IsCyclotomicExtension {n} ℚ K]
 
 open Finset
 
+omit [IsCyclotomicExtension {p} ℚ F] in
 theorem two_mul_sum_valGauss :
     2 * ∑ a ∈ range n, valGauss n P 𝓟 hζ a =
       (n - 1) * (P.inertiaDeg ℤ * 𝓟.ramificationIdx ℤ) := by
@@ -525,8 +529,6 @@ theorem two_mul_sum_valGauss :
       refine Finset.sum_congr rfl fun i hi ↦ ite_eq_right ?_
       exact (Nat.le_of_dvd (Nat.succ_pos i)).mt (by grind : ¬ n ≤ i + 1)
     _ = (n - 1) * (P.inertiaDeg ℤ * 𝓟.ramificationIdx ℤ) := by simp
-
-variable [IsCyclotomicExtension {p} ℚ F]
 
 theorem valGauss_ofDigits_le_sum (hn : 1 < n) (h𝓟 : 2 ≤ 𝓟.ramificationIdx (𝓞 K))
     (hζ𝓟 : algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∉ 𝓟 ^ 2) (D : List ℕ) :
@@ -552,12 +554,12 @@ section ValGaussDigitsPrimePow
 
 open Finset
 
-variable [hp : Fact p.Prime] (f : ℕ) [NeZero f] [P.HasTeichmullerLift (p ^ f - 1)]
-  [IsCyclotomicExtension {p ^ f - 1} ℚ K] [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal]
-  [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMaximal] [𝓟.LiesOver P]
+variable [hp : Fact p.Prime] [Fact (Odd p)] (f : ℕ) [NeZero f] [IsCyclotomicExtension {p} ℚ F]
+  [P.IsMaximal] [P.LiesOver (span {(p : ℤ)})] [P.HasTeichmullerLift (p ^ f - 1)] [𝓟.IsMaximal]
+  [𝓟.LiesOver P] [IsCyclotomicExtension {p ^ f - 1} ℚ K]
 
 -- Used in `SKW.Stickelberger.Factorization`.
-theorem valGauss_eq_sum_digits [hp' : Fact (Odd p)] (hf : 1 < p ^ f - 1) (a : ℕ)
+theorem valGauss_eq_sum_digits (hf : 1 < p ^ f - 1) (a : ℕ)
     (ha : a ≤ p ^ f - 2) :
     valGauss (p ^ f - 1) P 𝓟 hζ a = (Nat.digits p a).sum := by
   have : NeZero (p ^ f - 1) := sorry
