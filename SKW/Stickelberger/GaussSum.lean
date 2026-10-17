@@ -44,6 +44,7 @@ attribute [local instance] ZMod.algebra
 
 attribute [local instance] Ideal.Quotient.field
 
+variable {P 𝓟} in
 theorem cast_trace_eq_algebraMap_trace [P.LiesOver 𝒑] [CharP (𝓞 K ⧸ P) p]
     [Algebra (ℤ ⧸ 𝒑) (𝓞 L ⧸ 𝓟 ^ 2)] (x : 𝓞 K ⧸ P) :
     (Algebra.trace (ZMod p) (𝓞 K ⧸ P) x).cast =
@@ -55,7 +56,7 @@ local instance [NeZero P] : Fintype (𝓞 K ⧸ P) := Fintype.ofFinite (𝓞 K �
 
 section Teichmuller
 
-variable [NeZero n] [IsCyclotomicExtension {n} ℚ K]
+variable {n P} [NeZero n] [IsCyclotomicExtension {n} ℚ K]
 
 protected theorem teichmuller_ne_one (hn : n ≠ 1) :
     MulChar.teichmuller P n ≠ 1 :=
@@ -91,6 +92,8 @@ section
 -- The notation `𝒑` cannot be used in a `variable` command, since it refers to the variable `p`.
 variable [NeZero p] [P.LiesOver (span {(p : ℤ)})]
 
+variable {n P hζ}
+
 theorem gaussSum_def (a : ℤ) :
     haveI : NeZero P := ⟨Ideal.ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using NeZero.ne p) _⟩
     haveI : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
@@ -113,9 +116,10 @@ theorem gaussSum_mem_span_zeta_sub_one (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
   simp_rw [gaussSum_def, gaussSum, AddChar.compAddChar_traceChar_algebraMap,
     ← Quotient.eq_zero_iff_mem, map_sum, map_mul,
     AddChar.mk_traceChar_apply_eq_one _ (mem_span_singleton_self _), mul_one, ← map_sum]
-  rw [MulChar.sum_eq_zero_of_ne_one (teichmuller_ringHomComp_zpow_ne_one n P
+  rw [MulChar.sum_eq_zero_of_ne_one (teichmuller_ringHomComp_zpow_ne_one
     (by rwa [Int.dvd_neg])), map_zero]
 
+variable (n P hζ) in
 theorem gaussSum_mul_gaussSum [P.IsMaximal] (a b : ℤ) (h : ¬ (n : ℤ) ∣ a + b) :
     𝓖 n P hζ a * 𝓖 n P hζ b =
       𝓖 n P hζ (a + b) * algebraMap (𝓞 K) (𝓞 L) (𝓙 n P a b) := by
@@ -123,7 +127,7 @@ theorem gaussSum_mul_gaussSum [P.IsMaximal] (a b : ℤ) (h : ¬ (n : ℤ) ∣ a 
     ← MulChar.ringHomComp_mul, ← zpow_add, neg_add, jacobiSum_ringHomComp,
     Stickelberger.jacobiSum]
   rw [← MulChar.ringHomComp_mul, ← zpow_add, ← neg_add]
-  exact teichmuller_ringHomComp_zpow_ne_one n P (by rwa [Int.dvd_neg])
+  exact teichmuller_ringHomComp_zpow_ne_one (by rwa [Int.dvd_neg])
 
 end
 
@@ -132,6 +136,8 @@ end
 section
 
 variable [hp : Fact p.Prime] [P.IsMaximal] [P.LiesOver (span {(p : ℤ)})]
+
+variable {n P hζ}
 
 theorem gaussSum_zero :
     𝓖 n P hζ 0 = -1 := by
@@ -160,6 +166,7 @@ section
 
 variable [NeZero n] [IsCyclotomicExtension {n} ℚ K]
 
+variable (n P hζ) in
 theorem gaussSum_mul_gaussSum_neg (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
     𝓖 n P hζ a * 𝓖 n P hζ (-a) =
       algebraMap (𝓞 K) (𝓞 L) (((MulChar.teichmuller P n) ^ (- a)) (- 1)) * p ^ P.inertiaDeg ℤ := by
@@ -169,9 +176,10 @@ theorem gaussSum_mul_gaussSum_neg (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
     mul_right_comm, mul_assoc, gaussSum_mul_gaussSum_eq_card, Fintype.card_eq_nat_card,
     ← absNorm_eq_card, ← Ideal.pow_inertiaDeg p P, Nat.cast_pow, MulChar.ringHomComp_inv,
     MulChar.ringHomComp_apply]
-  · exact teichmuller_ringHomComp_zpow_ne_one n P ha
+  · exact teichmuller_ringHomComp_zpow_ne_one ha
   · apply AddChar.isPrimitive_traceChar _
 
+variable (n P hζ) in
 omit [P.IsMaximal] in
 theorem not_isUnit_gaussSum (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
     ¬ IsUnit (𝓖 n P hζ a) := by
@@ -180,8 +188,9 @@ theorem not_isUnit_gaussSum (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
     exact ⟨p, 1, hp.out.prime, zero_lt_one, by rw [pow_one]⟩
   contrapose! h
   rw [map_sub, map_one]
-  exact Ideal.eq_top_of_isUnit_mem _ (gaussSum_mem_span_zeta_sub_one n P hζ a ha) h
+  exact Ideal.eq_top_of_isUnit_mem _ (gaussSum_mem_span_zeta_sub_one a ha) h
 
+variable (n P hζ) in
 theorem norm_gaussSum (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
     ∃ k, 1 ≤ k ∧ (Algebra.norm ℤ (𝓖 n P hζ a)).natAbs = p ^ k := by
   have h := congr_arg (Int.natAbs <| Algebra.norm ℤ ·) <| gaussSum_mul_gaussSum_neg n P hζ _ ha
@@ -207,6 +216,7 @@ theorem gaussSum_ne_zero (a : ℤ) :
     rw [hk, Algebra.norm_zero, Int.natAbs_zero, ne_comm, pow_ne_zero_iff (by grind)]
     exact hp.out.ne_zero
 
+variable (hζ) in
 include hζ in
 theorem jacobiSum_ne_zero (a b : ℤ) (ha : ¬ (n : ℤ) ∣ (a + b)) :
     𝓙 n P a b ≠ 0 := by
@@ -223,11 +233,13 @@ section IsCycloF
 variable [hp : Fact p.Prime] [NumberField F] [IsCyclotomicExtension {p} ℚ F]
     [P.LiesOver (span {(p : ℤ)})]
 
+variable {n P 𝓟 hζ}
+
 theorem gaussSum_mem [NeZero n] [IsCyclotomicExtension {n} ℚ K]
     [𝓟.IsPrime] [𝓟.LiesOver 𝒑] (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
     𝓖 n P hζ a ∈ 𝓟 :=
   (span_singleton_le_iff_mem 𝓟).mpr (zeta_sub_one_mem hζ 𝓟) <|
-    gaussSum_mem_span_zeta_sub_one n P hζ a ha
+    gaussSum_mem_span_zeta_sub_one a ha
 
 variable [P.IsMaximal]
 
@@ -301,6 +313,8 @@ theorem smul_traceChar [CharP (𝓞 K ⧸ P) p] (σ : Gal(L/F)) (x : 𝓞 K ⧸ 
 
 variable [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {n} ℚ K]
 
+variable {n P hζ}
+
 theorem galLFEquiv_apply_of_isPrimitiveRoot (σ : Gal(L/F)) {η : 𝓞 K} (hη : IsPrimitiveRoot η n) :
     σ • (algebraMap (𝓞 K) (𝓞 L) η) =
       (algebraMap (𝓞 K) (𝓞 L)) η ^ (galFEquiv p n K F σ).val.val := by
@@ -323,8 +337,9 @@ theorem smul_teichmuller (σ : Gal(L/F)) (a : ℤ) (x : 𝓞 K ⧸ P) :
   rw [smul_eq_galRestrict_apply (𝓞 F), MulChar.map_ringHomComp_teichmuller_zpow_apply _ _
     (galFEquiv p n K F σ).val.val hη, neg_mul]
   rw [← smul_eq_galRestrict_apply]
-  exact galLFEquiv_apply_of_isPrimitiveRoot p n σ hη
+  exact galLFEquiv_apply_of_isPrimitiveRoot p σ hη
 
+variable {p} in
 theorem gal_gaussSum_eq_gaussSum [P.LiesOver 𝒑] (σ : Gal(L/F)) (a : ℤ) :
     σ • 𝓖 n P hζ a = 𝓖 n P hζ (a * (galFEquiv p n  K F σ).val.val) := by
   have : NeZero P := ⟨Ideal.ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using NeZero.ne p) _⟩
@@ -342,7 +357,7 @@ variable [Fact p.Prime] [P.IsMaximal] [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMa
 
 theorem finiteMultiplicity_gaussSum {a : ℤ} :
     FiniteMultiplicity 𝓟 (span {𝓖 n P hζ a}) :=
-  FiniteMultiplicity.of_prime_left (prime_of_maximal 𝓟) <| by simpa using gaussSum_ne_zero _ _ _ _
+  FiniteMultiplicity.of_prime_left (prime_of_maximal 𝓟) <| by simpa using gaussSum_ne_zero _
 
 variable (hζ)
 
@@ -350,7 +365,7 @@ include hζ in
 theorem finiteMultiplicity_jacobiSum {a b : ℤ} (h : ¬ (n : ℤ) ∣ a + b) :
     FiniteMultiplicity 𝓟 (span {algebraMap (𝓞 K) (𝓞 L) (𝓙 n P a b)}) :=
   FiniteMultiplicity.of_prime_left (prime_of_maximal 𝓟) <| by
-    simpa using jacobiSum_ne_zero n P hζ a b h
+    simpa using jacobiSum_ne_zero hζ a b h
 
 end FiniteMultiplicity
 section ValGauss
@@ -366,13 +381,13 @@ variable {n P 𝓟 hζ}
 theorem valGauss_periodic (a b : ℤ) (h : a ≡ b [ZMOD (n : ℕ)]) :
     valGauss n P 𝓟 hζ a = valGauss n P 𝓟 hζ b := by
   obtain ⟨k, rfl⟩ := Int.modEq_iff_add_fac.mp h
-  rw [valGauss, valGauss, gaussSum_periodic _ _ _ (dvd_mul_right _ _)]
+  rw [valGauss, valGauss, gaussSum_periodic (dvd_mul_right _ _)]
 
 end ValGauss
 
 section ValGaussGalois
 
-variable (p) [NeZero p] [NeZero n] [Fact (n.Coprime p)] [IsCyclotomicExtension {p * n} ℚ L]
+variable [NeZero p] [NeZero n] [Fact (n.Coprime p)] [IsCyclotomicExtension {p * n} ℚ L]
     [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {n} ℚ K]
     [P.LiesOver (span {(p : ℤ)})]
 
@@ -394,7 +409,7 @@ variable {n P 𝓟 hζ}
 
 theorem valGauss_eq_zero {a : ℤ} (ha : (n : ℤ) ∣ a) :
     valGauss n P 𝓟 hζ a = 0 := by
-  simp [valGauss, gaussSum_of_dvd _ _ _ _ ha]
+  simp [valGauss, gaussSum_of_dvd _ ha]
 
 theorem valGauss_zero :
     valGauss n P 𝓟 hζ 0 = 0 :=
@@ -467,7 +482,7 @@ section ValGaussOne
 variable [Fact p.Prime] [NumberField F] [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal]
     [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMaximal] [𝓟.LiesOver P] [IsCyclotomicExtension {n} ℚ K]
 
-variable {n P 𝓟}
+variable {n P 𝓟 hζ}
 
 theorem valGauss_one (hn : 1 < n) (h𝓟 : 2 ≤ 𝓟.ramificationIdx (𝓞 K))
     (hζ𝓟 : algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∉ 𝓟 ^ 2) :
@@ -479,7 +494,7 @@ theorem valGauss_one (hn : 1 < n) (h𝓟 : 2 ≤ 𝓟.ramificationIdx (𝓞 K))
     apply gaussSum_mem
     rw [Int.natCast_dvd_ofNat, Nat.dvd_one]
     exact hn.ne'
-  · rwa [dvd_span_singleton, ← Quotient.eq_zero_iff_mem, mk_sq_gaussSum_eq _ _ _ _ hn, map_neg,
+  · rwa [dvd_span_singleton, ← Quotient.eq_zero_iff_mem, mk_sq_gaussSum_eq hn, map_neg,
       neg_eq_zero, Quotient.eq_zero_iff_mem]
 
 theorem valGauss_le_self (hn : 1 < n) (h𝓟 : 2 ≤ 𝓟.ramificationIdx (𝓞 K))
@@ -492,7 +507,7 @@ theorem valGauss_le_self (hn : 1 < n) (h𝓟 : 2 ≤ 𝓟.ramificationIdx (𝓞 
     rw [Nat.cast_add, Nat.cast_one]
     refine (valGauss_subadditive a 1).trans ?_
     gcongr
-    rw [valGauss_one hζ hn h𝓟 hζ𝓟]
+    rw [valGauss_one hn h𝓟 hζ𝓟]
 
 end ValGaussOne
 
@@ -501,6 +516,8 @@ section ValGaussDigits
 variable [Fact p.Prime] [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal]
     [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMaximal] [𝓟.LiesOver P] [NeZero n]
     [IsCyclotomicExtension {n} ℚ K]
+
+variable {n P 𝓟 hζ}
 
 open Finset
 
@@ -538,14 +555,14 @@ theorem valGauss_ofDigits_le_sum (hn : 1 < n) (h𝓟 : 2 ≤ 𝓟.ramificationId
     rw [List.sum_cons, Nat.ofDigits_cons, Nat.cast_add]
     refine (valGauss_subadditive _ _).trans ?_
     gcongr
-    · exact valGauss_le_self hζ hn h𝓟 hζ𝓟 _
+    · exact valGauss_le_self hn h𝓟 hζ𝓟 _
     · rwa [Nat.cast_mul, valGauss, gaussSum_frob]
 
 theorem valGauss_le_sum_digits (hn : 1 < n) (h𝓟 : 2 ≤ 𝓟.ramificationIdx (𝓞 K))
     (hζ𝓟 : algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∉ 𝓟 ^ 2) (a : ℕ) :
     valGauss n P 𝓟 hζ a ≤ (Nat.digits p a).sum := by
-  refine le_of_eq_of_le ?_ (valGauss_ofDigits_le_sum n P 𝓟 hζ hn h𝓟 hζ𝓟 (Nat.digits p a))
-  rw [Nat.ofDigits_digits]
+  conv_lhs => rw [← Nat.ofDigits_digits p a]
+  exact valGauss_ofDigits_le_sum hn h𝓟 hζ𝓟 _
 
 end ValGaussDigits
 
@@ -556,6 +573,8 @@ open Finset
 variable [hp : Fact p.Prime] [Fact (Odd p)] (f : ℕ) [NeZero f] [IsCyclotomicExtension {p} ℚ F]
   [P.IsMaximal] [P.LiesOver (span {(p : ℤ)})] [P.HasTeichmullerLift (p ^ f - 1)] [𝓟.IsMaximal]
   [𝓟.LiesOver P] [IsCyclotomicExtension {p ^ f - 1} ℚ K]
+
+variable {f P 𝓟 hζ}
 
 theorem valGauss_eq_sum_digits (hf : 1 < p ^ f - 1) (a : ℕ)
     (ha : a ≤ p ^ f - 2) :
@@ -568,7 +587,7 @@ theorem valGauss_eq_sum_digits (hf : 1 < p ^ f - 1) (a : ℕ)
   suffices ∑ i ∈ range (p ^ f - 1), valGauss (p ^ f - 1) P 𝓟 hζ i =
       ∑ i ∈ range (p ^ f - 1), (p.digits i).sum from
      (sum_eq_sum_iff_of_le
-      (fun i _ ↦ valGauss_le_sum_digits _ _ _ _ hf h𝓟' hζ𝓟 _)).mp this a (by grind)
+      (fun i _ ↦ valGauss_le_sum_digits hf h𝓟' hζ𝓟 _)).mp this a (by grind)
   rw [← Nat.add_left_inj (n := (p.digits (p ^ f - 1)).sum), ← Nat.mul_right_inj two_ne_zero,
     ← Finset.sum_range_succ, Nat.sub_add_cancel (by lia),  Nat.sum_sum_digits_eq hp.out.one_lt,
     mul_add, two_mul_sum_valGauss, Nat.choose_two_right, hP, h𝓟,
@@ -581,6 +600,8 @@ theorem valGauss_eq_sum_digits (hf : 1 < p ^ f - 1) (a : ℕ)
     _ = p ^ f * (f * (p - 1)) := by rw [← pow_succ, Nat.sub_add_cancel (NeZero.pos f)]
 
 end ValGaussDigitsPrimePow
+
+#exit
 
 open scoped Pointwise
 
@@ -666,7 +687,13 @@ theorem exists_mem_gaussSum_pow_eq (hdm : d * m = n) (E : IntermediateField ℚ 
     [IsCyclotomicExtension {m * p} ℚ E] [Algebra F E] [IsScalarTower F E L]
     [IsCyclotomicExtension {m} ℚ k] :
     ∃ Γ : 𝓞 k, Γ ≠ 0 ∧ 𝓖 n P hζ d ^ m = algebraMap (𝓞 k) (𝓞 L) Γ := by
-  sorry
+  have : IsAbelianGalois ℚ L := IsCyclotomicExtension.isAbelianGalois {p * n} ℚ L
+  refine ⟨?_, ?_⟩
+  · have := (IsGaloisGroup.isInvariant (A := 𝓞 E)).isInvariant
+      (𝓖 n P hζ d ^ m) fun τ : Gal(L/E) ↦ ?_
+    sorry
+    apply smul_gaussSum_eq_gaussSum' n P hζ m d hdm
+  · sorry
 
 end Galois
 

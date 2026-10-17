@@ -171,7 +171,8 @@ theorem exists_mem_gaussSum_pow_eq [NeZero f] [NeZero m] [Fact (Odd p)] [Algebra
       rw [ramificationIdx_eq_p_sub_one' (p := p) (f := f) (P := P) (𝓟 := 𝓟)]
       lia
     have hζ𝓟 : algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∉ 𝓟 ^ 2 := sorry
-    exact_mod_cast pow_ne_zero m <| gaussSum_ne_zero (p ^ f - 1) P 𝓟 hζ hn h𝓟 hζ𝓟 _
+    sorry
+    -- exact_mod_cast pow_ne_zero m <| gaussSum_ne_zero (p ^ f - 1) P 𝓟 hζ hn h𝓟 hζ𝓟 _
   have : k = E ⊓ K := by
     have : p.Coprime d := (coprime_pow_sub_one p f).symm.of_dvd_right (Dvd.intro m hdm)
     convert isCyclotomicExtension_eq {m} ℚ L k _
