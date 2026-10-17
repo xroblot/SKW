@@ -10,7 +10,7 @@ public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.Algebra.Group.Subgroup.Order
 public import Mathlib.GroupTheory.QuotientGroup.Basic
 
-public import SKW.PRed2Mathlib.AlgebraMisc
+public import Mathlib.GroupTheory.Nilpotent
 
 set_option linter.style.header false
 

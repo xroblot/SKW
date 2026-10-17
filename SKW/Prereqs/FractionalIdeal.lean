@@ -1,7 +1,6 @@
 module
 
 public import SKW.PRed2Mathlib.FractionalIdeal
-public import SKW.PRed2Mathlib.Action
 public import Mathlib.Algebra.Ring.Action.Basic
 public import Mathlib.Algebra.Ring.Action.Group
 public import Mathlib.RingTheory.Localization.FractionRing

@@ -8,7 +8,7 @@ public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import Mathlib.GroupTheory.FiniteAbelian.Duality
 
-public import SKW.PRed2Mathlib.IntermediateFields
+public import Mathlib.FieldTheory.IntermediateField.Algebraic
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.Torsion
 public import SKW.Prereqs.Subfield

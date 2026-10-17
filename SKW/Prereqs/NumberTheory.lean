@@ -6,7 +6,6 @@ public import Mathlib.NumberTheory.NumberField.Units.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.NumberTheory.RamificationInertia.Galois
 
-public import SKW.PRed2Mathlib.NumberTheory
 
 set_option linter.style.header false
 

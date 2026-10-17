@@ -30,12 +30,6 @@ theorem MulAction.orbitProdStabilizerEquivGroup_apply_smul {α β : Type*} [Grou
 
 /-! ### List / Nat.digits -/
 
-theorem List.mapIdx_replicate {α β : Type*} (f : ℕ → α → β) (n : ℕ) (a : α) :
-    mapIdx f (replicate n a) = map (fun n ↦ f n a) (range n) := by
-  induction n with
-  | zero => simp
-  | succ n hn => simp [replicate_succ', mapIdx_append, range_succ, hn]
-
 theorem Nat.digits_base_pow_sub_one {b : ℕ} (hb : 1 < b) (l : ℕ) :
     b.digits (b ^ l - 1) = List.replicate l (b - 1) := by
   suffices b ^ l - 1 = Nat.ofDigits b (List.replicate l (b - 1)) by
@@ -54,57 +48,16 @@ theorem Nat.digits_eq_replicate_base_sub_one_iff {b : ℕ} (hb : 1 < b) (n k : �
   have := congr_arg (Nat.ofDigits b) h
   rwa [ofDigits_digits, ← digits_base_pow_sub_one hb, ofDigits_digits] at this
 
-theorem Nat.digitsAppend_def (b l n : ℕ) :
-    Nat.digitsAppend b l n = b.digits n ++ List.replicate (l - (b.digits n).length) 0 := by
-  sorry
-
-theorem Nat.digitsAppend_eq_nil_iff {b l n : ℕ} :
-    Nat.digitsAppend b l n = [] ↔ n = 0 ∧ l = 0 := by
-  rw [digitsAppend_def, List.append_eq_nil_iff, digits_eq_nil_iff_eq_zero,
-    List.replicate_eq_nil_iff, Nat.sub_eq_zero_iff_le, and_congr_right_iff]
-  intro h
-  rw [h, digits_zero, List.length_nil, le_zero]
-
-theorem Nat.mem_digitsAppend_of_mem_digits {b n : ℕ} (l d : ℕ) (hd : d ∈ b.digits n) :
-    d ∈ b.digitsAppend l n := by
-  rw [digitsAppend_def, List.mem_append]
-  exact Or.inl hd
-
-theorem Nat.digitsAppend_sum_eq_digits_sum (b l n : ℕ) :
-    (Nat.digitsAppend b l n).sum = (Nat.digits b n).sum := by
-  rw [Nat.digitsAppend_def, List.sum_append, List.sum_replicate, nsmul_zero, add_zero]
-
-theorem Nat.digitsAppend_eq_digits_iff {b l n : ℕ} (hn : n ≠ 0) (p : b.digitsAppend l n ≠ []) :
-    b.digitsAppend l n = b.digits n ↔ (b.digitsAppend l n).getLast p ≠ 0 := by
-  refine ⟨fun h ↦ ?_, fun h ↦ ?_⟩
-  · rw! [h]
-    exact Nat.getLast_digit_ne_zero _ hn
-  · contrapose! h
-    rw [ne_eq, b.digitsAppend_def, List.append_right_eq_self, List.replicate_eq_nil_iff] at h
-    rw! [b.digitsAppend_def]
-    rw [List.getLast_append_right, List.getLast_replicate]
-    rwa [ne_eq, List.replicate_eq_nil_iff]
-
-theorem Nat.eq_mapIdx_digits_sum (b n : ℕ) :
-    n = (List.mapIdx (fun i a ↦ a * b ^ i) (b.digits n)).sum := by
-  convert Nat.ofDigits_eq_sum_mapIdx b (b.digits n)
-  rw [Nat.ofDigits_digits]
-
 theorem Nat.eq_sum_digits_mul_pow (b n : ℕ) :
     n = ∑ i : Fin (b.digits n).length, (b.digits n)[i] * b ^ i.val := by
-  convert Nat.eq_mapIdx_digits_sum b n
+  convert (Nat.eq_mapIdx_digits_sum b n).symm
   simp [List.mapIdx_eq_zipIdx_map, ← Fin.sum_univ_fun_getElem,
       ← Fin.sum_congr' _ List.length_zipIdx.symm]
-
-theorem Nat.eq_mapIdx_digitsAppend_sum (b l n : ℕ) :
-    n = (List.mapIdx (fun i a ↦ a * b ^ i) (b.digitsAppend l n)).sum := by
-  simpa [digitsAppend_def, List.mapIdx_append,
-    List.mapIdx_replicate] using Nat.eq_mapIdx_digits_sum b n
 
 theorem Nat.eq_sum_digitsAppend_mul_pow {b n : ℕ} (l : ℕ) (hb : 1 < b) (hn : n < b ^ l) :
     haveI : (b.digitsAppend l n).length = l := length_digitsAppend hb l hn
     n = ∑ i : Fin l, (b.digitsAppend l n)[i] * b ^ i.val := by
-  convert Nat.eq_mapIdx_digitsAppend_sum b l n
+  convert (Nat.mapIdx_digitsAppend_sum_eq b l n).symm
   simp [List.mapIdx_eq_zipIdx_map, ← Fin.sum_univ_fun_getElem,
     ← Fin.sum_congr' _ (List.length_zipIdx.trans (length_digitsAppend hb l hn)).symm]
 
@@ -141,7 +94,7 @@ theorem Nat.sub_one_mul_sum_fract_div_eq_digits_sum {b l a : ℕ} (hb : 1 < b) [
               · have : b.digitsAppend l a ≠ [] := by
                   rw [ne_eq, Nat.digitsAppend_eq_nil_iff, not_and_or]
                   exact Or.inl h₀
-                rw [← (Nat.digitsAppend_eq_digits_iff h₀ this).mpr,
+                rw [← (Nat.digitsAppend_eq_digits_iff h₀).mpr,
                   Nat.length_digitsAppend hb l ha']
                 specialize ha _ (List.getLast_mem this)
                 grind

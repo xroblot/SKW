@@ -186,7 +186,7 @@ theorem IsCyclotomicExtension.Rat.gcd_inf {K : Type*} [Field K] [NumberField K]
   have hζ : IsPrimitiveRoot ζ d := hζ₁.pow (NeZero.pos n₁) (by rwa [mul_comm])
   have : IsCyclotomicExtension {d} ℚ ℚ⟮ζ⟯ := hζ.intermediateField_adjoin_isCyclotomicExtension ℚ
   rw [isCyclotomicExtension_singleton_iff_eq_adjoin d ℚ K _ hζ, eq_comm]
-  rw [eq_of_le_iff_finrank_eq]
+  rw [eq_iff_finrank_eq_of_le]
   · have : IsGalois ℚ F₁ := h₁.isGalois
     have := isCyclotomicExtension_lcm_sup ℚ K n₁ n₂ F₁ F₂
     have : Module.finrank ℚ ↑(F₁ ⊔ F₂) ≠ 0 := Module.finrank_pos.ne'

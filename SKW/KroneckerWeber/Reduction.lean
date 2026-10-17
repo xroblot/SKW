@@ -427,7 +427,7 @@ lemma kw_eq_of_unique_prime_subfield {A : Type*} [Field A] [CharZero A]
       rw [hK, hK', ← pow_add, Nat.dvd_prime_pow hp.out] at this
       obtain ⟨k, _, hk⟩ := this
       exact ⟨k, hk⟩
-    obtain ⟨H₁, H₂, hind₁, hind₂, h₁₂⟩ := IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic hP hCyc
+    obtain ⟨H₁, H₂, h₁₂, hind₁, hind₂⟩ := hP.not_isCyclic_iff_exists_ne_index_eq_prime.mp hCyc
     let K₁ := fixedField H₁
     let K₂ := fixedField H₂
     suffices K₁ = K₂ by

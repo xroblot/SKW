@@ -45,7 +45,7 @@ classification of quadratics and the compositum comparison.
 - `prop_kw_2_power`: the **general case**, reduced to the real case via the CM field `K(i)`.
 
 The engines are `kw_cyclic_compositum`, the non-cyclic-`2`-group fact
-`IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic`, and Mathlib's CM-field API
+`IsPGroup.not_isCyclic_iff_exists_ne_index_eq_prime`, and Mathlib's CM-field API
 (`maximalRealSubfield`/`complexConj`, with cyclotomic fields CM via
 `IsCyclotomicExtension.Rat.isCMField`).
 -/
@@ -215,7 +215,7 @@ contained in `ℚ(ζ_{2^{m+2}}) = ℚ⟮ξ (2^(m+2))⟯`.
 Plan: let `K' := ℚ(ζ_{2^{m+2}})⁺` (the maximal real subfield, cyclic of degree `2^m`, unramified
 outside `2`). If `K ⊔ K'` were not cyclic, its Galois group (a non-cyclic finite abelian `2`-group)
 would have two distinct index-`2` subgroups
-(`IsPGroup.exists_index_eq_prime_ne_of_not_isCyclic`), giving two distinct quadratic subfields —
+(`IsPGroup.not_isCyclic_iff_exists_ne_index_eq_prime`), giving two distinct quadratic subfields —
 both totally real (`K ⊔ K'` is totally real) and unramified outside `2` — contradicting
 `prop_kw_2_quadratic_real_unique`. So `K ⊔ K'` is cyclic, and `kw_cyclic_compositum` gives
 `K ≤ K' ≤ ℚ⟮ξ (2^(m+2))⟯`. -/

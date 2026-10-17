@@ -10,7 +10,6 @@ public import Mathlib.NumberTheory.NumberField.CMField
 
 public import SKW.KroneckerWeber.Basic
 public import SKW.Stickelberger.Stickelberger
-public import SKW.PRed2Mathlib.Action
 public import SKW.Prereqs.FractionalIdeal
 public import SKW.Prereqs.CMField
 public import SKW.Prereqs.CyclotomicField
@@ -189,7 +188,7 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : �
     IsCyclotomicExtension.equiv _ ℚ (⊤ : IntermediateField ℚ L) topEquiv
   have := (isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ _ ⊤ hξ').mpr
   apply this
-  rw [eq_comm, eq_of_le_iff_finrank_eq le_top]
+  rw [eq_comm, eq_iff_finrank_eq_of_le le_top]
   rw [finrank_top', ← finrank_mul_finrank ℚ F L, finrank p F, Nat.totient_prime hp.out, hrF,
     IsCyclotomicExtension.Rat.finrank (p ^ 2) ℚ⟮ξ⟯, Nat.totient_prime_pow hp.out Nat.two_pos,
     Nat.add_one_sub_one, pow_one, mul_comm]
@@ -357,7 +356,7 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (K : IntermediateField ℚ L) [IsGaloi
     IsCyclotomicExtension.equiv _ ℚ (⊤ : IntermediateField ℚ L) topEquiv
   have := (isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ _ ⊤ hξ').mpr
   apply this
-  rw [eq_comm, eq_of_le_iff_finrank_eq le_top]
+  rw [eq_comm, eq_iff_finrank_eq_of_le le_top]
   rw [finrank_top', ← finrank_mul_finrank ℚ F L, finrank p F, Nat.totient_prime hp.out, hrF,
     IsCyclotomicExtension.Rat.finrank (p ^ 2) ℚ⟮ξ⟯, Nat.totient_prime_pow hp.out Nat.two_pos,
     Nat.add_one_sub_one, pow_one, mul_comm]
