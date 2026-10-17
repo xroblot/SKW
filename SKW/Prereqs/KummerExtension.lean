@@ -93,7 +93,7 @@ theorem exists_eq_algebraMap_mul_pow_of_pow_eq_algebraMap {K : Type*} [Field K] 
       ← Algebra.smul_def, mul_comm, ← sub_mul] at h₁
     have := linearIndependent_iff'.mp B.basis.linearIndependent _ _ h₁ i (Finset.mem_univ i)
     rwa [mul_eq_zero_iff_left] at this
-    contrapose! hi
+    contrapose hi
     simpa [j₀, Fin.ext_iff] using hζ.pow_inj (Fin.val_lt_of_le i hdB.le) hj (sub_eq_zero.mp hi)
   simp +contextual [j₀, this, Algebra.smul_def, B]
 

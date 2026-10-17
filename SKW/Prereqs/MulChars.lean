@@ -38,6 +38,6 @@ theorem MulChar.isUnit_apply_iff {R R' : Type*} [CommMonoidWithZero R] [CommMono
     [Nontrivial R'] {χ : MulChar R R'} {a : R} :
     IsUnit (χ a) ↔ IsUnit a := by
   refine ⟨fun h ↦ ?_, χ.isUnit_apply⟩
-  contrapose! h
+  contrapose h
   rw [map_nonunit χ h]
   exact not_isUnit_zero

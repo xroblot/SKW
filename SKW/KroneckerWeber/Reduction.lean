@@ -344,7 +344,7 @@ lemma kw_reduce_to_unramified_outside_p {A : Type*} [Field A] [CharZero A] (ξ :
       Algebra.IsUnramifiedIn (𝓞 K) (Ideal.span {(q : ℤ)}) := by
     refine ⟨(discr K).natAbs.primeFactors, fun q hq hpq hD ↦ ?_⟩
     refine (not_dvd_discr_iff_isUnramifiedIn K (𝓞 K) (Nat.prime_iff_prime_int.mp hq)).mp ?_
-    contrapose! hD
+    contrapose hD
     exact hq.mem_primeFactors (by rwa [← Int.natCast_dvd])
       (Int.natAbs_ne_zero.mpr <| discr_ne_zero K)
   exact kw_reduce_to_unramified_outside_p_aux ξ hξ S K ⟨m, hK⟩ hS
@@ -419,7 +419,7 @@ lemma kw_eq_of_unique_prime_subfield {A : Type*} [Field A] [CharZero A]
   have : IsAbelianGalois ℚ ↑(K ⊔ K') := IsAbelianGalois.sup K K'
   have hCyc : IsCyclic Gal(↑(K ⊔ K')/ℚ) := by
     let : CommGroup Gal(↑(K ⊔ K')/ℚ) := IsMulCommutative.instCommGroup
-    by_contra! hCyc
+    by_contra hCyc
     have hP : IsPGroup p Gal(↑(K ⊔ K')/ℚ) := by
       refine IsPGroup.iff_card.mpr ?_
       rw [IsGalois.card_aut_eq_finrank]

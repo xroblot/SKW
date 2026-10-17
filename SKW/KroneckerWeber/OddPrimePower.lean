@@ -76,6 +76,7 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
   have hIrr : Irreducible (X ^ p - C (algebraMap (𝓞 ℚ⟮ζ⟯) ℚ⟮ζ⟯ μ)) := by
     rw [X_pow_sub_C_irreducible_iff_of_prime hp.out]
     intro b hb
+    have : Module.Free ℚ⟮ζ⟯ M := Module.Free.of_divisionRing _ _
     have := hS.splits_iff.mp (X_pow_sub_C_splits_of_isPrimitiveRoot (zeta_spec p ℚ ℚ⟮ζ⟯) hb)
     rw [eq_comm, Subalgebra.bot_eq_top_iff_finrank_eq_one, hrF] at this
     exact hp.out.ne_one this

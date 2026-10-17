@@ -127,7 +127,7 @@ lemma kw_abelian_kummer (σ : Gal(F/ℚ)) :
     (β := σ.liftNormal L α) (by rw [rootOfSplitsXPowSubC_pow])
     (by rw [← map_pow, hα, IsScalarTower.algebraMap_apply (𝓞 F) F, AlgEquiv.liftNormal_commutes])
   have hc : algebraMap F L c ≠ 0 := by
-    contrapose! hα₀
+    contrapose hα₀
     rwa [hα₀, zero_mul, map_eq_zero] at h
   rw [h, map_mul, map_pow, hτα, AlgEquiv.commutes, MulAction.subgroup_smul_def, Units.smul_def,
     Algebra.smul_def, mul_pow, ← mul_assoc, ← mul_assoc, mul_left_inj' (pow_ne_zero j hα₀),
@@ -149,7 +149,7 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮)
   obtain ⟨ξ, hξ₀, hξ⟩ := kw_abelian_kummer p F hrF hIrr σ
   obtain ⟨d, hd₀, ⟨β, hβ⟩⟩ := exists_integer_multiple ξ
   have hβ₀ : β ≠ 0 := by
-    by_contra!
+    by_contra this
     simp [this, hd₀, hξ₀] at hβ
   replace hβ : σ • (d ^ p * μ) = β ^ p * μ ^ (Rat.galEquivZMod p F σ).val.val := by
     apply FaithfulSMul.algebraMap_injective (𝓞 F) F
@@ -220,7 +220,7 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
           Rat.ramificationIdxIn_eq_of_prime, Rat.inertiaDegIn_eq_of_prime, mul_one]
         exact Nat.lt_sub_of_add_lt <| (Nat.Prime.odd_iff hp.out).mp hp'
       rwa [Subgroup.nontrivial_iff_exists_ne_one] at this
-    contrapose! hσ'
+    contrapose hσ'
     exact kw_split_prime p F hrF hμ hIrr h𝔮 hσ' hσ
   · obtain ⟨𝔔, _, _⟩  := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔮
     have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
@@ -286,7 +286,7 @@ lemma kw_not_dvd_nu (𝔭 : Ideal (𝓞 F)) [𝔭.IsMaximal] [𝔭.LiesOver (spa
         rw [IsScalarTower.algebraMap_apply (𝓞 F) F L, rootOfSplitsXPowSubC_pow]
   rw [multiplicity_span_eq_multiplicity] at hk
   have hν₀ : ν ≠ 0 := by
-    contrapose! hμ
+    contrapose hμ
     rwa [hμ, mul_zero] at hν
   refine ⟨ν, hν₀, ?_, ?_, ?_⟩
   · rw [hk, pow_mul, pow_right_comm] at hν

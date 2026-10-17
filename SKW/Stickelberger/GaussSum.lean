@@ -186,7 +186,7 @@ theorem not_isUnit_gaussSum (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
   have h : span {(algebraMap (𝓞 F) (𝓞 L)) (ζ - 1)} ≠ ⊤ := by
     rw [ne_eq, span_singleton_eq_top, isUnit_map_iff, hζ.isUnit_sub_one_iff hp.out.one_lt, not_not]
     exact ⟨p, 1, hp.out.prime, zero_lt_one, by rw [pow_one]⟩
-  contrapose! h
+  contrapose h
   rw [map_sub, map_one]
   exact Ideal.eq_top_of_isUnit_mem _ (gaussSum_mem_span_zeta_sub_one a ha) h
 
@@ -220,7 +220,7 @@ variable (hζ) in
 include hζ in
 theorem jacobiSum_ne_zero (a b : ℤ) (ha : ¬ (n : ℤ) ∣ (a + b)) :
     𝓙 n P a b ≠ 0 := by
-  by_contra! h
+  by_contra h
   have := gaussSum_mul_gaussSum n P hζ a b ha
   grind [mul_zero, mul_eq_zero, gaussSum_ne_zero]
 

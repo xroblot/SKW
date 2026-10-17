@@ -193,7 +193,7 @@ theorem tameCharacter_injective [IsDedekindDomain S] [FaithfulSMul G S] (Q : Ide
     [NeZero Q] (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
     Function.Injective (tameCharacter G Q) := by
   refine (injective_iff_map_eq_one _).mpr fun τ hτ ↦ eq_one_of_tameCharacter_eq_one _ _ ?_ hτ
-  contrapose! htame
+  contrapose htame
   obtain ⟨q, hq⟩ := Nat.cast_dvd_cast (α := S) <| orderOf_dvd_natCard τ
   exact hq ▸ Ideal.mul_mem_right _ _ htame
 
@@ -266,7 +266,7 @@ theorem card_inertia_notMem_iff [IsDomain S] (Q : Ideal S) [Q.IsPrime] [Module.F
 theorem card_inertia_notMem_of_not_dvd (Q : Ideal S) (h : ¬ (under ℤ Q).absNorm ∣ Nat.card G) :
     ↑(Nat.card (Q.inertia G)) ∉ Q := by
   rw [← Int.cast_natCast, Int.cast_mem_ideal_iff, Int.natCast_dvd_natCast]
-  contrapose! h
+  contrapose h
   exact dvd_trans h <| Subgroup.card_subgroup_dvd_card _
 
 /-- **Abelian tame ramification,

@@ -49,7 +49,7 @@ lemma kw_mu_unit (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) (hcl :
   rw [span_singleton_pow, span_singleton_eq_span_singleton] at h𝔞
   obtain ⟨η, hη⟩ := h𝔞
   refine ⟨α, η, ?_, hη.symm⟩
-  contrapose! hμ
+  contrapose hμ
   rw [← hη, hμ, zero_pow hp.out.ne_zero, zero_mul]
 
 include hrF hIrr in
@@ -68,8 +68,8 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
     refine ⟨ξ, hξ₀, ?_⟩
     rw [← (Commute.all _ _).pow_left_inj hp.out.ne_zero, mul_pow]
     rw [SubmonoidClass.coe_pow, ← coeIdeal_pow, pow_right_comm, h𝔞, coeIdeal_pow,
-      coeIdeal_span_singleton, spanSingleton_pow, spanSingleton_pow,
-        spanSingleton_mul_spanSingleton,
+      coeIdeal_span_singleton, ← map_pow, ← map_pow,
+        ← map_mul,
       ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_span, coeIdeal_span_singleton,
       algebraMap.smul', AlgEquiv.smul_def]
   have h₃ := Stickelberger.Stickelberger p F (ClassGroup.mk0 𝔞₀)
@@ -231,8 +231,8 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
     refine ⟨ξ, hξ₀, ?_⟩
     rw [← (Commute.all _ _).pow_left_inj hp.out.ne_zero, mul_pow]
     rw [SubmonoidClass.coe_pow, ← coeIdeal_pow, pow_right_comm, h𝔞, coeIdeal_pow,
-      coeIdeal_span_singleton, spanSingleton_pow, spanSingleton_pow,
-        spanSingleton_mul_spanSingleton,
+      coeIdeal_span_singleton, ← map_pow, ← map_pow,
+        ← map_mul,
       ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_span, coeIdeal_span_singleton,
       algebraMap.smul', AlgEquiv.smul_def]
   have h₃ := Stickelberger p F (ClassGroup.mk0 𝔞₀)

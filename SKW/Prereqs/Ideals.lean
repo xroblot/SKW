@@ -101,7 +101,7 @@ theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDede
     [hp : Fact (Nat.Prime p)] (hI : Ideal.absNorm I ∣ p ^ k) :
     I.LiesOver (Ideal.span {(p : ℤ)}) := by
   have : NeZero I := ⟨by
-    contrapose! hI
+    contrapose hI
     rw [hI, map_zero, Nat.zero_dvd]
     exact NeZero.ne (p ^ k)⟩
   have := (Int.absNorm_under_dvd_absNorm I).trans hI

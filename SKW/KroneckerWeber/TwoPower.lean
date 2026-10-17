@@ -84,7 +84,7 @@ theorem kw_2_quadratic_discr (K : Type*) [Field K] [NumberField K]
       obtain ⟨p, hp₁, hp₃⟩ := Nat.exists_prime_and_dvd hKne
       rw [← Int.natCast_dvd] at  hp₃
       refine ⟨p, hp₁, ?_, hp₃⟩
-      contrapose! hp₃
+      contrapose hp₃
       rw [hp₃, Nat.cast_ofNat]
       exact Int.not_two_dvd_iff_odd.mpr hKo
     exact False.elim (hp₂ <| h_main hp₁ hp₃)

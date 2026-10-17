@@ -112,7 +112,7 @@ theorem Stickelberger'' :
   have hpf : NeZero (p ^ f - 1) :=
     ⟨ne_of_gt <| Nat.sub_pos_iff_lt.mpr <| Nat.lt_of_add_left_lt (three_le_p_pow p f)⟩
   have : NeZero d := ⟨by
-    by_contra! h
+    by_contra h
     rw [← hdm, h, zero_mul] at hpf
     exact neZero_zero_iff_false.mp hpf⟩
   obtain ⟨ξ₀,
@@ -126,7 +126,7 @@ theorem Stickelberger'' :
 theorem Stickelberger' (I : Ideal (𝓞 k)) (hI₁ : Odd I.absNorm) (hI₂ : m.gcd I.absNorm = 1) :
     Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • I) ^ a.val.val) := by
   have hI : I ≠ ⊥ := by
-    contrapose! hI₁
+    contrapose hI₁
     simp [hI₁]
   rw [← Ideal.mem_isPrincipalSubmonoid_iff, ← Ideal.prod_normalizedFactors_eq_self hI]
   simp_rw  (config := {singlePass := true}) [← smul_pow', ← Multiset.map_id',
@@ -144,7 +144,7 @@ theorem Stickelberger' (I : Ideal (𝓞 k)) (hI₁ : Odd I.absNorm) (hI₂ : m.g
   have : P.IsMaximal := (isPrime_of_prime hP₁).isMaximal <| Prime.ne_zero hP₁
   have hp : Fact p.Prime := ⟨Nat.absNorm_under_prime P⟩
   have : Fact (Odd p) := ⟨by
-    contrapose! hI₁
+    contrapose hI₁
     rw [Nat.not_odd_iff_even] at hI₁ ⊢
     exact hI₁.trans_dvd hI₃⟩
   simp only [Function.comp_apply, mapHom_apply, map_pow, mem_isPrincipalSubmonoid_iff]
