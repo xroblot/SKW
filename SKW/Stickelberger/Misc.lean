@@ -135,6 +135,8 @@ end Algebra
 
 section IntermediateField
 
+open IsCyclotomicExtension
+
 variable {L : Type*} [Field L] [NumberField L] (p n : ℕ) [NeZero p] [NeZero n]
   (K F : IntermediateField ℚ L) [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {n} ℚ K]
   [hn : Fact (n.Coprime p)]
@@ -142,14 +144,14 @@ variable {L : Type*} [Field L] [NumberField L] (p n : ℕ) [NeZero p] [NeZero n]
 include p n in
 theorem K_inf_F_eq_bot : K ⊓ F = ⊥ := by
   apply LinearDisjoint.inf_eq_bot
-  exact IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime n p K F hn.out
+  exact Rat.linearDisjoint_ofCoprime n p K F hn.out
 
 variable [IsCyclotomicExtension {p * n} ℚ L]
 
 include p n in
 theorem K_sup_F_eq_top : K ⊔ F = (⊤ : IntermediateField ℚ L) := by
   have : IsCyclotomicExtension {p * n} ℚ (⊤ : IntermediateField ℚ L) :=
-    IsCyclotomicExtension.equiv _ _ _ topEquiv.symm
+    .equiv _ _ _ topEquiv.symm
   have : IsCyclotomicExtension {p * n} ℚ ↑(K ⊔ F) := by
     rw [mul_comm, ← Nat.Coprime.lcm_eq_mul hn.out]
     exact isCyclotomicExtension_lcm_sup ℚ L n p K F
@@ -161,9 +163,28 @@ def galEquiv₀ [Normal ℚ K] [IsGalois F L] : Gal(L/F) ≃* Gal(K/ℚ) :=
     restrictRestrictAlgEquivMapHom_surjective _ _ (K_inf_F_eq_bot p n K F)⟩
 
 def galFEquiv : Gal(L/F) ≃* (ZMod n)ˣ :=
-  haveI := IsCyclotomicExtension.isAbelianGalois {p * n} ℚ L
-  (galEquiv₀ p n K F).trans <| IsCyclotomicExtension.Rat.galEquivZMod n K
+  haveI := isAbelianGalois {p * n} ℚ L
+  (galEquiv₀ p n K F).trans <| Rat.galEquivZMod n K
 
+theorem galFEquiv_eq [Normal ℚ K] (σ : Gal(L/F)) :
+    galFEquiv p n K F σ = Rat.galEquivZMod n K ((σ.restrictScalars ℚ).restrictNormal K) :=
+  rfl
+
+variable {n K F}
+
+theorem IsPrimitiveRoot.galLFEquiv_apply (σ : Gal(L/F)) {η : K} (hη : IsPrimitiveRoot η n) :
+    σ (algebraMap K L η) = (algebraMap K L η) ^ (galFEquiv p n K F σ).val.val := by
+  have : Normal ℚ K := (isGalois {n} ℚ K).to_normal
+  rw [galFEquiv_eq, ← map_pow, ← Rat.galEquivZMod_apply_of_pow_eq _ _ _ hη.pow_eq_one,
+    AlgEquiv.restrictNormal_commutes, AlgEquiv.coe_restrictScalars]
+
+theorem IsPrimitiveRoot.galLFEquiv_smul (σ : Gal(L/F)) {η : 𝓞 K} (hη : IsPrimitiveRoot η n) :
+    σ • (algebraMap (𝓞 K) (𝓞 L) η) =
+      (algebraMap (𝓞 K) (𝓞 L)) η ^ (galFEquiv p n K F σ).val.val := by
+  apply RingOfIntegers.coe_injective
+  rw [algebraMap.smul', map_pow, ← IsScalarTower.algebraMap_apply, AlgEquiv.smul_def,
+    IsScalarTower.algebraMap_apply (𝓞 K) K L]
+  exact (hη.map_of_injective <| RingOfIntegers.coe_injective).galLFEquiv_apply p σ
 
 end IntermediateField
 

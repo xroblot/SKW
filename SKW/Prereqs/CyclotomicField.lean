@@ -276,21 +276,23 @@ theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_neg_one_apply (n : ℕ) [NeZ
 
 open NumberField IsCyclotomicExtension IsCyclotomicExtension.Rat in
 /-- An automorphism `σ` sends `ζ` to `ζ ^ k` exactly when `galEquivZMod` sends `σ` to `k`. -/
-theorem IsCyclotomicExtension.Rat.galEquivZMod_apply_eq_zpow_iff {n : ℕ} [NeZero n] {K : Type*}
-    [Field K] [NumberField K] [IsCyclotomicExtension {n} ℚ K] {σ : Gal(K/ℚ)} {k : ℤ}
-    {ζ : K} (hζ : IsPrimitiveRoot ζ n) :
-    σ ζ = ζ ^ k ↔ (galEquivZMod n K σ).val = k := by
-  rw [galEquivZMod_apply_of_pow_eq n K σ hζ.pow_eq_one, ← zpow_natCast,
-    ← IsUnit.unit_spec (hζ.isUnit (NeZero.ne n)), ←  Units.val_zpow_eq_zpow_val,
-    ← Units.val_zpow_eq_zpow_val, ← Units.ext_iff, zpow_eq_zpow_iff_modEq,
-    ← (hζ.isUnit_unit (NeZero.ne n)).eq_orderOf, ← ZMod.intCast_eq_intCast_iff]
-  simp
+theorem IsCyclotomicExtension.Rat.apply_eq_pow_iff_galEquivZMod_eq {n : ℕ} [NeZero n]
+    {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {n} ℚ K] {σ : Gal(K/ℚ)}
+    {k : ZMod n} {ζ : K} (hζ : IsPrimitiveRoot ζ n) :
+    σ ζ = ζ ^ k.val ↔ galEquivZMod n K σ = k := by
+  rw [galEquivZMod_apply_of_pow_eq n K σ hζ.pow_eq_one, ← (hζ.isUnit (NeZero.ne n)).unit_spec ,
+    ←  Units.val_pow_eq_pow_val, ← Units.val_pow_eq_pow_val, ← Units.ext_iff, pow_eq_pow_iff_modEq,
+    ← (hζ.isUnit_unit (NeZero.ne n)).eq_orderOf, ← ZMod.natCast_eq_natCast_iff,
+    ZMod.natCast_zmod_val, ZMod.natCast_zmod_val]
 
 open IsCyclotomicExtension IsCyclotomicExtension.Rat in
 /-- In a cyclotomic field, complex conjugation corresponds to `-1` under `galEquivZMod`. -/
 theorem IsCyclotomicExtension.Rat.galEquivZMod_ratComplexConj (n : ℕ) [NeZero n] (K : Type*)
     [Field K] [NumberField K] [IsCyclotomicExtension {n} ℚ K] [IsCMField K] :
     galEquivZMod n K (IsCMField.ratComplexConj K) = -1 := by
-  rw [Units.ext_iff, Units.coe_neg_one, ← Int.cast_one, ← Int.cast_neg,
-    ← galEquivZMod_apply_eq_zpow_iff (zeta_spec n ℚ K), IsCMField.ratComplexConj_apply,
-    zpow_neg_one, IsCMField.complexConj_eq_inv_of_isPrimitiveRoot (zeta_spec n ℚ K)]
+  rw [Units.ext_iff, Units.val_neg, Units.val_one,
+    show (-1 : ZMod n) = ((n - 1  : ℕ): ZMod n) by simp [Nat.cast_sub NeZero.one_le],
+    ← apply_eq_pow_iff_galEquivZMod_eq (zeta_spec n ℚ K), IsCMField.ratComplexConj_apply,
+    IsCMField.complexConj_eq_inv_of_isPrimitiveRoot (zeta_spec n ℚ K), ZMod.val_natCast,
+    Nat.self_sub_mod, ← zpow_natCast, Nat.cast_sub NeZero.one_le, Nat.cast_one, zpow_sub_one₀
+    ((zeta_spec n ℚ K).ne_zero (NeZero.ne n)), zpow_natCast, (zeta_spec n ℚ K).pow_eq_one, one_mul]
