@@ -485,11 +485,18 @@ end
 
 section
 
-variable [NumberField F] [IsCyclotomicExtension {p} ℚ F] [NeZero n] [IsCyclotomicExtension {n} ℚ K]
+variable [NeZero n] [IsCyclotomicExtension {n} ℚ K]
 
-theorem valGauss_eq_zero_of_not_liesOver (h𝓟 : ¬ 𝓟.LiesOver 𝒑) (a : ℤ) :
+theorem valGauss_eq_zero_of_not_liesOver [𝓟.IsMaximal] (h𝓟 : ¬ 𝓟.LiesOver 𝒑) (a : ℤ) :
     valGauss n P 𝓟 hζ a = 0 := by
-  sorry
+  by_cases ha : (n : ℤ) ∣ a
+  · rw [valGauss_eq_zero ha]
+  · contrapose! h𝓟
+    obtain ⟨k, hk₁, hk₂⟩ := norm_gaussSum n P hζ a ha
+    refine liesOver_of_absNorm_dvd_prime_pow 𝓟 (k := k) ?_
+    rw [← hk₂, ← Int.natCast_dvd]
+    refine Ideal.absNorm_dvd_norm_of_mem ?_
+    rwa [valGauss, multiplicity_ne_zero finiteMultiplicity_gaussSum, dvd_span_singleton] at h𝓟
 
 end
 
@@ -666,6 +673,35 @@ theorem smul_gaussSum_eq_gaussSum (hmd : n = m * d) (τ : Gal(L/K)) :
 
 end Teichmuller
 
+section Factorization
+
+theorem span_singleton_gaussSum_eq_prod [Fact p.Prime] [NeZero n] [IsCyclotomicExtension {n} ℚ K]
+    [P.IsMaximal] [P.LiesOver 𝒑] (a : ℤ) :
+    span {𝓖 n P hζ a} =
+      ∏ 𝓟 : primesOver 𝒑 (𝓞 L), 𝓟.val ^ valGauss n P 𝓟 hζ a := by
+  classical
+  have hp : 𝒑 ≠ ⊥ := by simpa using NeZero.ne p
+  have h₁ : span {𝓖 n P hζ a} ≠ 0 := by simpa using gaussSum_ne_zero _
+  have h₂ : ∏ 𝓟 : primesOver 𝒑 (𝓞 L), 𝓟.val ^ valGauss n P 𝓟 hζ a ≠ 0 :=
+    Finset.prod_ne_zero_iff.mpr fun 𝓟 h𝓟 ↦ pow_ne_zero _ <|
+      ne_bot_of_mem_primesOver hp (Subtype.mem 𝓟)
+  rw [← associated_iff_eq, UniqueFactorizationMonoid.associated_iff_multiplicity_eq h₁ h₂]
+  intro 𝓠 h𝓠
+  rw [Finset.multiplicity_prod h𝓠 _ _ (by rwa [h𝓠.finiteMultiplicity_iff_ne_zero])]
+  simp_rw [multiplicity_pow h𝓠, Irreducible.multiplicity_eq_ite _ (prime_of_maximal _).irreducible,
+    associated_iff_eq, mul_ite, mul_one, mul_zero]
+  · by_cases h : 𝓠.LiesOver 𝒑
+    · lift 𝓠 to 𝒑.primesOver (𝓞 L) using ⟨isPrime_of_prime h𝓠, h⟩
+      simp_rw [Subtype.coe_inj, Fintype.sum_ite_eq, valGauss]
+    · have : 𝓠.IsMaximal := (isPrime_of_prime h𝓠).isMaximal h𝓠.ne_zero
+      have h𝓟 {𝓟 : primesOver 𝒑 (𝓞 L)} : 𝓠 ≠ 𝓟.val := by
+        contrapose h
+        exact h ▸ primesOver.liesOver 𝒑 𝓟
+      simp_rw [ite_eq_right h𝓟, Finset.sum_const_zero]
+      exact valGauss_eq_zero_of_not_liesOver h _
+
+end Factorization
+
 section NotLiesOver
 
 variable [Fact p.Prime] [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal]
@@ -784,7 +820,7 @@ theorem gaussSum_factorization (hmf : orderOf (p : ZMod m) = f) (hdm : d * m = p
     [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] [𝓟.LiesOver 𝔭] (Γ : 𝓞 k) (hΓ₀ : Γ ≠ 0)
     (hΓ : 𝓖 (p ^ f - 1) P hζ d ^ m = algebraMap (𝓞 k) (𝓞 L) Γ) :
     span {Γ} = ∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val := by
-  
+
   sorry
 
 end PrimePow

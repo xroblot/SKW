@@ -275,4 +275,28 @@ theorem multiplicity_pow {α : Type*} [CommMonoidWithZero α] [IsCancelMulZero �
   · rw [multiplicity_eq_zero_of_not_finiteMultiplicity h, mul_zero,
       multiplicity_eq_zero_of_not_finiteMultiplicity fun h' ↦ h (h'.of_pow hk)]
 
+-- TODO(SKW): upstream, next to `Finset.emultiplicity_prod`.
+/-- The multiplicity of a prime in a finite product is the sum of the multiplicities. -/
+theorem Finset.multiplicity_prod {α β : Type*} [CommMonoidWithZero α] [IsCancelMulZero α]
+    {p : α} (hp : Prime p) (s : Finset β) (f : β → α) (hfin : FiniteMultiplicity p (∏ x ∈ s, f x)) :
+    multiplicity p (∏ x ∈ s, f x) = ∑ x ∈ s, multiplicity p (f x) := by
+  classical
+  induction s using Finset.induction with
+  | empty => simp
+  | insert a s has ih =>
+    rw [Finset.prod_insert has] at hfin
+    rw [Finset.prod_insert has, Finset.sum_insert has, multiplicity_mul hp hfin,
+      ih hfin.mul_right]
+
+-- TODO(SKW): upstream, next to `FiniteMultiplicity.mul_iff`.
+/-- The multiplicity of a prime in a finite product is finite iff it is finite in each factor. -/
+theorem Finset.finiteMultiplicity_prod_iff {α β : Type*} [CommMonoidWithZero α]
+    [IsCancelMulZero α] {p : α} (hp : Prime p) (s : Finset β) (f : β → α) :
+    FiniteMultiplicity p (∏ x ∈ s, f x) ↔ ∀ x ∈ s, FiniteMultiplicity p (f x) := by
+  classical
+  induction s using Finset.induction with
+  | empty => simpa using ⟨0, by simpa [← isUnit_iff_dvd_one] using hp.not_isUnit⟩
+  | insert a s has ih =>
+    rw [Finset.prod_insert has, FiniteMultiplicity.mul_iff hp, ih, Finset.forall_mem_insert]
+
 end
