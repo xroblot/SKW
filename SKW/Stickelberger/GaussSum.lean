@@ -799,7 +799,138 @@ end Galois
 
 section PrimePow
 
-variable [Fact p.Prime] [Fact (Odd p)] (f : ℕ) [NeZero f]
+variable [Fact p.Prime] [NeZero m] [IsCyclotomicExtension {m} ℚ k] (f : ℕ)
+
+def equivUnits₁ [𝔭.IsPrime] [𝔭.LiesOver 𝒑] :
+    𝒑.primesOver (𝓞 k) ≃ MulAction.orbit Gal(k/ℚ) 𝔭 :=
+  have := IsCyclotomicExtension.isGalois {m} ℚ k
+  (Set.equivOfEq (Algebra.IsInvariant.orbit_eq_primesOver ℤ _ _ 𝒑 𝔭)).symm
+
+omit [Fact (Nat.Prime p)] [NeZero m] in
+@[simp]
+theorem coe_equivUnits₁ [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (𝔮 : 𝒑.primesOver (𝓞 k)) :
+    (equivUnits₁ m 𝔭 𝔮 : Ideal (𝓞 k)) = 𝔮 := rfl
+
+def equivUnits₂ [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) :
+    Fin f ≃ MulAction.stabilizer Gal(k/ℚ) 𝔭 :=
+  (finCongr (by rw [← orderOf_units, ZMod.coe_unitOfCoprime, hmf])).trans <|
+    (finEquivZPowers (isOfFinOrder_of_finite (ZMod.unitOfCoprime p hp))).trans <|
+      (((galEquivZMod m k).subgroupMap _).trans
+        (MulEquiv.subgroupCongr (galEquivZMod_stabilizer m k p 𝔭 hp))).symm.toEquiv.trans <|
+          Equiv.inv _
+
+/-- An equivalence between pairs `(𝔮, j)`, with `𝔮` a prime of `𝓞 k` above `p` and `j < f`, and
+`(ZMod m)ˣ`, such that the image `a` of `(𝔮, j)` satisfies `σₐ⁻¹ • 𝔭 = 𝔮`. -/
+noncomputable def equivUnits [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) :
+    𝒑.primesOver (𝓞 k) × Fin f ≃ (ZMod m)ˣ :=
+  ((equivUnits₁ m 𝔭).prodCongr (equivUnits₂ m 𝔭 f hp hmf)).trans <|
+    (MulAction.orbitProdStabilizerEquivGroup _ 𝔭).trans <|
+      (galEquivZMod m k).toEquiv.trans <|
+        Equiv.inv _
+
+theorem equivUnits_spec [𝔭.IsMaximal] [𝔭.LiesOver 𝒑]
+    (hp : p.Coprime m) (hmf : orderOf (p : ZMod m) = f) (c : 𝒑.primesOver (𝓞 k) × Fin f) :
+    ((galEquivZMod m k).symm (equivUnits m 𝔭 f hp hmf c))⁻¹ • 𝔭 = c.1 := by
+  simp only [equivUnits, MulEquiv.toEquiv_eq_coe, Equiv.trans_apply, Equiv.prodCongr_apply,
+    EquivLike.coe_coe, Equiv.inv_apply, map_inv, MulEquiv.symm_apply_apply, inv_inv,
+    MulAction.orbitProdStabilizerEquivGroup_smul, Prod.map_fst, coe_equivUnits₁]
+
+theorem equivUnits_apply [NeZero f] [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) (𝔮 : 𝒑.primesOver (𝓞 k)) (j : Fin f) :
+    (equivUnits m 𝔭 f hp hmf (𝔮, j) : ZMod m) = equivUnits m 𝔭 f hp hmf (𝔮, 0) * p ^ (j : ℕ) := by
+
+  sorry
+
+theorem sum_equivUnits [NeZero f] [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) (𝔮 : 𝒑.primesOver (𝓞 k))
+    (a : (ZMod m)ˣ) (ha : ((galEquivZMod m k).symm a)⁻¹ • 𝔭 = 𝔮) :
+    ∑ j : Fin f, (equivUnits m 𝔭 f hp hmf (𝔮, j) : ZMod m).val =
+      ∑ j : Fin f, ((a : ZMod m) * p ^ (j : ℕ)).val := by
+  -- `a` is in the fibre above `𝔮`
+  obtain ⟨k, rfl⟩ : ∃ k, equivUnits m 𝔭 f hp hmf (𝔮, k) = a := sorry
+  rw [← Equiv.sum_comp (Equiv.addLeft k)]
+  refine Fintype.sum_congr _ _ fun j ↦ ?_
+  rw [Equiv.coe_addLeft, equivUnits_apply _ _ _ _ _ _ (k + j), equivUnits_apply _ _ _ _ _ _ k,
+    mul_assoc, ← pow_add, Fin.val_add, ← pow_eq_pow_mod _ (hmf ▸ pow_orderOf_eq_one (p : ZMod m))]
+
+/-- A unit `a` such that `σₐ⁻¹ • 𝔭 = 𝔮`. -/
+noncomputable def unitRep [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (𝔮 : 𝒑.primesOver (𝓞 k)) : (ZMod m)ˣ :=
+  (galEquivZMod m k (MulAction.mem_orbit_iff.mp (equivUnits₁ m 𝔭 𝔮).2).choose)⁻¹
+
+omit [Fact (Nat.Prime p)] in
+theorem unitRep_spec [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (𝔮 : 𝒑.primesOver (𝓞 k)) :
+    ((galEquivZMod m k).symm (unitRep m 𝔭 𝔮))⁻¹ • 𝔭 = 𝔮 := by
+  rw [unitRep, map_inv, inv_inv, MulEquiv.symm_apply_apply,
+    (MulAction.mem_orbit_iff.mp (equivUnits₁ m 𝔭 𝔮).2).choose_spec, coe_equivUnits₁]
+
+/-- The map `(𝔮, j) ↦ unitRep 𝔮 * p ^ j`. -/
+noncomputable def toUnits [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (hp : p.Coprime m) :
+    𝒑.primesOver (𝓞 k) × Fin f → (ZMod m)ˣ :=
+  fun x ↦ unitRep m 𝔭 x.1 * ZMod.unitOfCoprime p hp ^ (x.2 : ℕ)
+
+omit [Fact (Nat.Prime p)] in
+theorem toUnits_apply [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (x : 𝒑.primesOver (𝓞 k) × Fin f) :
+    toUnits m 𝔭 f hp x = unitRep m 𝔭 x.1 * ZMod.unitOfCoprime p hp ^ (x.2 : ℕ) := rfl
+
+theorem toUnits_spec [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (x : 𝒑.primesOver (𝓞 k) × Fin f) :
+    (galEquivZMod m k).symm (toUnits m 𝔭 f hp x)⁻¹ • 𝔭 = x.1 := by
+  rw [toUnits_apply, mul_inv, map_mul, mul_smul, MulAction.mem_stabilizer_iff (a := 𝔭).mp, map_inv,
+    unitRep_spec]
+  rw [← Subgroup.mem_map_equiv, ← MulEquiv.coe_mapSubgroup, galEquivZMod_stabilizer m k p _ hp,
+    Subgroup.inv_mem_iff]
+  exact Subgroup.npow_mem_zpowers _ _
+
+theorem toUnits_injective [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) :
+    Function.Injective (toUnits m 𝔭 f hp) := by
+  intro x y h
+  have h₁ : x.1 = y.1 := by
+    simpa only [Subtype.ext_iff, toUnits_spec] using congr_arg ((galEquivZMod m k).symm ·⁻¹ • 𝔭) h
+  rw [toUnits_apply, toUnits_apply, h₁] at h
+
+  -- apply `x ↦ σₓ⁻¹ • 𝔭` to get `𝔮 = 𝔮'` (`toUnits_spec`), then `pow_injOn_Iio_orderOf`
+  sorry
+
+theorem toUnits_surjective [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) :
+    Function.Surjective (toUnits m 𝔭 f hp) := by
+  -- `x * (unitRep 𝔮)⁻¹` fixes `𝔭` with `𝔮 = σₓ⁻¹ • 𝔭`, so it is `u ^ j` with `j < f`
+  -- (`mem_zpowers_iff_mem_range_orderOf`)
+  sorry
+
+noncomputable def equivUnits' [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) :
+    𝒑.primesOver (𝓞 k) × Fin f ≃ (ZMod m)ˣ :=
+  Equiv.ofBijective (toUnits m 𝔭 f hp)
+    ⟨toUnits_injective m 𝔭 f hp hmf, toUnits_surjective m 𝔭 f hp hmf⟩
+
+theorem equivUnits'_apply [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) (x : 𝒑.primesOver (𝓞 k) × Fin f) :
+    equivUnits' m 𝔭 f hp hmf x = unitRep m 𝔭 x.1 * ZMod.unitOfCoprime p hp ^ (x.2 : ℕ) := rfl
+
+theorem equivUnits'_spec [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) (x : 𝒑.primesOver (𝓞 k) × Fin f) :
+    ((galEquivZMod m k).symm (equivUnits' m 𝔭 f hp hmf x))⁻¹ • 𝔭 = x.1 :=
+  toUnits_spec m 𝔭 f hp x
+
+theorem sum_equivUnits' [NeZero f] [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) (𝔮 : 𝒑.primesOver (𝓞 k))
+    (a : (ZMod m)ˣ) (ha : ((galEquivZMod m k).symm a)⁻¹ • 𝔭 = 𝔮) :
+    ∑ j : Fin f, (equivUnits' m 𝔭 f hp hmf (𝔮, j) : ZMod m).val =
+      ∑ j : Fin f, ((a : ZMod m) * p ^ (j : ℕ)).val := by
+  obtain ⟨⟨𝔮', k⟩, rfl⟩ := (equivUnits' m 𝔭 f hp hmf).surjective a
+  obtain rfl : 𝔮 = 𝔮' := Subtype.ext <| ha.symm.trans (equivUnits'_spec m 𝔭 f hp hmf _)
+  rw [← Equiv.sum_comp (Equiv.addLeft k)]
+  refine Fintype.sum_congr _ _ fun j ↦ ?_
+  simp only [Equiv.coe_addLeft, equivUnits'_apply, Units.val_mul, Units.val_pow_eq_pow_val,
+    ZMod.coe_unitOfCoprime, mul_assoc, ← pow_add, Fin.val_add]
+  rw [← pow_eq_pow_mod _ (hmf ▸ pow_orderOf_eq_one (p : ZMod m))]
+
+variable [Fact (Odd p)]
   [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal]
   [P.LiesOver (span {(p : ℤ)})] [P.HasTeichmullerLift (p ^ f - 1)] [𝓟.IsMaximal] [𝓟.LiesOver P]
   [IsCyclotomicExtension {p ^ f - 1} ℚ K]
@@ -809,8 +940,6 @@ theorem mul_valGauss_eq_mul_sum (hdm : d * m = p ^ f - 1) (a : ℕ) (ha : d * a 
       (p - 1) * ∑ i ∈ Finset.range f, a * p ^ i % m := by
   sorry
 
-variable [NeZero m] [IsCyclotomicExtension {m} ℚ k]
-
 theorem multiplicity_galEquivZMod_symm_smul_gaussSum (hdm : d * m = p ^ f - 1) [𝔭.LiesOver 𝒑]
     [𝓟.LiesOver 𝔭] (a : (ZMod m)ˣ) {Γ : 𝓞 k} (hΓ₀ : Γ ≠ 0)
     (hΓ : 𝓖 (p ^ f - 1) P hζ d ^ m = algebraMap (𝓞 k) (𝓞 L) Γ) :
@@ -819,46 +948,29 @@ theorem multiplicity_galEquivZMod_symm_smul_gaussSum (hdm : d * m = p ^ f - 1) [
   sorry
 
 
-variable [NeZero (p ^ f - 1)]
+variable [NeZero f] [NeZero (p ^ f - 1)]
 
-def equivUnits₁ [𝔭.IsPrime] [𝔭.LiesOver 𝒑] :
-    𝒑.primesOver (𝓞 k) ≃ MulAction.orbit Gal(k/ℚ) 𝔭 :=
-  have := IsCyclotomicExtension.isGalois {m} ℚ k
-  (Set.equivOfEq (Algebra.IsInvariant.orbit_eq_primesOver ℤ _ _ 𝒑 𝔭)).symm
-
-@[simp]
-theorem coe_equivUnits₁ [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (𝔮 : 𝒑.primesOver (𝓞 k)) :
-    (equivUnits₁ m 𝔭 𝔮 : Ideal (𝓞 k)) = 𝔮 := rfl
-
-def equivUnits₂ [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
-    (hmf : orderOf (p : ZMod m) = f) :
-    Fin f ≃ MulAction.stabilizer Gal(k/ℚ) 𝔭 := by
-  refine Equiv.trans ?_ (((galEquivZMod m k).subgroupMap _).trans
-      (MulEquiv.subgroupCongr (galEquivZMod_stabilizer m k p 𝔭 hp))).symm.toEquiv
-  refine Equiv.trans ?_ (finEquivZPowers (isOfFinOrder_of_finite _))
-  refine finCongr (by rw [← orderOf_units, ZMod.coe_unitOfCoprime, hmf])
-
-/-- An equivalence between pairs `(𝔮, j)`, with `𝔮` a prime of `𝓞 k` above `p` and `j < f`, and
-`(ZMod m)ˣ`, such that the image `a` of `(𝔮, j)` satisfies `σₐ⁻¹ • 𝔭 = 𝔮`. -/
-noncomputable def equivUnits [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
-    (hmf : orderOf (p : ZMod m) = f) :
-    𝒑.primesOver (𝓞 k) × Fin f ≃ (ZMod m)ˣ :=
-  ((((equivUnits₁ m 𝔭).prodCongr (equivUnits₂ m 𝔭 f hp hmf)).trans
-    (MulAction.orbitProdStabilizerEquivGroup _ 𝔭)).trans (galEquivZMod m k).toEquiv).trans
-      (Equiv.inv _)
-
-theorem equivUnits_spec [𝔭.IsMaximal] [𝔭.LiesOver 𝒑]
-    (hp : p.Coprime m) (hmf : orderOf (p : ZMod m) = f) (c : 𝒑.primesOver (𝓞 k) × Fin f) :
-    ((galEquivZMod m k).symm (equivUnits m 𝔭 f hp hmf c))⁻¹ • 𝔭 = c.1 := by
-  simp only [equivUnits, MulEquiv.toEquiv_eq_coe, Equiv.trans_apply, Equiv.prodCongr_apply,
-    EquivLike.coe_coe, Equiv.inv_apply, map_inv, MulEquiv.symm_apply_apply, inv_inv,
-    MulAction.orbitProdStabilizerEquivGroup_smul, Prod.map_fst, coe_equivUnits₁]
-
-theorem equivUnits_apply [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
-    (hmf : orderOf (p : ZMod m) = f) (𝔮 : 𝒑.primesOver (𝓞 k)) (j : Fin f) :
-    equivUnits m 𝔭 f hp hmf (𝔮, j) =
-      equivUnits m 𝔭 f hp hmf (𝔮, 0) * ZMod.unitOfCoprime p hp ^ (j : ℕ) := by
-  sorry
+theorem valGauss_mul_eq (hmf : orderOf (p : ZMod m) = f) (hdm : d * m = p ^ f - 1)
+    (hp : p.Coprime m) [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] [𝓟.LiesOver 𝔭] (𝔮 : 𝒑.primesOver (𝓞 k))
+    (𝓠 : (𝔮 : Ideal (𝓞 k)).primesOver (𝓞 L)) :
+    valGauss (p ^ f - 1) P 𝓠 hζ d * m =
+      ∑ i, (p - 1) * (equivUnits m 𝔭 f hp hmf (𝔮, i) : ZMod m).val := by
+  have : Fact ((p ^ f - 1).Coprime p) := ⟨coprime_pow_sub_one p f⟩
+  -- `𝓠` is a conjugate of `𝓟` under `Gal(L/F)`
+  obtain ⟨τ, hτ⟩ : ∃ τ : Gal(L/F), τ • 𝓟 = 𝓠 := sorry
+  -- the image of `τ⁻¹` in `(ZMod m)ˣ`
+  let a : (ZMod m)ˣ := ZMod.unitsMap (Dvd.intro_left d hdm) (galFEquiv p (p ^ f - 1) K F τ⁻¹)
+  have h₁ : valGauss (p ^ f - 1) P 𝓠 hζ d = valGauss (p ^ f - 1) P 𝓟 hζ (d * a.val.val : ℕ) := by
+    -- `multiplicity_smul_gaussSum` and `valGauss_periodic`
+    sorry
+  have h₂ : d * a.val.val ≤ p ^ f - 2 := sorry
+  -- `τ` restricted to `k` is `σ_{a⁻¹}`
+  have h₃ : ((galEquivZMod m k).symm a)⁻¹ • 𝔭 = 𝔮 := sorry
+  rw [mul_comm, h₁, mul_valGauss_eq_mul_sum P 𝓟 hζ m d f hdm _ h₂,
+    ← Finset.mul_sum, Finset.sum_range, sum_equivUnits m 𝔭 f hp hmf 𝔮 a h₃]
+  congr 1
+  refine Fintype.sum_congr _ _ fun i ↦ ?_
+  rw [ZMod.val_mul, ← Nat.cast_pow, ZMod.val_natCast, Nat.mul_mod_mod]
 
 -- Used in `SKW.Stickelberger.Stickelberger`.
 theorem gaussSum_factorization (hmf : orderOf (p : ZMod m) = f) (hdm : d * m = p ^ f - 1)
@@ -891,6 +1003,7 @@ theorem gaussSum_factorization (hmf : orderOf (p : ZMod m) = f) (hdm : d * m = p
   rw [← Equiv.prod_comp (equivPrimesOverPrimesOver (𝓞 k) 𝒑 (B := 𝓞 L)).symm, Fintype.prod_sigma]
   simp_rw [coe_equivPrimesOverPrimesOver_symm_apply]
   refine Finset.prod_congr rfl fun 𝔮 _ ↦ Finset.prod_congr rfl fun 𝓠 _ ↦ congr_arg _ ?_
+  exact valGauss_mul_eq P 𝓟 hζ m d 𝔭 f hmf hdm hp 𝔮 𝓠
 
 #exit
 
