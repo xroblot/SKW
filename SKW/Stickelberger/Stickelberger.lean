@@ -84,6 +84,8 @@ theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f 
   simp_rw [Ideal.submodule_span_eq, ← Set.image_singleton, ← map_span,
     gaussSum_factorization P 𝓟 hζ m d 𝔭₀ f hf hdm _ hΓ₀ hΓ, ← mapHom_apply, map_prod,
       mapHom_apply]
+  -- TODO: once `IsCyclotomicExtension.Rat.map_galEquivZMod_symm_smul` is proved, use it (with
+  -- `m = n`, `b = a` and `hb` from `ZMod.unitsMap_self`) to replace the `ext` proof below.
   have (a : (ZMod m)ˣ) : ((galEquivZMod m k).symm a)⁻¹ • 𝔭 =
         Ideal.map e (((galEquivZMod m k₀).symm a)⁻¹ • 𝔭₀) := by
     ext x

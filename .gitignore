@@ -13,3 +13,9 @@ blueprint/src/web.paux
 .DS_Store
 SKW/Sandbox.lean
 SKW/Sandbox2.lean
+gaussSum_factorization.tex
+gaussSum_factorization.aux
+gaussSum_factorization.fdb_latexmk
+gaussSum_factorization.fls
+gaussSum_factorization.log
+gaussSum_factorization.pdf

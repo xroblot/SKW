@@ -9,6 +9,7 @@ public import Mathlib.Algebra.CharP.Reduced
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.Algebra.Group.Subgroup.Order
 public import Mathlib.GroupTheory.QuotientGroup.Basic
+public import Mathlib.GroupTheory.GroupAction.Quotient
 
 public import Mathlib.GroupTheory.Nilpotent
 
@@ -298,5 +299,30 @@ theorem Finset.finiteMultiplicity_prod_iff {α β : Type*} [CommMonoidWithZero �
   | empty => simpa using ⟨0, by simpa [← isUnit_iff_dvd_one] using hp.not_isUnit⟩
   | insert a s has ih =>
     rw [Finset.prod_insert has, FiniteMultiplicity.mul_iff hp, ih, Finset.forall_mem_insert]
+
+-- TODO(SKW): upstream into `Mathlib/GroupTheory/Coset/Basic.lean`, after
+-- `Subgroup.groupEquivQuotientProdSubgroup`.
+@[simp]
+theorem Subgroup.fst_groupEquivQuotientProdSubgroup {α : Type*} [Group α] {s : Subgroup α}
+    (g : α) : (groupEquivQuotientProdSubgroup (s := s) g).1 = g :=
+  rfl
+
+-- TODO(SKW): upstream into `Mathlib/GroupTheory/GroupAction/Quotient.lean`, after
+-- `MulAction.orbitProdStabilizerEquivGroup`.
+theorem MulAction.mk_orbitProdStabilizerEquivGroup {G X : Type*} [Group G] [MulAction G X]
+    (b : X) (x : orbit G b × stabilizer G b) :
+    (orbitProdStabilizerEquivGroup G b x : G ⧸ stabilizer G b) =
+      orbitEquivQuotientStabilizer G b x.1 :=
+  congr_arg Prod.fst <| Subgroup.groupEquivQuotientProdSubgroup.apply_symm_apply
+    (orbitEquivQuotientStabilizer G b x.1, x.2)
+
+-- TODO(SKW): upstream into `Mathlib/GroupTheory/GroupAction/Quotient.lean`, after
+-- `MulAction.orbitProdStabilizerEquivGroup`.
+@[simp]
+theorem MulAction.orbitProdStabilizerEquivGroup_smul {G X : Type*} [Group G] [MulAction G X]
+    (b : X) (x : orbit G b × stabilizer G b) :
+    orbitProdStabilizerEquivGroup G b x • b = x.1 := by
+  rw [← orbitEquivQuotientStabilizer_symm_apply, mk_orbitProdStabilizerEquivGroup,
+    Equiv.symm_apply_apply]
 
 end

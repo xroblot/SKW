@@ -209,3 +209,36 @@ the restriction to `H` of the inertia in `G`. -/
 theorem Ideal.subgroupOf_inertia {R : Type*} [Ring R] (I : Ideal R) {G : Type*} [Group G]
     [MulAction G R] (H : Subgroup G) : (I.inertia G).subgroupOf H = I.inertia H :=
   AddSubgroup.subgroupOf_inertia I.toAddSubgroup H
+
+-- TODO(SKW): upstream to `Mathlib/RingTheory/Ideal/Over.lean`, at the end of the `primesOver`
+-- section.
+namespace Ideal
+
+variable {R : Type*} (A : Type*) (B : Type*) [CommSemiring R] [CommSemiring A] [CommSemiring B]
+  [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B] (p : Ideal R)
+
+/-- In a tower `A/B/R`, the primes of `B` over `p` correspond to the pairs `(P, 𝔓)` with `P` a
+prime of `A` over `p` and `𝔓` a prime of `B` over `P`. -/
+def equivPrimesOverPrimesOver : p.primesOver B ≃ Σ P : p.primesOver A, P.1.primesOver B where
+  toFun 𝔓 := ⟨primesOver.mk p (𝔓.1.under A), primesOver.mk _ 𝔓.1⟩
+  invFun P :=
+    have := LiesOver.trans P.2.1 P.1.1 p
+    primesOver.mk p P.2.1
+  right_inv P := Sigma.subtype_ext (Subtype.ext (over_def P.2.1 P.1.1).symm) rfl
+
+@[simp]
+theorem coe_fst_equivPrimesOverPrimesOver_apply (𝔓 : p.primesOver B) :
+    ((equivPrimesOverPrimesOver A B p 𝔓).1 : Ideal A) = (𝔓 : Ideal B).under A :=
+  rfl
+
+@[simp]
+theorem coe_snd_equivPrimesOverPrimesOver_apply (𝔓 : p.primesOver B) :
+    ((equivPrimesOverPrimesOver A B p 𝔓).2 : Ideal B) = 𝔓 :=
+  rfl
+
+@[simp]
+theorem coe_equivPrimesOverPrimesOver_symm_apply (x : Σ P : p.primesOver A, P.1.primesOver B) :
+    ((equivPrimesOverPrimesOver A B p).symm x : Ideal B) = x.2 :=
+  rfl
+
+end Ideal
