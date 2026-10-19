@@ -826,6 +826,10 @@ def equivUnits₁ [𝔭.IsPrime] [𝔭.LiesOver 𝒑] :
   have := IsCyclotomicExtension.isGalois {m} ℚ k
   (Set.equivOfEq (Algebra.IsInvariant.orbit_eq_primesOver ℤ _ _ 𝒑 𝔭)).symm
 
+@[simp]
+theorem coe_equivUnits₁ [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (𝔮 : 𝒑.primesOver (𝓞 k)) :
+    (equivUnits₁ m 𝔭 𝔮 : Ideal (𝓞 k)) = 𝔮 := rfl
+
 def equivUnits₂ [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
     (hmf : orderOf (p : ZMod m) = f) :
     Fin f ≃ MulAction.stabilizer Gal(k/ℚ) 𝔭 := by
@@ -846,15 +850,9 @@ noncomputable def equivUnits [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Copri
 theorem equivUnits_spec [𝔭.IsMaximal] [𝔭.LiesOver 𝒑]
     (hp : p.Coprime m) (hmf : orderOf (p : ZMod m) = f) (c : 𝒑.primesOver (𝓞 k) × Fin f) :
     ((galEquivZMod m k).symm (equivUnits m 𝔭 f hp hmf c))⁻¹ • 𝔭 = c.1 := by
-  simp only [equivUnits, map_inv, MulAction.orbitProdStabilizerEquivGroup_smul]
-
-  simp? [- IsCyclotomicExtension.autEquivPow_apply, - IsCyclotomicExtension.autEquivPow_symm_apply,
-    equivUnits, MulEquiv.toEquiv_eq_coe,  Equiv.trans_apply, Equiv.prodCongr_apply,
-    EquivLike.coe_coe, MulEquiv.symm_apply_apply]
-
-
-
-  sorry
+  simp only [equivUnits, MulEquiv.toEquiv_eq_coe, Equiv.trans_apply, Equiv.prodCongr_apply,
+    EquivLike.coe_coe, Equiv.inv_apply, map_inv, MulEquiv.symm_apply_apply, inv_inv,
+    MulAction.orbitProdStabilizerEquivGroup_smul, Prod.map_fst, coe_equivUnits₁]
 
 theorem equivUnits_apply [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
     (hmf : orderOf (p : ZMod m) = f) (𝔮 : 𝒑.primesOver (𝓞 k)) (j : Fin f) :
