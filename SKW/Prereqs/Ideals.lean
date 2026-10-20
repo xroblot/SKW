@@ -184,11 +184,6 @@ theorem Ideal.smul_eq_top_iff {M : Type*} {R : Type*} [Group M] [CommRing R] [Mu
   rw [smul_eq_iff_eq_inv_smul, smul_top]
 
 open Pointwise in
-theorem Ideal.smul_span {M : Type*} {R : Type*} [Group M] [Semiring R] [MulSemiringAction M R]
-    {m : M} {r : R} : m • span {r} = span {m • r} := by
-  simp [pointwise_smul_def, map_span]
-
-open Pointwise in
 /-- An element of the stabilizer of `I` preserves `I`. -/
 theorem Ideal.smul_mem_of_mem_stabilizer {M R : Type*} [Group M] [CommRing R] [MulSemiringAction M
   R]

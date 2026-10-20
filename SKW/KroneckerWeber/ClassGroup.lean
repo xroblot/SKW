@@ -70,7 +70,7 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
     rw [SubmonoidClass.coe_pow, ← coeIdeal_pow, pow_right_comm, h𝔞, coeIdeal_pow,
       coeIdeal_span_singleton, ← map_pow, ← map_pow,
         ← map_mul,
-      ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_span, coeIdeal_span_singleton,
+      ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_closure, Set.smul_set_singleton, coeIdeal_span_singleton,
       algebraMap.smul', AlgEquiv.smul_def]
   have h₃ := Stickelberger.Stickelberger p F (ClassGroup.mk0 𝔞₀)
   have h₂ : ClassGroup.mk0 𝔞₀ ^ p = 1 := by
@@ -233,7 +233,7 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
     rw [SubmonoidClass.coe_pow, ← coeIdeal_pow, pow_right_comm, h𝔞, coeIdeal_pow,
       coeIdeal_span_singleton, ← map_pow, ← map_pow,
         ← map_mul,
-      ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_span, coeIdeal_span_singleton,
+      ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_closure, Set.smul_set_singleton, coeIdeal_span_singleton,
       algebraMap.smul', AlgEquiv.smul_def]
   have h₃ := Stickelberger p F (ClassGroup.mk0 𝔞₀)
   have h₂ : ClassGroup.mk0 𝔞₀ ^ p = 1 := by

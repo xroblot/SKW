@@ -173,7 +173,7 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮)
   have h₁ := congr_arg (multiplicity 𝔮 · ) <| congr_arg (σ • · ) <|
     congr_arg (span {(d ^ p : 𝓞 F)} * · ) h𝔞
   rw [span_singleton_mul_span_singleton, smul_mul', multiplicity_mul h𝔮, smul_mul', smul_pow', hσ,
-    multiplicity_mul h𝔮, smul_span, smul_span, smul_pow', ← span_singleton_pow,
+    multiplicity_mul h𝔮, smul_closure, smul_closure, Set.smul_set_singleton, Set.smul_set_singleton, smul_pow', ← span_singleton_pow,
     FiniteMultiplicity.multiplicity_pow h𝔮, multiplicity_pow_self h𝔮.ne_zero h𝔮.not_isUnit, hβ,
     ← span_singleton_mul_span_singleton, multiplicity_mul h𝔮, ← span_singleton_pow,
     ← span_singleton_pow, FiniteMultiplicity.multiplicity_pow h𝔮 hfβ,
@@ -489,7 +489,7 @@ lemma kw_split_prime {𝔮 : Ideal (𝓞 F)} (h𝔮 : Prime 𝔮) (hv : ¬ p ∣
   have h₁ := congr_arg (multiplicity 𝔮 · ) <| congr_arg (σ • · ) <|
     congr_arg (span {(d ^ p : 𝓞 F)} * · ) h𝔞
   rw [span_singleton_mul_span_singleton, smul_mul', multiplicity_mul h𝔮, smul_mul', smul_pow', hσ,
-    multiplicity_mul h𝔮, smul_span, smul_span, smul_pow', ← span_singleton_pow,
+    multiplicity_mul h𝔮, smul_closure, smul_closure, Set.smul_set_singleton, Set.smul_set_singleton, smul_pow', ← span_singleton_pow,
     FiniteMultiplicity.multiplicity_pow h𝔮, multiplicity_pow_self h𝔮.ne_zero h𝔮.not_unit, hβ,
     ← span_singleton_mul_span_singleton, multiplicity_mul h𝔮, ← span_singleton_pow,
     ← span_singleton_pow, FiniteMultiplicity.multiplicity_pow h𝔮 hfβ,

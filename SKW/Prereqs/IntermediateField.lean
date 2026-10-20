@@ -135,6 +135,65 @@ theorem IsGaloisGroup.fixedPoints_sup_eq_top_of_isComplement (G K L : Type*) [Gr
   rw [← fixedPoints_fixingSubgroup G K L F, ← FixedPoints.intermediateField_inf,
     disjoint_iff.mp h.disjoint, fixedPoints_bot]
 
+section restrictScalars
+
+variable (K F E L : Type*) [Field K] [Field F] [Field E] [Field L]
+  [Algebra K F] [Algebra K E] [Algebra K L] [Algebra F E] [Algebra F L] [Algebra E L]
+  [IsScalarTower K F E] [IsScalarTower K F L] [IsScalarTower K E L] [IsScalarTower F E L]
+  [FiniteDimensional K L] [FiniteDimensional K E] [FiniteDimensional F L] [FiniteDimensional F E]
+  [IsGalois K L] [IsGalois K E] [IsGalois F L] [IsGalois F E]
+
+/-- `restrictHom` commutes with `AlgEquiv.restrictScalars`. -/
+theorem IsGaloisGroup.restrictHom_restrictScalars (τ : Gal(L/F)) :
+    (IsGaloisGroup.restrictHom Gal(L/F) Gal(E/F) F E L τ).restrictScalars K =
+      IsGaloisGroup.restrictHom Gal(L/K) Gal(E/K) K E L (τ.restrictScalars K) := by
+  ext x
+  apply (algebraMap E L).injective
+  rw [AlgEquiv.restrictScalars_apply, ← AlgEquiv.smul_def, ← AlgEquiv.smul_def,
+    IsGaloisGroup.algebraMap_restrictHom_smul, IsGaloisGroup.algebraMap_restrictHom_smul,
+    AlgEquiv.smul_def, AlgEquiv.smul_def, AlgEquiv.restrictScalars_apply]
+
+end restrictScalars
+
+/-- `restrictHom` is `AlgEquiv.restrictNormal`. -/
+theorem IsGaloisGroup.restrictHom_eq_restrictNormal (K E L : Type*) [Field K] [Field E] [Field L]
+    [Algebra K E] [Algebra K L] [Algebra E L] [IsScalarTower K E L] [FiniteDimensional K L]
+    [FiniteDimensional K E] [IsGalois K L] [IsGalois K E] (σ : Gal(L/K)) :
+    IsGaloisGroup.restrictHom Gal(L/K) Gal(E/K) K E L σ = σ.restrictNormal E := by
+  ext x
+  apply (algebraMap E L).injective
+  rw [← AlgEquiv.smul_def, IsGaloisGroup.algebraMap_restrictHom_smul, AlgEquiv.smul_def,
+    AlgEquiv.restrictNormal_commutes]
+
+section restrictHom_eq
+
+variable (G G' A B C A' B' C' : Type*) [Group G] [Group G'] [Finite G] [Finite G']
+  [CommRing A] [CommRing B] [CommRing C] [IsDomain C] [Algebra A B] [Algebra A C] [Algebra B C]
+  [IsScalarTower A B C] [FaithfulSMul B C]
+  [MulSemiringAction G C] [IsGaloisGroup G A C] [MulSemiringAction G' B] [IsGaloisGroup G' A B]
+  [CommRing A'] [CommRing B'] [CommRing C'] [IsDomain C'] [Algebra A' B'] [Algebra A' C']
+  [Algebra B' C'] [IsScalarTower A' B' C'] [FaithfulSMul B' C']
+  [MulSemiringAction G C'] [IsGaloisGroup G A' C'] [MulSemiringAction G' B']
+  [IsGaloisGroup G' A' B']
+  [Algebra B B'] [Algebra C C'] [Algebra B C'] [IsScalarTower B B' C'] [IsScalarTower B C C']
+  [FaithfulSMul B B'] [SMulDistribClass G C C'] [SMulDistribClass G' B B']
+
+/-- `restrictHom` does not depend on the tower `C/B/A` used to define it, as long as the
+actions of `G` and `G'` are compatible with the maps `B → B'` and `C → C'`. -/
+theorem IsGaloisGroup.restrictHom_eq_restrictHom :
+    IsGaloisGroup.restrictHom G G' A B C = IsGaloisGroup.restrictHom G G' A' B' C' := by
+  ext g
+  have : FaithfulSMul G' B := IsGaloisGroup.faithful A
+  refine eq_of_smul_eq_smul (α := B) fun x ↦ ?_
+  apply FaithfulSMul.algebraMap_injective B B'
+  apply FaithfulSMul.algebraMap_injective B' C'
+  rw [← IsScalarTower.algebraMap_apply B B' C', IsScalarTower.algebraMap_apply B C C',
+    IsGaloisGroup.algebraMap_restrictHom_smul, algebraMap.smul',
+    ← IsScalarTower.algebraMap_apply B C C', algebraMap.smul',
+    IsGaloisGroup.algebraMap_restrictHom_smul, ← IsScalarTower.algebraMap_apply B B' C']
+
+end restrictHom_eq
+
 open Module in
 lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Field E] [Algebra F E]
     (K L : IntermediateField F E) [IsGalois F K] [FiniteDimensional F K] [FiniteDimensional F L]

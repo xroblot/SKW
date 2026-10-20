@@ -276,6 +276,12 @@ theorem multiplicity_pow {α : Type*} [CommMonoidWithZero α] [IsCancelMulZero �
   · rw [multiplicity_eq_zero_of_not_finiteMultiplicity h, mul_zero,
       multiplicity_eq_zero_of_not_finiteMultiplicity fun h' ↦ h (h'.of_pow hk)]
 
+-- TODO(SKW): upstream, next to `multiplicity_map_eq`.
+/-- The multiplicity is invariant under a group acting by multiplicative automorphisms. -/
+theorem multiplicity_smul {G α : Type*} [Group G] [Monoid α] [MulDistribMulAction G α] (g : G)
+    {a b : α} : multiplicity (g • a) (g • b) = multiplicity a b :=
+  multiplicity_map_eq (MulDistribMulAction.toMulEquiv α g)
+
 -- TODO(SKW): upstream, next to `Finset.emultiplicity_prod`.
 /-- The multiplicity of a prime in a finite product is the sum of the multiplicities. -/
 theorem Finset.multiplicity_prod {α β : Type*} [CommMonoidWithZero α] [IsCancelMulZero α]
