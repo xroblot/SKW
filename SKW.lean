@@ -25,7 +25,6 @@ import SKW.Prereqs.Cotangent
 import SKW.Prereqs.TameRamification
 import SKW.Stickelberger.AddCharTrace
 import SKW.Stickelberger.GaussSum
-import SKW.Stickelberger.Stickelberger
 import SKW.Stickelberger.Teichmuller
 import SKW.KroneckerWeber.Basic
 import SKW.KroneckerWeber.ClassGroup

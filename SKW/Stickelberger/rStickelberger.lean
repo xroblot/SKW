@@ -12,11 +12,19 @@ public import SKW.Prereqs.IdealNorm
 
 set_option linter.style.header false
 
+/-!
+# Stickelberger's theorem: the former proofs
+
+This file is the state of `SKW.Stickelberger.Stickelberger` before its results were restated at
+the end of `SKW.Stickelberger.GaussSum`, kept for reference. Nothing imports it, and its
+declarations duplicate those of `SKW.Stickelberger.GaussSum`.
+-/
+
 @[expose] public section
 
-namespace Stickelberger
+namespace Stickelberger2
 
-open Ideal NumberField IntermediateField Pointwise IsCyclotomicExtension.Rat
+open Ideal NumberField IntermediateField Pointwise IsCyclotomicExtension.Rat Stickelberger
 
 variable (m : ℕ) (k : Type*) [Field k] [NumberField k] [NeZero m]
   [IsCyclotomicExtension {m} ℚ k] (p : ℕ) [hp : Fact (p.Prime)] [Fact (Odd p)] (hp' : ¬ p ∣ m)
@@ -169,4 +177,4 @@ theorem Stickelberger (C : ClassGroup (𝓞 k)) :
   · exact Nat.coprime_two_right.mp (hcop.coprime_dvd_right (dvd_mul_right 2 m))
   · exact (hcop.coprime_dvd_right (dvd_mul_left m 2)).symm
 
-end Stickelberger
+end Stickelberger2
