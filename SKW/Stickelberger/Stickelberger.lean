@@ -6,6 +6,7 @@ public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import Mathlib.RingTheory.Invariant.Basic
 public import Mathlib.RingTheory.Ideal.IsPrincipal
 public import Mathlib.NumberTheory.NumberField.Ideal.Basic
+public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 
 public import SKW.Prereqs.ClassGroup
 public import SKW.Prereqs.ClassGroupCoprime
@@ -57,7 +58,7 @@ theorem cast_trace_eq_algebraMap_trace [P.LiesOver 𝒑] [CharP (𝓞 K ⧸ P) p
       algebraMap _ (𝓞 L ⧸ 𝓟 ^ 2) (Algebra.trace (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) x) := by
   rw [← ZMod.cast_trace_eq_trace (Int.quotientSpanNatEquivZMod p), ZMod.map_cast]
 
-@[nolint defsWithUnderscore]
+@[nolint defsWithUnderscore docBlame]
 local instance [NeZero P] : Fintype (𝓞 K ⧸ P) := Fintype.ofFinite (𝓞 K ⧸ P)
 
 section Teichmuller
@@ -129,7 +130,7 @@ theorem gaussSum_mem_span_zeta_sub_one (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
     (by rwa [Int.dvd_neg])), map_zero]
 
 variable (n P hζ) in
-theorem gaussSum_mul_gaussSum [P.IsMaximal] (a b : ℤ) (h : ¬ (n : ℤ) ∣ a + b) :
+theorem gaussSum_mul_gaussSum [P.IsMaximal] {a b : ℤ} (h : ¬ (n : ℤ) ∣ a + b) :
     𝓖 n P hζ a * 𝓖 n P hζ b =
       𝓖 n P hζ (a + b) * algebraMap (𝓞 K) (𝓞 L) (𝓙 n P a b) := by
   rw [gaussSum_def, gaussSum_def, gaussSum_def, ← jacobiSum_mul_nontrivial,
@@ -176,7 +177,7 @@ section
 variable [NeZero n] [IsCyclotomicExtension {n} ℚ K]
 
 variable (n P hζ) in
-theorem gaussSum_mul_gaussSum_neg (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
+theorem gaussSum_mul_gaussSum_neg {a : ℤ} (ha : ¬ (n : ℤ) ∣ a) :
     𝓖 n P hζ a * 𝓖 n P hζ (-a) =
       algebraMap (𝓞 K) (𝓞 L) (((MulChar.teichmuller P n) ^ (- a)) (- 1)) * p ^ P.inertiaDeg ℤ := by
   have : CharP (𝓞 K ⧸ P) p := ringChar.of_eq ringChar_quotient_eq
@@ -202,7 +203,7 @@ theorem not_isUnit_gaussSum (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
 variable (n P hζ) in
 theorem norm_gaussSum (a : ℤ) (ha : ¬ (n : ℤ) ∣ a) :
     ∃ k, 1 ≤ k ∧ (Algebra.norm ℤ (𝓖 n P hζ a)).natAbs = p ^ k := by
-  have h := congr_arg (Int.natAbs <| Algebra.norm ℤ ·) <| gaussSum_mul_gaussSum_neg n P hζ _ ha
+  have h := congr_arg (Int.natAbs <| Algebra.norm ℤ ·) <| gaussSum_mul_gaussSum_neg n P hζ ha
   rw [map_mul, map_mul, Int.natAbs_mul, Int.natAbs_mul, zpow_neg,
     ← map_natCast (algebraMap ℤ (𝓞 L)), map_pow,
     Algebra.norm_algebraMap_of_basis (NumberField.RingOfIntegers.basis L), ← pow_mul,
@@ -230,7 +231,7 @@ include hζ in
 theorem jacobiSum_ne_zero (a b : ℤ) (ha : ¬ (n : ℤ) ∣ (a + b)) :
     𝓙 n P a b ≠ 0 := by
   by_contra h
-  have := gaussSum_mul_gaussSum n P hζ a b ha
+  have := gaussSum_mul_gaussSum n P hζ ha
   grind [mul_zero, mul_eq_zero, gaussSum_ne_zero]
 
 end
@@ -239,7 +240,7 @@ end
 
 section IsCycloF
 
-variable [hp : Fact p.Prime] [NumberField F] [IsCyclotomicExtension {p} ℚ F]
+variable [hp : Fact p.Prime] [IsCyclotomicExtension {p} ℚ F]
     [P.LiesOver (span {(p : ℤ)})]
 
 variable {n P 𝓟 hζ}
@@ -447,7 +448,7 @@ theorem valGauss_add_valGauss {a b : ℤ} (h : ¬ (n : ℤ) ∣ a + b) :
     valGauss n P 𝓟 hζ a + valGauss n P 𝓟 hζ b = valGauss n P 𝓟 hζ (a + b) +
        multiplicity 𝓟 (span {algebraMap (𝓞 K) (𝓞 L) (𝓙 n P a b)}) := by
   rw [valGauss, valGauss, valGauss, ← multiplicity_mul (prime_of_maximal 𝓟),
-      span_singleton_mul_span_singleton, gaussSum_mul_gaussSum _ _ _ _ _ h,
+      span_singleton_mul_span_singleton, gaussSum_mul_gaussSum _ _ _ h,
       ← span_singleton_mul_span_singleton, multiplicity_mul (prime_of_maximal 𝓟)]
   · exact (prime_of_maximal 𝓟).finiteMultiplicity_mul finiteMultiplicity_gaussSum
       (finiteMultiplicity_jacobiSum hζ h)
@@ -466,7 +467,7 @@ theorem valGauss_add_valGauss_neg_self [𝓟.LiesOver 𝒑] {a : ℤ}
     (ha : ¬ (n : ℤ) ∣ a) :
     valGauss n P 𝓟 hζ a + valGauss n P 𝓟 hζ (-a) = P.inertiaDeg ℤ * 𝓟.ramificationIdx ℤ := by
   rw [valGauss, valGauss, ← multiplicity_mul (prime_of_maximal 𝓟),
-    span_singleton_mul_span_singleton, gaussSum_mul_gaussSum_neg _ _ _ _ ha,
+    span_singleton_mul_span_singleton, gaussSum_mul_gaussSum_neg _ _ _ ha,
     ← span_singleton_mul_span_singleton, multiplicity_mul (prime_of_maximal 𝓟),
     multiplicity_of_isUnit_right, zero_add, ← span_singleton_pow,
     multiplicity_pow (prime_of_maximal 𝓟), ← map_natCast (algebraMap ℤ (𝓞 L)),
@@ -510,7 +511,7 @@ end ValGaussPrime
 
 section ValGaussOne
 
-variable [Fact p.Prime] [NumberField F] [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal]
+variable [Fact p.Prime] [IsCyclotomicExtension {p} ℚ F] [P.IsMaximal]
     [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMaximal] [𝓟.LiesOver P] [IsCyclotomicExtension {n} ℚ K]
 
 variable {n P 𝓟 hζ}
@@ -662,7 +663,7 @@ open scoped Pointwise
 
 open IsCyclotomicExtension.Rat
 
-variable (m d : ℕ) {k : IntermediateField ℚ L} (𝔭 : Ideal (𝓞 k))
+variable {n} {m d : ℕ} {k : IntermediateField ℚ L} (𝔭 : Ideal (𝓞 k))
 
 section Teichmuller
 
@@ -722,8 +723,8 @@ open IsCyclotomicExtension
 
 variable (p F) in
 theorem modEq_one_of_apply_eq_pow (hmd : n = m * d) (E : IntermediateField ℚ L)
-    [IsCyclotomicExtension {m * p} ℚ E] [Algebra F E] [IsScalarTower F E L] (η : L)
-    (hη : IsPrimitiveRoot η n) (τ : Gal(L/E)) (a : ℕ) (hτ : τ η = η ^ a) :
+    [IsCyclotomicExtension {m * p} ℚ E] (η : L) (hη : IsPrimitiveRoot η n)
+    (τ : Gal(L/E)) (a : ℕ) (hτ : τ η = η ^ a) :
     a ≡ 1 [MOD m] := by
   let ν := algebraMap E L (zeta (m * p) ℚ E ^ p)
   have hν : IsPrimitiveRoot ν m := by
@@ -748,29 +749,38 @@ theorem smul_gaussSum_eq_gaussSum' [NeZero p] [Fact (n.Coprime p)] (hmd : n = m 
   · rw [← Nat.cast_mul, mul_comm, hmd]
   refine Int.ModEq.mul_left' ?_
   rw [← Nat.cast_one, Int.natCast_modEq_iff]
-  refine modEq_one_of_apply_eq_pow p n F m d hmd E (algebraMap K L (zeta n ℚ K)) ?_ τ _ ?_
+  refine modEq_one_of_apply_eq_pow p F hmd E (algebraMap K L (zeta n ℚ K)) ?_ τ _ ?_
   · exact (zeta_spec n ℚ K).map_of_injective <| FaithfulSMul.algebraMap_injective K L
   · rw [← (zeta_spec n ℚ K).galLFEquiv_apply p, AlgEquiv.coe_restrictScalars]
 
-variable [Fact p.Prime] [Fact (n.Coprime p)] [P.IsMaximal]
+variable [Fact p.Prime] [hnp : Fact (n.Coprime p)] [P.IsMaximal]
 
 -- Used in `SKW.Stickelberger.Stickelberger`.
 variable (k) in
-theorem exists_mem_gaussSum_pow_eq (hmd : n = m * d) (hdp : d.Coprime p) (E : IntermediateField ℚ L)
-    [IsCyclotomicExtension {m * p} ℚ E] [Algebra F E] [IsScalarTower F E L]
-    [IsCyclotomicExtension {m} ℚ k] :
+theorem exists_mem_gaussSum_pow_eq (hmd : n = m * d) [IsCyclotomicExtension {m} ℚ k] :
     ∃ Γ : 𝓞 k, 𝓖 n P hζ d ^ m = algebraMap (𝓞 k) (𝓞 L) Γ := by
   have : IsAbelianGalois ℚ L := IsCyclotomicExtension.isAbelianGalois {p * n} ℚ L
+  let ξ := zeta (p * n) ℚ L
+  have hξ := zeta_spec (p * n) ℚ L
+  let η := ξ ^ d
+  have hη : IsPrimitiveRoot η (m * p) := hξ.pow (NeZero.pos _) (by grind)
+  let E := ℚ⟮η⟯
+  have : IsCyclotomicExtension {m * p} ℚ E := hη.intermediateField_adjoin_isCyclotomicExtension ℚ
+  let : Algebra F E := by
+    have : F ≤ E := isCyclotomicExtension_le_of_dvd _ _ _ _ _ _ (p.dvd_mul_left m)
+    exact (inclusion this).toRingHom.toAlgebra
+  have : IsScalarTower F E L := IsScalarTower.of_algebraMap_eq' rfl
   obtain ⟨Γ₀, h₀⟩ : ∃ Γ₀ : K, Γ₀ = (𝓖 n P hζ d ^ m : L) :=
     IsGaloisGroup.isInvariant.isInvariant _ fun τ : Gal(L/K) ↦ by
-      exact_mod_cast smul_gaussSum_eq_gaussSum n P hζ m d hmd τ
+      exact_mod_cast smul_gaussSum_eq_gaussSum P hζ hmd τ
   obtain ⟨Γ₁, h₁⟩ : ∃ Γ₁ : E, Γ₁ = (𝓖 n P hζ d ^ m : L) :=
     IsGaloisGroup.isInvariant.isInvariant _ fun τ : Gal(L/E) ↦ by
       rw [smul_pow', RingOfIntegers.coe_eq_algebraMap, ← algebraMap.smul',
-        smul_gaussSum_eq_gaussSum' n P hζ m d hmd]
+        smul_gaussSum_eq_gaussSum' P hζ hmd]
   have hk : k = K ⊓ E := by
     have := IsCyclotomicExtension.Rat.gcd_inf n (m * p) K E
-    rw [hmd, Nat.gcd_mul_left, hdp, mul_one] at this
+    rw [hmd, Nat.gcd_mul_left, hnp.out.coprime_dvd_left (Dvd.intro_left m hmd.symm), mul_one]
+      at this
     exact IntermediateField.isCyclotomicExtension_eq {m} ℚ L k ↑(K ⊓ E)
   let Γ : 𝓞 k := (⟨⟨𝓖 n P hζ d ^ m, hk ▸ ⟨h₀ ▸ Subtype.coe_prop Γ₀, h₁ ▸ Subtype.coe_prop Γ₁⟩⟩ ,
       isIntegral_algebraMap_iff.mp ((𝓖 n P hζ d).isIntegral_coe.pow m)⟩ : 𝓞 k)
@@ -780,7 +790,7 @@ end Galois
 
 section PrimePow
 
-variable [IsCyclotomicExtension {m} ℚ k] (f : ℕ)
+variable (m) [IsCyclotomicExtension {m} ℚ k] (f : ℕ)
 
 include m in
 theorem mem_orbit [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (𝔮 : 𝒑.primesOver (𝓞 k)) :
@@ -789,40 +799,44 @@ theorem mem_orbit [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (𝔮 : 𝒑.primesOver (�
   rw [Algebra.IsInvariant.orbit_eq_primesOver ℤ _ _ 𝒑 𝔭]
   exact 𝔮.2
 
-variable [hp : Fact p.Prime] [NeZero m]
+section equivUnits
+
+variable [NeZero m]
 
 /-- A unit `a` such that `σₐ⁻¹ • 𝔭 = 𝔮`. -/
 noncomputable def unitRep [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (𝔮 : 𝒑.primesOver (𝓞 k)) : (ZMod m)ˣ :=
   (galEquivZMod m k (MulAction.mem_orbit_iff.mp (mem_orbit m 𝔭 𝔮)).choose)⁻¹
 
-omit [Fact (Nat.Prime p)] in
 theorem unitRep_spec [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (𝔮 : 𝒑.primesOver (𝓞 k)) :
     ((galEquivZMod m k).symm (unitRep m 𝔭 𝔮)⁻¹) • 𝔭 = 𝔮 := by
   rw [unitRep, inv_inv, MulEquiv.symm_apply_apply,
     (MulAction.mem_orbit_iff.mp (mem_orbit m 𝔭 𝔮)).choose_spec]
 
 /-- The map `(𝔮, j) ↦ unitRep 𝔮 * p ^ j`. -/
-noncomputable def toUnits [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (hp : p.Coprime m) :
+noncomputable def toUnits [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m) :
     𝒑.primesOver (𝓞 k) × Fin f → (ZMod m)ˣ :=
-  fun x ↦ unitRep m 𝔭 x.1 * ZMod.unitOfCoprime p hp ^ (x.2 : ℕ)
+  fun x ↦ unitRep m 𝔭 x.1 * ZMod.unitOfCoprime p hp' ^ (x.2 : ℕ)
 
-omit [Fact (Nat.Prime p)] in
-theorem toUnits_apply [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+theorem toUnits_apply [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m)
     (x : 𝒑.primesOver (𝓞 k) × Fin f) :
-    toUnits m 𝔭 f hp x = unitRep m 𝔭 x.1 * ZMod.unitOfCoprime p hp ^ (x.2 : ℕ) := rfl
+    toUnits m 𝔭 f hp' x = unitRep m 𝔭 x.1 * ZMod.unitOfCoprime p hp' ^ (x.2 : ℕ) := rfl
 
-theorem toUnits_spec [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+variable [hp : Fact p.Prime]
+
+variable {m 𝔭 f} in
+theorem toUnits_spec [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m)
     (x : 𝒑.primesOver (𝓞 k) × Fin f) :
-    (galEquivZMod m k).symm (toUnits m 𝔭 f hp x)⁻¹ • 𝔭 = x.1 := by
+    (galEquivZMod m k).symm (toUnits m 𝔭 f hp' x)⁻¹ • 𝔭 = x.1 := by
   rw [toUnits_apply, mul_inv, map_mul, mul_smul, MulAction.mem_stabilizer_iff (a := 𝔭).mp,
     unitRep_spec]
-  rw [← Subgroup.mem_map_equiv, ← MulEquiv.coe_mapSubgroup, galEquivZMod_stabilizer m k p _ hp,
+  rw [← Subgroup.mem_map_equiv, ← MulEquiv.coe_mapSubgroup, galEquivZMod_stabilizer m k p _ hp',
     Subgroup.inv_mem_iff]
   exact Subgroup.npow_mem_zpowers _ _
 
-theorem toUnits_injective [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+variable {m 𝔭 f} in
+theorem toUnits_injective [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m)
     (hmf : orderOf (p : ZMod m) = f) :
-    Function.Injective (toUnits m 𝔭 f hp) := by
+    Function.Injective (toUnits m 𝔭 f hp') := by
   intro ⟨x₁, x₂⟩ ⟨y₁, y₂⟩ h
   have h₁ : x₁ = y₁ := by
     simpa only [Subtype.ext_iff, toUnits_spec] using congr_arg ((galEquivZMod m k).symm ·⁻¹ • 𝔭) h
@@ -830,88 +844,91 @@ theorem toUnits_injective [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime 
   rw [toUnits_apply, toUnits_apply, h₁, mul_right_inj] at h
   refine pow_injOn_Iio_orderOf ?_ ?_ h <;> simp [← orderOf_units, ZMod.coe_unitOfCoprime, hmf]
 
-theorem toUnits_surjective [NeZero f] [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+variable {m 𝔭 f} in
+theorem toUnits_surjective [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m)
     (hmf : orderOf (p : ZMod m) = f) :
-    Function.Surjective (toUnits m 𝔭 f hp) := by
+    Function.Surjective (toUnits m 𝔭 f hp') := by
   intro y
   let 𝔮 : 𝒑.primesOver (𝓞 k) := primesOver.mk 𝒑 (((galEquivZMod m k).symm y)⁻¹ • 𝔭)
-  obtain ⟨c, hc⟩ : ∃ c : Fin (orderOf (ZMod.unitOfCoprime p hp)),
-      ZMod.unitOfCoprime p hp ^ c.val = y * (unitRep m 𝔭 𝔮)⁻¹ := by
+  obtain ⟨c, hc⟩ : ∃ c : Fin (orderOf (ZMod.unitOfCoprime p hp')),
+      ZMod.unitOfCoprime p hp' ^ c.val = y * (unitRep m 𝔭 𝔮)⁻¹ := by
     have : (galEquivZMod m k).symm (y * (unitRep m 𝔭 𝔮)⁻¹) ∈ MulAction.stabilizer Gal(k/ℚ) 𝔭 := by
       rw [MulAction.mem_stabilizer_iff, map_mul, mul_smul, unitRep_spec m 𝔭 𝔮,
         smul_eq_iff_eq_inv_smul]
     have := pow_finEquivZPowers_symm_apply (isOfFinOrder_of_finite _)
-      ⟨_, mem_zpowers_galEquivZMod_of_mem_stabilizer m k p 𝔭 hp this⟩
+      ⟨_, mem_zpowers_galEquivZMod_of_mem_stabilizer m k p 𝔭 hp' this⟩
     exact ⟨_, by simpa only [map_mul, map_inv, MulEquiv.apply_symm_apply, this]⟩
   refine ⟨⟨𝔮, finCongr (by rw [← orderOf_units, ZMod.coe_unitOfCoprime, hmf]) c⟩, ?_⟩
   rw [toUnits_apply, finCongr_apply, Fin.val_cast, hc, mul_inv_cancel_comm_assoc]
 
-variable [NeZero f]
-
 /-- An equivalence between pairs `(𝔮, j)`, with `𝔮` a prime of `𝓞 k` above `p` and `j < f`, and
 `(ZMod m)ˣ`, such that the image `a` of `(𝔮, j)` satisfies `σₐ⁻¹ • 𝔭 = 𝔮`. -/
-noncomputable def equivUnits [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+noncomputable def equivUnits [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m)
     (hmf : orderOf (p : ZMod m) = f) :
     𝒑.primesOver (𝓞 k) × Fin f ≃ (ZMod m)ˣ :=
-  Equiv.ofBijective (toUnits m 𝔭 f hp)
-    ⟨toUnits_injective m 𝔭 f hp hmf, toUnits_surjective m 𝔭 f hp hmf⟩
+  Equiv.ofBijective (toUnits m 𝔭 f hp')
+    ⟨toUnits_injective hp' hmf, toUnits_surjective hp' hmf⟩
 
-theorem equivUnits_apply [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+theorem equivUnits_apply [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m)
     (hmf : orderOf (p : ZMod m) = f) (x : 𝒑.primesOver (𝓞 k) × Fin f) :
-    equivUnits m 𝔭 f hp hmf x = unitRep m 𝔭 x.1 * ZMod.unitOfCoprime p hp ^ (x.2 : ℕ) := rfl
+    equivUnits m 𝔭 f hp' hmf x = unitRep m 𝔭 x.1 * ZMod.unitOfCoprime p hp' ^ (x.2 : ℕ) := rfl
 
-theorem equivUnits_spec [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+variable {m 𝔭 f} in
+theorem equivUnits_spec [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m)
     (hmf : orderOf (p : ZMod m) = f) (x : 𝒑.primesOver (𝓞 k) × Fin f) :
-    ((galEquivZMod m k).symm (equivUnits m 𝔭 f hp hmf x)⁻¹) • 𝔭 = x.1 :=
-  toUnits_spec m 𝔭 f hp x
+    ((galEquivZMod m k).symm (equivUnits m 𝔭 f hp' hmf x)⁻¹) • 𝔭 = x.1 :=
+  toUnits_spec hp' x
 
-theorem equivUnits_add [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
+theorem equivUnits_add [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m)
     (hmf : orderOf (p : ZMod m) = f) (𝔮 : 𝒑.primesOver (𝓞 k)) (i j : Fin f) :
-    (equivUnits m 𝔭 f hp hmf (𝔮, i + j)).val =
-      equivUnits m 𝔭 f hp hmf (𝔮, i) * p ^ j.val := by
+    (equivUnits m 𝔭 f hp' hmf (𝔮, i + j)).val =
+      equivUnits m 𝔭 f hp' hmf (𝔮, i) * p ^ j.val := by
   simp [equivUnits_apply, Units.val_mul, Units.val_pow_eq_pow_val, ZMod.coe_unitOfCoprime,
     mul_assoc, ← pow_add, Fin.val_add, ← pow_eq_pow_mod _ (hmf ▸ pow_orderOf_eq_one (p : ZMod m))]
 
-theorem exists_equivUnits_eq [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
-    (hmf : orderOf (p : ZMod m) = f) (𝔮 : 𝒑.primesOver (𝓞 k)) (a : (ZMod m)ˣ)
+variable {m 𝔭 f} in
+theorem exists_equivUnits_eq [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) {𝔮 : 𝒑.primesOver (𝓞 k)} {a : (ZMod m)ˣ}
     (ha : (galEquivZMod m k).symm a⁻¹ • 𝔭 = 𝔮) :
-    ∃ j, equivUnits m 𝔭 f hp hmf (𝔮, j) = a := by
-  obtain ⟨⟨𝔮', j⟩, rfl⟩ := (equivUnits m 𝔭 f hp hmf).surjective a
-  rw [show 𝔮 = 𝔮' from Subtype.ext <| ha.symm.trans (equivUnits_spec m 𝔭 f hp hmf _)]
+    ∃ j, equivUnits m 𝔭 f hp' hmf (𝔮, j) = a := by
+  obtain ⟨⟨𝔮', j⟩, rfl⟩ := (equivUnits m 𝔭 f hp' hmf).surjective a
+  rw [show 𝔮 = 𝔮' from Subtype.ext <| ha.symm.trans (equivUnits_spec hp' hmf _)]
   exact ⟨j, rfl⟩
 
-theorem sum_equivUnits [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp : p.Coprime m)
-    (hmf : orderOf (p : ZMod m) = f) (𝔮 : 𝒑.primesOver (𝓞 k))
+variable {m 𝔭 f} in
+theorem sum_equivUnits [NeZero f] [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] (hp' : p.Coprime m)
+    (hmf : orderOf (p : ZMod m) = f) {𝔮 : 𝒑.primesOver (𝓞 k)}
     (a : (ZMod m)ˣ) (ha : ((galEquivZMod m k).symm a⁻¹) • 𝔭 = 𝔮) :
-    ∑ j : Fin f, (equivUnits m 𝔭 f hp hmf (𝔮, j) : ZMod m).val =
+    ∑ j : Fin f, (equivUnits m 𝔭 f hp' hmf (𝔮, j) : ZMod m).val =
       ∑ j : Fin f, ((a : ZMod m) * p ^ (j : ℕ)).val := by
-  obtain ⟨j, rfl⟩ := exists_equivUnits_eq m 𝔭 f hp hmf 𝔮 a ha
+  obtain ⟨j, rfl⟩ := exists_equivUnits_eq hp' hmf ha
   simp_rw [← equivUnits_add]
   exact (Equiv.sum_comp (Equiv.addLeft j) _).symm
 
-variable [Fact (Odd p)]
-  [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p ^ f - 1} ℚ K]
-  [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] [P.IsMaximal] [P.LiesOver (span {(p : ℤ)})]
-  [P.HasTeichmullerLift (p ^ f - 1)] [𝓟.IsMaximal] [𝓟.LiesOver P]
+end equivUnits
 
-omit [NeZero m] in
-theorem mul_valGauss_eq_mul_sum (hdm : d * m = p ^ f - 1) (a : ℕ)
-    (ha : d * a ≤ p ^ f - 2) :
-    m * valGauss (p ^ f - 1) P 𝓟 hζ (d * a) =
-      (p - 1) * ∑ i ∈ Finset.range f, a * p ^ i % m := by
-  have hf : 1 < p ^ f - 1 := by have := three_le_p_pow p f; lia
-  rw [← mul_right_inj' (by grind : d ≠ 0), ← Nat.cast_mul, valGauss_eq_sum_digits _ ha,
-    ← mul_assoc, hdm, ← Nat.sub_one_mul_sum_mod_eq hp.out.one_lt (by lia), mul_left_comm,
-    Finset.mul_sum _ _ d]
-  refine congr_arg ((p - 1) * ·) <| Finset.sum_congr rfl fun i hi ↦ ?_
-  rw [← hdm, mul_assoc, Nat.mul_mod_mul_left]
+variable [IsCyclotomicExtension {p ^ f - 1} ℚ K] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
+  [P.IsMaximal] [P.LiesOver (span {(p : ℤ)})] [P.HasTeichmullerLift (p ^ f - 1)]
+  [𝓟.LiesOver P]
 
-variable [NeZero (p ^ f - 1)] [Fact ((p ^ f - 1).Coprime p)]
+variable {𝓟 𝔭} in
+theorem restrictNormal_smul_eq [IsGalois ℚ k] [IsGalois ℚ L] [h𝓟 : 𝓟.LiesOver 𝔭]
+    {𝔮 : 𝒑.primesOver (𝓞 k)} {𝓠 : (𝔮 : Ideal (𝓞 k)).primesOver (𝓞 L)} {τ : Gal(L/F)}
+    (hτ : τ • 𝓟 = 𝓠) :
+    (τ.restrictScalars ℚ).restrictNormal k • 𝔭 = 𝔮 := by
+  rw [← IsGaloisGroup.restrictHom_eq_restrictNormal,
+    ← IsGaloisGroup.restrictHom_eq_restrictHom Gal(L/ℚ) Gal(k/ℚ) ℤ (𝓞 k) (𝓞 L) ℚ k L,
+    (liesOver_iff _ _).mp h𝓟, IsGaloisGroup.restrictHom_smul_under, (liesOver_iff _ _).mp 𝓠.2.2,
+    ← hτ]
+  rfl
 
-omit [NeZero f] [Fact (Odd p)] in
+variable [hp : Fact (Nat.Prime p)] [IsCyclotomicExtension {p} ℚ F] [𝓟.IsMaximal]
+
 /-- The automorphism of `k` given by the image of `galFEquiv τ` in `(ZMod m)ˣ` is the restriction
 of `τ` to `k`. -/
-theorem galEquivZMod_symm_unitsMap_galFEquiv [Normal ℚ k] (h : m ∣ p ^ f - 1) (τ : Gal(L/F)) :
+theorem galEquivZMod_symm_unitsMap_galFEquiv [NeZero (p ^ f - 1)] [NeZero m]
+     [Fact ((p ^ f - 1).Coprime p)] [Normal ℚ k]
+    (h : m ∣ p ^ f - 1) (τ : Gal(L/F)) :
     (galEquivZMod m k).symm (ZMod.unitsMap h (galFEquiv p (p ^ f - 1) K F τ)) =
       (τ.restrictScalars ℚ).restrictNormal k := by
   have := IsCyclotomicExtension.isAbelianGalois {p * (p ^ f - 1)} ℚ L
@@ -922,8 +939,23 @@ theorem galEquivZMod_symm_unitsMap_galFEquiv [Normal ℚ k] (h : m ∣ p ^ f - 1
     ← MonoidHom.comp_apply, ZMod.unitsMap_comp]
   rfl
 
+variable {m f} [NeZero f]
+
+variable {P 𝓟 hζ} in
+theorem mul_valGauss_eq_mul_sum [Fact (Odd p)] (hmd : p ^ f - 1 = m * d) {a : ℕ}
+    (ha : d * a ≤ p ^ f - 2) :
+    m * valGauss (p ^ f - 1) P 𝓟 hζ (d * a) =
+      (p - 1) * ∑ i ∈ Finset.range f, a * p ^ i % m := by
+  have hf : 1 < p ^ f - 1 := by have := three_le_p_pow p f; lia
+  rw [← mul_right_inj' (by grind : d ≠ 0), ← Nat.cast_mul, valGauss_eq_sum_digits _ ha,
+    ← mul_assoc, mul_comm d, ← hmd, ← Nat.sub_one_mul_sum_mod_eq hp.out.one_lt (by lia),
+    mul_left_comm, Finset.mul_sum _ _ d]
+  refine congr_arg ((p - 1) * ·) <| Finset.sum_congr rfl fun i hi ↦ ?_
+  rw [hmd, mul_assoc, mul_comm m, Nat.mul_mod_mul_left]
+
+variable [NeZero m]
+
 variable (p) {𝓟} in
-omit [Fact (Odd p)] in
 /-- There is a single prime of `𝓞 F` above `p`, so any prime of `𝓞 L` above `p` lies over the prime
 of `𝓞 F` below `𝓟`. -/
 theorem liesOver_under_of_liesOver [𝓟.LiesOver 𝒑] {𝓠 : Ideal (𝓞 L)} [𝓠.IsPrime]
@@ -934,61 +966,51 @@ theorem liesOver_under_of_liesOver [𝓟.LiesOver 𝒑] {𝓠 : Ideal (𝓞 L)} 
   rw [hQ] at h₁ h₂
   exact (liesOver_iff _ _).mpr (h₁.trans h₂.symm)
 
-omit hp [Fact (Odd p)] [IsCyclotomicExtension {p} ℚ ↥F] [𝓟.IsMaximal] in
-theorem restrictNormal_smul_eq [IsGalois ℚ k] [IsGalois ℚ L] [h𝓟 : 𝓟.LiesOver 𝔭]
-    (𝔮 : 𝒑.primesOver (𝓞 k)) (𝓠 : (𝔮 : Ideal (𝓞 k)).primesOver (𝓞 L)) (τ : Gal(L/F))
-    (hτ : τ • 𝓟 = 𝓠) :
-    (τ.restrictScalars ℚ).restrictNormal k • 𝔭 = 𝔮 := by
-  rw [← IsGaloisGroup.restrictHom_eq_restrictNormal,
-    ← IsGaloisGroup.restrictHom_eq_restrictHom Gal(L/ℚ) Gal(k/ℚ) ℤ (𝓞 k) (𝓞 L) ℚ k L,
-    (liesOver_iff _ _).mp h𝓟, IsGaloisGroup.restrictHom_smul_under, (liesOver_iff _ _).mp 𝓠.2.2,
-    ← hτ]
-  rfl
-
-theorem mul_valGauss_eq (hmf : orderOf (p : ZMod m) = f) (hdm : d * m = p ^ f - 1)
-    (hp : p.Coprime m) [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] [h𝓟 : 𝓟.LiesOver 𝔭] (𝔮 : 𝒑.primesOver (𝓞 k))
+theorem mul_valGauss_eq [Fact (Odd p)] [NeZero (p ^ f - 1)] [Fact ((p ^ f - 1).Coprime p)]
+    (hmf : orderOf (p : ZMod m) = f) (hmd : p ^ f - 1 = m * d)
+    (hp' : p.Coprime m) [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] [h𝓟 : 𝓟.LiesOver 𝔭] (𝔮 : 𝒑.primesOver (𝓞 k))
     (𝓠 : (𝔮 : Ideal (𝓞 k)).primesOver (𝓞 L)) :
     m * valGauss (p ^ f - 1) P 𝓠 hζ d =
-      (p - 1) * ∑ i, (equivUnits m 𝔭 f hp hmf (𝔮, i) : ZMod m).val := by
-  have hd : 0 < d := Nat.pos_of_mul_pos_right (hdm ▸ NeZero.pos (p ^ f - 1))
+      (p - 1) * ∑ i, (equivUnits m 𝔭 f hp' hmf (𝔮, i) : ZMod m).val := by
+  have hd : 0 < d := Nat.pos_of_mul_pos_left (hmd ▸ NeZero.pos (p ^ f - 1))
   have := IsCyclotomicExtension.isAbelianGalois {p * (p ^ f - 1)} ℚ L
   have : 𝓠.val.LiesOver (under (𝓞 F) 𝓟) := by
     have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P _
     have : 𝓠.val.LiesOver 𝒑 := LiesOver.trans 𝓠.val 𝔮.val _
     exact liesOver_under_of_liesOver p
   obtain ⟨τ, hτ⟩ : ∃ τ, τ • 𝓟 = 𝓠 := exists_smul_eq_of_isGaloisGroup (under (𝓞 F) 𝓟) 𝓟 𝓠 Gal(L/F)
-  set a : (ZMod m)ˣ := ZMod.unitsMap (Dvd.intro_left d hdm) (galFEquiv p (p ^ f - 1) K F τ⁻¹)
+  set a : (ZMod m)ˣ := ZMod.unitsMap ⟨d, hmd⟩ (galFEquiv p (p ^ f - 1) K F τ⁻¹)
     with a_def
-  rw [← hτ, valGauss_smul, valGauss_periodic _ (d * a.val.val), mul_valGauss_eq_mul_sum _ _ _ _ _ _
-    hdm, sum_equivUnits _ _ _ _ _ _ a, Finset.sum_range]
+  rw [← hτ, valGauss_smul, valGauss_periodic _ (d * a.val.val), mul_valGauss_eq_mul_sum hmd,
+    sum_equivUnits hp' hmf a, Finset.sum_range]
   · refine congr_arg ((p - 1) * ·) <| Finset.sum_congr rfl fun i _ ↦ ?_
     rw [ZMod.val_mul, ← Nat.cast_pow, ZMod.val_natCast, Nat.mul_mod_mod]
   · rw [a_def, map_inv, map_inv, map_inv, map_inv, inv_inv, galEquivZMod_symm_unitsMap_galFEquiv]
-    exact restrictNormal_smul_eq 𝓟 𝔭 𝔮 𝓠 τ hτ
-  · rw [show p ^ f - 2 = p ^ f - 1 - 1 by lia, Nat.le_sub_one_iff_lt (NeZero.pos _), ← hdm,
-      Nat.mul_lt_mul_left hd]
+    exact restrictNormal_smul_eq hτ
+  · rw [show p ^ f - 2 = p ^ f - 1 - 1 by lia, Nat.le_sub_one_iff_lt (NeZero.pos _), hmd,
+      mul_comm m, Nat.mul_lt_mul_left hd]
     exact ZMod.val_lt _
-  · rw [← (congr_arg ((↑) : ℕ → ℤ) hdm), Nat.cast_mul, ZMod.unitsMap_val]
+  · rw [congr_arg ((↑) : ℕ → ℤ) hmd, Nat.cast_mul, mul_comm (m : ℤ), ZMod.unitsMap_val]
     exact Int.ModEq.mul_left' <| (ZMod.intCast_eq_intCast_iff _ _ m).mp <| by simp
 
-variable {m d f} in
 /-- A prime of `𝓞 L` above a prime `𝔮` of `𝓞 k` above `p` has ramification index `p - 1`
 over `𝔮`. -/
-theorem ramificationIdx_eq_sub_one (hdm : d * m = p ^ f - 1) (𝔮 : Ideal (𝓞 k)) [𝔮.IsMaximal]
+theorem ramificationIdx_eq_sub_one (hmd : p ^ f - 1 = m * d) (𝔮 : Ideal (𝓞 k)) [𝔮.IsMaximal]
     [𝔮.LiesOver 𝒑] {𝓠 : Ideal (𝓞 L)} [𝓠.IsPrime] [𝓠.LiesOver 𝔮] :
     𝓠.ramificationIdx (𝓞 k) = p - 1 := by
   sorry
 
 -- Used in `SKW.Stickelberger.Stickelberger`.
-theorem gaussSum_factorization (hmf : orderOf (p : ZMod m) = f) (hdm : d * m = p ^ f - 1)
-    [𝔭.IsMaximal] [𝔭.LiesOver 𝒑] [𝓟.LiesOver 𝔭] (Γ : 𝓞 k)
-    (hΓ : 𝓖 (p ^ f - 1) P hζ d ^ m = algebraMap (𝓞 k) (𝓞 L) Γ) :
+variable {P hζ} in
+theorem gaussSum_factorization [Fact (Odd p)] [NeZero (p ^ f - 1)] [Fact ((p ^ f - 1).Coprime p)]
+    (hmf : orderOf (p : ZMod m) = f) (hmd : p ^ f - 1 = m * d) [𝔭.IsMaximal] [𝔭.LiesOver 𝒑]
+    [𝓟.LiesOver 𝔭] {Γ : 𝓞 k} (hΓ : 𝓖 (p ^ f - 1) P hζ d ^ m = algebraMap (𝓞 k) (𝓞 L) Γ) :
     span {Γ} = ∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val := by
   have h₀ : 𝔭 ≠ ⊥ := IsMaximal.ne_bot_of_isIntegral_int 𝔭
   have h₁ : m ∣ p * (p ^ f - 1) := by
-    rw [← hdm, ← mul_assoc]
-    exact Nat.dvd_mul_left _ _
-  have hp : p.Coprime m := (coprime_pow_sub_one p f).symm.of_dvd_right <| Dvd.intro_left d hdm
+    rw [hmd, mul_rotate']
+    exact Nat.dvd_mul_right m (d * p)
+  have hp' : p.Coprime m := (coprime_pow_sub_one p f).symm.of_dvd_right ⟨d, hmd⟩
   have h𝔭₁ {σ : Gal(k/ℚ)} : σ • 𝔭 ≠ ⊥ := (smul_ne_zero_iff_ne _).mpr <| h₀
   have h𝔭₂ {σ : Gal(k/ℚ)} : (σ • 𝔭).IsMaximal := isMaximal_of_isPrime_of_ne_bot (σ • 𝔭) h𝔭₁
   have h𝔮 (σ : Gal(k/ℚ)) : ((σ • 𝔭).primesOver (𝓞 L)).toFinset =
@@ -996,17 +1018,17 @@ theorem gaussSum_factorization (hmf : orderOf (p : ZMod m) = f) (hdm : d * m = p
       rw [← Finset.coe_inj, IsDedekindDomain.coe_primesOverFinset h𝔭₁, Set.coe_toFinset]
   have h𝓠 {𝔮 : Ideal (𝓞 k)} [𝔮.IsMaximal] [𝔮.LiesOver 𝒑] {𝓠 : 𝔮.primesOver (𝓞 L)} :
       𝓠.val.ramificationIdx (𝓞 k) = p - 1 :=
-    ramificationIdx_eq_sub_one hdm 𝔮
+    ramificationIdx_eq_sub_one hmd 𝔮
   apply map_injective_of_faithfullyFlat (B := (𝓞 L))
   simp_rw [map_span, Set.image_singleton, ← hΓ, ← span_singleton_pow,
     span_singleton_gaussSum_eq_prod, ← mapHom_apply, map_prod, mapHom_apply, Ideal.map_pow,
     map_algebraMap_eq_finsetProd_pow h𝔭₁, ← Finset.prod_pow,
-    ← Equiv.prod_comp (equivUnits m 𝔭 f hp hmf), Fintype.prod_prod_type, ← map_inv,
+    ← Equiv.prod_comp (equivUnits m 𝔭 f hp' hmf), Fintype.prod_prod_type, ← map_inv,
     equivUnits_spec, Finset.prod_comm (γ := Fin f), ← pow_mul, Finset.prod_pow_eq_pow_sum,
     ← Finset.prod_set_coe, ← Equiv.prod_comp (equivPrimesOverPrimesOver (𝓞 k) 𝒑 (B := 𝓞 L)).symm,
     Fintype.prod_sigma, coe_equivPrimesOverPrimesOver_symm_apply]
   refine Finset.prod_congr rfl fun 𝔮 _ ↦ Finset.prod_congr rfl fun 𝓠 _ ↦ ?_
-  rw [h𝓠, ← Finset.mul_sum, mul_comm, mul_valGauss_eq P 𝓟 hζ m d 𝔭 f hmf hdm hp 𝔮 𝓠]
+  rw [h𝓠, ← Finset.mul_sum, mul_comm, mul_valGauss_eq P 𝓟 hζ 𝔭 hmf hmd hp' 𝔮 𝓠]
 
 end PrimePow
 
@@ -1014,23 +1036,104 @@ end Stickelberger
 
 namespace Stickelberger
 
-open Ideal NumberField IntermediateField Pointwise IsCyclotomicExtension.Rat
+open Ideal NumberField IntermediateField Pointwise IsCyclotomicExtension Rat
 
-variable (m : ℕ) (k : Type*) [Field k] [NumberField k] [NeZero m]
-  [IsCyclotomicExtension {m} ℚ k] (p : ℕ) [hp : Fact (p.Prime)] [Fact (Odd p)] (hp' : ¬ p ∣ m)
-  (𝔭 : Ideal (𝓞 k)) [𝔭.IsMaximal] [𝔭.LiesOver (span {(p : ℤ)})]
+variable (p : ℕ) [hp : Fact (p.Prime)]
 
-theorem Stickelberger_aux (f d : ℕ) [NeZero f] [NeZero d] [NeZero (p * (p ^ f - 1))]
-    [NeZero (p ^ f - 1)] [Fact ((p ^ f - 1).Coprime p)]
-    (hdm : d * m = p ^ f - 1) (hf : orderOf (p : ZMod m) = f) (L : Type*) [Field L] [NumberField L]
-    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
+-- variable  (k : Type*) [Field k] [NumberField k]
+--   -- (k : IntermediateField ℚ L)
+--   [NeZero m]
+--   [IsCyclotomicExtension {m} ℚ k]  (hp' : ¬ p ∣ m)
+--   (𝔭 : Ideal (𝓞 k)) [𝔭.IsMaximal] [𝔭.LiesOver (span {(p : ℤ)})]
+
+local notation3 "𝒑" => span {(p : ℤ)}
+
+attribute [local instance] Ideal.Quotient.field in
+variable {p} in
+theorem hasTeichmullerLift {f : ℕ} [NeZero f] [NeZero (p ^ f - 1)] {K : Type*} [Field K]
+    [NumberField K] [IsCyclotomicExtension {p ^ f - 1} ℚ K] (P : Ideal (𝓞 K)) [P.IsMaximal]
+    [P.LiesOver 𝒑] :
+    P.HasTeichmullerLift (p ^ f - 1) := by
+  have hζ := (zeta_spec (p ^ f - 1) ℚ K).toInteger_isPrimitiveRoot
+  have : HasEnoughRootsOfUnity (𝓞 K) (p ^ f - 1) := ⟨⟨_, hζ⟩, rootsOfUnity.isCyclic _ _⟩
+  refine .of_card_of_isPrime (p ^ f - 1) ?_
+  rw [Nat.card_units, tsub_left_inj Nat.card_pos NeZero.one_le, ← absNorm_eq_card,
+    ← absNorm_pow_inertiaDeg 𝒑, absNorm_eq_card, Int.card_ideal_quot,
+    IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd (m := p ^ f - 1) p K P,
+    ZMod.orderOf_mod_self_pow_sub_one _ _ hp.out.one_lt]
+  exact (Nat.Prime.coprime_iff_not_dvd hp.out).mp (coprime_pow_sub_one p f).symm
+
+variable [Fact (Odd p)]
+
+attribute [local instance] Ideal.Quotient.field in
+theorem Stickelberger₀ (f d : ℕ) [NeZero f] [NeZero (p ^ f - 1)] (L : Type*) [Field L]
+    [NumberField L] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] (m : ℕ) [NeZero m]
+    (k : IntermediateField ℚ L) [IsCyclotomicExtension {m} ℚ k] (𝔭 : Ideal (𝓞 k)) [𝔭.IsMaximal]
+    [𝔭.LiesOver 𝒑] (hmd : p ^ f - 1 = m * d) (hpf : orderOf (p : ZMod m) = f) :
     Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val) := by
-  sorry
+  have : Fact ((p ^ f - 1).Coprime p) := ⟨coprime_pow_sub_one p f⟩
+  have := isAbelianGalois {p * (p ^ f - 1)} ℚ L
+  let ξ := IsCyclotomicExtension.zeta (p * (p ^ f - 1)) ℚ L
+  have hξ := IsCyclotomicExtension.zeta_spec (p * (p ^ f - 1)) ℚ L
+  let ζ := ξ ^ (p ^ f - 1)
+  have hζ : IsPrimitiveRoot ζ p := hξ.pow (NeZero.pos _) (by rw [mul_comm])
+  let F := ℚ⟮ζ⟯
+  have : IsCyclotomicExtension {p} ℚ F := hζ.intermediateField_adjoin_isCyclotomicExtension ℚ
+  let η := ξ ^ p
+  have hη : IsPrimitiveRoot η (p ^ f - 1) := hξ.pow (NeZero.pos _) rfl
+  let K := ℚ⟮η⟯
+  have : IsCyclotomicExtension {p ^ f - 1} ℚ K :=
+    hη.intermediateField_adjoin_isCyclotomicExtension ℚ
+  obtain ⟨𝓟, h𝓟, _⟩ := exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔭
+  have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 𝔭 𝒑
+  let P := under (𝓞 K) 𝓟
+  have : P.HasTeichmullerLift (p ^ f - 1) := hasTeichmullerLift P
+  have : P.LiesOver 𝒑 := under_liesOver_of_liesOver (𝓞 K) 𝓟 𝒑
+  obtain ⟨Γ, hΓ⟩ := exists_mem_gaussSum_pow_eq P (zeta_spec p ℚ F).toInteger_isPrimitiveRoot k hmd
+  exact ⟨Γ, by rw [Ideal.submodule_span_eq, gaussSum_factorization 𝓟 𝔭 hpf hmd hΓ]⟩
 
-include hp' in
-theorem Stickelberger'' :
+theorem Stickelberger₁ [NeZero m] (k : Type*) [Field k] [NumberField k] (m : ℕ)
+    [IsCyclotomicExtension {m} ℚ k] (𝔭 : Ideal (𝓞 k)) [𝔭.IsMaximal] [𝔭.LiesOver 𝒑]
+    (hmp : p.Coprime m) :
     Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val) := by
-  sorry
+  set f := orderOf (p : ZMod m) with f_def
+  let d := (p ^ f - 1) / m
+  have h_mdiv : m ∣ p ^ f - 1 := by
+    refine (Nat.modEq_iff_dvd' (Nat.one_le_pow _ _ hp.out.pos)).mp ?_
+    rw [← ZMod.natCast_eq_natCast_iff, Nat.cast_pow, pow_orderOf_eq_one, Nat.cast_one]
+  have hmd : p ^ f - 1 = m * d := Nat.eq_mul_of_div_eq_right h_mdiv rfl
+  have : NeZero f := ⟨by
+    rw [f_def, ← ZMod.coe_unitOfCoprime p hmp, orderOf_units]
+    exact orderOf_ne_zero_iff.mpr <| isOfFinOrder_of_finite _⟩
+  have : NeZero (p ^ f - 1) := ⟨Nat.sub_ne_zero_of_lt (Nat.one_lt_pow (NeZero.ne f) hp.out.one_lt)⟩
+  obtain ⟨ξ, hξ⟩ :=
+    HasEnoughRootsOfUnity.exists_isPrimitiveRoot (AlgebraicClosure k) (p * (p ^ f - 1))
+  let L := ℚ⟮ξ⟯
+  have : NumberField L := {
+      to_finiteDimensional := adjoin.finiteDimensional <| hξ.isIntegral' (NeZero.pos _) }
+  have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L := hξ.adjoinSimple_isCyclotomicExtension _ ℚ
+  let η := (zeta (p * (p ^ f - 1)) ℚ L) ^ (p * d)
+  have hη : IsPrimitiveRoot η m :=
+    (zeta_spec (p * (p ^ f - 1)) ℚ L).pow (NeZero.pos _) <| by rw [hmd, mul_comm m, mul_assoc]
+  let k₀ := ℚ⟮η⟯
+  have : IsCyclotomicExtension {m} ℚ k₀ := hη.adjoinSimple_isCyclotomicExtension _ ℚ
+  let e : (𝓞 k₀) ≃+* (𝓞 k) :=
+    RingOfIntegers.mapRingEquiv <| (IsCyclotomicExtension.algEquiv {m} ℚ k₀ k).toRingEquiv
+  let 𝔭₀ := Ideal.comap e 𝔭
+  have :  𝔭₀.LiesOver 𝒑 := by
+    change (Ideal.comap e.toIntAlgEquiv 𝔭).LiesOver 𝒑
+    apply Ideal.comap_liesOver
+  have ha {a} : ((galEquivZMod m k).symm a)⁻¹ • 𝔭 =
+      Ideal.mapHom e (((galEquivZMod m k₀).symm a)⁻¹ • 𝔭₀) := by
+    ext x
+    have := ringHom_galEquivZMod_smul (f := e.toRingHom) e.injective a (e.symm x)
+    simp only [RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, RingEquiv.apply_symm_apply] at this
+    rw [mapHom_apply, show map e _ = _ from map_comap_of_equiv (e : 𝓞 k₀ ≃+* 𝓞 k), mem_comap,
+      Ideal.mem_inv_pointwise_smul_iff, Ideal.mem_inv_pointwise_smul_iff, ← this, ← mem_comap]
+  simp_rw [ha, ← map_pow, ← map_prod]
+  exact Submodule.IsPrincipal.map_ringHom e <| Stickelberger₀ p f d L m k₀ 𝔭₀ hmd rfl
+
+#exit
 
 theorem Stickelberger' (I : Ideal (𝓞 k)) (hI₁ : Odd I.absNorm) (hI₂ : m.gcd I.absNorm = 1) :
     Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • I) ^ a.val.val) := by

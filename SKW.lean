@@ -10,6 +10,7 @@ import SKW.Prereqs.ClassGroupCoprime
 import SKW.Prereqs.CyclotomicField
 import SKW.Prereqs.Digits
 import SKW.Prereqs.FractionalIdeal
+import SKW.Prereqs.GroupRingAction
 import SKW.Prereqs.Ideals
 import SKW.Prereqs.IdealNorm
 import SKW.Prereqs.Instances
@@ -24,7 +25,7 @@ import SKW.Prereqs.NumberTheory
 import SKW.Prereqs.Cotangent
 import SKW.Prereqs.TameRamification
 import SKW.Stickelberger.AddCharTrace
-import SKW.Stickelberger.GaussSum
+import SKW.Stickelberger.Stickelberger
 import SKW.Stickelberger.Teichmuller
 import SKW.KroneckerWeber.Basic
 import SKW.KroneckerWeber.ClassGroup

@@ -7,7 +7,7 @@ public import Mathlib.Data.ENat.BigOperators
 
 public import SKW.Prereqs.Digits
 public import SKW.Prereqs.MulChars
-public import SKW.Stickelberger.GaussSum
+public import SKW.Stickelberger.Stickelberger
 
 set_option linter.style.header false
 
@@ -15,9 +15,9 @@ set_option linter.style.header false
 # The factorization of the Gauss sums: the former proofs
 
 This file is the state of `SKW.Stickelberger.Factorization` before its results were restated with
-`multiplicity` and over an abstract `n` where possible at the end of `SKW.Stickelberger.GaussSum`,
-kept for reference. Nothing imports it, and its declarations duplicate those of
-`SKW.Stickelberger.GaussSum`.
+`multiplicity` and over an abstract `n` where possible in `SKW.Stickelberger.Stickelberger`, kept
+for reference. Nothing imports it, and its declarations duplicate those of
+`SKW.Stickelberger.Stickelberger`.
 -/
 
 @[expose] public section

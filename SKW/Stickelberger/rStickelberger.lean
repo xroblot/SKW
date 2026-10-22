@@ -5,7 +5,7 @@ public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import Mathlib.RingTheory.Ideal.IsPrincipal
 public import Mathlib.NumberTheory.NumberField.Ideal.Basic
 
-public import SKW.Stickelberger.GaussSum
+public import SKW.Stickelberger.Stickelberger
 public import SKW.Prereqs.ClassGroup
 public import SKW.Prereqs.ClassGroupCoprime
 public import SKW.Prereqs.IdealNorm
@@ -15,9 +15,10 @@ set_option linter.style.header false
 /-!
 # Stickelberger's theorem: the former proofs
 
-This file is the state of `SKW.Stickelberger.Stickelberger` before its results were restated at
-the end of `SKW.Stickelberger.GaussSum`, kept for reference. Nothing imports it, and its
-declarations duplicate those of `SKW.Stickelberger.GaussSum`.
+This file is the former `SKW.Stickelberger.Stickelberger`, kept for reference. Its results were
+restated at the end of `SKW.Stickelberger.GaussSum`, since renamed
+`SKW.Stickelberger.Stickelberger`. Nothing imports it, and its declarations duplicate those of
+`SKW.Stickelberger.Stickelberger`.
 -/
 
 @[expose] public section

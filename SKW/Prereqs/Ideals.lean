@@ -77,7 +77,7 @@ instance (K : Type*) [Field K] [NumberField K] :
 -- TODO(SKW): convert to the unprimed `Ideal.ramificationIdx` once Mathlib has an unprimed
 -- `le_comap_pow_ramificationIdx`. The name is currently taken by a deprecated alias for the primed
 -- lemma, and converting here without it would force Dedekind hypotheses on an otherwise
--- `CommRing`-level statement. The call site `GaussSum.lean` bridges in the meantime.
+-- `CommRing`-level statement. The call site `Stickelberger.lean` bridges in the meantime.
 theorem Ideal.pow_liesOver_of_liesOver {R S : Type*} [CommRing R] [CommRing S] [Algebra R S] (p :
   Ideal R) (P : Ideal S) [P.LiesOver p]
     {i : ℕ} (hi : i + 1 ≤ Ideal.ramificationIdx' p P) :

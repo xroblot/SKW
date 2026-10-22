@@ -9,7 +9,7 @@ public import Mathlib.Algebra.GroupWithZero.Torsion
 public import Mathlib.NumberTheory.NumberField.CMField
 
 public import SKW.KroneckerWeber.Basic
-public import SKW.Stickelberger.GaussSum
+public import SKW.Stickelberger.Stickelberger
 public import SKW.Prereqs.FractionalIdeal
 public import SKW.Prereqs.CMField
 public import SKW.Prereqs.CyclotomicField
