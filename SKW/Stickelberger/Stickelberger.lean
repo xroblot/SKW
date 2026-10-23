@@ -172,7 +172,7 @@ theorem gaussSum_mul_gaussSum_neg {a : ℤ} (ha : ¬ (n : ℤ) ∣ a) :
   rw [gaussSum_def, gaussSum_def, ← mul_gaussSum_inv_eq_gaussSum,
     AddChar.compAddChar_traceChar_algebraMap, neg_neg, zpow_neg, ← MulChar.ringHomComp_inv,
     mul_right_comm, mul_assoc, gaussSum_mul_gaussSum_eq_card, Fintype.card_eq_nat_card,
-    ← absNorm_eq_card, ← Ideal.pow_inertiaDeg p P, Nat.cast_pow, MulChar.ringHomComp_inv,
+    ← absNorm_eq_natCard, ← Ideal.pow_inertiaDeg p P, Nat.cast_pow, MulChar.ringHomComp_inv,
     MulChar.ringHomComp_apply]
   · exact teichmuller_ringHomComp_zpow_ne_one ha
   · apply AddChar.isPrimitive_traceChar _
@@ -254,7 +254,7 @@ private theorem sum_teichmuller_inv_mul_cast_trace_aux (i : ℕ) :
   rw [← Nat.succ_pred_eq_of_pos (NeZero.pos (p ^ i)), FiniteField.sum_inv_mul_pow_succ]
   obtain rfl | hi := Nat.eq_zero_or_pos i
   · simp
-  · rw [Fintype.card_eq_nat_card, ← absNorm_eq_card, ← Ideal.pow_inertiaDeg p P,
+  · rw [Fintype.card_eq_nat_card, ← absNorm_eq_natCard, ← Ideal.pow_inertiaDeg p P,
       Nat.pred_eq_sub_one,
       if_congr (Nat.pow_sub_one_dvd_pow_sub_one_iff hp.out.one_lt) rfl rfl]
 
@@ -1131,8 +1131,8 @@ theorem hasTeichmullerLift {f : ℕ} [NeZero (p ^ f - 1)] [hcop : Fact ((p ^ f -
   have hζ := (zeta_spec (p ^ f - 1) ℚ K).toInteger_isPrimitiveRoot
   have : HasEnoughRootsOfUnity (𝓞 K) (p ^ f - 1) := ⟨⟨_, hζ⟩, rootsOfUnity.isCyclic _ _⟩
   refine .of_card_of_isPrime (p ^ f - 1) ?_
-  rw [Nat.card_units, tsub_left_inj Nat.card_pos NeZero.one_le, ← absNorm_eq_card,
-    ← absNorm_pow_inertiaDeg 𝒑, absNorm_eq_card, Int.card_ideal_quot,
+  rw [Nat.card_units, tsub_left_inj Nat.card_pos NeZero.one_le, ← absNorm_eq_natCard,
+    ← absNorm_pow_inertiaDeg 𝒑, absNorm_eq_natCard, Int.card_ideal_quot,
     IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd (m := p ^ f - 1) p K P,
     ZMod.orderOf_mod_self_pow_sub_one _ _ hp.out.one_lt]
   exact (Nat.Prime.coprime_iff_not_dvd hp.out).mp hcop.out.symm
@@ -1167,7 +1167,7 @@ theorem Stickelberger₀ (f d : ℕ) [NeZero f] [NeZero (p ^ f - 1)] (L : Type*)
   have hP : P.LiesOver 𝒑 := under_liesOver_of_liesOver (𝓞 K) 𝓟 𝒑
   have : CharP (𝓞 K ⧸ P) p := by
     refine ringChar.of_eq  ?_
-    rw [Ideal.ringChar_quot P, ← (liesOver_iff _ _).mp hP, absNorm_eq_card, Int.card_ideal_quot]
+    rw [Ideal.ringChar_quot P, ← (liesOver_iff _ _).mp hP, absNorm_eq_natCard, Int.card_ideal_quot]
   obtain ⟨Γ, hΓ⟩ := exists_mem_gaussSum_pow_eq P (zeta_spec p ℚ F).toInteger_isPrimitiveRoot k hmd
   exact ⟨Γ, by rw [Ideal.submodule_span_eq, gaussSum_factorization 𝓟 𝔭 hpf hmd hΓ]⟩
 

@@ -1,8 +1,8 @@
 module
 
-public import SKW.PRed2Mathlib.FractionalIdeal
 public import Mathlib.Algebra.Ring.Action.Basic
 public import Mathlib.Algebra.Ring.Action.Group
+public import Mathlib.RingTheory.FractionalIdeal.Operations
 public import Mathlib.RingTheory.Localization.FractionRing
 
 set_option linter.style.header false

@@ -1,7 +1,6 @@
 import SKW.Basic
 import SKW.Misc
 import SKW.PRed2Mathlib.Subfield
-import SKW.PRed2Mathlib.FractionalIdeal
 import SKW.PRed2Mathlib.AddCharTrace
 import SKW.PRed2Mathlib.Teichmuller
 import SKW.Prereqs.AlgebraMisc

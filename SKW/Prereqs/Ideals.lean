@@ -16,11 +16,6 @@ open NumberField
 
 /-! ### Ideal -/
 
-theorem Ideal.absNorm_eq_card {S : Type*} [CommRing S] [IsDedekindDomain S] [Infinite S]
-    (I : Ideal S) :
-    Ideal.absNorm I = Nat.card (S ⧸ I) := rfl
-
-
 @[simps]
 def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike F R S]
     [RingHomClass F R S] (e : F) : Ideal R ≃+* Ideal S where
