@@ -4,6 +4,7 @@ public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.IntermediateField
 public import SKW.Prereqs.NumberTheory
 public import SKW.Prereqs.CMField
+public import SKW.PRed2Mathlib.CyclotomicField
 
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.CMField
@@ -40,69 +41,6 @@ theorem IsPrimitiveRoot.of_pow_eq {M : Type*} [CommMonoid M] {ζ y : M} {m n : �
     (hmn : ∀ q, q.Prime → q ∣ m → q ∣ n) : IsPrimitiveRoot y (m * n) := by
   rw [IsPrimitiveRoot.iff_orderOf, orderOf_eq_mul_orderOf_pow hm
     (fun q hq hqm => by rw [hy, ← h.eq_orderOf]; exact hmn q hq hqm), hy, ← h.eq_orderOf]
-
--- TODO(SKW): PRIORITY for upstreaming. The first result goes next to
--- `Polynomial.eval_one_cyclotomic_not_prime_pow` in
--- `Mathlib/RingTheory/Polynomial/Cyclotomic/Eval.lean`, the four others into
--- `Mathlib/RingTheory/RootsOfUnity/CyclotomicUnits.lean`.
-
-/-- The `n`-th cyclotomic polynomial takes the value `1` at `1` when `n` is neither `1` nor a prime
-power. -/
-theorem Polynomial.eval_one_cyclotomic_not_isPrimePow {R : Type*} [Ring R] {n : ℕ} (hn : n ≠ 1)
-    (h : ¬ IsPrimePow n) : Polynomial.eval 1 (Polynomial.cyclotomic n R) = 1 := by
-  refine eval_one_cyclotomic_not_prime_pow fun {p} hp k hk ↦ ?_
-  obtain rfl | hk₀ := Nat.eq_zero_or_pos k
-  · exact hn (by simpa using hk.symm)
-  · exact h ⟨p, k, hp.prime, hk₀, hk⟩
-
-open Polynomial in
-/-- The element `ζ - 1` is a unit precisely when the `n`-th cyclotomic polynomial takes a unit
-value at `1`. -/
-theorem IsPrimitiveRoot.isUnit_sub_one_iff_isUnit_eval_cyclotomic {R : Type*} [CommRing R]
-    [IsDomain R] {n : ℕ}
-    (hn : 1 < n) {ζ : R} (hζ : IsPrimitiveRoot ζ n) :
-    IsUnit (ζ - 1) ↔ IsUnit (eval 1 (cyclotomic n R)) := by
-  have : NeZero n := ⟨Nat.ne_zero_of_lt hn⟩
-  have : Nonempty (primitiveRoots n R) := ⟨ζ, by rwa [mem_primitiveRoots (NeZero.pos _)]⟩
-  have h_unit {η : R} (hη : η ∈ primitiveRoots n R) : IsUnit (1 - η) ↔ IsUnit (ζ - 1) := by
-    obtain ⟨i, -, hi, rfl⟩ := hζ.isPrimitiveRoot_iff.mp (isPrimitiveRoot_of_mem_primitiveRoots hη)
-    apply Associated.isUnit_iff
-    rw [← Associated.neg_left_iff, neg_sub]
-    exact (hζ.associated_sub_one_pow_sub_one_of_coprime hi).symm
-  rw [cyclotomic_eq_prod_X_sub_primitiveRoots hζ]
-  simp +contextual [eval_prod, h_unit]
-
-open Polynomial in
-/-- If the order of `ζ` is not a prime power, then `ζ - 1` is a unit. -/
-theorem IsPrimitiveRoot.isUnit_sub_one_of_not_isPrimePow {R : Type*} [CommRing R] [IsDomain R]
-    {n : ℕ} (hn : 1 < n) (hn' : ¬ IsPrimePow n) {ζ : R} (hζ : IsPrimitiveRoot ζ n) :
-    IsUnit (ζ - 1) := by
-  rw [hζ.isUnit_sub_one_iff_isUnit_eval_cyclotomic hn,
-    eval_one_cyclotomic_not_isPrimePow hn.ne' hn']
-  exact isUnit_one
-
-open Polynomial in
-/-- If the order of `ζ` is a power of the prime `p`, then `ζ - 1` is a unit precisely when `p` is
-one. -/
-theorem IsPrimitiveRoot.isUnit_sub_one_iff_of_prime_pow {R : Type*} [CommRing R] [IsDomain R]
-    {p k : ℕ} [hp : Fact p.Prime] {ζ : R} (hζ : IsPrimitiveRoot ζ (p ^ (k + 1))) :
-    IsUnit (ζ - 1) ↔ IsUnit (p : R) := by
-  rw [hζ.isUnit_sub_one_iff_isUnit_eval_cyclotomic (Nat.one_lt_pow (by lia) hp.out.one_lt),
-    eval_one_cyclotomic_prime_pow]
-
-open Polynomial in
-/-- The element `ζ - 1` is a unit precisely when the order `n` of `ζ` is not a prime power. -/
-theorem IsPrimitiveRoot.isUnit_sub_one_iff {R : Type*} [CommRing R] [IsDomain R]
-    [IsLocalHom (algebraMap ℤ R)] {n : ℕ} (hn : 1 < n) {ζ : R} (hζ : IsPrimitiveRoot ζ n) :
-    IsUnit (ζ - 1) ↔ ¬ IsPrimePow n := by
-  refine ⟨fun h hpp ↦ ?_, hζ.isUnit_sub_one_of_not_isPrimePow hn⟩
-  obtain ⟨p, k, hp, hk, rfl⟩ := (isPrimePow_nat_iff n).mp hpp
-  obtain ⟨m, rfl⟩ := Nat.exists_eq_succ_of_ne_zero hk.ne'
-  have : Fact p.Prime := ⟨hp⟩
-  rw [hζ.isUnit_sub_one_iff_of_prime_pow, show (p : R) = algebraMap ℤ R p by push_cast; ring,
-    isUnit_map_iff, Int.isUnit_iff] at h
-  have := hp.two_le
-  obtain h | h := h <;> lia
 
 /-! ### IsCyclotomicExtension -/
 
