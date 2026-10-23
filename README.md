@@ -33,7 +33,7 @@ theorem following the approach of Lemmermeyer's paper
 
 Both `Stickelberger` and `kronecker_weber` are proved, and no file of this project contains
 a `sorry` of its own. What remains are nine statements admitted on purpose, each of
-them a result already submitted to Mathlib and awaiting review; until those land,
+them a result submitted (or to be added) to Mathlib and awaiting review; until those land,
 `#print axioms kronecker_weber` still reports `sorryAx`.
 
 | PR | content | statements |
@@ -42,10 +42,10 @@ them a result already submitted to Mathlib and awaiting review; until those land
 | [#36843](https://github.com/leanprover-community/mathlib4/pull/36843) | a compositum of unramified extensions is unramified | 1 |
 | [#43490](https://github.com/leanprover-community/mathlib4/pull/43490) | quadratic fields and their discriminant | 4 |
 | [#43493](https://github.com/leanprover-community/mathlib4/pull/43493) | complex embeddings of quadratic fields | 1 |
-| [#40302](https://github.com/leanprover-community/mathlib4/pull/40302) | the `digitsAppend` API | 1 |
+| [#44588](https://github.com/leanprover-community/mathlib4/pull/44588) | reduction of roots of unity modulo an ideal | 1 |
 
 The first four live in [`SKW.Prereqs.OtherPR`](https://xroblot.github.io/SKW/docs/SKW/Prereqs/OtherPR.html), the last one
-in [`SKW.Prereqs.Digits`](https://xroblot.github.io/SKW/docs/SKW/Prereqs/Digits.html).
+in [`SKW.PRed2Mathlib.Teichmuller`](https://xroblot.github.io/SKW/docs/SKW/PRed2Mathlib/Teichmuller.html).
 
 As each PR is merged, the corresponding stub is deleted and its uses redirected to the
 upstream name. The [blueprint](https://xroblot.github.io/SKW/blueprint/) tracks the

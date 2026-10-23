@@ -240,17 +240,6 @@ theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_smul {E F : Type*} [Field
   have := ringHom_galEquivZMod_apply (F := F) (IsFractionRing.map hf) a (algebraMap (𝓞 E) E x)
   rwa [IsFractionRing.map_apply_algebraMap] at this
 
-open Pointwise in
-/-- Pushing an ideal forward along an injective ring homomorphism between cyclotomic fields of
-levels `m ∣ n` intertwines the actions of `galEquivZMod`. -/
-theorem IsCyclotomicExtension.Rat.map_galEquivZMod_symm_smul {E F : Type*} [Field E] [Field F]
-    [NumberField E] [NumberField F] {m n : ℕ} [NeZero m] [NeZero n] (hmn : m ∣ n)
-    [IsCyclotomicExtension {m} ℚ E] [IsCyclotomicExtension {n} ℚ F]
-    {f : 𝓞 E →+* 𝓞 F} (hf : Function.Injective f) {a : (ZMod m)ˣ} {b : (ZMod n)ˣ}
-    (hb : ZMod.unitsMap hmn b = a) (I : Ideal (𝓞 E)) :
-    Ideal.map f ((galEquivZMod m E).symm a • I) = (galEquivZMod n F).symm b • Ideal.map f I := by
-  sorry
-
 /-- The automorphism of `ℚ(ζ_n)` corresponding to `a ∈ (ℤ/nℤ)ˣ` under `galEquivZMod` acts on every
 `n`-th root of unity as raising to the `z`-th power, for any integer `z` representing `a`. -/
 theorem IsCyclotomicExtension.Rat.galEquivZMod_symm_apply_of_pow_eq (n : ℕ) [NeZero n]
