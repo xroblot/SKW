@@ -749,7 +749,7 @@ theorem smul_gaussSum_eq_gaussSum' [NeZero p] [Fact (n.Coprime p)] (hmd : n = m 
   · rw [← Nat.cast_mul, mul_comm, hmd]
   refine Int.ModEq.mul_left' ?_
   rw [← Nat.cast_one, Int.natCast_modEq_iff]
-  refine modEq_one_of_apply_eq_pow p F hmd E (algebraMap K L (zeta n ℚ K)) ?_ τ _ ?_
+  refine modEq_one_of_apply_eq_pow p hmd E (algebraMap K L (zeta n ℚ K)) ?_ τ _ ?_
   · exact (zeta_spec n ℚ K).map_of_injective <| FaithfulSMul.algebraMap_injective K L
   · rw [← (zeta_spec n ℚ K).galLFEquiv_apply p, AlgEquiv.coe_restrictScalars]
 
@@ -1092,7 +1092,7 @@ theorem Stickelberger₀ (f d : ℕ) [NeZero f] [NeZero (p ^ f - 1)] (L : Type*)
   obtain ⟨Γ, hΓ⟩ := exists_mem_gaussSum_pow_eq P (zeta_spec p ℚ F).toInteger_isPrimitiveRoot k hmd
   exact ⟨Γ, by rw [Ideal.submodule_span_eq, gaussSum_factorization 𝓟 𝔭 hpf hmd hΓ]⟩
 
-theorem Stickelberger₁ [NeZero m] (k : Type*) [Field k] [NumberField k] (m : ℕ)
+theorem Stickelberger₁ (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero m]
     [IsCyclotomicExtension {m} ℚ k] (𝔭 : Ideal (𝓞 k)) [𝔭.IsMaximal] [𝔭.LiesOver 𝒑]
     (hmp : p.Coprime m) :
     Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • 𝔭) ^ a.val.val) := by
@@ -1133,14 +1133,38 @@ theorem Stickelberger₁ [NeZero m] (k : Type*) [Field k] [NumberField k] (m : �
   simp_rw [ha, ← map_pow, ← map_prod]
   exact Submodule.IsPrincipal.map_ringHom e <| Stickelberger₀ p f d L m k₀ 𝔭₀ hmd rfl
 
-#exit
-
-theorem Stickelberger' (I : Ideal (𝓞 k)) (hI₁ : Odd I.absNorm) (hI₂ : m.gcd I.absNorm = 1) :
-    Submodule.IsPrincipal (∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • I) ^ a.val.val) := by
-  sorry
-
-theorem Stickelberger (C : ClassGroup (𝓞 k)) :
+theorem Stickelberger (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero m]
+    [IsCyclotomicExtension {m} ℚ k] (C : ClassGroup (𝓞 k)) :
     ∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • C) ^ a.val.val = 1 := by
-  sorry
+  obtain ⟨⟨I, hI⟩, rfl, hI'⟩ := ClassGroup.exists_mk0_eq_and_isCoprime C
+    (J := span {(2*m : 𝓞 k)}) (by simpa using NeZero.ne m)
+  simp_rw [ClassGroup.smul_mk0, ← map_pow, ← map_prod]
+  rw [ClassGroup.mk0_eq_one_iff]
+  have hI : I ≠ ⊥ := mem_nonZeroDivisors_iff_ne_zero.mp hI
+  rw [← Ideal.mem_isPrincipalSubmonoid_iff]
+  simp only [SubmonoidClass.coe_finsetProd, SubmonoidClass.coe_pow, nonZeroDivisors.val_smul]
+  rw [← Ideal.prod_normalizedFactors_eq_self hI]
+  simp_rw +singlePass [← smul_pow', ← Multiset.map_id',
+    ← Multiset.prod_map_pow, pointwise_smul_def, ← mapHom_apply, map_multiset_prod,
+    Multiset.map_map, ← Multiset.prod_map_prod]
+  refine Submonoid.multiset_prod_mem _ _ (fun f hf ↦ mem_isPrincipalSubmonoid_iff.mp ?_)
+  by_cases hf₀ : f = 0
+  · simpa [hf₀] using! bot_isPrincipal
+  rw [← Subtype.coe_mk f (mem_nonZeroDivisors_of_ne_zero hf₀)]
+  obtain ⟨𝔭, h𝔭, rfl⟩ := Multiset.mem_map.mp hf
+  obtain ⟨h𝔭₁, h𝔭₂⟩ := (UniqueFactorizationMonoid.mem_normalizedFactors_iff hI).mp h𝔭
+  have : NeZero 𝔭 := ⟨Prime.ne_zero h𝔭₁⟩
+  have : 𝔭.IsMaximal := (isPrime_of_prime h𝔭₁).isMaximal (NeZero.ne _)
+  have h₁ : Nat.Coprime (Ideal.absNorm 𝔭) (2 * m) := by
+    refine Nat.Coprime.of_dvd_left (map_dvd absNorm h𝔭₂) ?_
+    exact coprime_absNorm_of_isCoprime_span (by exact_mod_cast hI')
+  let p := (under ℤ 𝔭).absNorm
+  have : Fact p.Prime := ⟨Nat.absNorm_under_prime 𝔭⟩
+  have h₂ : p ∣ absNorm 𝔭 := Int.absNorm_under_dvd_absNorm 𝔭
+  have : Fact (Odd p) :=
+   ⟨Nat.coprime_two_right.mp <| (Nat.Coprime.of_dvd_left h₂ h₁).of_dvd_right (dvd_mul_right 2 m)⟩
+  simp only [← pointwise_smul_def, Function.comp_apply, mapHom_apply,
+    smul_pow', mem_isPrincipalSubmonoid_iff]
+  exact Stickelberger₁ p k m 𝔭 <| (Nat.Coprime.of_dvd_left h₂ h₁).of_dvd_right (dvd_mul_left m 2)
 
 end Stickelberger

@@ -72,7 +72,7 @@ lemma kw_class_trivial (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) 
         ← map_mul,
       ← hξ, ← coeIdeal_pow, val_smul, ← smul_pow', h𝔞, smul_closure, Set.smul_set_singleton, coeIdeal_span_singleton,
       algebraMap.smul', AlgEquiv.smul_def]
-  have h₃ := Stickelberger.Stickelberger p F (ClassGroup.mk0 𝔞₀)
+  have h₃ := Stickelberger.Stickelberger F p (ClassGroup.mk0 𝔞₀)
   have h₂ : ClassGroup.mk0 𝔞₀ ^ p = 1 := by
     rw [← map_pow, ClassGroup.mk0_eq_one_iff]
     exact ⟨μ, h𝔞⟩
