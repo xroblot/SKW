@@ -25,28 +25,6 @@ noncomputable section
 
 open Ideal NumberField IntermediateField
 
-section Misc
-
-variable (p f : ℕ)
-
-theorem three_le_p_pow [NeZero f] [hp : Fact (p.Prime)] [hp' : Fact (Odd p)] : 3 ≤ p ^ f := by
-  refine le_trans (Nat.le_pow (NeZero.pos f)) ?_
-  exact (Nat.pow_le_pow_iff_left (NeZero.ne f)).mpr <| (Nat.Prime.odd_iff hp.out).mp hp'.out
-
-theorem coprime_pow_sub_one [NeZero f] [Fact (p.Prime)] : (p ^ f - 1).Coprime p := by
-  rw [← Nat.coprime_pow_right_iff (NeZero.pos f), Nat.coprime_self_sub_left NeZero.one_le]
-  exact Nat.gcd_one_left _
-
-variable [NeZero (p ^ f - 1)]
-
-theorem not_dvd_pow_self_sub_one [hp : Fact (p.Prime)] : ¬ p ∣ p ^ f - 1 := by
-  rw [Nat.dvd_sub_iff_right NeZero.one_le (p.div_pow_of_pos f _), Nat.dvd_one]
-  · exact hp.out.ne_one
-  · by_contra! h
-    aesop
-
-end Misc
-
 section Algebra
 
 variable {p f : ℕ}
@@ -63,10 +41,6 @@ variable {F : Type*} [Field F] {ζ : 𝓞 F} (hζ : IsPrimitiveRoot ζ p)
 local notation3 "𝒑" => span {(p : ℤ)}
 
 -- variable (𝓟 : Ideal (𝓞 L))
-
-theorem ringChar_quotient_eq [hP : P.LiesOver 𝒑] : ringChar (𝓞 K ⧸ P) = p := by
-  have := Ideal.ringChar_quot P
-  rwa [← (liesOver_iff _ _).mp hP, absNorm_eq_card, Int.card_ideal_quot] at this
 
 variable [P.IsMaximal]
 
@@ -86,107 +60,9 @@ variable (p f P)
 
 variable [NumberField F] [Algebra F L] [IsCyclotomicExtension {p} ℚ F]
 
-variable {p} in
-include hζ in
-theorem zeta_sub_one_mem [𝓟.LiesOver 𝒑] : algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∈ 𝓟 := by
-  rw [← map_one (f := algebraMap (𝓞 F) (𝓞 L)), ← map_sub, ← mem_comap,
-    ← Ideal.under_def, IsCyclotomicExtension.Rat.eq_span_zeta_sub_one_of_liesOver' p F
-      (IsPrimitiveRoot.coe_submonoidClass_iff.mpr hζ) (under (𝓞 F) 𝓟)]
-  exact Submodule.mem_span_singleton_self _
-
 variable [NumberField L]
 
-theorem ramificationIdx_eq_p_sub_one [𝓟.LiesOver 𝒑] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
-    𝓟.ramificationIdx ℤ = p - 1 := by
-  simpa using @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L
-    _ _ 𝓟 _ _ _
-    (by ring) (not_dvd_pow_self_sub_one p f)
-
-section
-
-variable [NumberField K] [Algebra K L] [IsCyclotomicExtension {p ^ f - 1} ℚ K]
-
-omit [P.HasTeichmullerLift (p ^ f - 1)] in
-theorem ramificationIdx_eq_p_sub_one' [𝓟.LiesOver P] [P.LiesOver 𝒑]
-    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
-    𝓟.ramificationIdx (𝓞 K) = p - 1 := by
-  have h𝓟 : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
-  have tower := Ideal.ramificationIdx_tower (R := ℤ) P 𝓟
-  rw [@IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _
-    _ _ (by ring) (not_dvd_pow_self_sub_one p f),
-    IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p K P (not_dvd_pow_self_sub_one p f),
-    one_mul] at tower
-  simpa using tower.symm
-
-end
-
-theorem ramificationIdx_under_eq_one [𝓟.LiesOver 𝒑] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] :
-    𝓟.ramificationIdx (𝓞 F) = 1 := by
-  have h𝓟 : 𝓟 ≠ ⊥ := ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using hp.out.ne_zero) 𝓟
-  have tower := Ideal.ramificationIdx_tower (R := ℤ) (under (𝓞 F) 𝓟) 𝓟
-  rw [@IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L _ _ 𝓟 _
-    _ _  (by ring) (not_dvd_pow_self_sub_one p f),
-    IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p F _] at tower
-  simp at tower
-  have hne : p - 1 ≠ 0 := Nat.sub_ne_zero_iff_lt.mpr hp.out.one_lt
-  nlinarith [Nat.pos_of_ne_zero hne]
-
 end Algebra
-
-section IntermediateField
-
-open IsCyclotomicExtension
-
-variable {L : Type*} [Field L] [NumberField L] (p n : ℕ) [NeZero p] [NeZero n]
-  (K F : IntermediateField ℚ L) [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {n} ℚ K]
-  [hn : Fact (n.Coprime p)]
-
-include p n in
-theorem K_inf_F_eq_bot : K ⊓ F = ⊥ := by
-  apply LinearDisjoint.inf_eq_bot
-  exact Rat.linearDisjoint_ofCoprime n p K F hn.out
-
-variable [IsCyclotomicExtension {p * n} ℚ L]
-
-include p n in
-theorem K_sup_F_eq_top : K ⊔ F = (⊤ : IntermediateField ℚ L) := by
-  have : IsCyclotomicExtension {p * n} ℚ (⊤ : IntermediateField ℚ L) :=
-    .equiv _ _ _ topEquiv.symm
-  have : IsCyclotomicExtension {p * n} ℚ ↑(K ⊔ F) := by
-    rw [mul_comm, ← Nat.Coprime.lcm_eq_mul hn.out]
-    exact isCyclotomicExtension_lcm_sup ℚ L n p K F
-  exact isCyclotomicExtension_eq {p * n}  ℚ L _ _
-
-def galEquiv₀ [Normal ℚ K] [IsGalois F L] : Gal(L/F) ≃* Gal(K/ℚ) :=
-  MulEquiv.ofBijective (restrictRestrictAlgEquivMapHom ℚ K F L)
-    ⟨restrictRestrictAlgEquivMapHom_injective _ _ (K_sup_F_eq_top p n K F),
-    restrictRestrictAlgEquivMapHom_surjective _ _ (K_inf_F_eq_bot p n K F)⟩
-
-def galFEquiv : Gal(L/F) ≃* (ZMod n)ˣ :=
-  haveI := isAbelianGalois {p * n} ℚ L
-  (galEquiv₀ p n K F).trans <| Rat.galEquivZMod n K
-
-theorem galFEquiv_eq [Normal ℚ K] (σ : Gal(L/F)) :
-    galFEquiv p n K F σ = Rat.galEquivZMod n K ((σ.restrictScalars ℚ).restrictNormal K) :=
-  rfl
-
-variable {n K F}
-
-theorem IsPrimitiveRoot.galLFEquiv_apply (σ : Gal(L/F)) {η : K} (hη : IsPrimitiveRoot η n) :
-    σ (algebraMap K L η) = (algebraMap K L η) ^ (galFEquiv p n K F σ).val.val := by
-  have : Normal ℚ K := (isGalois {n} ℚ K).to_normal
-  rw [galFEquiv_eq, ← map_pow, ← Rat.galEquivZMod_apply_of_pow_eq _ _ _ hη.pow_eq_one,
-    AlgEquiv.restrictNormal_commutes, AlgEquiv.coe_restrictScalars]
-
-theorem IsPrimitiveRoot.galLFEquiv_smul (σ : Gal(L/F)) {η : 𝓞 K} (hη : IsPrimitiveRoot η n) :
-    σ • (algebraMap (𝓞 K) (𝓞 L) η) =
-      (algebraMap (𝓞 K) (𝓞 L)) η ^ (galFEquiv p n K F σ).val.val := by
-  apply RingOfIntegers.coe_injective
-  rw [algebraMap.smul', map_pow, ← IsScalarTower.algebraMap_apply, AlgEquiv.smul_def,
-    IsScalarTower.algebraMap_apply (𝓞 K) K L]
-  exact (hη.map_of_injective <| RingOfIntegers.coe_injective).galLFEquiv_apply p σ
-
-end IntermediateField
 
 --  haveI := IsCyclotomicExtension.isAbelianGalois {p * (p ^ f - 1)} ℚ L
 --  (MulEquiv.ofBijective (IntermediateField.restrictRestrictAlgEquivMapHom ℚ K F L)

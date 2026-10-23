@@ -7,27 +7,6 @@ set_option linter.style.header false
 
 @[expose] public section
 
-/-! ### Finset / MulAction -/
-
-@[to_additive]
-theorem Finset.prod_filter_eq_eq_pow_card {α β γ : Type*} [Fintype α] [CommMonoid γ]
-    [DecidableEq β] (f : α → β) (b : β) (g : β → γ) :
-    ∏ x with b = f x, g (f x) = g b ^ Fintype.card {x // b = f x} := by
-  rw [Finset.pow_eq_prod_const, Finset.prod_range,
-    Finset.prod_subtype (p := fun x ↦ b = f x) _ (by simp)]
-  exact Fintype.prod_equiv (Fintype.equivFin _) _ _ fun x ↦ by rw [← x.prop]
-
-@[to_additive (attr := simp)]
-theorem MulAction.orbitProdStabilizerEquivGroup_symm_apply_fst {α β : Type*} [Group α]
-    [MulAction α β] (b : β) (a : α) :
-    ((MulAction.orbitProdStabilizerEquivGroup α b).symm a).1 = a • b := rfl
-
-@[to_additive (attr := simp)]
-theorem MulAction.orbitProdStabilizerEquivGroup_apply_smul {α β : Type*} [Group α]
-    [MulAction α β] (b : β) (x : orbit α b) (y : stabilizer α b) :
-    MulAction.orbitProdStabilizerEquivGroup α b (x, y) • b = x := by
-  rw [← MulAction.orbitProdStabilizerEquivGroup_symm_apply_fst, Equiv.symm_apply_apply]
-
 /-! ### List / Nat.digits -/
 
 theorem Nat.digits_base_pow_sub_one {b : ℕ} (hb : 1 < b) (l : ℕ) :
