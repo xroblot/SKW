@@ -10,10 +10,15 @@ open scoped nonZeroDivisors
 @[expose] public section
 
 /-!
-# Coprime integral representatives in an ideal class
+# PRed to Mathlib: `ClassGroup.exists_mk0_eq_and_isCoprime`
 
 In a Dedekind domain, every ideal class contains an integral ideal coprime to a given nonzero
-ideal (`ClassGroup.exists_mk0_eq_and_isCoprime`).
+ideal. This file was extracted from `SKW.Prereqs.ClassGroupCoprime` and submitted upstream as
+Mathlib PR [#45217](https://github.com/leanprover-community/mathlib4/pull/45217), where the lemma
+goes to `Mathlib/RingTheory/DedekindDomain/Factorization.lean`.
+
+Once that PR is merged and the `lake-manifest.json` pin is bumped past the merge commit, this file
+(and its import in `SKW.Stickelberger.Stickelberger`) should be deleted.
 -/
 
 namespace ClassGroup

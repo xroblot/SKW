@@ -96,13 +96,13 @@ structure literal, and the `ℚ`/`ℤ` halves clearly belong in one PR together.
 
 Two extra checks that helped confirm it was a *good* (not just *valid*) pick:
 - **Not already in Mathlib**: `grep -rn "toRatAlgEquiv\|toIntAlgEquiv\|equivRatAlgEquiv"
-  mathlib4-alt/Mathlib --include="*.lean"` came back empty — genuinely missing, not a
+  mathlib4-claude/Mathlib --include="*.lean"` came back empty — genuinely missing, not a
   near-duplicate that'd get bounced.
 - **Battle-tested, not speculative**: `grep -rn "<name>" SKW --include="*.lean"` showed
   `toIntAlgEquiv` is actually used in `SKW/Stickelberger/Stickelberger.lean:55` — it's
   load-bearing code, not an untested generalization nobody needs.
 
-Run both checks (against `mathlib4-alt/Mathlib` and against `SKW`) for whatever cluster
+Run both checks (against `mathlib4-claude/Mathlib` and against `SKW`) for whatever cluster
 you're considering before committing to it.
 
 Before doing any porting work, list the candidates for the user: file:line, a one-line
@@ -111,8 +111,14 @@ pick which one(s) to pursue — don't push multiple unrelated lemmas into a sing
 
 ## 2. Prepare the port
 
-Working copy: `/Users/roblot/Desktop/EnCours/Lean/Lean4/mathlib4-alt`
-(`origin` = user's fork `xroblot/mathlib4`, `upstream` = `leanprover-community/mathlib4`).
+Working copy: `/Users/roblot/Desktop/EnCours/Lean/Lean4/mathlib4-claude`, the clone reserved for
+Claude sessions (`origin` = user's fork `xroblot/mathlib4`, `upstream` =
+`leanprover-community/mathlib4`). Never use `mathlib4` or `mathlib4-alt`: they are the user's, and
+other sessions work there. Rules in `~/Desktop/Claude/Lean/Mathlib/clone-mathlib4-claude.md`:
+
+- At rest the clone is on `master` = `upstream/master` with the cache. If it is on another branch
+  when you start, another session may be using it: ask before touching anything.
+- Check `git branch --show-current` right before every commit.
 
 - `git fetch upstream && git checkout -b <branch-name> upstream/master`
   (branch from fresh `upstream/master`, not a possibly-stale local `master`).
@@ -245,6 +251,9 @@ track of which PR they came from. Instead, move them into a mirror file under
 This way the eventual cleanup (once the PR merges and the pin bumps — see below) is a
 two-line deletion: drop the `PRed2Mathlib` file and the one `public import` line, with
 zero risk of missing a stray duplicated declaration elsewhere in the original file.
+
+Then put `mathlib4-claude` back at rest: `git fetch upstream && git checkout -B master
+upstream/master`, delete the pushed work branch, `lake exe cache get`.
 
 ## 6. Plan the post-merge cleanup
 

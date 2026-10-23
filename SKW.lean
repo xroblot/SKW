@@ -5,7 +5,7 @@ import SKW.PRed2Mathlib.AddCharTrace
 import SKW.PRed2Mathlib.Teichmuller
 import SKW.Prereqs.AlgebraMisc
 import SKW.Prereqs.ClassGroup
-import SKW.Prereqs.ClassGroupCoprime
+import SKW.PRed2Mathlib.ClassGroupCoprime
 import SKW.Prereqs.CyclotomicField
 import SKW.Prereqs.Digits
 import SKW.Prereqs.FractionalIdeal

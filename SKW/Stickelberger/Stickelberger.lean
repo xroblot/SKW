@@ -4,7 +4,7 @@ public import Mathlib.NumberTheory.JacobiSum.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 public import SKW.PRed2Mathlib.AddCharTrace
 public import SKW.Prereqs.ClassGroup
-public import SKW.Prereqs.ClassGroupCoprime
+public import SKW.PRed2Mathlib.ClassGroupCoprime
 public import SKW.Prereqs.CyclotomicField
 public import SKW.Prereqs.Digits
 public import SKW.Prereqs.IdealNorm
