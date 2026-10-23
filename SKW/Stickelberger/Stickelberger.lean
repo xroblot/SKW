@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.NumberTheory.JacobiSum.Basic
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 public import SKW.PRed2Mathlib.AddCharTrace
 public import SKW.Prereqs.ClassGroup
 public import SKW.Prereqs.ClassGroupCoprime
