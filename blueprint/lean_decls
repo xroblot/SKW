@@ -1,5 +1,4 @@
 Ideal.HasTeichmullerLift
-Ideal.HasTeichmullerLift.of_card_of_isPrime
 Stickelberger.hasTeichmullerLift
 MulChar.teichmuller
 MulChar.mk_teichmuller_apply

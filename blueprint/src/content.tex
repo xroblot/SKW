@@ -38,33 +38,18 @@ $f$, the residue field $\cO_K/P$ has $q$ elements.
 \end{definition}
 
 \begin{lemma}
-  \label{lem:hasTeichmullerLift_of_card}
-  \uses{def:hasTeichmullerLift}
-  \lean{Ideal.HasTeichmullerLift.of_card_of_isPrime}
-  \leanok
-  Let $R$ be a domain containing $n$ distinct $n$-th roots of unity and let $I$ be a prime ideal
-  of $R$ such that $(R/I)^\times$ has $n$ elements. Then $I$ has Teichmüller lifts of order $n$.
-\end{lemma}
-
-\begin{proof}
-  The integer $n$ is not in $I$: otherwise the characteristic $\ell$ of $R/I$ divides $n$, but
-  $(R/I)^\times$ is cyclic of order $n$ and no unit of a domain of characteristic $\ell$ has order
-  divisible by $\ell$. Since $n \notin I$, distinct $n$-th roots of unity stay distinct modulo
-  $I$, so the reduction map is injective, and it is bijective since both sides have $n$
-  elements.
-\end{proof}
-
-\begin{lemma}
   \label{lem:hasTeichmullerLift}
-  \uses{lem:hasTeichmullerLift_of_card}
+  \uses{def:hasTeichmullerLift}
   \lean{Stickelberger.hasTeichmullerLift}
   \leanok
   The ideal $P$ has Teichmüller lifts of order $q - 1$.
 \end{lemma}
 
 \begin{proof}
-  The ring $\cO_K$ contains a primitive $(q-1)$-th root of unity and $(\cO_K/P)^\times$ has
-  $q - 1$ elements, so this follows from \ref{lem:hasTeichmullerLift_of_card}.
+  \leanok
+  The ring $\cO_K$ contains $q - 1$ distinct $(q-1)$-th roots of unity, and the integer $q - 1$
+  is not in $P$. Hence these roots stay distinct modulo $P$, so the reduction map is injective,
+  and it is bijective since $(\cO_K/P)^\times$ has $q - 1$ elements.
 \end{proof}
 
 \begin{definition}
@@ -1008,6 +993,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
 \end{lemma}
 
 \begin{proof}
+  \leanok
   Choose a maximal ideal $\fP$ of $\cO_L$ above $\fp$ and let $P = \fP \cap \cO_K$. The ideal
   $P$ has Teichmüller lifts of order $q - 1$ by \ref{lem:hasTeichmullerLift}. Take $\Gamma$ as in
   \ref{lem:gauss_sum_power_in_cyclotomic}; then $\fp^{\Theta} = (\Gamma)$ by
@@ -1025,6 +1011,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
 \end{theorem}
 
 \begin{proof}
+  \leanok
   Let $f$ be the order of $p$ modulo $m$ and $q = p^f$. The field
   $L = \QQ(\zeta_{p(q-1)})$ contains a subfield $k_0 = \QQ(\zeta_m)$, and an isomorphism
   $k_0 \cong k$ commutes with the action of the $\sigma_a$. Apply
@@ -1059,6 +1046,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
 \end{corollary}
 
 \begin{proof}
+  \leanok
   By \ref{lem:class_coprime_rep}, choose an integral ideal $\mathfrak{b} \in c$ coprime to
   $2m$. Every prime factor of $\mathfrak{b}$ lies above an odd prime not dividing $m$, so
   \ref{thm:stickelberger} applied to each prime factor shows that $\mathfrak{b}^{\Theta}$ is
