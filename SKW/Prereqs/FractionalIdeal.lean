@@ -5,6 +5,8 @@ public import Mathlib.Algebra.Ring.Action.Group
 public import Mathlib.RingTheory.FractionalIdeal.Operations
 public import Mathlib.RingTheory.Localization.FractionRing
 
+public import SKW.Prereqs.Stickelberger
+
 set_option linter.style.header false
 
 @[expose] public section
@@ -25,6 +27,8 @@ available. For a tower of Galois extensions this class holds as an instance, so 
 argument is needed at the call site.
 -/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 namespace FractionalIdeal
 
 section General
@@ -209,3 +213,4 @@ theorem spanSingleton_smul (g : G) (x : FractionRing R) :
 end FractionRing
 
 end FractionalIdeal
+-/

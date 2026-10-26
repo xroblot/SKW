@@ -12,6 +12,7 @@ public import Mathlib.FieldTheory.IntermediateField.Algebraic
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.Torsion
 public import SKW.Prereqs.Subfield
+public import SKW.Prereqs.Stickelberger
 
 set_option linter.style.header false
 
@@ -155,6 +156,8 @@ theorem IsGaloisGroup.restrictHom_restrictScalars (τ : Gal(L/F)) :
 
 end restrictScalars
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 /-- `restrictHom` is `AlgEquiv.restrictNormal`. -/
 theorem IsGaloisGroup.restrictHom_eq_restrictNormal (K E L : Type*) [Field K] [Field E] [Field L]
     [Algebra K E] [Algebra K L] [Algebra E L] [IsScalarTower K E L] [FiniteDimensional K L]
@@ -164,7 +167,10 @@ theorem IsGaloisGroup.restrictHom_eq_restrictNormal (K E L : Type*) [Field K] [F
   apply (algebraMap E L).injective
   rw [← AlgEquiv.smul_def, IsGaloisGroup.algebraMap_restrictHom_smul, AlgEquiv.smul_def,
     AlgEquiv.restrictNormal_commutes]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 section restrictHom_eq
 
 variable (G G' A B C A' B' C' : Type*) [Group G] [Group G'] [Finite G] [Finite G']
@@ -193,7 +199,10 @@ theorem IsGaloisGroup.restrictHom_eq_restrictHom :
     IsGaloisGroup.algebraMap_restrictHom_smul, ← IsScalarTower.algebraMap_apply B B' C']
 
 end restrictHom_eq
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 open Module in
 lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Field E] [Algebra F E]
     (K L : IntermediateField F E) [IsGalois F K] [FiniteDimensional F K] [FiniteDimensional F L]
@@ -201,7 +210,10 @@ lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Fi
     finrank K ↑(K ⊔ L) = finrank F L := by
   rw [← mul_right_inj', ← (LinearDisjoint.of_inf_eq_bot hinf).finrank_sup, finrank_mul_finrank]
   exact finrank_pos.ne'
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 set_option maxHeartbeats 500000 in
 -- reason for change
 set_option synthInstance.maxHeartbeats 100000 in
@@ -248,6 +260,7 @@ theorem IntermediateField.finrank_sup_mul_finrank_inf_eq {k L : Type*} [Field k]
     _ = finrank ↑(E ⊓ F) E * finrank ↑(E ⊓ F) F := by rw [f'.toLinearEquiv.finrank_eq]
   · rw [LinearEquiv.finrank_eq (M := ↑(E ⊔ F)) (N := ↑(E' ⊔ F'))]
     exact (LinearEquiv.refl ↑(E ⊓ F) ↑(E ⊔ F)).trans h.symm
+-/
 
 universe u
 

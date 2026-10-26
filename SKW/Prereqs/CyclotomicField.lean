@@ -14,10 +14,13 @@ set_option linter.style.header false
 
 @[expose] public section
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem IsPrimitiveRoot.isIntegral' {n : ℕ} {K L : Type*} [CommRing K] [CommRing L] [Algebra K L]
     {μ : L} (h : IsPrimitiveRoot μ n) (hpos : 0 < n) :
     IsIntegral K μ :=
   IsIntegral.tower_top (h.isIntegral hpos)
+-/
 
 /-- Companion to `orderOf_pow'`: if every prime factor of `m` divides `orderOf (y ^ m)`, then
 `orderOf y = m * orderOf (y ^ m)`. -/
@@ -44,6 +47,8 @@ theorem IsPrimitiveRoot.of_pow_eq {M : Type*} [CommMonoid M] {ζ y : M} {m n : �
 
 /-! ### IsCyclotomicExtension -/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 open IntermediateField in
 /-- `E⟮ζ⟯` is a cyclotomic extension of `E` for `ζ` a primitive `n`-th root of unity.
 
@@ -54,12 +59,15 @@ theorem IsPrimitiveRoot.adjoinSimple_isCyclotomicExtension (n : ℕ) [NeZero n] 
     [Field E] [Field F] [Algebra E F] {ζ : F} (hζ : IsPrimitiveRoot ζ n) :
     IsCyclotomicExtension {n} E E⟮ζ⟯ :=
   (isCyclotomicExtension_singleton_iff_eq_adjoin n E F E⟮ζ⟯ hζ).mpr rfl
+-/
 
 theorem IsCyclotomicExtension.primitiveRoots_nonempty (n : ℕ) [NeZero n] (A B : Type*) [CommRing A]
     [CommRing B] [IsDomain B] [Algebra A B] [hC : IsCyclotomicExtension {n} A B] :
     (primitiveRoots n B).Nonempty :=
   ⟨hC.zeta, (mem_primitiveRoots (NeZero.pos n)).mpr hC.zeta_spec⟩
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 open NumberField in
 theorem IsCyclotomicExtension.Rat.discr_coprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂] (K₁ K₂ : Type*)
     [Field K₁] [Field K₂] [NumberField K₁] [NumberField K₂] [IsCyclotomicExtension {n₁} ℚ K₁]
@@ -70,13 +78,19 @@ theorem IsCyclotomicExtension.Rat.discr_coprime (n₁ n₂ : ℕ) [NeZero n₁] 
   refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos
     _))
   exact Nat.Coprime.pow_left _ (Nat.Coprime.pow_right _ h)
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem IntermediateField.linearDisjoint_iff'' {F E : Type*} [Field F] [Field E] [Algebra F E]
     (A : IntermediateField F E) (L : Type*) [Field L] [Algebra F L] [Algebra L E]
     [IsScalarTower F L E] :
     A.LinearDisjoint L ↔ A.LinearDisjoint (IsScalarTower.toAlgHom F L E).fieldRange := by
   rw [linearDisjoint_iff', AlgHom.fieldRange_toSubalgebra]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂]
     {E : Type*} [Field E] [NumberField E] (K₁ : IntermediateField ℚ E) [NumberField K₁] (K₂ : Type*)
     [Field K₂] [NumberField K₂] [Algebra K₂ E] [IsCyclotomicExtension {n₁} ℚ K₁]
@@ -87,6 +101,7 @@ theorem IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime (n₁ n₂ : ℕ) [Ne
   have : IsGalois ℚ K₁ := IsCyclotomicExtension.isGalois {n₁} ℚ K₁
   rw [IntermediateField.linearDisjoint_iff'']
   exact NumberField.linearDisjoint_of_isGalois_isCoprime_discr E _ _ <| discr_coprime n₁ n₂ K₁ _ h
+-/
 
 theorem IsCyclotomicExtension.finset_lcm_sup {A B : Type*} [CommRing A] [CommRing B] [Algebra A B]
     [IsDomain B] {ι : Type*} (n : ι → ℕ) (C : ι → Subalgebra A B) (s : Finset ι) (hs : s.Nonempty)
@@ -109,6 +124,8 @@ theorem IsCyclotomicExtension.finset_lcm_sup {A B : Type*} [CommRing A] [CommRin
 
 open IntermediateField
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 set_option backward.isDefEq.respectTransparency false in
 theorem IsCyclotomicExtension.Rat.gcd_inf {K : Type*} [Field K] [NumberField K]
     (n₁ n₂ : ℕ) (F₁ F₂ : IntermediateField ℚ K) [h₁ : IsCyclotomicExtension {n₁} ℚ F₁]
@@ -144,9 +161,12 @@ theorem IsCyclotomicExtension.Rat.gcd_inf {K : Type*} [Field K] [NumberField K]
       ht⟩ := hζ₂.eq_pow_of_pow_eq_one <| (hζ.pow_eq_one_iff_dvd n₂).mpr (n₁.gcd_dvd_right n₂)
       rw [← ht]
       exact pow_mem (mem_adjoin_simple_self ℚ _) t
+-/
 
 open IsCyclotomicExtension.Rat NumberField
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_apply {E F : Type*} [Field E] [Field F]
     [NumberField E] [NumberField F] {n : ℕ} [NeZero n] [hE : IsCyclotomicExtension {n} ℚ E]
     [hF : IsCyclotomicExtension {n} ℚ F] (f : E →+* F) (a : (ZMod n)ˣ) (x : E) :
@@ -161,13 +181,19 @@ theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_apply {E F : Type*} [Fiel
   rw [galEquivZMod_apply_of_pow_eq n _ _ hζp,
     galEquivZMod_apply_of_pow_eq n _ _ (by rw [← map_pow, hζp, map_one]), map_pow,
     MulEquiv.apply_symm_apply, MulEquiv.apply_symm_apply]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 @[simp]
 theorem IsFractionRing.map_apply_algebraMap {A B K L : Type*} [CommRing A] [CommRing B] [IsDomain B]
     [CommRing K] [Algebra A K] [IsFractionRing A K] [CommRing L] [Algebra B L] [IsFractionRing B L]
     {j : A →+* B} (hj : Function.Injective j) (x : A) :
     IsFractionRing.map hj (algebraMap A K x) = algebraMap B L (j x) := by simp [map]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_smul {E F : Type*} [Field E] [Field F]
     [NumberField E] [NumberField F] {n : ℕ} [NeZero n]
     [hE : IsCyclotomicExtension {n} ℚ E] [hF : IsCyclotomicExtension {n} ℚ F]
@@ -177,6 +203,7 @@ theorem IsCyclotomicExtension.Rat.ringHom_galEquivZMod_smul {E F : Type*} [Field
   rw [← IsFractionRing.map_apply_algebraMap (K := E) hf]
   have := ringHom_galEquivZMod_apply (F := F) (IsFractionRing.map hf) a (algebraMap (𝓞 E) E x)
   rwa [IsFractionRing.map_apply_algebraMap] at this
+-/
 
 /-- The automorphism of `ℚ(ζ_n)` corresponding to `a ∈ (ℤ/nℤ)ˣ` under `galEquivZMod` acts on every
 `n`-th root of unity as raising to the `z`-th power, for any integer `z` representing `a`. -/

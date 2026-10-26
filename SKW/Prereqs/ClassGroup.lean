@@ -3,6 +3,7 @@ module
 public import Mathlib.RingTheory.ClassGroup.Basic
 public import Mathlib.RingTheory.Ideal.Pointwise
 public import SKW.Prereqs.FractionalIdeal
+public import SKW.Prereqs.Stickelberger
 
 set_option linter.style.header false
 
@@ -23,6 +24,8 @@ quotient. With this definition `g • [u] = [g • u]` holds essentially definit
 (`ClassGroup.smul_mk0`) follows.
 -/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 namespace ClassGroup
 
 open FractionalIdeal
@@ -78,5 +81,6 @@ example (g : G) (c : ClassGroup R) : g • c = mapAut g c := by
   with_reducible_and_instances rfl
 
 end ClassGroup
+-/
 
 end

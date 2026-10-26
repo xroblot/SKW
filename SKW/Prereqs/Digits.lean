@@ -3,12 +3,16 @@ module
 public import Mathlib.Data.List.Indexes
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 
+public import SKW.Prereqs.Stickelberger
+
 set_option linter.style.header false
 
 @[expose] public section
 
 /-! ### List / Nat.digits -/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem Nat.digits_base_pow_sub_one {b : ℕ} (hb : 1 < b) (l : ℕ) :
     b.digits (b ^ l - 1) = List.replicate l (b - 1) := by
   suffices b ^ l - 1 = Nat.ofDigits b (List.replicate l (b - 1)) by
@@ -19,14 +23,20 @@ theorem Nat.digits_base_pow_sub_one {b : ℕ} (hb : 1 < b) (l : ℕ) :
         rw [List.replicate_succ, Nat.ofDigits_cons, ← hl, add_comm (b - 1), Nat.mul_sub, mul_one,
           ← Nat.pow_succ', ← Nat.add_sub_assoc hb.le,
           Nat.sub_add_cancel (Nat.le_self_pow l.succ_ne_zero b)]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem Nat.digits_eq_replicate_base_sub_one_iff {b : ℕ} (hb : 1 < b) {n k : ℕ} :
     b.digits n = List.replicate k (b - 1) ↔ n = b ^ k - 1 := by
   refine ⟨?_, fun h ↦ by rw [h, digits_base_pow_sub_one hb]⟩
   intro h
   have := congr_arg (Nat.ofDigits b) h
   rwa [ofDigits_digits, ← digits_base_pow_sub_one hb, ofDigits_digits] at this
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem Nat.ofDigits_eq_base_pow_length_sub_one_iff {b : ℕ} {L : List ℕ} (hb : 1 < b)
     (hL : ∀ x ∈ L, x < b) :
     ofDigits b L = b ^ L.length - 1 ↔ L = List.replicate L.length (b - 1) := by
@@ -36,17 +46,23 @@ theorem Nat.ofDigits_eq_base_pow_length_sub_one_iff {b : ℕ} {L : List ℕ} (hb
       (digits_eq_replicate_base_sub_one_iff hb).mpr h,  List.length_replicate]
     rw [h, digits_base_pow_sub_one hb, List.length_replicate]
   · rw [← ofDigits_digits b (b ^ L.length - 1), digits_base_pow_sub_one hb L.length, ← h]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem Nat.ofDigits_eq_sum (b : ℕ) (L : List ℕ) :
     ofDigits b L = ∑ i : Fin L.length, L[i] * b ^ (i : ℕ) := by
   rw [Nat.ofDigits_eq_sum_mapIdx]
   simp [List.mapIdx_eq_zipIdx_map, ← Fin.sum_univ_fun_getElem,
     ← Fin.sum_congr' _ List.length_zipIdx.symm]
+-/
 
 theorem Nat.eq_sum_digits_mul_pow (b n : ℕ) :
     n = ∑ i : Fin (b.digits n).length, (b.digits n)[i] * b ^ i.val :=
   (ofDigits_digits b n).symm.trans (ofDigits_eq_sum b _)
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 /- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 TODO, CHANGE BACK WHEN UPSTREAMING to `Mathlib/Data/Nat/Digits/Lemmas.lean`: there `digitsAppend`
 is visible, and the intended proof of `Nat.ofDigits_digitsAppend` is
@@ -56,6 +72,7 @@ here (it replaces the stub `Nat.digitsAppend_def`, whose `sorry` leaked into the
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -/
 theorem Nat.ofDigits_digitsAppend (b l n : ℕ) : ofDigits b (digitsAppend b l n) = n := by
   rw [ofDigits_eq_sum_mapIdx, mapIdx_digitsAppend_sum_eq]
+-/
 
 theorem Nat.eq_sum_digitsAppend_mul_pow {b n : ℕ} (l : ℕ) (hb : 1 < b) (hn : n < b ^ l) :
     haveI : (b.digitsAppend l n).length = l := length_digitsAppend hb l hn
@@ -64,6 +81,8 @@ theorem Nat.eq_sum_digitsAppend_mul_pow {b n : ℕ} (l : ℕ) (hb : 1 < b) (hn :
   rw [ofDigits_eq_sum, ← Fin.sum_congr' _ (length_digitsAppend hb l hn)]
   rfl
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 /-- Multiplying by `b` modulo `b ^ L.length - 1` rotates the digits of `L` to the right by one
 place. -/
 theorem Nat.ofDigits_mul_modEq {b : ℕ} (hb : 0 < b) (L : List ℕ) :
@@ -76,7 +95,10 @@ theorem Nat.ofDigits_mul_modEq {b : ℕ} (hb : 0 < b) (L : List ℕ) :
     ← Nat.sub_add_cancel (by grind : 1 ≤ b ^ L'.length.succ), add_mul, one_mul, ← add_assoc,
     ← add_rotate]
   exact add_modulus_mul_modEq_iff.mpr rfl
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 /-- Multiplying by `b ^ i` modulo `b ^ L.length - 1` rotates the digits of `L` to the right by `i`
 places. -/
 theorem Nat.ofDigits_mul_pow_modEq {b : ℕ} (hb : 0 < b) (L : List ℕ) {i : ℕ} (hi : i ≤ L.length) :
@@ -89,13 +111,19 @@ theorem Nat.ofDigits_mul_pow_modEq {b : ℕ} (hb : 0 < b) (L : List ℕ) {i : �
     rwa [← mul_assoc, ← pow_succ', List.rotate_rotate, tsub_add_eq_add_tsub (by lia),
       add_tsub_assoc_of_le (by lia), ← List.rotate_rotate, List.rotate_length,
       ← tsub_add_eq_tsub_tsub_swap] at h
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem List.sum_getElem_rotate {R : Type*} [AddCommMonoid R] (L : List R) (x : Fin L.length) :
     ∑ i : Fin L.length, (L.rotate i)[x] = L.sum := by
   have : NeZero L.length := Fin.neZero x
   rw [← (Equiv.sum_comp (Equiv.addLeft x) fun i ↦ L[i]).trans (Fin.sum_univ_getElem L)]
   simp [Fin.val_add, List.getElem_rotate]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 /-- Adding up all the rotations of `L` puts each digit once in each position. -/
 theorem Nat.sum_ofDigits_rotate (b : ℕ) (L : List ℕ) :
     ∑ i ∈ Finset.range L.length, Nat.ofDigits b (L.rotate i) =
@@ -105,7 +133,10 @@ theorem Nat.sum_ofDigits_rotate (b : ℕ) (L : List ℕ) :
   rw [Finset.sum_comm]
   simp_rw [← Finset.sum_mul, Finset.sum_range, ← Fin.getElem_fin,  List.sum_getElem_rotate,
     Finset.mul_sum]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 /-- If the digits of `L` are not all equal to `b - 1`, the same holds for any rotation of `L`. -/
 theorem Nat.ofDigits_rotate_lt {b : ℕ} {L : List ℕ} (hb : 1 < b) (hL : ∀ x ∈ L, x < b)
     (hx : ofDigits b L < b ^ L.length - 1) (n : ℕ) :
@@ -120,7 +151,10 @@ theorem Nat.ofDigits_rotate_lt {b : ℕ} {L : List ℕ} (hb : 1 < b) (hL : ∀ x
     List.length_rotate, (LE.le.ge_iff_eq hx).mp]
   exact le_sub_one_of_lt <|
     List.length_rotate _ _ ▸ ofDigits_lt_base_pow_length hb (by simpa [List.mem_rotate])
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem Nat.sub_one_mul_sum_mod_eq {b l x : ℕ} (hb : 1 < b) (hx : x < b ^ l - 1) :
     (b - 1) * ∑ i ∈ Finset.range l, x * b ^ i % (b ^ l - 1) =
       (b ^ l - 1) * (Nat.digits b x).sum := by
@@ -143,6 +177,7 @@ theorem Nat.sub_one_mul_sum_mod_eq {b l x : ℕ} (hb : 1 < b) (hx : x < b ^ l - 
       rw [← sum_ofDigits_rotate, mul_comm, hl]
     _ = (b ^ l - 1) * (b.digits x).sum := by
       rw [digitsAppend_sum_eq_digits_sum, mul_assoc, geom_sum_mul_of_one_le hb.le, hl, mul_comm]
+-/
 
 theorem Nat.sub_one_mul_sum_fract_div_eq_digits_sum {b l a : ℕ} (hb : 1 < b) [NeZero l]
     (ha : a ≤ b ^ l - 2) :

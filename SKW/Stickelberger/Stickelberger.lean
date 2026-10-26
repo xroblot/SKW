@@ -2,15 +2,18 @@ module
 
 public import Mathlib.NumberTheory.JacobiSum.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
+public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+
 public import SKW.PRed2Mathlib.AddCharTrace
-public import SKW.Prereqs.ClassGroup
 public import SKW.PRed2Mathlib.ClassGroupCoprime
-public import SKW.Prereqs.CyclotomicField
-public import SKW.Prereqs.Digits
-public import SKW.Prereqs.IdealNorm
-public import SKW.Prereqs.Ideals
-public import SKW.Prereqs.MulChars
+public import SKW.PRed2Mathlib.CyclotomicField
+
 public import SKW.Stickelberger.Teichmuller
+
+public import SKW.Prereqs.Stickelberger
+
+-- public import SKW.Prereqs.ClassGroup
 
 set_option linter.style.header false
 

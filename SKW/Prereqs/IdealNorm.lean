@@ -17,6 +17,8 @@ For an order `S` in a number field (`IsDedekindDomain S`, finite free over `ℤ`
   then `absNorm I` is coprime to `n`.
 -/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 namespace Ideal
 
 variable {S : Type*} [CommRing S] [IsDedekindDomain S] [Module.Free ℤ S]
@@ -46,3 +48,4 @@ theorem coprime_absNorm_of_isCoprime_span {n : ℕ} {I : Ideal S}
   exact mul_mem_right c P hpP
 
 end Ideal
+-/

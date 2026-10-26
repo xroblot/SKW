@@ -3,6 +3,8 @@ module
 public import Mathlib.NumberTheory.MulChar.Basic
 public import Mathlib.NumberTheory.GaussSum
 
+public import SKW.Prereqs.Stickelberger
+
 set_option linter.style.header false
 
 
@@ -23,6 +25,8 @@ theorem MonoidHom.compAddChar_eq_one_iff {A M : Type*} [AddMonoid A] [Monoid M] 
 
 /-! ### MulChar -/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 -- TODO(SKW): upstream both into `Mathlib/NumberTheory/MulChar/Basic.lean`, next to
 -- `MulChar.apply_ne_zero_iff`, which is the same statement with `≠ 0` in place of `IsUnit`;
 -- Mathlib currently writes `ha.isUnit.map χ` by hand, as in `MulChar/Lemmas.lean:186`.
@@ -31,7 +35,10 @@ theorem MulChar.isUnit_apply {R R' : Type*} [CommMonoidWithZero R] [CommMonoidWi
     (χ : MulChar R R') {a : R} (ha : IsUnit a) :
     IsUnit (χ a) :=
   ha.map χ
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 /-- A value of a multiplicative character is a unit precisely at a unit. -/
 @[simp]
 theorem MulChar.isUnit_apply_iff {R R' : Type*} [CommMonoidWithZero R] [CommMonoidWithZero R']
@@ -41,3 +48,4 @@ theorem MulChar.isUnit_apply_iff {R R' : Type*} [CommMonoidWithZero R] [CommMono
   contrapose h
   rw [map_nonunit χ h]
   exact not_isUnit_zero
+-/

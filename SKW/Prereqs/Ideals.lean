@@ -8,6 +8,8 @@ public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 
 public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
 
+public import SKW.Prereqs.Stickelberger
+
 set_option linter.style.header false
 
 @[expose] public section
@@ -69,6 +71,8 @@ instance (K : Type*) [Field K] [NumberField K] :
 
 /-! ### Ideal — LiesOver / ramification -/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 -- TODO(SKW): convert to the unprimed `Ideal.ramificationIdx` once Mathlib has an unprimed
 -- `le_comap_pow_ramificationIdx`. The name is currently taken by a deprecated alias for the primed
 -- lemma, and converting here without it would force Dedekind hypotheses on an otherwise
@@ -82,7 +86,10 @@ theorem Ideal.pow_liesOver_of_liesOver {R S : Type*} [CommRing R] [CommRing S] [
   · exact le_trans le_comap_pow_ramificationIdx' <| comap_mono (pow_le_pow_right hi)
   · refine le_trans (comap_mono <| pow_le_pow_right (Nat.le_add_left 1 i)) ?_
     rw [pow_one, ← Ideal.under_def, ← Ideal.over_def P p]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 instance Ideal.Quotient.isScalarTower_of_liesOver_liesOver {A B C : Type*} [CommRing A] [CommRing B]
     [CommRing C] [Algebra A B] [Algebra A C] [Algebra B C] [IsScalarTower A B C] (Q : Ideal C)
     (P : Ideal B) (p : Ideal A) [Q.LiesOver P] [P.LiesOver p] [Q.LiesOver p] :
@@ -90,7 +97,10 @@ instance Ideal.Quotient.isScalarTower_of_liesOver_liesOver {A B C : Type*} [Comm
   refine IsScalarTower.of_algebraMap_eq fun x ↦ Quotient.inductionOn' x fun x ↦ ?_
   have : Quotient.mk'' x = Ideal.Quotient.mk p x := rfl
   simp [this, Ideal.Quotient.algebraMap_mk_of_liesOver, ← IsScalarTower.algebraMap_apply]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDedekindDomain R]
     [Infinite R] [Algebra.IsIntegral ℤ R] (I : Ideal R) [I.IsPrime] {p k : ℕ}
     [hp : Fact (Nat.Prime p)] (hI : Ideal.absNorm I ∣ p ^ k) :
@@ -102,6 +112,7 @@ theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDede
   have := (Int.absNorm_under_dvd_absNorm I).trans hI
   rw [Ideal.liesOver_iff, ← Nat.prime_eq_prime_of_dvd_pow (Nat.absNorm_under_prime I)
     hp.out this, Int.ideal_span_absNorm_eq_self]
+-/
 
 theorem Algebra.not_isUnramifiedAt_iff {R S : Type*} [CommRing R] [CommRing S]
     [Algebra R S] {p : Ideal S} [p.IsPrime] [IsNoetherianRing R] [Module.Finite R S]
@@ -121,10 +132,13 @@ theorem Ideal.emultiplicity_top {R : Type*} [CommSemiring R] {I : Ideal R} (hI :
     emultiplicity I ⊤ = 0 := by
   rw [← one_eq_top, emultiplicity_of_one_right (by rwa [Ideal.isUnit_iff])]
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem Ideal.IsDedekindDomain.prime_of_maximal {R : Type*} [CommRing R] [CharZero R]
     [Algebra.IsIntegral ℤ R] [IsDedekindDomain R] (I : Ideal R) [I.IsMaximal] :
     Prime I := by
   refine (prime_iff_isPrime (IsMaximal.ne_bot_of_isIntegral_int I)).mpr <| IsMaximal.isPrime' I
+-/
 
 -- Replace Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul?
 -- TODO(SKW): the statement is already unprimed, but the proof bridges back to the primed index
@@ -207,6 +221,8 @@ namespace Ideal
 variable {R : Type*} (A : Type*) (B : Type*) [CommSemiring R] [CommSemiring A] [CommSemiring B]
   [Algebra R A] [Algebra A B] [Algebra R B] [IsScalarTower R A B] (p : Ideal R)
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 /-- In a tower `A/B/R`, the primes of `B` over `p` correspond to the pairs `(P, 𝔓)` with `P` a
 prime of `A` over `p` and `𝔓` a prime of `B` over `P`. -/
 def equivPrimesOverPrimesOver : p.primesOver B ≃ Σ P : p.primesOver A, P.1.primesOver B where
@@ -215,6 +231,7 @@ def equivPrimesOverPrimesOver : p.primesOver B ≃ Σ P : p.primesOver A, P.1.pr
     have := LiesOver.trans P.2.1 P.1.1 p
     primesOver.mk p P.2.1
   right_inv P := Sigma.subtype_ext (Subtype.ext (over_def P.2.1 P.1.1).symm) rfl
+-/
 
 @[simp]
 theorem coe_fst_equivPrimesOverPrimesOver_apply (𝔓 : p.primesOver B) :
@@ -226,9 +243,12 @@ theorem coe_snd_equivPrimesOverPrimesOver_apply (𝔓 : p.primesOver B) :
     ((equivPrimesOverPrimesOver A B p 𝔓).2 : Ideal B) = 𝔓 :=
   rfl
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 @[simp]
 theorem coe_equivPrimesOverPrimesOver_symm_apply (x : Σ P : p.primesOver A, P.1.primesOver B) :
     ((equivPrimesOverPrimesOver A B p).symm x : Ideal B) = x.2 :=
   rfl
+-/
 
 end Ideal
