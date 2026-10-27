@@ -6,7 +6,6 @@ public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 
 public import SKW.PRed2Mathlib.AddCharTrace
-public import SKW.PRed2Mathlib.ClassGroupCoprime
 public import SKW.PRed2Mathlib.CyclotomicField
 
 public import SKW.Stickelberger.Teichmuller
