@@ -41,6 +41,13 @@ theorem pow_add (m : M) (θ θ' : MonoidAlgebra ℕ G) : m ^ (θ + θ') = m ^ θ
   simp_rw [pow_def, coeff_add]
   exact Finsupp.prod_add_index' (fun _ ↦ _root_.pow_zero _) fun _ ↦ _root_.pow_add _
 
+theorem pow_sum {ι : Type*} (m : M) (s : Finset ι) (θ : ι → MonoidAlgebra ℕ G) :
+    m ^ (∑ i ∈ s, θ i) = ∏ i ∈ s, m ^ θ i := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert i s hi ih => rw [Finset.sum_insert hi, Finset.prod_insert hi, pow_add, ih]
+
 theorem pow_nsmul (m : M) (n : ℕ) (θ : MonoidAlgebra ℕ G) : m ^ (n • θ) = (m ^ θ) ^ n := by
   induction n with
   | zero => simp

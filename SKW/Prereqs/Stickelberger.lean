@@ -155,6 +155,7 @@ theorem IntermediateField.finrank_sup_mul_finrank_inf_eq {k L : Type*} [Field k]
   · rw [LinearEquiv.finrank_eq (M := ↑(E ⊔ F)) (N := ↑(E' ⊔ F'))]
     exact (LinearEquiv.refl ↑(E ⊓ F) ↑(E ⊔ F)).trans h.symm
 
+/-- Euler's totient function as an arithmetic function with values in `ℤ`. -/
 @[expose] def ArithmeticFunction.totient : ArithmeticFunction ℤ where
   toFun n := Nat.totient n
   map_zero' := by simp

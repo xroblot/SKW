@@ -11,6 +11,7 @@ public import SKW.PRed2Mathlib.CyclotomicField
 
 public import SKW.Stickelberger.Teichmuller
 
+public import SKW.Prereqs.GroupRingAction
 public import SKW.Prereqs.Stickelberger
 
 -- public import SKW.Prereqs.ClassGroup
@@ -1256,5 +1257,18 @@ theorem stickelberger_theorem (k : Type*) [Field k] [NumberField k] (m : ℕ) [N
     smul_pow', mem_isPrincipalSubmonoid_iff]
   exact isPrincipal_prod_smul_pow_of_coprime p k m 𝔭 <|
     (Nat.Coprime.of_dvd_left h₂ h₁).of_dvd_right (dvd_mul_left m 2)
+
+/-- The Stickelberger element `θ = ∑ a • σₐ⁻¹ ∈ ℕ[Gal(k/ℚ)]`, where `σₐ` sends `ζ` to `ζ ^ a` and
+`a` runs over the representatives in `[0, m)` of the units of `ZMod m`. -/
+def stickelbergerElement (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero m]
+    [IsCyclotomicExtension {m} ℚ k] : MonoidAlgebra ℕ Gal(k/ℚ) :=
+  ∑ a : (ZMod m)ˣ, MonoidAlgebra.single ((galEquivZMod m k).symm a)⁻¹ a.val.val
+
+/-- The Stickelberger element annihilates the class group. -/
+theorem pow_stickelbergerElement_eq_one (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero m]
+    [IsCyclotomicExtension {m} ℚ k] (C : ClassGroup (𝓞 k)) :
+    C ^ stickelbergerElement k m = 1 := by
+  simp_rw [stickelbergerElement, MonoidAlgebra.pow_sum, MonoidAlgebra.pow_single]
+  exact stickelberger_theorem k m C
 
 end Stickelberger
