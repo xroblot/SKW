@@ -201,7 +201,7 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
   let E := ℚ⟮ξ q⟯
   have : NeZero q := ⟨hq.ne_zero⟩
   have hEcyc : IsCyclotomicExtension {q} ℚ E :=
-    (hξ q).adjoinSimple_isCyclotomicExtension q ℚ A
+    (hξ q).intermediateField_adjoin_isCyclotomicExtension' ℚ
   have : NumberField E := IsCyclotomicExtension.numberField {q} ℚ E
   let L := ↑(K ⊔ E)
   let 𝔮 : Ideal ℤ := span {(q : ℤ)}
@@ -318,10 +318,10 @@ lemma kw_reduce_to_unramified_outside_p_aux {A : Type*} [Field A] [CharZero A] (
           have : NeZero (n.lcm r) := ⟨Nat.lcm_ne_zero (NeZero.ne _) (NeZero.ne _)⟩
           refine ⟨F, ‹_›, ‹_›, ‹_›, hF₁, fun q hq hqp ↦  hF₂ q hq hqp, n.lcm r, NeZero.pos _, ?_⟩
           have : ℚ⟮ξ (n.lcm r)⟯ = ℚ⟮ξ n⟯ ⊔ ℚ⟮ξ r⟯ := by
-            have := (hξ n).adjoinSimple_isCyclotomicExtension n ℚ A
-            have := (hξ r).adjoinSimple_isCyclotomicExtension r ℚ A
+            have := (hξ n).intermediateField_adjoin_isCyclotomicExtension' ℚ
+            have := (hξ r).intermediateField_adjoin_isCyclotomicExtension' ℚ
             have := isCyclotomicExtension_lcm_sup ℚ A n r ℚ⟮ξ n⟯ ℚ⟮ξ r⟯
-            have := (hξ (n.lcm r)).adjoinSimple_isCyclotomicExtension (n.lcm r) ℚ A
+            have := (hξ (n.lcm r)).intermediateField_adjoin_isCyclotomicExtension' ℚ
             exact IntermediateField.isCyclotomicExtension_eq {n.lcm r} ℚ A _ _
           rw [this, ← sup_assoc, sup_right_comm, hE₄, sup_right_comm, hF₃, sup_assoc]
       · refine ih K hK fun q hq₁ hq₂ hq₃ ↦ hram _ hq₁ hq₂ ?_

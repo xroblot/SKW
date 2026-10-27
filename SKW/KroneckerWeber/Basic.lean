@@ -209,7 +209,7 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
     p ∣ multiplicity 𝔮 (span {μ}) := by
   let q := absNorm (under ℤ 𝔮)
   have : 𝔮.LiesOver (span {(q : ℤ)}) := Int.liesOver_span_absNorm 𝔮
-  have h𝔮 : Prime 𝔮 := IsDedekindDomain.prime_of_maximal 𝔮
+  have h𝔮 : Prime 𝔮 := prime_of_isMaximal 𝔮
   have hq : Fact q.Prime := ⟨Nat.absNorm_under_prime 𝔮⟩
   by_cases hqp : q = p
   · obtain ⟨σ, hσ, hσ'⟩ : ∃ σ : Gal(F/ℚ), σ • 𝔮 = 𝔮 ∧ σ ≠ 1 := by
@@ -224,7 +224,7 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
     exact kw_split_prime p F hrF hμ hIrr h𝔮 hσ' hσ
   · obtain ⟨𝔔, _, _⟩  := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔮
     have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
-    have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
+    have h𝔔 : Prime 𝔔 := prime_of_isMaximal 𝔔
     have h𝔔' : 𝔔.ramificationIdx (𝓞 F) = 1 := by
       have hram : 𝔔.ramificationIdx ℤ = 1 :=
         (hLRam q hq.out hqp).ramificationIdx_eq_one ‹𝔔.LiesOver (span {(q : ℤ)})›
@@ -526,7 +526,7 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
     p ∣ multiplicity 𝔮 (span {μ}) := by
   let q := absNorm (under ℤ 𝔮)
   have : 𝔮.LiesOver (span {(q : ℤ)}) := Int.liesOver_span_absNorm 𝔮
-  have h𝔮 : Prime 𝔮 := IsDedekindDomain.prime_of_maximal 𝔮
+  have h𝔮 : Prime 𝔮 := prime_of_isMaximal 𝔮
   have hq : Fact q.Prime := ⟨Nat.absNorm_under_prime 𝔮⟩
   by_cases hqp : q = p
   · obtain ⟨σ, hσ, hσ'⟩ : ∃ σ : Gal(F/ℚ), σ • 𝔮 = 𝔮 ∧ σ ≠ 1 := by
@@ -541,7 +541,7 @@ lemma kw_mu_val_p (𝔮 : Ideal (𝓞 F)) [𝔮.IsMaximal] (hLRam : UnramifiedOu
     exact kw_split_prime p F hrF hμ hIrr h𝔮 hσ' hσ
   · obtain ⟨𝔔, _, _⟩  := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := 𝓞 L) 𝔮
     have : 𝔔.LiesOver (span {(q : ℤ)}) := LiesOver.trans 𝔔 𝔮 _
-    have h𝔔 : Prime 𝔔 := IsDedekindDomain.prime_of_maximal 𝔔
+    have h𝔔 : Prime 𝔔 := prime_of_isMaximal 𝔔
     have h𝔔' : 𝔮.ramificationIdx 𝔔 = 1 := by
       have hram : (span {(q : ℤ)}).ramificationIdx 𝔔 = 1 := by
         rw [Ideal.ramificationIdx_eq_ramificationIdx _ _ (by simpa using hq.out.ne_zero)]

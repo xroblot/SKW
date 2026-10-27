@@ -289,7 +289,7 @@ theorem mk_sq_gaussSum_eq [CharP (𝓞 K ⧸ P) p] [IsCyclotomicExtension {n} �
   have : NeZero P := ⟨Ideal.ne_bot_of_liesOver_of_ne_bot (p := 𝒑) (by simpa using NeZero.ne p) _⟩
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
   have : (𝓟 ^ 2).LiesOver P := by
-    refine pow_liesOver_of_liesOver P 𝓟 ?_
+    refine pow_liesOver_of_le_ramificationIdx P 𝓟 ?_
     rw [Ideal.ramificationIdx'_eq_ramificationIdx _ _ (NeZero.ne P)]
     exact h𝓟
   have : (𝓟 ^ 2).LiesOver 𝒑 := LiesOver.trans (𝓟 ^ 2) P 𝒑
@@ -341,7 +341,7 @@ def galFEquiv : Gal(L/F) ≃* (ZMod n)ˣ :=
       isCyclotomicExtension_eq {p * n} ℚ L _ _,
     restrictRestrictAlgEquivMapHom_surjective _ _ <|
       LinearDisjoint.inf_eq_bot <|
-        IsCyclotomicExtension.Rat.linearDisjoint_ofCoprime n p K F hn.out⟩ |>.trans <|
+        IsCyclotomicExtension.Rat.linearDisjoint_of_coprime n p K F hn.out⟩ |>.trans <|
    IsCyclotomicExtension.Rat.galEquivZMod n K
 
 theorem galFEquiv_eq [Normal ℚ K] (σ : Gal(L/F)) :
@@ -411,14 +411,14 @@ variable [Fact p.Prime] [P.IsMaximal] [P.LiesOver (span {(p : ℤ)})] [CharP (�
 
 theorem finiteMultiplicity_gaussSum {a : ℤ} :
     FiniteMultiplicity 𝓟 (span {𝓖 n P hζ a}) :=
-  FiniteMultiplicity.of_prime_left (prime_of_maximal 𝓟) <| by simpa using gaussSum_ne_zero _
+  FiniteMultiplicity.of_prime_left (prime_of_isMaximal 𝓟) <| by simpa using gaussSum_ne_zero _
 
 variable (hζ)
 
 include hζ in
 theorem finiteMultiplicity_jacobiSum {a b : ℤ} (h : ¬ (n : ℤ) ∣ a + b) :
     FiniteMultiplicity 𝓟 (span {algebraMap (𝓞 K) (𝓞 L) (𝓙 n P a b)}) :=
-  FiniteMultiplicity.of_prime_left (prime_of_maximal 𝓟) <| by
+  FiniteMultiplicity.of_prime_left (prime_of_isMaximal 𝓟) <| by
     simpa using jacobiSum_ne_zero hζ a b h
 
 end FiniteMultiplicity
@@ -476,12 +476,12 @@ variable [𝓟.IsMaximal] [NeZero n] [IsCyclotomicExtension {n} ℚ K]
 theorem valGauss_add_valGauss {a b : ℤ} (h : ¬ (n : ℤ) ∣ a + b) :
     valGauss n P 𝓟 hζ a + valGauss n P 𝓟 hζ b = valGauss n P 𝓟 hζ (a + b) +
        multiplicity 𝓟 (span {algebraMap (𝓞 K) (𝓞 L) (𝓙 n P a b)}) := by
-  rw [valGauss, valGauss, valGauss, ← multiplicity_mul (prime_of_maximal 𝓟),
+  rw [valGauss, valGauss, valGauss, ← multiplicity_mul (prime_of_isMaximal 𝓟),
       span_singleton_mul_span_singleton, gaussSum_mul_gaussSum _ _ _ h,
-      ← span_singleton_mul_span_singleton, multiplicity_mul (prime_of_maximal 𝓟)]
-  · exact (prime_of_maximal 𝓟).finiteMultiplicity_mul finiteMultiplicity_gaussSum
+      ← span_singleton_mul_span_singleton, multiplicity_mul (prime_of_isMaximal 𝓟)]
+  · exact (prime_of_isMaximal 𝓟).finiteMultiplicity_mul finiteMultiplicity_gaussSum
       (finiteMultiplicity_jacobiSum hζ h)
-  · exact (prime_of_maximal 𝓟).finiteMultiplicity_mul finiteMultiplicity_gaussSum
+  · exact (prime_of_isMaximal 𝓟).finiteMultiplicity_mul finiteMultiplicity_gaussSum
       finiteMultiplicity_gaussSum
 
 theorem valGauss_subadditive (a b : ℤ) :
@@ -495,17 +495,17 @@ theorem valGauss_subadditive (a b : ℤ) :
 theorem valGauss_add_valGauss_neg_self [𝓟.LiesOver 𝒑] {a : ℤ}
     (ha : ¬ (n : ℤ) ∣ a) :
     valGauss n P 𝓟 hζ a + valGauss n P 𝓟 hζ (-a) = P.inertiaDeg ℤ * 𝓟.ramificationIdx ℤ := by
-  rw [valGauss, valGauss, ← multiplicity_mul (prime_of_maximal 𝓟),
+  rw [valGauss, valGauss, ← multiplicity_mul (prime_of_isMaximal 𝓟),
     span_singleton_mul_span_singleton, gaussSum_mul_gaussSum_neg _ _ _ ha,
-    ← span_singleton_mul_span_singleton, multiplicity_mul (prime_of_maximal 𝓟),
+    ← span_singleton_mul_span_singleton, multiplicity_mul (prime_of_isMaximal 𝓟),
     multiplicity_of_isUnit_right, zero_add, ← span_singleton_pow,
-    multiplicity_pow (prime_of_maximal 𝓟), ← map_natCast (algebraMap ℤ (𝓞 L)),
+    multiplicity_pow (prime_of_isMaximal 𝓟), ← map_natCast (algebraMap ℤ (𝓞 L)),
     ← Set.image_singleton, ← map_span, ← IsDedekindDomain.ramificationIdx_eq_multiplicity]
   · exact map_ne_bot_of_ne_bot <| by simpa using NeZero.ne p
   · simp [MulChar.inv_apply']
   · rw [span_singleton_eq_top.mpr (by simp), top_mul]
-    exact FiniteMultiplicity.of_prime_left (prime_of_maximal 𝓟) (by simp [NeZero.ne p])
-  · exact (prime_of_maximal 𝓟).finiteMultiplicity_mul finiteMultiplicity_gaussSum
+    exact FiniteMultiplicity.of_prime_left (prime_of_isMaximal 𝓟) (by simp [NeZero.ne p])
+  · exact (prime_of_isMaximal 𝓟).finiteMultiplicity_mul finiteMultiplicity_gaussSum
       finiteMultiplicity_gaussSum
 
 theorem valGauss_add_valGauss_sub_self [𝓟.LiesOver 𝒑] {k : ℤ} (hk : (n : ℤ) ∣ k)
@@ -715,7 +715,7 @@ theorem valGauss_eq_sum_digits [hcop : Fact ((p ^ f - 1).Coprime p)] (a : ℕ)
   have : NeZero (p ^ f - 1) := ⟨by lia⟩
   have hP : P.inertiaDeg ℤ = f := by
     rw [IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd (m := p ^ f - 1) p K P,
-      ZMod.orderOf_mod_self_pow_sub_one _ _ hp.out.one_lt]
+      ZMod.orderOf_pow_sub_one _ _ hp.out.one_lt]
     exact (Nat.Prime.coprime_iff_not_dvd hp.out).mp hcop.out.symm
   have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
   have h𝓟 : 𝓟.ramificationIdx ℤ = p - 1 := ramificationIdx_eq_p_sub_one f 𝓟
@@ -784,8 +784,9 @@ theorem span_singleton_gaussSum_eq_prod [Fact p.Prime] [NeZero n] [IsCyclotomicE
   rw [← associated_iff_eq, UniqueFactorizationMonoid.associated_iff_multiplicity_eq h₁ h₂]
   intro 𝓠 h𝓠
   rw [Finset.multiplicity_prod h𝓠 _ _ (by rwa [h𝓠.finiteMultiplicity_iff_ne_zero])]
-  simp_rw [multiplicity_pow h𝓠, Irreducible.multiplicity_eq_ite _ (prime_of_maximal _).irreducible,
-    associated_iff_eq, mul_ite, mul_one, mul_zero]
+  simp_rw [multiplicity_pow h𝓠,
+    Irreducible.multiplicity_eq_ite _ (prime_of_isMaximal _).irreducible, associated_iff_eq,
+    mul_ite, mul_one, mul_zero]
   · by_cases h : 𝓠.LiesOver 𝒑
     · lift 𝓠 to 𝒑.primesOver (𝓞 L) using ⟨isPrime_of_prime h𝓠, h⟩
       simp_rw [Subtype.coe_inj, Fintype.sum_ite_eq, valGauss]
@@ -1029,7 +1030,7 @@ theorem mul_valGauss_eq_mul_sum [Fact (Odd p)] [Fact ((p ^ f - 1).Coprime p)]
       (p - 1) * ∑ i ∈ Finset.range f, a * p ^ i % m := by
   have hf : 1 < p ^ f - 1 := by have : 3 ≤ p ^ f := three_le_p_pow f; lia
   rw [← mul_right_inj' (by grind : d ≠ 0), ← Nat.cast_mul, valGauss_eq_sum_digits _ ha,
-    ← mul_assoc, mul_comm d, ← hmd, ← Nat.sub_one_mul_sum_mod_eq hp.out.one_lt (by lia),
+    ← mul_assoc, mul_comm d, ← hmd, ← Nat.sub_one_mul_sum_mul_pow_mod_eq hp.out.one_lt (by lia),
     mul_left_comm, Finset.mul_sum _ _ d]
   refine congr_arg ((p - 1) * ·) <| Finset.sum_congr rfl fun i hi ↦ ?_
   rw [hmd, mul_assoc, mul_comm m, Nat.mul_mod_mul_left]
@@ -1137,7 +1138,7 @@ theorem hasTeichmullerLift {f : ℕ} [NeZero (p ^ f - 1)] [hcop : Fact ((p ^ f -
   rw [Nat.card_units, tsub_left_inj Nat.card_pos NeZero.one_le, ← absNorm_eq_natCard,
     ← absNorm_pow_inertiaDeg 𝒑, absNorm_eq_natCard, Int.card_ideal_quot,
     IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd (m := p ^ f - 1) p K P,
-    ZMod.orderOf_mod_self_pow_sub_one _ _ hp.out.one_lt]
+    ZMod.orderOf_pow_sub_one _ _ hp.out.one_lt]
   exact (Nat.Prime.coprime_iff_not_dvd hp.out).mp hcop.out.symm
 
 variable (p) [Fact (Odd p)]
@@ -1193,12 +1194,13 @@ theorem Stickelberger₁ (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero
   let L := ℚ⟮ξ⟯
   have : NumberField L := {
       to_finiteDimensional := adjoin.finiteDimensional <| hξ.isIntegral' (NeZero.pos _) }
-  have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L := hξ.adjoinSimple_isCyclotomicExtension _ ℚ
+  have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L :=
+      hξ.intermediateField_adjoin_isCyclotomicExtension' ℚ
   let η := (zeta (p * (p ^ f - 1)) ℚ L) ^ (p * d)
   have hη : IsPrimitiveRoot η m :=
     (zeta_spec (p * (p ^ f - 1)) ℚ L).pow (NeZero.pos _) <| by rw [hmd, mul_comm m, mul_assoc]
   let k₀ := ℚ⟮η⟯
-  have : IsCyclotomicExtension {m} ℚ k₀ := hη.adjoinSimple_isCyclotomicExtension _ ℚ
+  have : IsCyclotomicExtension {m} ℚ k₀ := hη.intermediateField_adjoin_isCyclotomicExtension' ℚ
   let e : (𝓞 k₀) ≃+* (𝓞 k) :=
     RingOfIntegers.mapRingEquiv <| (IsCyclotomicExtension.algEquiv {m} ℚ k₀ k).toRingEquiv
   let 𝔭₀ := Ideal.comap e 𝔭
@@ -1208,7 +1210,7 @@ theorem Stickelberger₁ (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero
   have ha {a} : ((galEquivZMod m k).symm a)⁻¹ • 𝔭 =
       Ideal.mapHom e (((galEquivZMod m k₀).symm a)⁻¹ • 𝔭₀) := by
     ext x
-    have := ringHom_galEquivZMod_smul (f := e.toRingHom) e.injective a (e.symm x)
+    have := map_galEquivZMod_symm_smul (f := e.toRingHom) e.injective a (e.symm x)
     simp only [RingEquiv.toRingHom_eq_coe, RingHom.coe_coe, RingEquiv.apply_symm_apply] at this
     rw [mapHom_apply, show map e _ = _ from map_comap_of_equiv (e : 𝓞 k₀ ≃+* 𝓞 k), mem_comap,
       Ideal.mem_inv_pointwise_smul_iff, Ideal.mem_inv_pointwise_smul_iff, ← this, ← mem_comap]
@@ -1239,7 +1241,7 @@ theorem Stickelberger (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero m]
   have : 𝔭.IsMaximal := (isPrime_of_prime h𝔭₁).isMaximal (NeZero.ne _)
   have h₁ : Nat.Coprime (Ideal.absNorm 𝔭) (2 * m) := by
     refine Nat.Coprime.of_dvd_left (map_dvd absNorm h𝔭₂) ?_
-    exact coprime_absNorm_of_isCoprime_span (by exact_mod_cast hI')
+    exact coprime_absNorm_of_isCoprime_span_singleton (by exact_mod_cast hI')
   let p := (under ℤ 𝔭).absNorm
   have : Fact p.Prime := ⟨Nat.absNorm_under_prime 𝔭⟩
   have h₂ : p ∣ absNorm 𝔭 := Int.absNorm_under_dvd_absNorm 𝔭

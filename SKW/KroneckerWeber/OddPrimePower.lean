@@ -47,7 +47,7 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
     K ≤ ℚ⟮ξ⟯ := by
   let ζ : A := ξ ^ p
   have hζ : IsPrimitiveRoot ζ p := hξ.pow (NeZero.pos _) (by rw [pow_two])
-  have : IsCyclotomicExtension {p} ℚ ℚ⟮ζ⟯ := hζ.adjoinSimple_isCyclotomicExtension p ℚ A
+  have : IsCyclotomicExtension {p} ℚ ℚ⟮ζ⟯ := hζ.intermediateField_adjoin_isCyclotomicExtension' ℚ
   have : NumberField ℚ⟮ζ⟯ := IsCyclotomicExtension.numberField {p} ℚ ℚ⟮ζ⟯
   have : IsAbelianGalois ℚ K := IsAbelianGalois.of_isCyclic ℚ K
   have : IsAbelianGalois ℚ ℚ⟮ζ⟯ := isAbelianGalois {p} ℚ ℚ⟮ζ⟯
@@ -95,7 +95,8 @@ theorem prop_kw_exponent_p_eq (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {
     [NumberField K₂] [IsGalois ℚ K₂] [hC₂ : IsCyclic Gal(K₂/ℚ)] (hK₂ : Module.finrank ℚ K₂ = p)
     (hKram₂ : UnramifiedOutside K₂ p) :
     K₁ = K₂ := by
-  have : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ := hξ.adjoinSimple_isCyclotomicExtension (p ^ 2) ℚ A
+  have : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ :=
+      hξ.intermediateField_adjoin_isCyclotomicExtension' ℚ
   have : NumberField ℚ⟮ξ⟯ := IsCyclotomicExtension.numberField {p ^ 2} ℚ _
   have h₁ : K₁ ≤ ℚ⟮ξ⟯ := prop_kw_exponent_p p hp' hξ K₁ hK₁ hKram₁
   have h₂ : K₂ ≤ ℚ⟮ξ⟯ := prop_kw_exponent_p p hp' hξ K₂ hK₂ hKram₂
@@ -131,7 +132,7 @@ theorem prop_kw_odd_prime_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
     K ≤ ℚ⟮ξ (p ^ (m + 1))⟯ := by
   let C : IntermediateField ℚ A := ℚ⟮ξ (p ^ (m + 1))⟯
   have hC : IsCyclotomicExtension {p ^ (m + 1)} ℚ C :=
-    (hξ (p ^ (m + 1))).adjoinSimple_isCyclotomicExtension _ ℚ A
+    (hξ (p ^ (m + 1))).intermediateField_adjoin_isCyclotomicExtension' ℚ
   have : IsAbelianGalois ℚ C := isAbelianGalois {p ^ (m + 1)} ℚ C
   have : NumberField C := IsCyclotomicExtension.numberField {p ^ (m + 1)} ℚ C
   have hCram : UnramifiedOutside C p := by
@@ -182,7 +183,7 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
   let ζ : A := ξ ^ p
   have hζ : IsPrimitiveRoot ζ p := hξ.pow (NeZero.pos _) (by rw [pow_two])
   have : IsCyclotomicExtension {p} ℚ ℚ⟮ζ⟯ :=
-    hζ.adjoinSimple_isCyclotomicExtension p ℚ A
+    hζ.intermediateField_adjoin_isCyclotomicExtension' ℚ
   have : NumberField ℚ⟮ζ⟯ := IsCyclotomicExtension.numberField {p} ℚ ℚ⟮ζ⟯
   let M : IntermediateField ℚ A := K ⊔ ℚ⟮ζ⟯
   let F : IntermediateField ℚ M := (ℚ⟮ζ⟯).restrict le_sup_right

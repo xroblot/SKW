@@ -59,11 +59,12 @@ lemma kw_cyclic_primePow_le_cyclotomic {p : ℕ} (hp : p.Prime) {A : Type*} [Fie
     have : NeZero n₀ := ⟨hn₀.ne'⟩
     have : NeZero (c.lcm n₀) := ⟨Nat.lcm_ne_zero (NeZero.ne _) (NeZero.ne _)⟩
     have : IsCyclotomicExtension {c.lcm n₀} ℚ ℚ⟮ξ (c.lcm n₀)⟯ :=
-      (hξ (c.lcm n₀)).adjoinSimple_isCyclotomicExtension _ _ _
+      (hξ (c.lcm n₀)).intermediateField_adjoin_isCyclotomicExtension' ℚ
     have : IsCyclotomicExtension {c.lcm n₀} ℚ ↑(ℚ⟮ξ c⟯ ⊔ ℚ⟮ξ n₀⟯) := by
-      have : IsCyclotomicExtension {c} ℚ ℚ⟮ξ c⟯ := (hξ c).adjoinSimple_isCyclotomicExtension _ _ _
-      have : IsCyclotomicExtension {n₀} ℚ ℚ⟮ξ n₀⟯ := (hξ n₀).adjoinSimple_isCyclotomicExtension _ _
-        _
+      have : IsCyclotomicExtension {c} ℚ ℚ⟮ξ c⟯ :=
+          (hξ c).intermediateField_adjoin_isCyclotomicExtension' ℚ
+      have : IsCyclotomicExtension {n₀} ℚ ℚ⟮ξ n₀⟯ :=
+          (hξ n₀).intermediateField_adjoin_isCyclotomicExtension' ℚ
       exact isCyclotomicExtension_lcm_sup ℚ A _ _ _ _
     exact IntermediateField.isCyclotomicExtension_eq {c.lcm n₀} ℚ _ _ _
   rw [this, hKF]
@@ -93,11 +94,13 @@ lemma kw_reduce_to_prime_power_aux {A : Type*} [Field A] [CharZero A] {ξ : ℕ 
       have : NeZero (n.lcm m) := ⟨(Nat.lcm_pos hn₀ hm₀).ne'⟩
       refine ⟨n.lcm m, NeZero.pos _, (htop ▸ sup_le_sup hn₁ hm₁).trans ?_⟩
       have : IsCyclotomicExtension {n.lcm m} ℚ ↑(ℚ⟮ξ n⟯ ⊔ ℚ⟮ξ m⟯) := by
-        have : IsCyclotomicExtension {n} ℚ ℚ⟮ξ n⟯ := (hξ n).adjoinSimple_isCyclotomicExtension n ℚ A
-        have : IsCyclotomicExtension {m} ℚ ℚ⟮ξ m⟯ := (hξ m).adjoinSimple_isCyclotomicExtension m ℚ A
+        have : IsCyclotomicExtension {n} ℚ ℚ⟮ξ n⟯ :=
+            (hξ n).intermediateField_adjoin_isCyclotomicExtension' ℚ
+        have : IsCyclotomicExtension {m} ℚ ℚ⟮ξ m⟯ :=
+            (hξ m).intermediateField_adjoin_isCyclotomicExtension' ℚ
         exact isCyclotomicExtension_lcm_sup _ _ _ _ _ _
       have : IsCyclotomicExtension {n.lcm m} ℚ ℚ⟮ξ (n.lcm m)⟯ :=
-        (hξ (n.lcm m)).adjoinSimple_isCyclotomicExtension (n.lcm m) ℚ A
+        (hξ (n.lcm m)).intermediateField_adjoin_isCyclotomicExtension' ℚ
       exact isCyclotomicExtension_le_of_dvd _ _ (n.lcm m) (n.lcm m) _ _ dvd_rfl
 
 set_option backward.isDefEq.respectTransparency false in
@@ -144,7 +147,8 @@ theorem kronecker_weber
   obtain ⟨n, hn, hK⟩ := kw_reduce_to_prime_power hξ (IsScalarTower.toAlgHom ℚ K A).fieldRange
   refine ⟨n, ?_⟩
   have : NeZero n := ⟨hn.ne'⟩
-  have : IsCyclotomicExtension {n} ℚ ℚ⟮ξ n⟯ := (hξ n).adjoinSimple_isCyclotomicExtension n ℚ A
+  have : IsCyclotomicExtension {n} ℚ ℚ⟮ξ n⟯ :=
+      (hξ n).intermediateField_adjoin_isCyclotomicExtension' ℚ
   exact ⟨((algEquiv {n} ℚ ℚ⟮ξ n⟯ _).toAlgHom.comp (inclusion hK)).comp
     (IsScalarTower.toAlgHom ℚ K A).equivFieldRange.toAlgHom⟩
 

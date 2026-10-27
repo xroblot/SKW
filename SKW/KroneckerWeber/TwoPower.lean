@@ -227,7 +227,7 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   have : IsAbelianGalois ℚ K := IsAbelianGalois.of_isCyclic ℚ K
   have hCcyc : IsCyclotomicExtension {2 ^ (m + 2)} ℚ ℚ⟮ξ (2 ^ (m + 2))⟯ :=
-    (hξ (2 ^ (m + 2))).adjoinSimple_isCyclotomicExtension (2 ^ (m + 2)) ℚ A
+    (hξ (2 ^ (m + 2))).intermediateField_adjoin_isCyclotomicExtension' ℚ
   have : NumberField ℚ⟮ξ (2 ^ (m + 2))⟯ := IsCyclotomicExtension.numberField {2 ^ (m + 2)} ℚ _
   -- `K' = ℚ(ζ_{2^{m+2}})⁺`, the maximal real subfield: cyclic of degree `2^m`, totally real,
   -- unramified outside `2`, contained in `ℚ(ζ_{2^{m+2}})`.
@@ -310,8 +310,9 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   · exact prop_kw_2_power_real hξ m K hK hKram
   -- otherwise pass to `L = K(i) = K ⊔ ℚ(i)`, which is CM
   have : IsCyclotomicExtension {2 ^ (m + 2)} ℚ ℚ⟮ξ (2 ^ (m + 2))⟯ :=
-    (hξ (2 ^ (m + 2))).adjoinSimple_isCyclotomicExtension (2 ^ (m + 2)) ℚ A
-  have : IsCyclotomicExtension {4} ℚ ℚ ⟮ξ 4⟯ := (hξ 4).adjoinSimple_isCyclotomicExtension 4 ℚ A
+    (hξ (2 ^ (m + 2))).intermediateField_adjoin_isCyclotomicExtension' ℚ
+  have : IsCyclotomicExtension {4} ℚ ℚ ⟮ξ 4⟯ :=
+      (hξ 4).intermediateField_adjoin_isCyclotomicExtension' ℚ
   have : NumberField ℚ⟮ξ 4⟯ := IsCyclotomicExtension.numberField {4} ℚ _
   have : IsAbelianGalois ℚ ℚ⟮ξ 4⟯ := IsCyclotomicExtension.isAbelianGalois {4} ℚ ℚ⟮ξ 4⟯
   have : IsTotallyComplex ℚ⟮ξ 4⟯ :=
@@ -423,7 +424,7 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
   refine le_trans this ?_
   apply sup_le
   · have : IsCyclotomicExtension {2 ^ (k + 2)} ℚ ℚ⟮ξ (2 ^ (k + 2))⟯ :=
-      (hξ (2 ^ (k + 2))).adjoinSimple_isCyclotomicExtension (2 ^ (k + 2)) ℚ A
+      (hξ (2 ^ (k + 2))).intermediateField_adjoin_isCyclotomicExtension' ℚ
     apply isCyclotomicExtension_le_of_dvd _ _ (2 ^ (k + 2)) (2 ^ (m + 2))
     apply Nat.pow_dvd_pow
     lia
