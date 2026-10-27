@@ -94,7 +94,7 @@ $f$, the residue field $\cO_K/P$ has $q$ elements.
 \begin{lemma}
   \label{lem:teichmuller_sum}
   \uses{lem:orderOf_teichmuller}
-  \lean{Stickelberger.teichmuller_ringHomComp_zpow_ne_one}
+  \lean{Stickelberger.ringHomComp_teichmuller_zpow_ne_one}
   \leanok
   Let $a \in \ZZ$ with $(q-1) \nmid a$. The character $\om^{-a}$, viewed with values in $\cO_L$,
   is nontrivial. In particular,
@@ -276,7 +276,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:GaussSum_periodic}
   \uses{def:gauss_sum_s, lem:orderOf_teichmuller}
-  \lean{Stickelberger.gaussSum_periodic}
+  \lean{Stickelberger.gaussSum_add_of_dvd}
   \leanok
   If $(q-1) \mid k$, then for all $a \in \ZZ$, $g_{a+k} = g_a$.
 \end{lemma}
@@ -290,7 +290,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:gaussSum_of_dvd}
   \uses{lem:GaussSum_periodic, lem:gaussSum_one_left, lem:addCharTrace_ne_one}
-  \lean{Stickelberger.gaussSum_of_dvd}
+  \lean{Stickelberger.gaussSum_eq_neg_one_of_dvd}
   \leanok
   If $(q-1) \mid a$, then $g_a = -1$.
 \end{lemma}
@@ -398,7 +398,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:norm_GaussSum}
   \uses{lem:GaussSum_mul_GaussSum_neg, lem:not_isUnit_gaussSum}
-  \lean{Stickelberger.norm_gaussSum}
+  \lean{Stickelberger.exists_natAbs_norm_gaussSum_eq_pow}
   \leanok
   If $(q-1) \nmid a$, then there exists $k \geq 1$ such that
   $|N_{L/\QQ}(g_a)| = p^k$.
@@ -430,7 +430,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
   \label{lem:mk_sq_gausssum_eq}
   \uses{lem:addCharTrace_mk_sq_eq, lem:teichmuller_sum, lem:mk_teichmuller,
         lem:zeta_sub_one_mem, lem:ramificationIdx_eq_p_sub_one}
-  \lean{Stickelberger.mk_sq_gaussSum_eq}
+  \lean{Stickelberger.mk_gaussSum_one_eq_neg_zeta_sub_one}
   \leanok
   We have
   \[
@@ -473,7 +473,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:gal_gaussSum_eq_gaussSum}
   \uses{def:gauss_sum_s, lem:galFEquiv, lem:map_ringHomComp_teichmuller_zpow_apply}
-  \lean{Stickelberger.gal_gaussSum_eq_gaussSum}
+  \lean{Stickelberger.smul_gaussSum_eq_mul_galFEquiv}
   \leanok
   For all $\sigma \in \Gal(L/F)$ and $a \in \ZZ$,
   \[
@@ -491,7 +491,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:gauss_sum_galois_action_K}
   \uses{def:gauss_sum_s, def:addchar, lem:map_ringHomComp_teichmuller_zpow_apply}
-  \lean{Stickelberger.gal_gaussSum_eq_mul_gaussSum}
+  \lean{Stickelberger.smul_gaussSum_eq_mul_gaussSum}
   \leanok
   Let $\tau \in \Gal(L/K)$ and $e \in (\ZZ/p\ZZ)^\times$ with $\tau(\zeta_p) = \zeta_p^e$.
   Then for all $a \in \ZZ$,
@@ -523,7 +523,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:valGauss_periodic}
   \uses{def:s, lem:GaussSum_periodic}
-  \lean{Stickelberger.valGauss_periodic}
+  \lean{Stickelberger.valGauss_congr}
   \leanok
   If $a \equiv b \pmod{q-1}$, then $s(a) = s(b)$.
 \end{lemma}
@@ -536,7 +536,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:valGauss_eq_zero}
   \uses{def:s, lem:gaussSum_of_dvd}
-  \lean{Stickelberger.valGauss_eq_zero}
+  \lean{Stickelberger.valGauss_eq_zero_of_dvd}
   \leanok
   If $(q - 1) \mid a$, then $s(a) = 0$.
 \end{lemma}
@@ -563,7 +563,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:valGauss_subadditive}
   \uses{lem:valGauss_add_valGauss, lem:valGauss_eq_zero}
-  \lean{Stickelberger.valGauss_subadditive}
+  \lean{Stickelberger.valGauss_add_le}
   \leanok
   For all $a, b \in \ZZ$, $s(a + b) \leq s(a) + s(b)$.
 \end{lemma}
@@ -577,7 +577,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:valGauss_add_valGauss_neg_self}
   \uses{def:s, lem:GaussSum_mul_GaussSum_neg, lem:gaussSum_ne_zero}
-  \lean{Stickelberger.valGauss_add_valGauss_neg_self}
+  \lean{Stickelberger.valGauss_add_valGauss_neg}
   \leanok
   If $(q-1) \nmid a$, then $s(a) + s(-a) = f \cdot e(\fP \mid p)$.
 \end{lemma}
@@ -591,7 +591,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:valGauss_add_valGauss_sub_self}
   \uses{lem:valGauss_add_valGauss_neg_self, lem:valGauss_periodic, lem:valGauss_eq_zero}
-  \lean{Stickelberger.valGauss_add_valGauss_sub_self}
+  \lean{Stickelberger.valGauss_add_valGauss_sub}
   \leanok
   Assume $(q-1) \mid k$. Then
   \[
@@ -799,7 +799,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
 \begin{lemma}
   \label{lem:gauss_sum_power_fixed_2}
   \uses{lem:gauss_sum_galois_action_K, lem:orderOf_teichmuller}
-  \lean{Stickelberger.smul_gaussSum_eq_gaussSum}
+  \lean{Stickelberger.smul_gaussSum_pow_eq_self}
   \leanok
   For any $\tau \in \Gal(L/K)$, we have $\tau(g_d^m) = g_d^m$.
 \end{lemma}
@@ -813,7 +813,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
 \begin{lemma}
   \label{lem:gauss_sum_power_fixed_1}
   \uses{lem:gal_gaussSum_eq_gaussSum, lem:GaussSum_periodic}
-  \lean{Stickelberger.smul_gaussSum_eq_gaussSum'}
+  \lean{Stickelberger.smul_gaussSum_eq_self}
   \leanok
   Let $E = \QQ(\zeta_{mp}) \subseteq L$. For any $\tau \in \Gal(L/E)$, we have
   $\tau(g_d) = g_d$.
@@ -829,7 +829,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
 \begin{lemma}
   \label{lem:gauss_sum_power_in_cyclotomic}
   \uses{lem:gauss_sum_power_fixed_1, lem:gauss_sum_power_fixed_2}
-  \lean{Stickelberger.exists_mem_gaussSum_pow_eq}
+  \lean{Stickelberger.exists_gaussSum_pow_eq_algebraMap}
   \leanok
   There exists $\Gamma \in \cO_k$ with $g_d^m = \Gamma$.
 \end{lemma}
@@ -920,7 +920,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
 \begin{lemma}
   \label{lem:ramificationIdx_eq_sub_one}
   \uses{lem:ramificationIdx_eq_p_sub_one}
-  \lean{Stickelberger.ramificationIdx_eq_sub_one}
+  \lean{Stickelberger.ramificationIdx_eq_sub_one'}
   \leanok
   Let $\fq$ be a prime of $\cO_k$ above $p$ and $\fQ$ a prime of $\cO_L$ above $\fq$. Then
   $e(\fQ \mid \fq) = p - 1$.
@@ -960,7 +960,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
   \label{lem:gauss_sum_factorization_cyclotomic}
   \uses{lem:gauss_sum_power_in_cyclotomic, lem:gaussSum_factorization_L, def:equivUnits,
         lem:ramificationIdx_eq_sub_one, lem:valuation_gauss_sum_power}
-  \lean{Stickelberger.gaussSum_factorization}
+  \lean{Stickelberger.span_singleton_eq_prod_of_gaussSum_pow_eq}
   \leanok
   Let $\Gamma \in \cO_k$ with $g_d^m = \Gamma$ (\ref{lem:gauss_sum_power_in_cyclotomic}). Then
   \[
@@ -987,7 +987,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
   \label{lem:stickelberger_in_L}
   \uses{lem:gauss_sum_power_in_cyclotomic, lem:gauss_sum_factorization_cyclotomic,
         lem:hasTeichmullerLift}
-  \lean{Stickelberger.Stickelberger₀}
+  \lean{Stickelberger.isPrincipal_prod_smul_pow_of_orderOf_eq}
   \leanok
   In the setting of this chapter, the ideal $\fp^{\Theta}$ of $\cO_k$ is principal.
 \end{lemma}
@@ -1003,7 +1003,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
 \begin{theorem}
   \label{thm:stickelberger}
   \uses{lem:stickelberger_in_L}
-  \lean{Stickelberger.Stickelberger₁}
+  \lean{Stickelberger.isPrincipal_prod_smul_pow_of_coprime}
   \leanok
   Let $k$ be a number field isomorphic to $\QQ(\zeta_m)$, let $p$ be an odd prime with
   $p \nmid m$ and let $\fp$ be a maximal ideal of $\cO_k$ above $p$. Then the ideal
@@ -1036,7 +1036,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
 \begin{corollary}
   \label{cor:stickelberger_annihilates}
   \uses{thm:stickelberger, lem:class_coprime_rep}
-  \lean{Stickelberger.Stickelberger}
+  \lean{Stickelberger.stickelberger_theorem}
   \leanok
   Let $k$ be a number field isomorphic to $\QQ(\zeta_m)$. The Stickelberger element $\Theta$
   annihilates the ideal class group $\mathrm{Cl}(k)$: for every ideal class $c$,
@@ -1908,7 +1908,7 @@ Set $F = \QQ(\zeta_p)$ and $L = KF$.
 
 \begin{lemma}
   \label{lem:ramificationIdx_eq_p_sub_one}
-  \lean{Stickelberger.ramificationIdx_eq_p_sub_one}
+  \lean{Stickelberger.ramificationIdx_eq_sub_one}
   \leanok
   The ramification index of $\fP$ above $p$ is $p - 1$, i.e.,
   \[
