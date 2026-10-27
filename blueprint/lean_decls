@@ -44,7 +44,7 @@ Stickelberger.valGauss_one
 Stickelberger.valGauss_le_self
 Stickelberger.valGauss_le_sum_digits
 Stickelberger.valGauss_eq_sum_digits
-Nat.sub_one_mul_sum_mod_eq
+Nat.sub_one_mul_sum_mul_pow_mod_eq
 Stickelberger.mul_valGauss_eq_mul_sum
 Stickelberger.smul_gaussSum_pow_eq_self
 Stickelberger.smul_gaussSum_eq_self
