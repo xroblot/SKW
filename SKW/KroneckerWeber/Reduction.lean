@@ -36,8 +36,7 @@ This file establishes the reduction steps that allow us to prove Kronecker-Weber
 
 1. `kw_cyclic_compositum`: If two cyclic `p`-extensions have cyclic compositum, one contains the
    other.
-2. `kw_minkowski`: Every non-trivial extension of `ℚ` is ramified at some finite prime.
-3. `kw_ramification_reduction`: Given `K/ℚ` cyclic of prime power degree with `q ≠ p` ramified,
+2. `kw_ramification_reduction`: Given `K/ℚ` cyclic of prime power degree with `q ≠ p` ramified,
    there exists a cyclotomic `L/ℚ` such that `KL = FL` for `F/ℚ` cyclic of prime power degree
    with `q` unramified.
 
@@ -56,35 +55,6 @@ def IsCyclicOfPrimePowDegree (K : Type*) [Field K] [Algebra ℚ K] : Prop :=
   IsGalois ℚ K ∧ IsCyclic Gal(K/ℚ) ∧ IsPrimePow (Module.finrank ℚ K)
 
 variable {p : ℕ} [hp : Fact p.Prime]
-
-/- Superseded by the ambient (`IntermediateField ℚ A`) form below, which callers use without
-restricting into the compositum.
-/-- Two cyclic `p`-extensions of `ℚ` whose compositum is cyclic must be comparable. -/
-lemma kw_cyclic_compositum (L : Type*) [Field L] [NumberField L] (K K' : IntermediateField ℚ L)
-    (h : finrank ℚ K ∣ finrank ℚ K') [IsGalois ℚ L] [hCL : IsCyclic Gal(L/ℚ)] :
-    K ≤ K' := by
-  rw [← IsGaloisGroup.fixedPoints_fixingSubgroup Gal(L/ℚ) ℚ L K,
-    ← IsGaloisGroup.fixedPoints_fixingSubgroup Gal(L/ℚ) ℚ L K']
-  apply IsGaloisGroup.fixedPoints_le_of_le
-  rw [IsCyclic.subgroup_le_iff_card_dvd, IsGaloisGroup.card_fixingSubgroup_eq_finrank,
-    IsGaloisGroup.card_fixingSubgroup_eq_finrank]
-  have hd : finrank ℚ K ∣ finrank ℚ L := finrank_mul_finrank ℚ K L ▸ dvd_mul_right _ _
-  have hd' : finrank ℚ K' ∣ finrank ℚ L := finrank_mul_finrank ℚ K' L ▸ dvd_mul_right _ _
-  have he : finrank K L = finrank ℚ L / finrank ℚ K :=
-    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
-  have he' : finrank K' L = finrank ℚ L / finrank ℚ K' :=
-    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank])
-  rwa [he, he', Nat.div_dvd_div_iff_left finrank_pos hd' hd]
--/
-
-/-- Every non-trivial extension of `ℚ` is ramified at some finite prime (Minkowski). -/
-lemma kw_minkowski (K : Type*) [Field K] [NumberField K] (h : Module.finrank ℚ K > 1) :
-    ∃ q : ℕ, q.Prime ∧ ∃ 𝔮 : Ideal (𝓞 K), 𝔮.IsMaximal ∧ 𝔮.LiesOver (Ideal.span {(q : ℤ)}) ∧
-      1 < 𝔮.ramificationIdx ℤ := by
-  obtain ⟨𝔮, hq, hq'⟩ := exists_not_isUnramifiedAt_int (K := K) (𝒪 := 𝓞 K) h.ne'
-  refine ⟨absNorm (Ideal.under ℤ 𝔮), Nat.absNorm_under_prime 𝔮, 𝔮, hq,
-    Int.liesOver_span_absNorm 𝔮, ?_⟩
-  rwa [← Algebra.not_isUnramifiedAt_iff]
 
 /-- **Tame Abhyankar (ramification index, hard direction).** For a Galois `K/ℚ`, two Galois
 intermediate fields `E`, `F` with `E ⊔ F = ⊤`, and a prime `𝔓` of `𝓞 K` over a rational prime `p`
