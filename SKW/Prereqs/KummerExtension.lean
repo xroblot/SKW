@@ -170,4 +170,15 @@ theorem isSplittingField_X_pow_sub_C_of_mul_pow (a : K) {x : K} (hx : x ≠ 0)
 
 end
 
+/-- Version of `exists_root_adjoin_eq_top_of_isCyclic` with a nonzero root `α`. -/
+theorem exists_root_adjoin_eq_top_of_isCyclic' (K L : Type*) [Field K] [Field L] [Algebra K L]
+    [FiniteDimensional K L] [IsGalois K L] [IsCyclic Gal(L/K)]
+    (hK : (primitiveRoots (Module.finrank K L) K).Nonempty) :
+    ∃ α : L, α ≠ 0 ∧ α ^ Module.finrank K L ∈ Set.range (algebraMap K L) ∧ K⟮α⟯ = ⊤ := by
+  obtain ⟨α, hα, hα'⟩ := exists_root_adjoin_eq_top_of_isCyclic K L hK
+  obtain rfl | h := eq_or_ne α 0
+  · rw [adjoin_zero] at hα'
+    exact ⟨1, one_ne_zero, ⟨1, by simp⟩, by rwa [adjoin_one]⟩
+  · exact ⟨α, h, hα, hα'⟩
+
 end

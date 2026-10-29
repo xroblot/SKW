@@ -27,6 +27,28 @@ This file establishes
 - `kw_mu_pth_power_ideal`: `(μ) = 𝔞ᵖ` for some ideal `𝔞` of `𝓞_F`.
 -/
 
+/-
+╔══════════════════════════════════════════════════════════════════════════════════════════════╗
+║ TODO(SKW), PLANNED REFACTOR (29 October 2026): take `μ ∈ Fˣ` instead of `μ : 𝓞 F`, here and in ║
+║ `ClassGroup.lean`. Full write-up: item 6 of "Reste à faire" in                               ║
+║ `~/Desktop/Claude/Lean/KroneckerWeber/plan_kronecker_weber.md`.                              ║
+╚══════════════════════════════════════════════════════════════════════════════════════════════╝
+
+The integrality of `μ` is only used to stay inside `Ideal (𝓞 F)`. The plan:
+* `kw_kummer`, `kw_abelian_kummer`: field statements; with
+  `exists_root_adjoin_eq_top_of_isCyclic'` the element `x` works as is, no
+  `exists_integer_multiple`.
+* `kw_split_prime`: `hv` is only used to cancel `v_𝔮(μ)` modulo `p`, all valuations are taken in
+  `F`; rewrite with `FractionalIdeal.count` (no `d ^ p`, no `FiniteMultiplicity` goals). The
+  `have h₃` there is dead.
+* `kw_mu_val_p`: the case `q = p` only uses `kw_split_prime`. The case `q ≠ p` is the only place
+  taking a valuation in `L`; apply the current integral argument to `d ^ p * μ` (same `v_𝔮`
+  modulo `p`, same `L`, root `d * α`), so no "count of an extended fractional ideal" API needed.
+* `kw_mu_pth_power_ideal`: `𝔞 := ∏ᶠ v, v ^ (count v (μ) / p)` as a fractional ideal.
+* `kw_class_trivial`: apply Stickelberger to the class of the fractional ideal `𝔞`.
+* `exists_pth_root` goes away.
+-/
+
 open NumberField Ideal Polynomial Pointwise IntermediateField Module IsCyclotomicExtension
   nonZeroDivisors
 
@@ -34,7 +56,7 @@ noncomputable section IsScalarTower
 
 variable (p : ℕ) [hp : Fact p.Prime]
 variable (F : Type*) [Field F] [NumberField F] [IsCyclotomicExtension {p} ℚ F]
-variable {L : Type*} [Field L] [NumberField L] [Algebra F L] [FiniteDimensional F L]
+variable {L : Type*} [Field L] [Algebra F L] [FiniteDimensional F L]
   [IsGalois F L] [hCF : IsCyclic Gal(L/F)] (hrF : finrank F L = p)
 
 include hrF in
@@ -45,30 +67,22 @@ lemma kw_kummer :
       IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ)) := by
   have hne : (primitiveRoots (Module.finrank F L) F).Nonempty :=
     hrF ▸ primitiveRoots_nonempty p ℚ F
-  obtain ⟨α, ⟨x, hx₁⟩, hx₂⟩ := exists_root_adjoin_eq_top_of_isCyclic F L hne
+  obtain ⟨g, hg, ⟨x, hx₁⟩, hx₂⟩ := exists_root_adjoin_eq_top_of_isCyclic' F L hne
+  have hx₀ : x ≠ 0 :=
+      fun h ↦ hg <| by rwa [h, map_zero, eq_comm, pow_eq_zero_iff finrank_pos.ne'] at hx₁
   obtain ⟨d, hd₁, ⟨μ, hμ⟩⟩ := exists_integer_multiple x
-  refine ⟨d ^ (finrank F L - 1) * μ, ?_, ?_⟩
-  · refine mul_ne_zero (by aesop) ?_
-    contrapose! hx₂
-    rw [hx₂, map_zero, eq_comm, mul_eq_zero_iff_left (Int.cast_ne_zero.mpr hd₁)] at hμ
-    rw [hμ, map_zero, eq_comm, pow_eq_zero_iff finrank_pos.ne'] at hx₁
-    rw [hx₁, adjoin_zero, Ne.eq_def, bot_eq_top_iff_finrank_eq_one, hrF]
-    exact hp.out.ne_one
-  · have : F⟮d * α⟯ = ⊤ := by
-      rw [← hx₂]
-      apply le_antisymm
-      · rw [adjoin_le_iff, Set.singleton_subset_iff, SetLike.mem_coe]
-        exact IntermediateField.mul_mem _ (intCast_mem _ d) (mem_adjoin_simple_self _ α)
-      · rw [adjoin_le_iff, Set.singleton_subset_iff, SetLike.mem_coe]
-        have := div_mem (mem_adjoin_simple_self _ (d * α)) (intCast_mem F⟮d * α⟯ d)
-        rwa [mul_div_cancel_left₀] at this
-        exact Int.cast_ne_zero.mpr hd₁
-    rw [← hrF]
-    refine isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top hne ?_ this
-    rw [map_mul, hμ, map_mul, map_mul, map_pow, map_pow, map_intCast, map_intCast, ← mul_assoc,
-      ← pow_succ, hx₁, Nat.sub_add_cancel finrank_pos, mul_pow]
+  have hμ₀ : μ ≠ 0 :=
+    RingOfIntegers.coe_ne_zero_iff.mp <| hμ ▸ mul_ne_zero_iff.mpr ⟨Int.cast_ne_zero.mpr hd₁, hx₀⟩
+  refine ⟨d ^ (finrank F L - 1) * μ, mul_ne_zero (by aesop) hμ₀, ?_⟩
+  · have : F⟮d * g⟯ = ⊤ := by
+      rw [mul_comm, ← map_intCast (algebraMap F L),
+        adjoin_simple_mul_algebraMap _ _ (Int.cast_ne_zero.mpr hd₁), hx₂]
+    refine hrF ▸ isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top hne ?_ this
+    simp_rw [map_mul, hμ, map_mul, map_pow, map_intCast, ← mul_assoc, ← pow_succ, hx₁,
+      Nat.sub_add_cancel finrank_pos, mul_pow]
 
-variable [IsAbelianGalois ℚ L]
+variable [NumberField L] [IsAbelianGalois ℚ L]
+
 variable {μ : 𝓞 F} (hμ : μ ≠ 0)
   [hS : IsSplittingField F L (X ^ p - C (algebraMap (𝓞 F) F μ))]
   (hIrr : Irreducible (X ^ p - C ((algebraMap (𝓞 F) F) μ)))
