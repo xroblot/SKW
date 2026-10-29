@@ -1,7 +1,6 @@
 import SKW.Basic
 import SKW.Misc
 import SKW.PRed2Mathlib.Subfield
-import SKW.PRed2Mathlib.AddCharTrace
 import SKW.PRed2Mathlib.Teichmuller
 import SKW.PRed2Mathlib.FiniteFieldSum
 import SKW.PRed2Mathlib.MulCharIsUnit
@@ -27,7 +26,6 @@ import SKW.Prereqs.ZModUnits
 import SKW.Prereqs.NumberTheory
 import SKW.Prereqs.Cotangent
 import SKW.Prereqs.TameRamification
-import SKW.Stickelberger.AddCharTrace
 import SKW.Stickelberger.Stickelberger
 import SKW.Stickelberger.Teichmuller
 import SKW.KroneckerWeber.Basic

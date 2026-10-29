@@ -5,7 +5,7 @@ public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 
-public import SKW.PRed2Mathlib.AddCharTrace
+public import Mathlib.NumberTheory.AddCharacter.Trace
 public import SKW.PRed2Mathlib.CyclotomicField
 
 public import SKW.Stickelberger.Teichmuller
@@ -316,7 +316,7 @@ theorem smul_traceChar_apply_eq_self [CharP (𝓞 K ⧸ P) p] (σ : Gal(L/F)) (x
     σ • (algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ) x =
       (algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ) x := by
   rw [AddChar.compAddChar_traceChar_algebraMap, smul_eq_galRestrict_apply (𝓞 F),
-    AddChar.map_traceChar_apply_eq_mulShift _ _ 1, Nat.cast_one, AddChar.mulShift_one]
+    AddChar.map_traceChar_apply_eq_mulShift _ (m := 1), Nat.cast_one, AddChar.mulShift_one]
   rw [AlgEquiv.commutes, pow_one]
 
 theorem smul_traceChar_apply_eq_mulShift [CharP (𝓞 K ⧸ P) p] (τ : Gal(L/K)) {e : ℕ}
@@ -324,7 +324,7 @@ theorem smul_traceChar_apply_eq_mulShift [CharP (𝓞 K ⧸ P) p] (τ : Gal(L/K)
     τ • (algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ) x
        = ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ)).mulShift e x := by
   rw [AddChar.compAddChar_traceChar_algebraMap, smul_eq_galRestrict_apply (𝓞 K),
-    AddChar.map_traceChar_apply_eq_mulShift _ _ e (by rwa [← smul_eq_galRestrict_apply])]
+    AddChar.map_traceChar_apply_eq_mulShift _ (m := e) (by rwa [← smul_eq_galRestrict_apply])]
 
 variable [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {n} ℚ K] (K F)
 

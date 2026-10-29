@@ -335,14 +335,16 @@ lemma kw_cyclic_compositum {A : Type*} [Field A] [CharZero A] (K K' : Intermedia
   apply IsGaloisGroup.fixedPoints_le_of_le
   rw [IsCyclic.subgroup_le_iff_card_dvd, IsGaloisGroup.card_fixingSubgroup_eq_finrank,
     IsGaloisGroup.card_fixingSubgroup_eq_finrank]
+  have : Module.Free J ↑(K ⊔ K') := Module.Free.of_divisionRing _ _
+  have : Module.Free J' ↑(K ⊔ K') := Module.Free.of_divisionRing _ _
   have hd : finrank ℚ J ∣ finrank ℚ ↑(K ⊔ K') :=
-    finrank_mul_finrank' (R := ℚ) (S := J) ↑(K ⊔ K') ▸ dvd_mul_right _ _
+    Module.finrank_mul_finrank ℚ J ↑(K ⊔ K') ▸ dvd_mul_right _ _
   have hd' : finrank ℚ J' ∣ finrank ℚ ↑(K ⊔ K') :=
-    finrank_mul_finrank' (R := ℚ) (S := J') ↑(K ⊔ K') ▸ dvd_mul_right _ _
+    Module.finrank_mul_finrank ℚ J' ↑(K ⊔ K') ▸ dvd_mul_right _ _
   have he : finrank J ↑(K ⊔ K') = finrank ℚ ↑(K ⊔ K') / finrank ℚ J :=
-    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank'])
+    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [Module.finrank_mul_finrank])
   have he' : finrank J' ↑(K ⊔ K') = finrank ℚ ↑(K ⊔ K') / finrank ℚ J' :=
-    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [finrank_mul_finrank'])
+    Nat.eq_div_of_mul_eq_right finrank_pos.ne' (by rw [Module.finrank_mul_finrank])
   rwa [he, he', Nat.div_dvd_div_iff_left finrank_pos hd' hd]
 
 open IntermediateField in

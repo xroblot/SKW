@@ -9,6 +9,7 @@ public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import Mathlib.GroupTheory.FiniteAbelian.Duality
 
 public import Mathlib.FieldTheory.IntermediateField.Algebraic
+public import Mathlib.LinearAlgebra.Dimension.Domain
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.Torsion
 public import SKW.Prereqs.Subfield
@@ -333,11 +334,12 @@ theorem IntermediateField.finrank_sup_dvd_mul_of_isGalois {F E : Type*} [Field F
   let A' : IntermediateField F ↑(A ⊔ B) := A.restrict le_sup_left
   let B' : IntermediateField F ↑(A ⊔ B) := B.restrict le_sup_right
   have : IsGalois F B' := IsGalois.of_algEquiv (restrictAlgEquiv le_sup_right)
+  have : Module.Free A' ↑(A ⊔ B) := Module.Free.of_divisionRing _ _
   have : B' ⊔ A' = ⊤ :=
     lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top, sup_comm])
   have := mul_dvd_mul_left (finrank F A') <| finrank_dvd_finrank_of_isGalois_of_sup_eq_top A' B'
     this
-  rwa [finrank_mul_finrank', finrank_restrict, finrank_restrict] at this
+  rwa [Module.finrank_mul_finrank, finrank_restrict, finrank_restrict] at this
 
 theorem IntermediateField.lift_iInf {F E : Type*} [Field F] [Field E] [Algebra F E]
     (K : IntermediateField F E) {ι : Type*} (S : Finset ι) (hS : S.Nonempty)

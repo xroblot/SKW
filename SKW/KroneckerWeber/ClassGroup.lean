@@ -159,7 +159,7 @@ lemma kw_unit_root_of_unity (hp' : Odd p) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : �
   have h₁ : IsSplittingField F L (X ^ p - C (μ ^ 4 : F)) :=
     isSplittingField_X_pow_sub_C_pow_of_coprime _ hF hIrr <| hp'.coprime_two_left.pow_left 2
   have h₂ : Irreducible (X ^ p - C (μ ^ 4 : F)) := by
-    rw [X_pow_sub_C_irreducible_iff_of_prime hp.out] at hIrr ⊢
+    rw [irreducible_X_pow_sub_C_iff_of_prime hp.out] at hIrr ⊢
     intro x hx
     obtain ⟨u, v, huv⟩ := (hp'.coprime_two_left.pow_left 2).isCoprime
     refine hIrr (x ^ u * μ ^ v) ?_

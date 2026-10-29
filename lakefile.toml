@@ -16,7 +16,7 @@ git = "https://github.com/PatrickMassot/checkdecls.git"
 [[require]]
 name = "«doc-gen4»"
 git = "https://github.com/leanprover/doc-gen4"
-rev = "v4.36.0-rc1"
+rev = "v4.36.0-rc2"
 
 [[require]]
 name = "mathlib"
