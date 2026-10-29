@@ -5,6 +5,10 @@ public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 public import Mathlib.NumberTheory.NumberField.Discriminant.Different
 public import Mathlib.RingTheory.ClassGroup.Basic
 
+public import SKW.PRed2Mathlib.FiniteFieldSum
+public import SKW.PRed2Mathlib.MulCharIsUnit
+public import SKW.PRed2Mathlib.NatPowSubOne
+
 set_option linter.style.header false
 
 public section
@@ -44,14 +48,6 @@ theorem ZMod.cast_trace_eq_trace {p : ℕ} {A C : Type*} [CommRing A] [CommRing 
     exact congr($(Subsingleton.elim (f.comp (e.symm : ZMod p →+* A)) (g.comp e.symm)) z)⟩
   rw [Algebra.trace_eq_of_equiv_equiv e (RingEquiv.refl C) (Subsingleton.elim _ _) x]
   exact e.eq_symm_apply.mpr (ZMod.ringHom_map_cast (e : A →+* ZMod p) _)
-
--- TODO(SKW): upstream, next to `Nat.pow_sub_one_mod_pow_sub_one` in
--- `Mathlib/Data/Nat/GCD/Basic.lean`.
-/-- For `1 < a`, the number `a ^ m - 1` divides `a ^ n - 1` precisely when `m` divides `n`. -/
-theorem Nat.pow_sub_one_dvd_pow_sub_one_iff {a : ℕ} (ha : 1 < a) {n m : ℕ} :
-    a ^ m - 1 ∣ a ^ n - 1 ↔ m ∣ n := by
-  rw [Nat.dvd_iff_mod_eq_zero, Nat.pow_sub_one_mod_pow_sub_one, Nat.sub_eq_zero_iff_le,
-    ← pow_zero a, Nat.pow_le_pow_iff_right ha, Nat.le_zero, Nat.dvd_iff_mod_eq_zero]
 
 theorem ZMod.orderOf_pow_sub_one (a k : ℕ) (ha : 1 < a) :
     orderOf (a : ZMod (a ^ k - 1)) = k := by
@@ -520,25 +516,6 @@ theorem coe_equivPrimesOverPrimesOver_symm_apply (x : Σ P : p.primesOver A, P.1
 
 end Ideal
 
--- TODO(SKW): upstream both into `Mathlib/NumberTheory/MulChar/Basic.lean`, next to
--- `MulChar.apply_ne_zero_iff`, which is the same statement with `≠ 0` in place of `IsUnit`;
--- Mathlib currently writes `ha.isUnit.map χ` by hand, as in `MulChar/Lemmas.lean:186`.
-/-- A multiplicative character sends a unit to a unit. -/
-theorem MulChar.isUnit_apply {R R' : Type*} [CommMonoidWithZero R] [CommMonoidWithZero R']
-    (χ : MulChar R R') {a : R} (ha : IsUnit a) :
-    IsUnit (χ a) :=
-  ha.map χ
-
-/-- A value of a multiplicative character is a unit precisely at a unit. -/
-@[simp]
-theorem MulChar.isUnit_apply_iff {R R' : Type*} [CommMonoidWithZero R] [CommMonoidWithZero R']
-    [Nontrivial R'] {χ : MulChar R R'} {a : R} :
-    IsUnit (χ a) ↔ IsUnit a := by
-  refine ⟨fun h ↦ ?_, χ.isUnit_apply⟩
-  contrapose h
-  rw [map_nonunit χ h]
-  exact not_isUnit_zero
-
 namespace FractionalIdeal
 
 section General
@@ -796,18 +773,6 @@ open Finset
 variable (K : Type*) [Field K] [Fintype K]
 
 local notation "q" => Fintype.card K
-
--- TODO(SKW): upstream `sum_sdiff_zero` into `Mathlib/FieldTheory/Finite/Basic.lean`, right after
--- `FiniteField.sum_pow_units`.
-/-- A sum over the nonzero elements of a finite field is a sum over its units. -/
-theorem sum_sdiff_zero {M : Type*} [AddCommMonoid M] [DecidableEq K] (f : K → M) :
-    ∑ x ∈ univ \ {0}, f x = ∑ x : Kˣ, f x := by
-  let φ : Kˣ ↪ K := ⟨fun x ↦ x, Units.val_injective⟩
-  have : univ.map φ = univ \ {0} := by
-    ext x
-    simpa only [mem_map, mem_univ, Function.Embedding.coeFn_mk, true_and, mem_sdiff,
-      mem_singleton, φ] using! isUnit_iff_ne_zero
-  simp [← this, univ.sum_map φ, φ]
 
 /-- The sum of `x⁻¹ * x ^ (i + 1)` as `x` ranges over a finite field of cardinality `q` is equal
 to `-1` if `q - 1 ∣ i`, and to `0` otherwise. -/
