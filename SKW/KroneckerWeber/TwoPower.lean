@@ -18,7 +18,7 @@ public import SKW.KroneckerWeber.Reduction
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.CMField
 public import SKW.Prereqs.CyclotomicField
-public import SKW.Prereqs.ZModUnits
+public import SKW.PRed2Mathlib.ZModUnits
 
 set_option linter.style.header false
 

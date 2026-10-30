@@ -9,6 +9,7 @@ import SKW.PRed2Mathlib.MultiplicityPow
 import SKW.Prereqs.AlgebraMisc
 import SKW.Prereqs.ClassGroup
 import SKW.PRed2Mathlib.CyclotomicField
+import SKW.PRed2Mathlib.ZModUnits
 import SKW.Prereqs.CyclotomicField
 import SKW.Prereqs.Digits
 import SKW.Prereqs.FractionalIdeal
@@ -22,7 +23,6 @@ import SKW.Prereqs.MulChars
 import SKW.Prereqs.Normal
 import SKW.Prereqs.Subfield
 import SKW.Prereqs.Unramified
-import SKW.Prereqs.ZModUnits
 import SKW.Prereqs.NumberTheory
 import SKW.Prereqs.Cotangent
 import SKW.Prereqs.TameRamification
