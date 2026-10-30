@@ -335,6 +335,7 @@ lemma kw_cyclic_compositum {A : Type*} [Field A] [CharZero A] (K K' : Intermedia
   apply IsGaloisGroup.fixedPoints_le_of_le
   rw [IsCyclic.subgroup_le_iff_card_dvd, IsGaloisGroup.card_fixingSubgroup_eq_finrank,
     IsGaloisGroup.card_fixingSubgroup_eq_finrank]
+  -- TODO: workaround for a slow `IsTorsionFree` instance search, see the plan; drop once fixed.
   have : Module.Free J ↑(K ⊔ K') := Module.Free.of_divisionRing _ _
   have : Module.Free J' ↑(K ⊔ K') := Module.Free.of_divisionRing _ _
   have hd : finrank ℚ J ∣ finrank ℚ ↑(K ⊔ K') :=

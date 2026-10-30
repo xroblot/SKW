@@ -334,6 +334,7 @@ theorem IntermediateField.finrank_sup_dvd_mul_of_isGalois {F E : Type*} [Field F
   let A' : IntermediateField F ↑(A ⊔ B) := A.restrict le_sup_left
   let B' : IntermediateField F ↑(A ⊔ B) := B.restrict le_sup_right
   have : IsGalois F B' := IsGalois.of_algEquiv (restrictAlgEquiv le_sup_right)
+  -- TODO: workaround for a slow `IsTorsionFree` instance search, see the plan; drop once fixed.
   have : Module.Free A' ↑(A ⊔ B) := Module.Free.of_divisionRing _ _
   have : B' ⊔ A' = ⊤ :=
     lift_injective _ (by rw [lift_sup, lift_restrict, lift_restrict, lift_top, sup_comm])

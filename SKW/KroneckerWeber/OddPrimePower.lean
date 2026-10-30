@@ -100,6 +100,7 @@ theorem prop_kw_exponent_p_eq (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {
   have h₁ : K₁ ≤ ℚ⟮ξ⟯ := prop_kw_exponent_p p hp' hξ K₁ hK₁ hKram₁
   have h₂ : K₂ ≤ ℚ⟮ξ⟯ := prop_kw_exponent_p p hp' hξ K₂ hK₂ hKram₂
   let : Algebra K₁ ↑(K₁ ⊔ K₂) := (inclusion le_sup_left).toAlgebra
+  -- TODO: workaround for a slow `IsTorsionFree` instance search, see the plan; drop once fixed.
   have : Module.Free K₁ ↑(K₁ ⊔ K₂) := Module.Free.of_divisionRing _ _
   suffices Module.finrank ℚ K₁ = Module.finrank ℚ ↑(K₁ ⊔ K₂) by
       rw [← eq_iff_finrank_eq_of_le le_sup_left, left_eq_sup] at this
