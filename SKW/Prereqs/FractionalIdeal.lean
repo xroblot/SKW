@@ -2,6 +2,7 @@ module
 
 public import Mathlib.Algebra.Ring.Action.Basic
 public import Mathlib.Algebra.Ring.Action.Group
+public import Mathlib.RingTheory.DedekindDomain.Factorization
 public import Mathlib.RingTheory.FractionalIdeal.Operations
 public import Mathlib.RingTheory.Localization.FractionRing
 
@@ -12,19 +13,20 @@ set_option linter.style.header false
 @[expose] public section
 
 /-!
-# Action of a group on fractional ideals
+# Fractional ideals
 
-Given a group `G` acting on a commutative ring `R` and on an `R`-algebra `P` by ring
-automorphisms, compatibly via `SMulDistribClass G R P` (i.e. `algebraMap R P` is `G`-equivariant,
-`g • (r • x) = (g • r) • (g • x)`) and keeping the submonoid `S` invariant (`hS`), the action of
-`G` on `P` carries each fractional ideal `I : FractionalIdeal S P` to a fractional ideal. This
-produces a `MulDistribMulAction G (FractionalIdeal S P)` (`FractionalIdeal.mulDistribMulAction`).
+Bridges between `FractionalIdeal.count` and `multiplicity`, for a Dedekind domain `R` with
+fraction field `K` and a maximal ideal `v`:
 
-The compatibility is exactly `SMulDistribClass G R P`, whose `smul_distrib_smul` field is the
-semilinearity law and which makes `algebraMap.smul'`
-  (`algebraMap R P (g • r) = g • algebraMap R P r`)
-available. For a tower of Galois extensions this class holds as an instance, so no compatibility
-argument is needed at the call site.
+* `FractionalIdeal.count_coe_eq_multiplicity`: the `v`-adic valuation of an ideal `J` of `R` is
+  `multiplicity v.asIdeal J`;
+* `FractionalIdeal.count_coe_mul_inv_eq_multiplicity_sub`: the same for `I * J⁻¹`, with `I` and
+  `J` nonzero ideals of `R`, as a difference of multiplicities;
+* `FractionalIdeal.count_eq_multiplicity_num_sub`: the same for a nonzero fractional ideal `I`,
+  written via `I.num` and `I.den`.
+
+The commented-out block (action of a group on fractional ideals) is a copy of code now in
+`SKW.Prereqs.Stickelberger`.
 -/
 
 -- Copied to `SKW.Prereqs.Stickelberger`.
@@ -214,3 +216,39 @@ end FractionRing
 
 end FractionalIdeal
 -/
+
+section count
+
+open scoped nonZeroDivisors
+
+open IsDedekindDomain HeightOneSpectrum FractionalIdeal Associates UniqueFactorizationMonoid
+
+variable {R : Type*} [CommRing R] [IsDedekindDomain R] (K : Type*) [Field K] [Algebra R K]
+  [IsFractionRing R K] (v : HeightOneSpectrum R)
+
+/-- The `v`-adic valuation of an ideal `J` is the multiplicity of `v` in `J`. -/
+theorem FractionalIdeal.count_coe_eq_multiplicity (J : Ideal R) :
+    count K v J = multiplicity v.asIdeal J := by
+  obtain rfl | hJ := eq_or_ne J 0
+  · simp [FractionalIdeal.count_zero]
+  rw [count_coe K v hJ, Ideal.count_associates_factors_eq hJ v.isPrime v.ne_bot,
+    count_normalizedFactors_eq_multiplicity hJ]
+
+/-- The `v`-adic valuation of `I * J⁻¹`, for nonzero ideals `I` and `J`, is the difference of the
+multiplicities of `v` in `I` and `J`. -/
+theorem FractionalIdeal.count_coe_mul_inv_eq_multiplicity_sub {I J : Ideal R} (hI : I ≠ 0)
+    (hJ : J ≠ 0) :
+    count K v (I * (J : FractionalIdeal R⁰ K)⁻¹) =
+      multiplicity v.asIdeal I - multiplicity v.asIdeal J := by
+  rw [count_mul K v (coeIdeal_ne_zero.mpr hI) (inv_ne_zero (coeIdeal_ne_zero.mpr hJ)), count_inv,
+    count_coe_eq_multiplicity, count_coe_eq_multiplicity, sub_eq_add_neg]
+
+/-- The `v`-adic valuation of a nonzero fractional ideal `I` is the difference of the
+multiplicities of `v` in `I.num` and in the ideal spanned by `I.den`. -/
+theorem FractionalIdeal.count_eq_multiplicity_num_sub {I : FractionalIdeal R⁰ K} (hI : I ≠ 0) :
+    count K v I =
+      multiplicity v.asIdeal I.num - multiplicity v.asIdeal (Ideal.span {(I.den : R)}) := by
+  rw [← count_coe_mul_inv_eq_multiplicity_sub K v (num_eq_zero_iff.not.mpr hI) (by simp),
+    coeIdeal_span_singleton, ← den_mul_self_eq_num', mul_comm, inv_mul_cancel_left₀ (by simp)]
+
+end count

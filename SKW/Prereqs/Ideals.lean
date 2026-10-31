@@ -27,6 +27,19 @@ def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike 
   left_inv _ := by simpa using comap_map_of_bijective _ (EquivLike.bijective e)
   right_inv _ := by simpa using Ideal.map_comap_of_surjective _ (EquivLike.surjective e) _
 
+theorem Ideal.mapEquiv_eq_bot_iff {R S F : Type*} [CommSemiring R] [CommSemiring S]
+    [EquivLike F R S] [RingHomClass F R S] (e : F) (I : Ideal R) :
+    I.mapEquiv e = ⊥ ↔ I = ⊥ := by
+  refine ⟨fun h ↦ ?_, fun h ↦ by simp [h]⟩
+  rwa [← RingEquiv.eq_symm_apply, mapEquiv_symm_apply,
+    comap_bot_of_injective _ (EquivLike.injective e)] at h
+
+theorem Ideal.mapEquiv_eq_top_iff {R S F : Type*} [CommSemiring R] [CommSemiring S]
+    [EquivLike F R S] [RingHomClass F R S] (e : F) (I : Ideal R) :
+    I.mapEquiv e = ⊤ ↔ I = ⊤ := by
+  refine ⟨fun h ↦ ?_, fun h ↦ by simp [h, map_top]⟩
+  rwa [← RingEquiv.eq_symm_apply, mapEquiv_symm_apply, comap_top] at h
+
 /-- For a maximal ideal `I`, `R ⧸ I` is already its own fraction field, so the canonical map to
 the residue field `κ(I) = ResidueField R_I` of the localization is an isomorphism. -/
 noncomputable def Ideal.residueFieldEquiv {R : Type*} [CommRing R] (I : Ideal R) [I.IsMaximal] :

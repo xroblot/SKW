@@ -619,91 +619,51 @@ def mulDistribMulAction : MulDistribMulAction G (FractionalIdeal S P) where
 
 end General
 
-section FractionRing
+section FractionField
 
 open scoped nonZeroDivisors
 
 variable {R : Type*} [CommRing R] {G : Type*} [Group G] [MulSemiringAction G R]
+  {K : Type*} [CommRing K] [Algebra R K] [MulSemiringAction G K] [SMulDistribClass G R K]
 
-/-- The `G`-action on `R` extends to a `G`-action on its fraction ring, via the unique
-extension of each ring automorphism of `R` to the localization. -/
-noncomputable instance : MulSemiringAction G (FractionRing R) where
-  smul g x := IsFractionRing.ringEquivOfRingEquiv
-    (K := FractionRing R) (L := FractionRing R) (MulSemiringAction.toRingEquiv G R g) x
-  one_smul x := by
-    have : (IsFractionRing.ringEquivOfRingEquiv (K := FractionRing R) (L := FractionRing R)
-        (MulSemiringAction.toRingEquiv G R (1 : G)) : FractionRing R →+* FractionRing R)
-        = RingHom.id _ :=
-      IsLocalization.ringHom_ext R⁰ (by ext r; simp)
-    exact RingHom.congr_fun this x
-  mul_smul g h x := by
-    have : (IsFractionRing.ringEquivOfRingEquiv (K := FractionRing R) (L := FractionRing R)
-        (MulSemiringAction.toRingEquiv G R (g * h)) : FractionRing R →+* FractionRing R) =
-        (IsFractionRing.ringEquivOfRingEquiv (K := FractionRing R) (L := FractionRing R)
-          (MulSemiringAction.toRingEquiv G R g) : FractionRing R →+* FractionRing R).comp
-          (IsFractionRing.ringEquivOfRingEquiv (K := FractionRing R) (L := FractionRing R)
-            (MulSemiringAction.toRingEquiv G R h)) :=
-      IsLocalization.ringHom_ext R⁰ (by ext r; simp)
-    exact RingHom.congr_fun this x
-  smul_zero g := map_zero _
-  smul_add g := map_add _
-  smul_one g := map_one _
-  smul_mul g := map_mul _
-
-@[simp]
-theorem fractionRing_smul_algebraMap (g : G) (r : R) :
-    g • algebraMap R (FractionRing R) r = algebraMap R (FractionRing R) (g • r) :=
-  IsFractionRing.ringEquivOfRingEquiv_algebraMap (MulSemiringAction.toRingEquiv G R g) r
-
-/-- Semilinearity over `R` of the action on the fraction ring. -/
-theorem fractionRing_smul_smul (g : G) (a : R) (x : FractionRing R) :
-    g • (a • x) = (g • a) • (g • x) := by
-  rw [Algebra.smul_def, smul_mul', fractionRing_smul_algebraMap, ← Algebra.smul_def]
-
-instance : SMulDistribClass G R (FractionRing R) where
-  smul_distrib_smul := fractionRing_smul_smul
-
-/-- The `G`-action on `R` induces a `G`-action on the fractional ideals of its fraction ring. -/
-noncomputable instance instMulDistribMulActionFractionRing :
-    MulDistribMulAction G (FractionalIdeal R⁰ (FractionRing R)) :=
+/-- The `G`-action on `R` and `K` induces a `G`-action on the fractional ideals of `K`. -/
+noncomputable instance : MulDistribMulAction G (FractionalIdeal R⁰ K) :=
   mulDistribMulAction (fun g _ hs => smul_mem_nonZeroDivisors g hs)
 
 @[simp]
-theorem mem_smul_fractionRing {g : G} {I : FractionalIdeal R⁰ (FractionRing R)}
-    {y : FractionRing R} : y ∈ g • I ↔ ∃ x ∈ I, g • x = y := mem_smulFractional _
+theorem mem_smul {g : G} {I : FractionalIdeal R⁰ K} {y : K} :
+    y ∈ g • I ↔ ∃ x ∈ I, g • x = y := mem_smulFractional _
 
 open scoped Pointwise in
-/-- The coercion `Ideal R → FractionalIdeal R⁰ (FractionRing R)` is `G`-equivariant: the action
-on ideals and the action on fractional ideals are compatible. -/
+/-- The coercion `Ideal R → FractionalIdeal R⁰ K` is `G`-equivariant: the action on ideals and the
+action on fractional ideals are compatible. -/
 @[simp]
 theorem coeIdeal_smul (g : G) (I : Ideal R) :
-    (↑(g • I) : FractionalIdeal R⁰ (FractionRing R))
-      = g • (I : FractionalIdeal R⁰ (FractionRing R)) := by
+    (↑(g • I) : FractionalIdeal R⁰ K) = g • (I : FractionalIdeal R⁰ K) := by
   refine coeToSubmodule_injective (Submodule.ext fun y => ?_)
   simp only [coe_coeIdeal, IsLocalization.mem_coeSubmodule]
   constructor
   · rintro ⟨b, hb, rfl⟩
-    refine ⟨algebraMap R (FractionRing R) (g⁻¹ • b),
+    refine ⟨algebraMap R K (g⁻¹ • b),
       ⟨g⁻¹ • b, (Ideal.mem_pointwise_smul_iff_inv_smul_mem).mp hb, rfl⟩, ?_⟩
-    change g • algebraMap R (FractionRing R) (g⁻¹ • b) = algebraMap R (FractionRing R) b
-    rw [fractionRing_smul_algebraMap, smul_inv_smul]
+    change g • algebraMap R K (g⁻¹ • b) = algebraMap R K b
+    rw [← algebraMap.smul', smul_inv_smul]
   · rintro ⟨_, ⟨a, ha, rfl⟩, rfl⟩
-    exact ⟨g • a, Ideal.smul_mem_pointwise_smul g a I ha,
-      (fractionRing_smul_algebraMap g a).symm⟩
+    exact ⟨g • a, Ideal.smul_mem_pointwise_smul g a I ha, algebraMap.smul' g a K⟩
 
 /-- The action on fractional ideals is compatible with `spanSingleton`. -/
 @[simp]
-theorem spanSingleton_smul (g : G) (x : FractionRing R) :
+theorem spanSingleton_smul [IsLocalization R⁰ K] (g : G) (x : K) :
     g • spanSingleton R⁰ x = spanSingleton R⁰ (g • x) := by
   ext y
-  simp only [mem_smul_fractionRing, mem_spanSingleton]
+  simp only [mem_smul, mem_spanSingleton]
   constructor
   · rintro ⟨_, ⟨a, rfl⟩, rfl⟩
-    exact ⟨g • a, (fractionRing_smul_smul g a x).symm⟩
+    exact ⟨g • a, (smul_distrib_smul g a x).symm⟩
   · rintro ⟨a, rfl⟩
-    exact ⟨(g⁻¹ • a) • x, ⟨g⁻¹ • a, rfl⟩, by rw [fractionRing_smul_smul, smul_inv_smul]⟩
+    exact ⟨(g⁻¹ • a) • x, ⟨g⁻¹ • a, rfl⟩, by rw [smul_distrib_smul, smul_inv_smul]⟩
 
-end FractionRing
+end FractionField
 
 end FractionalIdeal
 
@@ -714,6 +674,9 @@ open scoped nonZeroDivisors Pointwise
 open FractionalIdeal
 
 variable {G R : Type*} [Group G] [CommRing R] [IsDedekindDomain R] [MulSemiringAction G R]
+
+noncomputable instance : MulSemiringAction G (FractionRing R) :=
+  IsFractionRing.mulSemiringAction G R (FractionRing R)
 
 attribute [local instance] Units.mulDistribMulActionRight
 
