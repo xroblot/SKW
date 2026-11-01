@@ -145,54 +145,64 @@ lemma kw_exists_realUnit_torsion [IsCMField F] (hp' : Odd p) {α : 𝓞 F} {η :
     exact exists_eq_pow_of_pow_eq_pow_of_coprime (Nat.coprime_two_left.mpr hp') (by simp) key
   exact ⟨ζ, δ, hζ, fun hδ₀ ↦ by simp [hδ₀, zero_pow hp.out.ne_zero] at hδ, by rw [hη4, hδ]⟩
 
-open IntermediateField Polynomial in
-include hrF hIrr hμ in
-/-- If `𝔞 ^ p = (μ)`, then `L` is the cyclotomic extension `ℚ(ζ_{p²})`. -/
-lemma kw_unit_root_of_unity (hp' : Odd p) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) :
+open nonZeroDivisors in
+include hrF in
+/-- If `𝔞 ^ p = (μ)` for a fractional ideal `𝔞`, then `L` is the cyclotomic extension
+`ℚ(ζ_{p²})`. -/
+lemma kw_unit_root_of_unity {μ : F} [IsSplittingField F L (X ^ p - C μ)]
+    (hIrr : Irreducible (X ^ p - C μ)) (hp' : Odd p) {𝔞 : FractionalIdeal (𝓞 F)⁰ F}
+    (h𝔞 : 𝔞 ^ p = FractionalIdeal.spanSingleton (𝓞 F)⁰ μ) :
     IsCyclotomicExtension {p ^ 2} ℚ L := by
-  have : IsCMField F :=
-    IsCyclotomicExtension.Rat.isCMField F (S := {p}) <|
-      exists_eq_left.mpr <| (Nat.Prime.odd_iff hp.out).mp hp'
-  have hF : (primitiveRoots p F).Nonempty := IsCyclotomicExtension.primitiveRoots_nonempty p ℚ F
-  obtain ⟨α, η, hα, h⟩ := kw_mu_unit p F hμ h𝔞₀ h𝔞 (kw_class_trivial p F hrF hIrr h𝔞₀ h𝔞)
-  obtain ⟨ζ, δ, hζ, hδ₀, hηδ⟩ := kw_exists_realUnit_torsion p F hrF hμ hIrr hp' h
-  have h₁ : IsSplittingField F L (X ^ p - C (μ ^ 4 : F)) :=
-    isSplittingField_X_pow_sub_C_pow_of_coprime _ hF hIrr <| hp'.coprime_two_left.pow_left 2
-  have h₂ : Irreducible (X ^ p - C (μ ^ 4 : F)) := by
-    rw [irreducible_X_pow_sub_C_iff_of_prime hp.out] at hIrr ⊢
-    intro x hx
-    obtain ⟨u, v, huv⟩ := (hp'.coprime_two_left.pow_left 2).isCoprime
-    refine hIrr (x ^ u * μ ^ v) ?_
-    rw [mul_pow, ← zpow_natCast, ← zpow_natCast, ← zpow_mul, ← zpow_mul, mul_comm u, zpow_mul,
-      zpow_natCast, hx, ← zpow_natCast, ← zpow_mul, mul_comm _ u, ← zpow_add₀ (by simpa), huv,
-        zpow_one]
-  have h₃ : IsSplittingField F L (X ^ p - C (ζ.val : F)) := by
-    rw [h, RingOfIntegers.coe_eq_algebraMap, map_mul, mul_pow, hηδ, map_pow, pow_right_comm,
-      ← mul_assoc, mul_right_comm, ← mul_pow, mul_comm] at h₁ h₂
-    exact isSplittingField_X_pow_sub_C_of_mul_pow _ (by simpa [hα]) hF h₂
-  have hζ : IsPrimitiveRoot ζ.val.val p := by
-    refine IsPrimitiveRoot.iff_orderOf.mpr <| orderOf_eq_prime hζ fun h ↦ ?_
-    rw [h, map_one] at h₃
-    have := h₃.splits_iff.mp <| X_pow_sub_one_splits <| zeta_spec p ℚ F
-    rw [eq_comm, Subalgebra.bot_eq_top_iff_finrank_eq_one, hrF] at this
-    exact hp.out.ne_one this
-  let ξ := rootOfSplitsXPowSubC hp.out.pos (ζ.val : F) L
-  have hξ := rootOfSplitsXPowSubC_pow (ζ.val : F) L (n := p)
-  have hξ' : IsPrimitiveRoot ξ (p ^ 2) := by
-    rw [pow_two]
-    exact (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) L)).of_pow_eq hξ
-      hp.out.ne_zero
-      (by aesop)
-  have : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ := hξ'.intermediateField_adjoin_isCyclotomicExtension
-    ℚ
-  suffices IsCyclotomicExtension {p ^ 2} ℚ (⊤ : IntermediateField ℚ L) from
-    IsCyclotomicExtension.equiv _ ℚ (⊤ : IntermediateField ℚ L) topEquiv
-  have := (isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ _ ⊤ hξ').mpr
-  apply this
-  rw [eq_comm, eq_iff_finrank_eq_of_le le_top]
-  rw [finrank_top', ← finrank_mul_finrank ℚ F L, finrank p F, Nat.totient_prime hp.out, hrF,
-    IsCyclotomicExtension.Rat.finrank (p ^ 2) ℚ⟮ξ⟯, Nat.totient_prime_pow hp.out Nat.two_pos,
-    Nat.add_one_sub_one, pow_one, mul_comm]
+  sorry
+
+-- open IntermediateField Polynomial in
+-- include hrF hIrr hμ in
+-- /-- If `𝔞 ^ p = (μ)`, then `L` is the cyclotomic extension `ℚ(ζ_{p²})`. -/
+-- lemma kw_unit_root_of_unity (hp' : Odd p) (h𝔞₀ : 𝔞 ≠ ⊥) (h𝔞 : 𝔞 ^ p = span {μ}) :
+--     IsCyclotomicExtension {p ^ 2} ℚ L := by
+--   have : IsCMField F :=
+--     IsCyclotomicExtension.Rat.isCMField F (S := {p}) <|
+--       exists_eq_left.mpr <| (Nat.Prime.odd_iff hp.out).mp hp'
+--   have hF : (primitiveRoots p F).Nonempty := IsCyclotomicExtension.primitiveRoots_nonempty p ℚ F
+--   obtain ⟨α, η, hα, h⟩ := kw_mu_unit p F hμ h𝔞₀ h𝔞 (kw_class_trivial p F hrF hIrr h𝔞₀ h𝔞)
+--   obtain ⟨ζ, δ, hζ, hδ₀, hηδ⟩ := kw_exists_realUnit_torsion p F hrF hμ hIrr hp' h
+--   have h₁ : IsSplittingField F L (X ^ p - C (μ ^ 4 : F)) :=
+--     isSplittingField_X_pow_sub_C_pow_of_coprime _ hF hIrr <| hp'.coprime_two_left.pow_left 2
+--   have h₂ : Irreducible (X ^ p - C (μ ^ 4 : F)) := by
+--     rw [irreducible_X_pow_sub_C_iff_of_prime hp.out] at hIrr ⊢
+--     intro x hx
+--     obtain ⟨u, v, huv⟩ := (hp'.coprime_two_left.pow_left 2).isCoprime
+--     refine hIrr (x ^ u * μ ^ v) ?_
+--     rw [mul_pow, ← zpow_natCast, ← zpow_natCast, ← zpow_mul, ← zpow_mul, mul_comm u, zpow_mul,
+--       zpow_natCast, hx, ← zpow_natCast, ← zpow_mul, mul_comm _ u, ← zpow_add₀ (by simpa), huv,
+--         zpow_one]
+--   have h₃ : IsSplittingField F L (X ^ p - C (ζ.val : F)) := by
+--     rw [h, RingOfIntegers.coe_eq_algebraMap, map_mul, mul_pow, hηδ, map_pow, pow_right_comm,
+--       ← mul_assoc, mul_right_comm, ← mul_pow, mul_comm] at h₁ h₂
+--     exact isSplittingField_X_pow_sub_C_of_mul_pow _ (by simpa [hα]) hF h₂
+--   have hζ : IsPrimitiveRoot ζ.val.val p := by
+--     refine IsPrimitiveRoot.iff_orderOf.mpr <| orderOf_eq_prime hζ fun h ↦ ?_
+--     rw [h, map_one] at h₃
+--     have := h₃.splits_iff.mp <| X_pow_sub_one_splits <| zeta_spec p ℚ F
+--     rw [eq_comm, Subalgebra.bot_eq_top_iff_finrank_eq_one, hrF] at this
+--     exact hp.out.ne_one this
+--   let ξ := rootOfSplitsXPowSubC hp.out.pos (ζ.val : F) L
+--   have hξ := rootOfSplitsXPowSubC_pow (ζ.val : F) L (n := p)
+--   have hξ' : IsPrimitiveRoot ξ (p ^ 2) := by
+--     rw [pow_two]
+--     exact (hζ.map_of_injective (FaithfulSMul.algebraMap_injective (𝓞 F) L)).of_pow_eq hξ
+--       hp.out.ne_zero
+--       (by aesop)
+--   have : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ := hξ'.intermediateField_adjoin_isCyclotomicExtension
+--     ℚ
+--   suffices IsCyclotomicExtension {p ^ 2} ℚ (⊤ : IntermediateField ℚ L) from
+--     IsCyclotomicExtension.equiv _ ℚ (⊤ : IntermediateField ℚ L) topEquiv
+--   have := (isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ _ ⊤ hξ').mpr
+--   apply this
+--   rw [eq_comm, eq_iff_finrank_eq_of_le le_top]
+--   rw [finrank_top', ← finrank_mul_finrank ℚ F L, finrank p F, Nat.totient_prime hp.out, hrF,
+--     IsCyclotomicExtension.Rat.finrank (p ^ 2) ℚ⟮ξ⟯, Nat.totient_prime_pow hp.out Nat.two_pos,
+--     Nat.add_one_sub_one, pow_one, mul_comm]
 
 end IsScalarTower
 

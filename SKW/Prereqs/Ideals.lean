@@ -40,6 +40,12 @@ theorem Ideal.mapEquiv_eq_top_iff {R S F : Type*} [CommSemiring R] [CommSemiring
   refine ⟨fun h ↦ ?_, fun h ↦ by simp [h, map_top]⟩
   rwa [← RingEquiv.eq_symm_apply, mapEquiv_symm_apply, comap_top] at h
 
+theorem IsDedekindDomain.HeightOneSpectrum.equivOfRingEquiv_apply_asIdeal {R S : Type*}
+    [CommRing R] [CommRing S] (f : R ≃+* S) (v : HeightOneSpectrum R) :
+    (equivOfRingEquiv f v).asIdeal = v.asIdeal.map f := by
+  simp only [equivOfRingEquiv_apply, ← RingEquiv.toRingHom_eq_coe, comap_asIdeal]
+  exact Ideal.comap_symm f
+
 /-- For a maximal ideal `I`, `R ⧸ I` is already its own fraction field, so the canonical map to
 the residue field `κ(I) = ResidueField R_I` of the localization is an isomorphism. -/
 noncomputable def Ideal.residueFieldEquiv {R : Type*} [CommRing R] (I : Ideal R) [I.IsMaximal] :

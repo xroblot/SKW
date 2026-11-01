@@ -12,6 +12,9 @@ public import Mathlib.GroupTheory.QuotientGroup.Basic
 public import Mathlib.GroupTheory.GroupAction.Quotient
 
 public import Mathlib.GroupTheory.Nilpotent
+public import Mathlib.Algebra.GroupWithZero.Associated
+public import Mathlib.RingTheory.Multiplicity
+public import Mathlib.RingTheory.UniqueFactorizationDomain.FactorSet
 
 public import SKW.PRed2Mathlib.MultiplicityPow
 
@@ -302,3 +305,52 @@ theorem MulAction.orbitProdStabilizerEquivGroup_smul {G X : Type*} [Group G] [Mu
     Equiv.symm_apply_apply]
 
 end
+
+section AssociatesCount
+
+@[simp]
+theorem Associates.count_top {α : Type*} [CommMonoidWithZero α] [DecidableEq (Associates α)]
+    [∀ p : Associates α, Decidable (Irreducible p)] (p : Associates α) :
+    p.count (⊤ : FactorSet α) = 0 := by
+  rw [count]
+  split_ifs <;> rfl
+
+/-- Corrected `Associates.prime_pow_dvd_iff_le`: despite its name, that lemma is stated with `≤`;
+this version uses `∣` and is meant to replace it upstream. -/
+theorem Associates.prime_pow_dvd_iff_le' {α : Type*} [CommMonoidWithZero α]
+    [UniqueFactorizationMonoid α] [DecidableEq (Associates α)]
+    [∀ p : Associates α, Decidable (Irreducible p)] {m p : Associates α} (h₁ : m ≠ 0)
+    (h₂ : Irreducible p) {k : ℕ} :
+    p ^ k ∣ m ↔ k ≤ p.count m.factors :=
+  Associates.prime_pow_dvd_iff_le h₁ h₂
+
+variable {α β : Type*} [CommMonoidWithZero α] [UniqueFactorizationMonoid α]
+  [DecidableEq (Associates α)] [∀ p : Associates α, Decidable (Irreducible p)]
+  [CommMonoidWithZero β] [UniqueFactorizationMonoid β]
+  [DecidableEq (Associates β)] [∀ p : Associates β, Decidable (Irreducible p)]
+
+namespace Associates
+
+theorem count_factors_eq_multiplicity {a p : Associates α} (hp : Irreducible p) :
+    p.count a.factors = multiplicity p a := by
+  obtain rfl | ha := eq_or_ne a 0
+  · simp
+  simp [eq_comm, (FiniteMultiplicity.of_not_isUnit hp.not_isUnit ha).multiplicity_eq_iff,
+    prime_pow_dvd_iff_le' ha hp]
+
+theorem count_mk_factors_mk_eq_multiplicity {a p : α} (hp : Irreducible p) :
+    (Associates.mk p).count (Associates.mk a).factors = multiplicity p a := by
+  rw [count_factors_eq_multiplicity (irreducible_mk.mpr hp)]
+  exact multiplicity_eq_of_emultiplicity_eq emultiplicity_mk_eq_emultiplicity
+
+theorem count_congr_factors_congr (e : α ≃* β) (p a : Associates α) :
+    (congr e p).count (congr e a).factors = p.count a.factors := by
+  by_cases hp : Irreducible p
+  · rw [count_factors_eq_multiplicity hp, count_factors_eq_multiplicity, multiplicity_map_eq]
+    rwa [MulEquiv.irreducible_iff]
+  · rw [count_reducible hp, count_reducible, Pi.zero_apply, Pi.zero_apply]
+    rwa [MulEquiv.irreducible_iff]
+
+end Associates
+
+end AssociatesCount

@@ -72,16 +72,15 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
     rwa [hinf, mul_one, hK, hζdeg] at this
   obtain ⟨hGal, hCyc, hrF⟩ := kw_kummer₀ p (F := ℚ⟮ζ⟯) (L := M) hMdeg
   obtain ⟨μ, hμ, hS⟩ := kw_kummer p ℚ⟮ζ⟯ hrF
-  have hIrr : Irreducible (X ^ p - C (algebraMap (𝓞 ℚ⟮ζ⟯) ℚ⟮ζ⟯ μ)) := by
+  have hIrr : Irreducible (X ^ p - C μ) := by
     rw [irreducible_X_pow_sub_C_iff_of_prime hp.out]
     intro b hb
     have : Module.Free ℚ⟮ζ⟯ M := Module.Free.of_divisionRing _ _
     have := hS.splits_iff.mp (X_pow_sub_C_splits_of_isPrimitiveRoot (zeta_spec p ℚ ℚ⟮ζ⟯) hb)
     rw [eq_comm, Subalgebra.bot_eq_top_iff_finrank_eq_one, hrF] at this
     exact hp.out.ne_one this
-  obtain ⟨𝔞, h𝔞₀, h𝔞⟩ := kw_mu_pth_power_ideal p ℚ⟮ζ⟯ hrF hμ hIrr hMram hp'
-  have hcyc : IsCyclotomicExtension {p ^ 2} ℚ M :=
-    kw_unit_root_of_unity p ℚ⟮ζ⟯ hrF hμ hIrr hp' h𝔞₀ h𝔞
+  obtain ⟨𝔞, h𝔞₀, h𝔞⟩ := kw_mu_pth_power_ideal p ℚ⟮ζ⟯ hrF hIrr hMram hp'
+  have hcyc : IsCyclotomicExtension {p ^ 2} ℚ M := kw_unit_root_of_unity p ℚ⟮ζ⟯ hrF hIrr hp' h𝔞
   have hMeq : M = ℚ⟮ξ⟯ :=
     (IntermediateField.isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ A M hξ).mp hcyc
   exact le_sup_left.trans hMeq.le

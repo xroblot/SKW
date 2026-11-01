@@ -3,9 +3,11 @@ module
 public import Mathlib.Algebra.Ring.Action.Basic
 public import Mathlib.Algebra.Ring.Action.Group
 public import Mathlib.RingTheory.DedekindDomain.Factorization
+public import Mathlib.RingTheory.FractionalIdeal.Extended
 public import Mathlib.RingTheory.FractionalIdeal.Operations
 public import Mathlib.RingTheory.Localization.FractionRing
 
+public import SKW.Prereqs.Ideals
 public import SKW.Prereqs.Stickelberger
 
 set_option linter.style.header false
@@ -217,6 +219,28 @@ end FractionRing
 end FractionalIdeal
 -/
 
+namespace IsDedekindDomain.HeightOneSpectrum
+
+open scoped Pointwise
+
+variable {G R : Type*} [Group G] [CommRing R] [MulSemiringAction G R]
+
+/-- A group acting on `R` by ring automorphisms acts on the height one primes of `R`. -/
+instance : MulAction G (HeightOneSpectrum R) where
+  smul g v := ⟨g • v.asIdeal, inferInstance, by simpa [Ideal.smul_eq_bot_iff] using v.ne_bot⟩
+  one_smul v := HeightOneSpectrum.ext (one_smul G v.asIdeal)
+  mul_smul g h v := HeightOneSpectrum.ext (mul_smul g h v.asIdeal)
+
+@[simp]
+theorem smul_asIdeal (g : G) (v : HeightOneSpectrum R) : (g • v).asIdeal = g • v.asIdeal := rfl
+
+theorem smul_eq_equivOfRingEquiv (g : G) (v : HeightOneSpectrum R) :
+    g • v = equivOfRingEquiv (MulSemiringAction.toRingEquiv G R g) v := by
+  apply HeightOneSpectrum.ext
+  rw [smul_asIdeal, equivOfRingEquiv_apply_asIdeal, Ideal.pointwise_smul_def', Ideal.mapEquiv_apply]
+
+end IsDedekindDomain.HeightOneSpectrum
+
 section count
 
 open scoped nonZeroDivisors
@@ -252,3 +276,73 @@ theorem FractionalIdeal.count_eq_multiplicity_num_sub {I : FractionalIdeal R⁰ 
     coeIdeal_span_singleton, ← den_mul_self_eq_num', mul_comm, inv_mul_cancel_left₀ (by simp)]
 
 end count
+
+section FractionalIdealCount
+
+open scoped nonZeroDivisors
+open IsDedekindDomain HeightOneSpectrum
+
+variable {R S : Type*} [CommRing R] [CommRing S] [IsDedekindDomain S]
+  (K L : Type*) [Field K] [Field L] [Algebra R K] [IsFractionRing R K] [Algebra S L]
+  [IsFractionRing S L]
+
+theorem FractionalIdeal.extended_eq_map_num_mul_inv {f : R →+* S} (hf : R⁰ ≤ S⁰.comap f)
+    (I : FractionalIdeal R⁰ K) :
+    I.extended L hf = (I.num.map f) * (Ideal.span {f I.den} : FractionalIdeal S⁰ L)⁻¹ := by
+  rw [eq_mul_inv_iff_mul_eq₀, mul_comm]
+  · rw [← Set.image_singleton, ← Ideal.map_span, ← extended_coeIdeal_eq_map (K := K) L hf,
+      ← extended_mul, coeIdeal_span_singleton, den_mul_self_eq_num', extended_coeIdeal_eq_map]
+  · rw [coeIdeal_ne_zero, ne_eq, Ideal.span_singleton_eq_bot, ← ne_eq]
+    exact nonZeroDivisors.ne_zero (hf I.den.2)
+
+theorem FractionalIdeal.ringEquivOfRingEquiv_eq_extended [IsDomain R] (f : R ≃+* S)
+    (I : FractionalIdeal R⁰ K) :
+    ringEquivOfRingEquiv K L f I =
+      I.extended L (nonZeroDivisors_le_comap_nonZeroDivisors_of_injective (f : R →+* S)
+        fun _ _ h ↦ f.injective h) := by
+  rw [← coeToSubmodule_inj, coe_extended_eq_span, ringEquivOfRingEquiv_apply, coe_mk,
+    ← Submodule.span_eq (Submodule.map _ _), Submodule.map_coe]
+  rfl
+
+theorem FractionalIdeal.ringEquivOfRingEquiv_eq_map_num_mul_inv [IsDomain R] (f : R ≃+* S)
+    (I : FractionalIdeal R⁰ K) :
+    ringEquivOfRingEquiv K L f I =
+      (I.num.map f) * (Ideal.span {f I.den} : FractionalIdeal S⁰ L)⁻¹ := by
+  rw [ringEquivOfRingEquiv_eq_extended, extended_eq_map_num_mul_inv, Ideal.map_coe,
+    RingEquiv.coe_toRingHom]
+
+theorem FractionalIdeal.count_ringEquivOfRingEquiv [IsDedekindDomain R] (f : R ≃+* S)
+    (v : HeightOneSpectrum R) (I : FractionalIdeal R⁰ K) :
+    count L (equivOfRingEquiv f v) (ringEquivOfRingEquiv K L f I) = count K v I := by
+  by_cases hI : I = 0
+  · simp [hI, count_zero]
+  rw [ringEquivOfRingEquiv_eq_map_num_mul_inv, ← Ideal.mapEquiv_apply, count_mul, count_inv,
+    count_coe_eq_multiplicity, count_coe_eq_multiplicity, equivOfRingEquiv_apply_asIdeal,
+    ← Set.image_singleton, ← Ideal.map_span, ← Ideal.mapEquiv_apply, ← Ideal.mapEquiv_apply,
+    multiplicity_map_eq, multiplicity_map_eq, Int.add_neg_eq_sub,
+    ← count_eq_multiplicity_num_sub _ _ hI]
+  · rw [coeIdeal_ne_zero, ne_eq, Ideal.mapEquiv_eq_bot_iff]
+    exact num_eq_zero_iff.not.mpr hI
+  · simp [- spanSingleton_inv]
+
+theorem FractionalIdeal.count_smul [IsDedekindDomain R] {G : Type*} [Group G]
+    [MulSemiringAction G R] [MulSemiringAction G K] [SMulDistribClass G R K]
+    (v : HeightOneSpectrum R) (I : FractionalIdeal R⁰ K) (σ : G) :
+    count K (σ • v) (σ • I) = count K v I := by
+  rw [← count_ringEquivOfRingEquiv K K (MulSemiringAction.toRingEquiv G R σ) v I]
+  congr
+  · rw [← smul_eq_equivOfRingEquiv]
+  -- TODO: the `have` below is missing API, a lemma stating
+  -- `IsFractionRing.ringEquivOfRingEquiv (toRingEquiv G R σ) = toRingEquiv G K σ`.
+  -- This goal should be revisited once the action on fractional ideals is defined via `extended`
+  -- (see `SKW/Sandbox.lean`), since the proof depends on that definition.
+  · ext x
+    rw [mem_smul, ← mem_coe, ringEquivOfRingEquiv_apply, coe_mk, Submodule.mem_map]
+    have : (IsFractionRing.ringEquivOfRingEquiv (K := K) (L := K)
+        (MulSemiringAction.toRingEquiv G R σ)).toRingHom = MulSemiringAction.toRingHom G K σ :=
+      IsLocalization.ringHom_ext R⁰ <| RingHom.ext fun r ↦ by
+        simp [algebraMap.smul']
+    exact exists_congr fun y ↦ and_congr_right fun _ ↦
+      Eq.congr_left (RingHom.congr_fun this y).symm
+
+end FractionalIdealCount
