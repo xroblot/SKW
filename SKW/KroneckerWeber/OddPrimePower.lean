@@ -5,7 +5,7 @@ public import Mathlib.NumberTheory.NumberField.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.RingTheory.ZMod.UnitsCyclic
 
-public import SKW.KroneckerWeber.Basic
+public import SKW.KroneckerWeber.KroneckerWeber
 public import SKW.KroneckerWeber.ClassGroup
 public import SKW.KroneckerWeber.Reduction
 public import SKW.Prereqs.Unramified
@@ -79,7 +79,7 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ 
     have := hS.splits_iff.mp (X_pow_sub_C_splits_of_isPrimitiveRoot (zeta_spec p ℚ ℚ⟮ζ⟯) hb)
     rw [eq_comm, Subalgebra.bot_eq_top_iff_finrank_eq_one, hrF] at this
     exact hp.out.ne_one this
-  obtain ⟨𝔞, h𝔞₀, h𝔞⟩ := kw_mu_pth_power_ideal p ℚ⟮ζ⟯ hrF hIrr hMram hp'
+  obtain ⟨𝔞, h𝔞⟩ := kw_mu_pth_power_ideal p ℚ⟮ζ⟯ hrF hIrr hMram hp'
   have hcyc : IsCyclotomicExtension {p ^ 2} ℚ M := kw_unit_root_of_unity p ℚ⟮ζ⟯ hrF hIrr hp' h𝔞
   have hMeq : M = ℚ⟮ξ⟯ :=
     (IntermediateField.isCyclotomicExtension_singleton_iff_eq_adjoin (p ^ 2) ℚ A M hξ).mp hcyc

@@ -46,6 +46,17 @@ theorem IsDedekindDomain.HeightOneSpectrum.equivOfRingEquiv_apply_asIdeal {R S :
   simp only [equivOfRingEquiv_apply, ← RingEquiv.toRingHom_eq_coe, comap_asIdeal]
   exact Ideal.comap_symm f
 
+/-- Every height one prime of `R` lies below a height one prime of `S`. -/
+theorem IsDedekindDomain.HeightOneSpectrum.under_surjective {R S : Type*} [CommRing R]
+    [CommRing S] [IsDedekindDomain R] [IsDomain S] [Algebra R S] [Algebra.IsIntegral R S]
+    [Module.IsTorsionFree R S] :
+    Function.Surjective
+      (HeightOneSpectrum.under R : HeightOneSpectrum S → HeightOneSpectrum R) := by
+  intro v
+  obtain ⟨Q, hQ, hQ'⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := S) v.asIdeal
+  exact ⟨⟨Q, hQ.isPrime, Ideal.ne_bot_of_liesOver_of_ne_bot v.ne_bot Q⟩,
+    HeightOneSpectrum.ext <| by simp [under_asIdeal, (Ideal.liesOver_iff _ _).mp hQ']⟩
+
 /-- For a maximal ideal `I`, `R ⧸ I` is already its own fraction field, so the canonical map to
 the residue field `κ(I) = ResidueField R_I` of the localization is an isomorphism. -/
 noncomputable def Ideal.residueFieldEquiv {R : Type*} [CommRing R] (I : Ideal R) [I.IsMaximal] :
@@ -165,32 +176,51 @@ theorem Ideal.IsDedekindDomain.prime_of_maximal {R : Type*} [CommRing R] [CharZe
 -- does, the `rw` below goes, and `ramificationIdx'_ne_zero` becomes
 -- `ramificationIdx_pos_of_isDedekindDomain'`.
 theorem Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' {R : Type*} [CommRing R]
-    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul
-      R S]
-    {v : Ideal R} {w : Ideal S} (I : Ideal R) (hv : Irreducible v) (hw : Irreducible w)
-    (hw_bot : w ≠ ⊥) [w.LiesOver v] :
+    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R]
+    [FaithfulSMul R S] {v : Ideal R} {w : Ideal S} (I : Ideal R) (hv : v ≠ ⊥) [w.IsPrime]
+    (hw : w ≠ ⊥) [w.LiesOver v] :
     emultiplicity w (map (algebraMap R S) I) = w.ramificationIdx R * emultiplicity v I := by
-  have : w.IsPrime := (prime_iff_isPrime hw_bot).mp hw.prime
-  rw [← Ideal.ramificationIdx'_eq_ramificationIdx v w hv.ne_zero]
+  have := isPrime_of_liesOver w v
+  rw [← Ideal.ramificationIdx'_eq_ramificationIdx v w hv]
   by_cases hI : I = ⊥
   · rw [hI, map_bot, ← zero_eq_bot, ← zero_eq_bot, emultiplicity_zero_right,
     emultiplicity_zero_right, ENat.mul_top]
     simp only [ne_eq, Nat.cast_eq_zero]
-    apply ramificationIdx'_ne_zero (map_ne_bot_of_ne_bot <| hv.ne_zero) (isPrime_of_prime hw.prime)
+    apply ramificationIdx'_ne_zero (map_ne_bot_of_ne_bot hv) ‹_›
     rw [map_le_iff_le_comap, over_def w v]
-  · exact emultiplicity_map_eq_ramificationIdx'_mul hI hv hw hw_bot
+  · exact emultiplicity_map_eq_ramificationIdx'_mul hI
+      (irreducible_iff_prime.mpr ((prime_iff_isPrime hv).mpr ‹_›))
+      (irreducible_iff_prime.mpr ((prime_iff_isPrime hw).mpr ‹_›)) hw
+
+theorem Ideal.IsDedekindDomain.multiplicity_map_eq_ramificationIdx_mul {R : Type*} [CommRing R]
+    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R]
+    [FaithfulSMul R S] {v : Ideal R} {w : Ideal S} (I : Ideal R) (hv : v ≠ ⊥) [w.IsPrime]
+    (hw : w ≠ ⊥) [w.LiesOver v] :
+    multiplicity w (map (algebraMap R S) I) = w.ramificationIdx R * multiplicity v I := by
+  by_cases hI : I = ⊥
+  · simp [hI]
+  have := isPrime_of_liesOver w v
+  have h := emultiplicity_map_eq_ramificationIdx_mul' I hv hw
+  rw [(FiniteMultiplicity.of_not_isUnit (isUnit_iff.not.mpr IsPrime.ne_top')
+      (map_ne_bot_of_ne_bot hI)).emultiplicity_eq_multiplicity,
+    (FiniteMultiplicity.of_not_isUnit (isUnit_iff.not.mpr IsPrime.ne_top')
+      hI).emultiplicity_eq_multiplicity] at h
+  exact mod_cast h
 
 theorem Ideal.IsDedekindDomain.ramificationIdx_mul_emultiplicity_under_eq {R : Type*} [CommRing R]
-    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R] [FaithfulSMul
-      R S]
-    [Algebra.IsIntegral R S] {w : Ideal S} (hw : Irreducible w) (hw_bot : w ≠ ⊥) {I : Ideal R} :
+    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R]
+    [FaithfulSMul R S] [Algebra.IsIntegral R S] {w : Ideal S} [w.IsPrime] (hw : w ≠ ⊥)
+    {I : Ideal R} :
     w.ramificationIdx R * emultiplicity (under R w) I =
-        emultiplicity w (map (algebraMap R S) I) := by
-  have : w.IsPrime := (prime_iff_isPrime hw_bot).mp hw.prime
-  have : Irreducible (comap (algebraMap R S) w) :=
-    irreducible_iff_prime.mpr <|
-      (prime_iff_isPrime (under_ne_bot R hw_bot)).mpr (IsPrime.under R w)
-  exact (emultiplicity_map_eq_ramificationIdx_mul' I this hw hw_bot).symm
+        emultiplicity w (map (algebraMap R S) I) :=
+  (emultiplicity_map_eq_ramificationIdx_mul' I (under_ne_bot R hw) hw).symm
+
+theorem Ideal.IsDedekindDomain.ramificationIdx_mul_multiplicity_under_eq {R : Type*} [CommRing R]
+    {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R]
+    [FaithfulSMul R S] [Algebra.IsIntegral R S] {w : Ideal S} [w.IsPrime] (hw : w ≠ ⊥)
+    {I : Ideal R} :
+    w.ramificationIdx R * multiplicity (under R w) I = multiplicity w (map (algebraMap R S) I) :=
+  (multiplicity_map_eq_ramificationIdx_mul I (under_ne_bot R hw) hw).symm
 
 open Pointwise in
 @[simp]

@@ -5,6 +5,7 @@ public import Mathlib.GroupTheory.SpecificGroups.Cyclic
 public import Mathlib.GroupTheory.FiniteAbelian.Basic
 public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
 public import Mathlib.RingTheory.IntegralDomain
+public import Mathlib.RingTheory.Localization.FractionRing
 public import Mathlib.Algebra.CharP.Reduced
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
 public import Mathlib.Algebra.Group.Subgroup.Order
@@ -30,6 +31,17 @@ theorem Algebra.adjoin_singleton_add {R A : Type*} [CommRing R] [Ring A] [Algebr
   · apply adjoin_singleton_le
     convert Subalgebra.sub_mem _ (self_mem_adjoin_singleton R _) (algebraMap_mem _ y)
     rw [add_sub_cancel_right]
+
+open Function nonZeroDivisors in
+/-- The map of fraction fields induced by an injective `algebraMap A B` is `algebraMap K L`. -/
+@[simp]
+theorem IsFractionRing.map_algebraMap_apply {A B K L : Type*} [CommRing A] [CommRing B] [IsDomain B]
+    [CommRing K] [Algebra A K] [IsFractionRing A K] [CommRing L] [Algebra B L] [IsFractionRing B L]
+    [Algebra A B] [Algebra K L] [Algebra A L] [IsScalarTower A B L] [IsScalarTower A K L]
+    (hj : Injective (algebraMap A B)) (x : K) :
+    map hj x = algebraMap K L x :=
+  RingHom.congr_fun (IsLocalization.ringHom_ext A⁰ <| RingHom.ext fun a ↦ by
+    simp [map, ← IsScalarTower.algebraMap_apply]) x
 
 /-! ### MulEquiv / AlgHom / AlgEquiv -/
 

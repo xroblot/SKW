@@ -28,9 +28,9 @@ import SKW.Prereqs.Cotangent
 import SKW.Prereqs.TameRamification
 import SKW.Stickelberger.Stickelberger
 import SKW.Stickelberger.Teichmuller
-import SKW.KroneckerWeber.Basic
+import SKW.KroneckerWeber.KroneckerWeber
 import SKW.KroneckerWeber.ClassGroup
 import SKW.KroneckerWeber.Reduction
 import SKW.KroneckerWeber.OddPrimePower
 import SKW.KroneckerWeber.TwoPower
-import SKW.KroneckerWeber.KroneckerWeber
+import SKW.KroneckerWeber.Final

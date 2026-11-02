@@ -13,7 +13,7 @@ public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
 public import Mathlib.Data.Nat.Factors
 public import Mathlib.NumberTheory.NumberField.Discriminant.Basic
 
-public import SKW.KroneckerWeber.Basic
+public import SKW.KroneckerWeber.KroneckerWeber
 public import SKW.KroneckerWeber.Reduction
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.CMField

@@ -1,155 +1,201 @@
 module
 
-public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+public import SKW.Prereqs.CyclotomicField
+public import SKW.Prereqs.FractionalIdeal
+public import SKW.Prereqs.Ideals
+public import SKW.Prereqs.KummerExtension
+public import SKW.Prereqs.OtherPR
+public import SKW.Prereqs.Unramified
 
-public import SKW.KroneckerWeber.OddPrimePower
-public import SKW.KroneckerWeber.TwoPower
-public import SKW.Prereqs.Instances
+public import Mathlib.Algebra.FiniteSupport.Basic
+public import Mathlib.Algebra.GroupWithZero.Torsion
 
 set_option linter.style.header false
 
 @[expose] public section
 
 /-!
-# The Kronecker-Weber theorem
+# The Kummer step of the Kronecker-Weber theorem
 
-Every abelian extension of `ℚ` is contained in a cyclotomic field.
+Let `p` be an odd prime, `F = ℚ(ζ_p)` and `L/F` a cyclic extension of degree `p`, with `L/ℚ`
+abelian.
 
-## Proof outline
-
-1. Every finite abelian extension is a compositum of cyclic prime power degree extensions
-   (`IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top`).
-2. Each cyclic prime power degree extension can be replaced, up to a cyclotomic factor, by one
-   unramified outside `p` (`kw_reduce_to_unramified_outside_p` / `kw_ramification_reduction`).
-3. Cyclic prime power degree extensions unramified outside `p` are cyclotomic:
-   - Odd prime `p`: `prop_kw_odd_prime_power`.
-   - `p = 2`: `prop_kw_2_power`.
-4. A compositum of cyclotomic fields is cyclotomic.
+This file establishes
+- `kw_kummer₀`: if `L/ℚ` is Galois of degree `p * (p - 1)`, then `L/F` is cyclic of degree `p`.
+- `kw_kummer`: `L/F` is a Kummer extension `F(ᵖ√μ)` for some nonzero `μ ∈ F`.
+- `kw_abelian_kummer`: the Kummer criterion for `L/ℚ` to be abelian.
+- `kw_split_prime`: if `p ∤ v(μ)`, then the stabilizer of `v` in `Gal(F/ℚ)` is trivial.
+- `kw_mu_val_p`: if `L/F` is unramified outside `p`, then `p ∣ v(μ)` for every prime `v` of `F`.
+- `kw_mu_pth_power_ideal`: if `L/F` is unramified outside `p`, then `(μ) = 𝔞 ^ p` for some
+  fractional ideal `𝔞` of `F`.
 -/
 
-open NumberField IntermediateField IsCyclotomicExtension
+open NumberField Ideal Polynomial Pointwise IntermediateField Module IsCyclotomicExtension
+  nonZeroDivisors IsDedekindDomain FractionalIdeal
 
-set_option backward.isDefEq.respectTransparency false in
-/-- Seam between the ramification reduction and the base cases: a cyclic extension of `ℚ` of
-prime-power degree `pᵐ` is contained in a cyclotomic field `ℚ⟮ξ n⟯` (`n > 0`). Combines
-`kw_reduce_to_unramified_outside_p` (removing ramification away from `p`, up to a cyclotomic factor)
-with `prop_kw_odd_prime_power` / `prop_kw_2_power` (the unramified-outside-`p` base cases). This is
-exactly the fact discharging the `hK` hypothesis of `kw_reduce_to_prime_power`. -/
-lemma kw_cyclic_primePow_le_cyclotomic {p : ℕ} (hp : p.Prime) {A : Type*} [Field A] [CharZero A]
-    {ξ : ℕ → A} (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K]
-    [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)] (m : ℕ) (hK : Module.finrank ℚ K = p ^ m) :
-    ∃ n, 0 < n ∧ K ≤ ℚ⟮ξ n⟯ := by
-  have : Fact p.Prime := ⟨hp⟩
-  obtain ⟨F, _, _, _, ⟨k, hF₁⟩, hF₂, n₀, hn₀, hKF⟩ :=
-    kw_reduce_to_unramified_outside_p ξ hξ K m hK
-  obtain ⟨c, hc, hF₃⟩ : ∃ c, 0 < c ∧ F ≤ ℚ⟮ξ c⟯ := by
-    obtain rfl | hk := k.eq_zero_or_pos
-    · exact ⟨1, one_pos, by simp_all⟩
-    · obtain rfl | hodd := eq_or_ne p 2
-      · exact ⟨2 ^ (k + 2), by positivity, prop_kw_2_power hξ k F hF₁ hF₂⟩
-      · have : Fact (Odd p) := ⟨hp.odd_of_ne_two hodd⟩
-        have : IsAbelianGalois ℚ F := .of_isCyclic ℚ F
-        exact ⟨p ^ (k + 1), pow_pos (Fact.out : p.Prime).pos _,
-          prop_kw_odd_prime_power p hξ k hk F hF₁ hF₂⟩
-  refine ⟨c.lcm n₀, Nat.pos_of_ne_zero (Nat.lcm_ne_zero hc.ne' hn₀.ne'), ?_⟩
-  have : K ≤ K ⊔ ℚ⟮ξ n₀⟯ := le_sup_left
-  refine le_trans this ?_
-  have : ℚ⟮ξ (c.lcm n₀)⟯ = ℚ⟮ξ c⟯ ⊔ ℚ⟮ξ n₀⟯ := by
-    have : NeZero c := ⟨hc.ne'⟩
-    have : NeZero n₀ := ⟨hn₀.ne'⟩
-    have : NeZero (c.lcm n₀) := ⟨Nat.lcm_ne_zero (NeZero.ne _) (NeZero.ne _)⟩
-    have : IsCyclotomicExtension {c.lcm n₀} ℚ ℚ⟮ξ (c.lcm n₀)⟯ :=
-      (hξ (c.lcm n₀)).intermediateField_adjoin_isCyclotomicExtension' ℚ
-    have : IsCyclotomicExtension {c.lcm n₀} ℚ ↑(ℚ⟮ξ c⟯ ⊔ ℚ⟮ξ n₀⟯) := by
-      have : IsCyclotomicExtension {c} ℚ ℚ⟮ξ c⟯ :=
-          (hξ c).intermediateField_adjoin_isCyclotomicExtension' ℚ
-      have : IsCyclotomicExtension {n₀} ℚ ℚ⟮ξ n₀⟯ :=
-          (hξ n₀).intermediateField_adjoin_isCyclotomicExtension' ℚ
-      exact isCyclotomicExtension_lcm_sup ℚ A _ _ _ _
-    exact IntermediateField.isCyclotomicExtension_eq {c.lcm n₀} ℚ _ _ _
-  rw [this, hKF]
-  exact sup_le_sup_right hF₃ _
+noncomputable section
 
-set_option backward.isDefEq.respectTransparency false in
-lemma kw_reduce_to_prime_power_aux {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
-    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K]
-    [IsAbelianGalois ℚ K] {ι : Type*} (S : Finset ι) (C : ι → IntermediateField ℚ A)
-    (hC : ∀ i, ∃ n, 0 < n ∧ C i ≤ ℚ⟮ξ n⟯) (htop : ⨆ i ∈ S, C i = K) :
-    ∃ n : ℕ, 0 < n ∧ K ≤ ℚ⟮ξ n⟯ := by
-  classical
-  induction S using Finset.induction generalizing K with
-  | empty =>
-      refine ⟨1, zero_lt_one, ?_⟩
-      simp only [Finset.notMem_empty, not_false_eq_true, iSup_neg, iSup_bot] at htop
-      simp [← htop]
-  | insert i S _ hi =>
-      rw [Finset.iSup_insert] at htop
-      obtain ⟨n, hn₀, hn₁⟩ := hC i
-      let : Algebra ↑(⨆ i ∈ S, C i) K := (inclusion (htop ▸ le_sup_right)).toAlgebra
-      have : NumberField ↑(⨆ i ∈ S, C i) := NumberField.of_tower ℚ K _
-      have : IsAbelianGalois ℚ ↑(⨆ i ∈ S, C i) :=  IsAbelianGalois.tower_bot ℚ _ K
-      obtain ⟨m, hm₀, hm₁⟩ := hi (⨆ i ∈ S, C i) rfl
-      have : NeZero n := ⟨hn₀.ne'⟩
-      have : NeZero m := ⟨hm₀.ne'⟩
-      have : NeZero (n.lcm m) := ⟨(Nat.lcm_pos hn₀ hm₀).ne'⟩
-      refine ⟨n.lcm m, NeZero.pos _, (htop ▸ sup_le_sup hn₁ hm₁).trans ?_⟩
-      have : IsCyclotomicExtension {n.lcm m} ℚ ↑(ℚ⟮ξ n⟯ ⊔ ℚ⟮ξ m⟯) := by
-        have : IsCyclotomicExtension {n} ℚ ℚ⟮ξ n⟯ :=
-            (hξ n).intermediateField_adjoin_isCyclotomicExtension' ℚ
-        have : IsCyclotomicExtension {m} ℚ ℚ⟮ξ m⟯ :=
-            (hξ m).intermediateField_adjoin_isCyclotomicExtension' ℚ
-        exact isCyclotomicExtension_lcm_sup _ _ _ _ _ _
-      have : IsCyclotomicExtension {n.lcm m} ℚ ℚ⟮ξ (n.lcm m)⟯ :=
-        (hξ (n.lcm m)).intermediateField_adjoin_isCyclotomicExtension' ℚ
-      exact isCyclotomicExtension_le_of_dvd _ _ (n.lcm m) (n.lcm m) _ _ dvd_rfl
+variable (p : ℕ) [hp : Fact p.Prime]
 
-set_option backward.isDefEq.respectTransparency false in
-/-- Reduction of Kronecker-Weber to the cyclic prime power case (in `IntermediateField ℚ A`
-currency): if every cyclic subextension of `K` of prime power degree lies in a cyclotomic field
-`ℚ⟮ξ n⟯` (with `n > 0`), then so does `K`. The proof decomposes `K` as a compositum of such
-subextensions (`IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top`) and recombines the
-  cyclotomic fields, using that
-`ℚ⟮ξ m⟯ ≤ ℚ⟮ξ n⟯` whenever `m ∣ n`. -/
-lemma kw_reduce_to_prime_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
-    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (K : IntermediateField ℚ A) [NumberField K]
-    [IsAbelianGalois ℚ K] :
-    ∃ n : ℕ, 0 < n ∧ K ≤ ℚ⟮ξ n⟯ := by
-  obtain ⟨ι, _, C, hC, htop⟩ := IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top ℚ K
-  apply kw_reduce_to_prime_power_aux hξ _ Finset.univ (fun i ↦ lift (C i)) ?_ ?_
-  · intro i
-    obtain ⟨_, _, ⟨p, k, hp, _, hrC⟩⟩ := hC i
-    rw [← Nat.prime_iff] at hp
-    exact kw_cyclic_primePow_le_cyclotomic hp hξ _ k (by rwa [finrank_lift, eq_comm])
-  · have := (lift_inj _ _).mpr htop
-    rwa [← iSup_univ, ← Finset.coe_univ, Finset.iSup_coe, lift_iSup _ _ _ Finset.univ,
-      lift_top] at this
+section
 
-set_option backward.isDefEq.respectTransparency false in
-/-- **Kronecker-Weber theorem**: every abelian extension of `ℚ` is contained in a cyclotomic
-field. -/
-theorem kronecker_weber
-    (K : Type*) [Field K] [NumberField K] [IsAbelianGalois ℚ K] :
-    ∃ n : ℕ, Nonempty (K →ₐ[ℚ] CyclotomicField n ℚ) := by
-  let A := AlgebraicClosure K
-  have : Algebra K A := by exact AlgebraicClosure.instAlgebra K
-  let ξ : ℕ → A :=
-    fun n ↦ if hn : n = 0 then 0 else
-      haveI : NeZero n := ⟨hn⟩
-      (HasEnoughRootsOfUnity.exists_isPrimitiveRoot A n).choose
-  have hξ (n : ℕ) : IsPrimitiveRoot (ξ n) n := by
-    cases n
-    · exact IsPrimitiveRoot.zero
-    · exact (HasEnoughRootsOfUnity.exists_isPrimitiveRoot A _).choose_spec
-  have : NumberField (IsScalarTower.toAlgHom ℚ K A).fieldRange :=
-    .of_ringEquiv K _ (IsScalarTower.toAlgHom ℚ K A).equivFieldRange
-  have : IsAbelianGalois ℚ (IsScalarTower.toAlgHom ℚ K A).fieldRange :=
-    .of_algHom (IsScalarTower.toAlgHom ℚ K A).equivFieldRange.symm.toAlgHom
-  obtain ⟨n, hn, hK⟩ := kw_reduce_to_prime_power hξ (IsScalarTower.toAlgHom ℚ K A).fieldRange
-  refine ⟨n, ?_⟩
-  have : NeZero n := ⟨hn.ne'⟩
-  have : IsCyclotomicExtension {n} ℚ ℚ⟮ξ n⟯ :=
-      (hξ n).intermediateField_adjoin_isCyclotomicExtension' ℚ
-  exact ⟨((algEquiv {n} ℚ ℚ⟮ξ n⟯ _).toAlgHom.comp (inclusion hK)).comp
-    (IsScalarTower.toAlgHom ℚ K A).equivFieldRange.toAlgHom⟩
+variable {F L : Type*} [Field F] [NumberField F] [IsCyclotomicExtension {p} ℚ F] [Field L]
+  [NumberField L] [Algebra F L] [IsGalois ℚ L]
+
+/-- If `L/ℚ` is Galois of degree `p * (p - 1)`, then `L/F` is cyclic Galois of degree `p`. -/
+lemma kw_kummer₀ (hL : Module.finrank ℚ L = p * (p - 1)) :
+    IsGalois F L ∧ IsCyclic Gal(L/F) ∧ finrank F L = p := by
+  have hF : finrank ℚ F = p - 1 := Nat.totient_prime hp.out ▸ IsCyclotomicExtension.Rat.finrank p F
+  have hrF : finrank F L = p := by
+    have h := Module.finrank_mul_finrank ℚ F L
+    rw [hF, hL, mul_comm p (p - 1)] at h
+    exact Nat.eq_of_mul_eq_mul_left (by have := hp.out.one_lt; omega) h
+  have : IsGalois F L := IsGalois.tower_top_of_isGalois ℚ F L
+  exact ⟨this, isCyclic_of_prime_card <| by rw [IsGalois.card_aut_eq_finrank, hrF], hrF⟩
 
 end
+
+variable (F : Type*) [Field F] [NumberField F] {L : Type*} [Field L] [Algebra F L]
+
+section
+
+variable [NumberField L] {μ : F} [IsSplittingField F L (X ^ p - C μ)]
+
+/-- If `L` is unramified outside `p` and `v` is a prime of `𝓞 F` above a prime `q ≠ p`, then
+`p ∣ v(μ)`. -/
+lemma kw_mu_val_p_of_liesOver_ne {v : HeightOneSpectrum (𝓞 F)} {q : ℕ} [hq : Fact q.Prime]
+    [v.asIdeal.LiesOver (span {(q : ℤ)})] (hqp : q ≠ p) (hLRam : UnramifiedOutside L p) :
+    (p : ℤ) ∣ count F v (spanSingleton (𝓞 F)⁰ μ) := by
+  obtain ⟨w, hw⟩ := HeightOneSpectrum.under_surjective (S := 𝓞 L) v
+  have hram : w.asIdeal.ramificationIdx (𝓞 F) = 1 := by
+    have : w.asIdeal.LiesOver v.asIdeal := by
+      rw [← hw, HeightOneSpectrum.under_asIdeal, liesOver_iff]
+    have := hLRam q hq.out hqp w.asIdeal w.isPrime <| Ideal.LiesOver.trans w.asIdeal v.asIdeal _
+    rw [← Ideal.ramificationIdx_eq_one_iff, ramificationIdx_tower v.asIdeal] at this
+    exact Nat.eq_one_of_mul_eq_one_left this
+  have h_main := FractionalIdeal.count_extendedHom F L w ((spanSingleton (𝓞 F)⁰) μ)
+  rw [hram, Nat.cast_one, one_mul, hw, extendedHom_spanSingleton,
+    IsFractionRing.map_algebraMap_apply, ← rootOfSplitsXPowSubC_pow μ L (n := p), map_pow,
+    count_pow] at h_main
+  exact dvd_of_mul_right_eq _ h_main
+
+end
+
+variable [IsCyclotomicExtension {p} ℚ F] [FiniteDimensional F L] [IsGalois F L]
+  [hCF : IsCyclic Gal(L/F)] (hrF : finrank F L = p)
+
+include hrF in
+/-- The extension `L/F` is a Kummer extension: `L` is the splitting field of `X ^ p - μ` for some
+nonzero `μ ∈ F`. -/
+theorem kw_kummer : ∃ μ : F, μ ≠ 0 ∧ IsSplittingField F L (X ^ p - C μ) := by
+  have hne : (primitiveRoots (Module.finrank F L) F).Nonempty :=
+    hrF ▸ primitiveRoots_nonempty p ℚ F
+  obtain ⟨g, hg, ⟨μ, hμ₁⟩, hμ₂⟩ := exists_root_adjoin_eq_top_of_isCyclic' F L hne
+  refine ⟨μ, ?_, ?_⟩
+  · contrapose hg
+    rwa [hg, map_zero, eq_comm, pow_eq_zero_iff finrank_pos.ne'] at hμ₁
+  · exact hrF ▸ isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top hne hμ₁.symm hμ₂
+
+variable [NumberField L] [IsAbelianGalois ℚ L] {μ : F} [hS : IsSplittingField F L (X ^ p - C μ)]
+  (hIrr : Irreducible (X ^ p - C μ))
+
+include hIrr hrF
+
+/-- The Kummer criterion for `L/ℚ` to be abelian: every `σ ∈ Gal(F/ℚ)` sends `μ` to
+`c ^ p * μ ^ a`, where `a` is the image of `σ` in `(ℤ/pℤ)ˣ`. -/
+theorem kw_abelian_kummer (σ : Gal(F/ℚ)) :
+    ∃ c : F, c ≠ 0 ∧ σ μ = c ^ p * μ ^ (Rat.galEquivZMod p F σ).val.val := by
+  have hne : (primitiveRoots p F).Nonempty := primitiveRoots_nonempty p ℚ F
+  have hμ₀ : μ ≠ 0 := ne_zero_of_irreducible_X_pow_sub_C' hp.out.ne_one hIrr
+  obtain ⟨τ, hτ⟩ := isCyclic_iff_exists_orderOf_eq_natCard.mp hCF
+  set a := rootOfSplitsXPowSubC hp.out.pos μ L with a_def
+  have hμ : algebraMap F L μ = a ^ p  := (rootOfSplitsXPowSubC_pow _ _).symm
+  have ha₀ : a ≠ 0 := by
+    contrapose hμ₀
+    rw [← map_eq_zero (algebraMap F L), hμ, hμ₀, zero_pow hp.out.ne_zero]
+  obtain ⟨c, j, hj, h⟩ := exists_eq_algebraMap_mul_pow_of_pow_eq_algebraMap hne hIrr (α := a)
+    (β := σ.liftNormal L a) (by rw [rootOfSplitsXPowSubC_pow])
+    (by rw [← map_pow, rootOfSplitsXPowSubC_pow, AlgEquiv.liftNormal_commutes])
+  refine ⟨c, ?_, ?_⟩
+  · contrapose ha₀
+    rw [← map_eq_zero (σ.liftNormal L), h, ha₀, map_zero, zero_mul]
+  · suffices (Rat.galEquivZMod p F σ).val = (j : ZMod p) by
+      apply FaithfulSMul.algebraMap_injective F L
+      rw [← AlgEquiv.liftNormal_commutes, hμ, map_pow, h, mul_pow, map_mul, map_pow, pow_right_comm,
+        ← hμ, map_pow, this, ZMod.val_cast_of_lt hj]
+    let ζ : F := (autEquivRootsOfUnity hne hIrr L τ).val
+    have hζ : IsPrimitiveRoot ζ p := by
+      rw [← hrF, ← IsGalois.card_aut_eq_finrank, ← hτ, IsPrimitiveRoot.iff_orderOf, orderOf_units,
+        Subgroup.orderOf_coe]
+      exact MulEquiv.orderOf_eq (autEquivRootsOfUnity hne hIrr L) τ
+    rw [← IsCyclotomicExtension.Rat.apply_eq_pow_iff_galEquivZMod_eq hζ]
+    have hτa : algebraMap F L ζ * a = τ.restrictScalars ℚ a := by
+      rw [AlgEquiv.restrictScalars_apply, autEquivRootsOfUnity_apply_rootOfSplit hne hIrr,
+        MulAction.subgroup_smul_def, Units.smul_def, Algebra.smul_def]
+    apply FaithfulSMul.algebraMap_injective F L
+    rw [ZMod.val_cast_of_lt hj, ← mul_left_inj' (by aesop : (σ.liftNormal L) a ≠ 0),
+      ← AlgEquiv.liftNormal_commutes, ← map_mul, hτa, ← AlgEquiv.smul_def, ← AlgEquiv.smul_def,
+      ← mul_smul, mul_comm', mul_smul, AlgEquiv.smul_def, AlgEquiv.smul_def, h, map_mul,
+      AlgEquiv.restrictScalars_apply, AlgEquiv.commutes, map_pow, ← hτa, mul_pow, map_pow]
+    ring
+
+/-- If `v` is a prime of `𝓞 F` with `p ∤ v(μ)`, then every `σ ∈ Gal(F/ℚ)` fixing `v` is the
+identity. -/
+lemma kw_split_prime {v : HeightOneSpectrum (𝓞 F)}
+    (hv : ¬ (p : ℤ) ∣ count F v (spanSingleton (𝓞 F)⁰ μ)) {σ : Gal(F/ℚ)} (hσ : σ • v = v) :
+    σ = 1 := by
+  have hμ₀ : μ ≠ 0 := ne_zero_of_irreducible_X_pow_sub_C' hp.out.ne_one hIrr
+  apply (Rat.galEquivZMod p F).injective
+  rw [map_one, Units.ext_iff, Units.val_one]
+  obtain ⟨c, hc₀, hc₁⟩ := kw_abelian_kummer p F hrF hIrr σ
+  have : count F v (spanSingleton (𝓞 F)⁰ μ) = count F v (spanSingleton (𝓞 F)⁰ (σ μ)) := by
+    rw [← AlgEquiv.smul_def, ← spanSingleton_smul]
+    have := FractionalIdeal.count_smul F v ((spanSingleton (𝓞 F)⁰) μ) σ
+    rw [← FractionalIdeal.count_smul _ _ _ σ, hσ]
+  have := congr_arg (· : ℤ → ZMod p) this
+  rwa [hc₁, map_mul, map_pow, map_pow, count_mul _ _ (by simp [hc₀]) (by simp [hμ₀]), count_pow,
+    count_pow, Int.cast_add, Int.cast_mul, Int.cast_natCast, ZMod.natCast_self, zero_mul, zero_add,
+    Int.cast_mul, right_eq_mul₀, Int.cast_natCast, ZMod.natCast_zmod_val] at this
+  rwa [ne_eq, ZMod.intCast_zmod_eq_zero_iff_dvd]
+
+/-- If `v` is a prime of `𝓞 F` above `p`, then `p ∣ v(μ)`. -/
+lemma kw_mu_val_p_of_liesOver {v : HeightOneSpectrum (𝓞 F)}
+    [v.asIdeal.LiesOver (span {(p : ℤ)})] (hp' : Odd p) :
+    (p : ℤ) ∣ count F v (spanSingleton (𝓞 F)⁰ μ) := by
+  have : IsGalois ℚ F := isGalois {p} ℚ F
+  have : Nontrivial (MulAction.stabilizer Gal(F/ℚ) v.asIdeal) := by
+    refine Finite.one_lt_card_iff_nontrivial.mp ?_
+    rw [Ideal.card_stabilizer_eq (span {(p : ℤ)}), Rat.ramificationIdxIn_eq_of_prime,
+      Rat.inertiaDegIn_eq_of_prime, mul_one]
+    lia [hp.out.odd_iff.mp hp']
+  obtain ⟨σ, hσ⟩ := exists_ne (1 : MulAction.stabilizer Gal(F/ℚ) v.asIdeal)
+  by_contra hv
+  refine hσ <| Subtype.ext <| kw_split_prime p F hrF hIrr hv ?_
+  rw [HeightOneSpectrum.ext_iff, HeightOneSpectrum.smul_asIdeal, σ.prop]
+
+/-- If `L` is unramified outside `p`, then `p ∣ v(μ)` for every prime `v` of `𝓞 F`. -/
+lemma kw_mu_val_p (v : HeightOneSpectrum (𝓞 F)) (hLRam : UnramifiedOutside L p) (hp' : Odd p) :
+    (p : ℤ) ∣ count F v (spanSingleton (𝓞 F)⁰ μ) := by
+  have : Fact (absNorm (under ℤ v.asIdeal)).Prime := ⟨Nat.absNorm_under_prime v.asIdeal⟩
+  have hv : v.asIdeal.LiesOver (span {((absNorm (under ℤ v.asIdeal) : ℕ) : ℤ)}) :=
+    Int.liesOver_span_absNorm v.asIdeal
+  by_cases hqp : absNorm (under ℤ v.asIdeal) = p
+  · rw [hqp] at hv
+    exact kw_mu_val_p_of_liesOver p F hrF hIrr hp'
+  · exact kw_mu_val_p_of_liesOver_ne p F hqp hLRam
+
+/-- If `L` is unramified outside `p`, then `(μ) = 𝔞 ^ p` for a fractional ideal `𝔞` of `F`. -/
+lemma kw_mu_pth_power_ideal (hLram : UnramifiedOutside L p) (hp' : Odd p) :
+    ∃ 𝔞 : FractionalIdeal (𝓞 F)⁰ F, 𝔞 ^ p = spanSingleton (𝓞 F)⁰ μ := by
+  have hμ₀ : μ ≠ 0 := ne_zero_of_irreducible_X_pow_sub_C' hp.out.ne_one hIrr
+  have hfin : ∀ᶠ v in Filter.cofinite, count F v (spanSingleton (𝓞 F)⁰ μ) / p = 0 := by
+    filter_upwards [finite_factors (spanSingleton (𝓞 F)⁰ μ)] with v hv
+    rw [hv, Int.zero_ediv]
+  let exps : HeightOneSpectrum (𝓞 F) →₀ ℤ :=
+    Finsupp.ofSupportFinite (fun v ↦ count F v (spanSingleton (𝓞 F)⁰ μ) / p) hfin
+  refine ⟨Finsupp.prod exps fun v z ↦ v.asIdeal ^ z,
+    (eq_iff_count_eq _ ?_ (by simp [hμ₀])).mpr fun v ↦ ?_⟩
+  · exact pow_ne_zero p <| Finsupp.prod_ne_zero_iff.mpr fun v _ ↦ zpow_ne_zero (exps v)
+      <| coeIdeal_ne_zero.mpr v.ne_bot
+  · simp only [count_pow, count_finsuppProd]
+    exact Int.mul_ediv_cancel' <| kw_mu_val_p p F hrF hIrr v hLram hp'

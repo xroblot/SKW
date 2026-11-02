@@ -15,7 +15,10 @@ set_option linter.style.header false
 @[expose] public section
 
 /-!
-# Basic setup for the Kronecker-Weber theorem
+# Basic setup for the Kronecker-Weber theorem (old version)
+
+Parked copy of the former `Basic.lean`, out of the build. The live results are in
+`SKW.KroneckerWeber.KroneckerWeber`.
 
 Let `p` be an odd prime and `K/ℚ` a cyclic extension of degree `p` unramified outside `p`.
 Set `F = ℚ(ζ_p)` and `L = KF`.
@@ -284,27 +287,52 @@ lemma kw_split_prime {v : HeightOneSpectrum (𝓞 F)}
 
 include hrF hIrr in
 /-- If `v` is a prime of `𝓞 F` above `p`, then `p ∣ v(μ)`. -/
-lemma kw_mu_val_p_of_mem {v : HeightOneSpectrum (𝓞 F)} (hv : (p : 𝓞 F) ∈ v.asIdeal)
-    (hp' : Odd p) :
+lemma kw_mu_val_p_of_liesOver {v : HeightOneSpectrum (𝓞 F)}
+    [v.asIdeal.LiesOver (span {(p : ℤ)})] (hp' : Odd p) :
     (p : ℤ) ∣ count F v (spanSingleton (𝓞 F)⁰ μ) := by
-  sorry
+  have : IsGalois ℚ F := isGalois {p} ℚ F
+  have : Nontrivial (MulAction.stabilizer Gal(F/ℚ) v.asIdeal) := by
+    refine Finite.one_lt_card_iff_nontrivial.mp ?_
+    rw [Ideal.card_stabilizer_eq (span {(p : ℤ)}), Rat.ramificationIdxIn_eq_of_prime,
+      Rat.inertiaDegIn_eq_of_prime, mul_one]
+    lia [hp.out.odd_iff.mp hp']
+  obtain ⟨σ, hσ⟩ := exists_ne (1 : MulAction.stabilizer Gal(F/ℚ) v.asIdeal)
+  by_contra hv
+  refine hσ <| Subtype.ext <| kw_split_prime p F hrF hIrr hv ?_
+  rw [HeightOneSpectrum.ext_iff, HeightOneSpectrum.smul_asIdeal, σ.prop]
 
-include hrF hIrr in
-/-- If `L` is unramified outside `p` and `v` is a prime of `𝓞 F` not above `p`, then
+omit [IsCyclotomicExtension {p} ℚ F] [FiniteDimensional F L] [IsGalois F L] hCF
+  [IsAbelianGalois ℚ L] in
+/-- If `L` is unramified outside `p` and `v` is a prime of `𝓞 F` above a prime `q ≠ p`, then
 `p ∣ v(μ)`. -/
-lemma kw_mu_val_p_of_notMem {v : HeightOneSpectrum (𝓞 F)} (hv : (p : 𝓞 F) ∉ v.asIdeal)
-    (hLRam : UnramifiedOutside L p) :
+lemma kw_mu_val_p_of_liesOver_ne {v : HeightOneSpectrum (𝓞 F)} {q : ℕ} [hq : Fact q.Prime]
+    [v.asIdeal.LiesOver (span {(q : ℤ)})] (hqp : q ≠ p) (hLRam : UnramifiedOutside L p) :
     (p : ℤ) ∣ count F v (spanSingleton (𝓞 F)⁰ μ) := by
-  sorry
+  obtain ⟨w, hw⟩ := HeightOneSpectrum.under_surjective (S := 𝓞 L) v
+  have hram : w.asIdeal.ramificationIdx (𝓞 F) = 1 := by
+    have : w.asIdeal.LiesOver v.asIdeal := by
+      rw [← hw, HeightOneSpectrum.under_asIdeal, liesOver_iff]
+    have := hLRam q hq.out hqp w.asIdeal w.isPrime <| Ideal.LiesOver.trans w.asIdeal v.asIdeal _
+    rw [← Ideal.ramificationIdx_eq_one_iff, ramificationIdx_tower v.asIdeal] at this
+    exact Nat.eq_one_of_mul_eq_one_left this
+  have h_main := FractionalIdeal.count_extendedHom F L w ((spanSingleton (𝓞 F)⁰) μ)
+  rw [hram, Nat.cast_one, one_mul, hw, extendedHom_spanSingleton,
+    IsFractionRing.map_algebraMap_apply, ← rootOfSplitsXPowSubC_pow μ L (n := p), map_pow,
+    count_pow] at h_main
+  exact dvd_of_mul_right_eq _ h_main
 
 include hrF hIrr in
 /-- If `L` is unramified outside `p`, then `p ∣ v(μ)` for every prime `v` of `𝓞 F`. -/
 lemma kw_mu_val_p (v : IsDedekindDomain.HeightOneSpectrum (𝓞 F))
     (hLRam : UnramifiedOutside L p) (hp' : Odd p) :
     (p : ℤ) ∣ FractionalIdeal.count F v (FractionalIdeal.spanSingleton (𝓞 F)⁰ μ) := by
-  by_cases hv : (p : 𝓞 F) ∈ v.asIdeal
-  · exact kw_mu_val_p_of_mem p F hrF hIrr hv hp'
-  · exact kw_mu_val_p_of_notMem p F hrF hIrr hv hLRam
+  have : Fact (absNorm (under ℤ v.asIdeal)).Prime := ⟨Nat.absNorm_under_prime v.asIdeal⟩
+  have hv : v.asIdeal.LiesOver (span {((absNorm (under ℤ v.asIdeal) : ℕ) : ℤ)}) :=
+    Int.liesOver_span_absNorm v.asIdeal
+  by_cases hqp : absNorm (under ℤ v.asIdeal) = p
+  · rw [hqp] at hv
+    exact kw_mu_val_p_of_liesOver p F hrF hIrr hp'
+  · exact kw_mu_val_p_of_liesOver_ne p F hqp hLRam
 
 -- attribute [local instance] Ideal.Quotient.field in
 -- include hrF hIrr hμ in
@@ -353,8 +381,19 @@ include hrF hIrr in
 /-- If `L` is unramified outside `p`, then `(μ) = 𝔞 ^ p` for a nonzero fractional ideal `𝔞` of
 `F`. -/
 lemma kw_mu_pth_power_ideal (hLram : UnramifiedOutside L p) (hp' : Odd p) :
-    ∃ 𝔞 : FractionalIdeal (𝓞 F)⁰ F, 𝔞 ≠ 0 ∧ 𝔞 ^ p = FractionalIdeal.spanSingleton (𝓞 F)⁰ μ := by
-  sorry
+    ∃ 𝔞 : FractionalIdeal (𝓞 F)⁰ F, 𝔞 ^ p = spanSingleton (𝓞 F)⁰ μ := by
+  have hμ₀ : μ ≠ 0 := ne_zero_of_irreducible_X_pow_sub_C' hp.out.ne_one hIrr
+  have hfin : ∀ᶠ v in Filter.cofinite, count F v (spanSingleton (𝓞 F)⁰ μ) / p = 0 := by
+    filter_upwards [finite_factors (spanSingleton (𝓞 F)⁰ μ)] with v hv
+    rw [hv, Int.zero_ediv]
+  let exps : HeightOneSpectrum (𝓞 F) →₀ ℤ :=
+    Finsupp.ofSupportFinite (fun v ↦ count F v (spanSingleton (𝓞 F)⁰ μ) / p) hfin
+  refine ⟨Finsupp.prod exps fun v z ↦ v.asIdeal ^ z,
+    (eq_iff_count_eq _ ?_ (by simp [hμ₀])).mpr fun v ↦ ?_⟩
+  · exact pow_ne_zero p <| Finsupp.prod_ne_zero_iff.mpr fun v _ ↦ zpow_ne_zero (exps v)
+      <| coeIdeal_ne_zero.mpr v.ne_bot
+  · simp only [count_pow, count_finsuppProd]
+    exact Int.mul_ediv_cancel' <| kw_mu_val_p p F hrF hIrr v hLram hp'
 
 -- include hrF hμ hIrr in
 -- /-- If `L` is unramified outside `p`, then `(μ) = 𝔞 ^ p` for a nonzero ideal `𝔞` of `𝓞 F`. -/

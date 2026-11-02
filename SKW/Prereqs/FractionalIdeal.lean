@@ -219,6 +219,12 @@ end FractionRing
 end FractionalIdeal
 -/
 
+theorem FractionalIdeal.num_ne_bot_of_ne_zero {R : Type*} [CommRing R] {S : Submonoid R} {P : Type*}
+    [CommRing P] [Algebra R P] [IsDomain R] [Module.IsTorsionFree R P] (hS : 0 ∉ S)
+    {I : FractionalIdeal S P} (hI : I ≠ 0) :
+    I.num ≠ ⊥ :=
+  (zero_of_num_eq_bot hS).mt hI
+
 namespace IsDedekindDomain.HeightOneSpectrum
 
 open scoped Pointwise
@@ -275,7 +281,45 @@ theorem FractionalIdeal.count_eq_multiplicity_num_sub {I : FractionalIdeal R⁰ 
   rw [← count_coe_mul_inv_eq_multiplicity_sub K v (num_eq_zero_iff.not.mpr hI) (by simp),
     coeIdeal_span_singleton, ← den_mul_self_eq_num', mul_comm, inv_mul_cancel_left₀ (by simp)]
 
+/-- Two nonzero fractional ideals are equal if and only if they have the same valuation at every
+height one prime. -/
+theorem FractionalIdeal.eq_iff_count_eq {I J : FractionalIdeal R⁰ K} (hI : I ≠ 0) (hJ : J ≠ 0) :
+    I = J ↔ ∀ v : HeightOneSpectrum R, count K v I = count K v J := by
+  refine ⟨fun h _ ↦ h ▸ rfl, fun h ↦ ?_⟩
+  rw [← finprod_heightOneSpectrum_factorization' K hI,
+    ← finprod_heightOneSpectrum_factorization' K hJ]
+  simp_rw [h]
+
 end count
+
+section CountExtended
+
+open Ideal IsDedekindDomain nonZeroDivisors
+
+variable {R S : Type*} [CommRing R] [CommRing S] [IsDedekindDomain R] [IsDedekindDomain S]
+  [Algebra R S] [Algebra.IsIntegral R S] (K L : Type*) [Field K] [Field L] [Algebra R K]
+  [IsFractionRing R K] [Algebra S L] [IsFractionRing S L]
+
+/-- The `w`-adic valuation of the extension of a fractional ideal `I` is the ramification index of
+`w` times the valuation of `I` at the prime below `w`. -/
+theorem FractionalIdeal.count_extendedHom [Module.IsTorsionFree R S] (w : HeightOneSpectrum S)
+    (I : FractionalIdeal R⁰ K) :
+    count L w (extendedHom L S I) = w.asIdeal.ramificationIdx R * count K (w.under R) I := by
+  by_cases hI : I = 0
+  · simp [hI, count_zero]
+  have h' : Ideal.map (algebraMap R S) (span {↑I.den}) ≠ 0 := by simp [map_ne_bot_of_ne_bot]
+  rw [FractionalIdeal.count_eq_multiplicity_num_sub _ _ hI, HeightOneSpectrum.under_asIdeal,
+    mul_sub, ← Nat.cast_mul, ← Nat.cast_mul, ramificationIdx_mul_multiplicity_under_eq w.ne_bot,
+    ramificationIdx_mul_multiplicity_under_eq w.ne_bot,
+    ← FractionalIdeal.count_coe_mul_inv_eq_multiplicity_sub L _ _ h']
+  · congr
+    rw [eq_mul_inv_iff_mul_eq₀ (by simpa using h'), ← extendedHom_coeIdeal_eq_map _ S (K := K),
+      ← map_mul, mul_comm, coeIdeal_span_singleton, den_mul_self_eq_num', extendedHom'_apply,
+      extended_coeIdeal_eq_map]
+  · apply map_ne_bot_of_ne_bot
+    exact FractionalIdeal.num_ne_bot_of_ne_zero zero_notMem_nonZeroDivisors hI
+
+end CountExtended
 
 section FractionalIdealCount
 
