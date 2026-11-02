@@ -369,24 +369,15 @@ theorem FractionalIdeal.count_ringEquivOfRingEquiv [IsDedekindDomain R] (f : R �
     exact num_eq_zero_iff.not.mpr hI
   · simp [- spanSingleton_inv]
 
+theorem FractionalIdeal.smul_eq_ringEquivOfRingEquiv [IsDedekindDomain R] {G : Type*} [Group G]
+    [MulSemiringAction G R] (g : G) (I : FractionalIdeal R⁰ K) :
+    g • I = ringEquivOfRingEquiv K K (MulSemiringAction.toRingEquiv G R g) I := by
+  rw [FractionalIdeal.smul_def, ringEquivOfRingEquiv_eq_extended]
+  rfl
+
 theorem FractionalIdeal.count_smul [IsDedekindDomain R] {G : Type*} [Group G]
-    [MulSemiringAction G R] [MulSemiringAction G K] [SMulDistribClass G R K]
-    (v : HeightOneSpectrum R) (I : FractionalIdeal R⁰ K) (σ : G) :
+    [MulSemiringAction G R] (v : HeightOneSpectrum R) (I : FractionalIdeal R⁰ K) (σ : G) :
     count K (σ • v) (σ • I) = count K v I := by
-  rw [← count_ringEquivOfRingEquiv K K (MulSemiringAction.toRingEquiv G R σ) v I]
-  congr
-  · rw [← smul_eq_equivOfRingEquiv]
-  -- TODO: the `have` below is missing API, a lemma stating
-  -- `IsFractionRing.ringEquivOfRingEquiv (toRingEquiv G R σ) = toRingEquiv G K σ`.
-  -- This goal should be revisited once the action on fractional ideals is defined via `extended`
-  -- (see `SKW/Sandbox.lean`), since the proof depends on that definition.
-  · ext x
-    rw [mem_smul, ← mem_coe, ringEquivOfRingEquiv_apply, coe_mk, Submodule.mem_map]
-    have : (IsFractionRing.ringEquivOfRingEquiv (K := K) (L := K)
-        (MulSemiringAction.toRingEquiv G R σ)).toRingHom = MulSemiringAction.toRingHom G K σ :=
-      IsLocalization.ringHom_ext R⁰ <| RingHom.ext fun r ↦ by
-        simp [algebraMap.smul']
-    exact exists_congr fun y ↦ and_congr_right fun _ ↦
-      Eq.congr_left (RingHom.congr_fun this y).symm
+  rw [smul_eq_ringEquivOfRingEquiv, smul_eq_equivOfRingEquiv, count_ringEquivOfRingEquiv]
 
 end FractionalIdealCount

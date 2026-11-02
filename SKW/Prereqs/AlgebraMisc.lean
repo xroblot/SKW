@@ -43,6 +43,17 @@ theorem IsFractionRing.map_algebraMap_apply {A B K L : Type*} [CommRing A] [Comm
   RingHom.congr_fun (IsLocalization.ringHom_ext A⁰ <| RingHom.ext fun a ↦ by
     simp [map, ← IsScalarTower.algebraMap_apply]) x
 
+theorem MulSemiringAction.toRingHom_mul {G R : Type*} [Monoid G] [Semiring R]
+    [MulSemiringAction G R] (g h : G) :
+    MulSemiringAction.toRingHom G R (g * h) =
+      (MulSemiringAction.toRingHom G R g).comp (MulSemiringAction.toRingHom G R h) :=
+  RingHom.ext fun x ↦ mul_smul g h x
+
+theorem MulSemiringAction.toRingHom_one {G R : Type*} [Monoid G] [Semiring R]
+    [MulSemiringAction G R] :
+    MulSemiringAction.toRingHom G R 1 = RingHom.id R :=
+  RingHom.ext fun x ↦ one_smul G x
+
 /-! ### MulEquiv / AlgHom / AlgEquiv -/
 
 @[to_additive (attr := simp)]

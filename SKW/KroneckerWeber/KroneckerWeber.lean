@@ -6,9 +6,11 @@ public import SKW.Prereqs.Ideals
 public import SKW.Prereqs.KummerExtension
 public import SKW.Prereqs.OtherPR
 public import SKW.Prereqs.Unramified
+public import SKW.Stickelberger.Stickelberger
 
 public import Mathlib.Algebra.FiniteSupport.Basic
 public import Mathlib.Algebra.GroupWithZero.Torsion
+public import Mathlib.RingTheory.ClassGroup.Basic
 
 set_option linter.style.header false
 
@@ -95,6 +97,8 @@ theorem kw_kummer : ∃ μ : F, μ ≠ 0 ∧ IsSplittingField F L (X ^ p - C μ)
   · contrapose hg
     rwa [hg, map_zero, eq_comm, pow_eq_zero_iff finrank_pos.ne'] at hμ₁
   · exact hrF ▸ isSplittingField_X_pow_sub_C_of_root_adjoin_eq_top hne hμ₁.symm hμ₂
+
+section
 
 variable [NumberField L] [IsAbelianGalois ℚ L] {μ : F} [hS : IsSplittingField F L (X ^ p - C μ)]
   (hIrr : Irreducible (X ^ p - C μ))
@@ -199,3 +203,75 @@ lemma kw_mu_pth_power_ideal (hLram : UnramifiedOutside L p) (hp' : Odd p) :
       <| coeIdeal_ne_zero.mpr v.ne_bot
   · simp only [count_pow, count_finsuppProd]
     exact Int.mul_ediv_cancel' <| kw_mu_val_p p F hrF hIrr v hLram hp'
+
+/-- If `𝔞 ^ p = (μ)` for a fractional ideal `𝔞`, then `𝔞` is principal. -/
+lemma kw_class_trivial {𝔞 : FractionalIdeal (𝓞 F)⁰ F} (h𝔞 : 𝔞 ^ p = spanSingleton (𝓞 F)⁰ μ) :
+    ∃ β : F, 𝔞 = spanSingleton (𝓞 F)⁰ β := by
+  have hμ₀ : μ ≠ 0 := ne_zero_of_irreducible_X_pow_sub_C' hp.out.ne_one hIrr
+  have h𝔞₀ : 𝔞 ≠ 0 := by
+    rwa [← pow_ne_zero_iff hp.out.ne_zero, h𝔞, ne_eq, map_eq_zero]
+  rw [← isPrincipal_iff, ← Units.val_mk0 h𝔞₀, ← ClassGroup.mk_eq_one_iff]
+  let C := (ClassGroup.mk F) (Units.mk0 𝔞 h𝔞₀)
+  have hC : C ^ p = 1 := by
+    rw [← map_pow, ClassGroup.mk_eq_one_iff, Units.val_pow_eq_pow_val, Units.val_mk0, h𝔞]
+    exact ⟨μ, rfl⟩
+  have h₁ {a : (ZMod p)ˣ} : (Rat.galEquivZMod p F).symm a • C = C ^ a.val.val := by
+    obtain ⟨c, hc₀, hc⟩ := kw_abelian_kummer p F hrF hIrr ((Rat.galEquivZMod p F).symm a)
+    rw [ClassGroup.smul_mk', ← map_pow, eq_comm, ClassGroup.mk_eq_mk']
+    refine ⟨Units.mk0 c hc₀, ?_⟩
+    rw [Units.ext_iff, Units.val_mul, Units.coe_smul, Units.val_mk0, coe_toPrincipalIdeal,
+      Units.val_mk0, Units.val_pow_eq_pow_val, Units.val_mk0, ← pow_left_inj hp.out.ne_zero,
+      mul_pow, ← smul_pow', pow_right_comm, h𝔞, spanSingleton_smul, AlgEquiv.smul_def, hc,
+      MulEquiv.apply_symm_apply, map_mul, map_pow, map_pow, mul_comm]
+  have h₂ {a b : (ZMod p)ˣ} : C ^ (a.val.val * b.val.val) = C  ^ (a * b).val.val := by
+    rw [Units.val_mul, ZMod.val_mul, ← pow_eq_pow_mod _ hC]
+  have h_main := stickelberger_theorem F p C
+  simp_rw [← map_inv, h₁, ← pow_mul, h₂, inv_mul_cancel, Units.val_one, ZMod.val_one,
+    pow_one, Finset.prod_const, Finset.card_univ, ZMod.card_units_eq_totient,
+    Nat.totient_prime hp.out] at h_main
+  rwa [← pow_sub_one_mul hp.out.ne_zero, h_main, one_mul] at hC
+
+-- 1. The ideal 𝔞 is principal (Stickelberger).
+--   - Action of σ_a on the class of 𝔞. By kw_abelian_kummer, σ_a(μ) = c ^ p · μ ^ a for
+--      some c ∈ Fˣ. Applying σ_a to 𝔞 ^ p = (μ) gives (σ_a 𝔞) ^ p = (c) ^ p · (𝔞 ^ a) ^ p.
+--   - The group of nonzero fractional ideals is torsion-free (it is free abelian on the primes),
+--      so σ_a 𝔞 = (c) · 𝔞 ^ a. Hence [σ_a 𝔞] = [𝔞] ^ a in Cl(F).
+--   - Applying Stickelberger. The class [𝔞] is killed by p, because [𝔞] ^ p = [(μ)] = 1.
+--      Stickelberger's theorem says θ = Σ_a a · σ_a⁻¹ kills Cl(F), so
+--      1 = ∏_a (σ_a⁻¹ [𝔞]) ^ a = ∏_a [𝔞] ^ (a⁻¹ · a) = [𝔞] ^ (p - 1).
+--   - Conclusion. Together with [𝔞] ^ p = 1, this gives [𝔞] = 1, so 𝔞 = (β) with β ∈ Fˣ.
+
+/-- If `𝔞 ^ p = (μ)` for a fractional ideal `𝔞`, then `L` is the cyclotomic extension
+`ℚ(ζ_{p²})`. -/
+lemma kw_unit_root_of_unity (hp' : Odd p) {𝔞 : FractionalIdeal (𝓞 F)⁰ F}
+    (h𝔞 : 𝔞 ^ p = spanSingleton (𝓞 F)⁰ μ) :
+    IsCyclotomicExtension {p ^ 2} ℚ L := by
+  sorry
+
+end
+
+
+
+--   2. A unit appears. From (β) ^ p = (μ) we get (μ / β ^ p) = (1), so
+--      μ = β ^ p · η with η ∈ (𝓞 F)ˣ. With μ ∈ F this is simpler than in the old
+--      proof: there is no integral α and no 𝔞 ≠ 0 to carry.
+
+--   3. Complex conjugation. Take σ = σ_{-1}, which is complex conjugation on F.
+--      Kummer gives σ(μ) = c ^ p · μ ^ (p - 1), so μ · σ(μ) is a p-th power, and hence
+--      η · σ(η) = w ^ p for some w ∈ F.
+
+--   4. Units of the CM field F. The field F is CM since p is odd.
+--   - By the CM unit index, η ^ 2 = ζ' · ε with ζ' a root of unity and ε a real unit.
+--   - The torsion of F has order 2p, so squaring once more gives η ^ 4 = ζ · ε'
+--      with ζ ^ p = 1 and ε' real.
+--   - Then σ(η) ^ 4 = ζ⁻¹ · ε', so ε' ^ 2 = (η · σ(η)) ^ 4 = (w ^ 4) ^ p.
+--   - Since gcd(2, p) = 1, it follows that ε' = δ ^ p for some δ ∈ F.
+
+--   5. The field L is ℚ(ζ_{p²}).
+--   - Reduce to X ^ p - ζ. We have μ ^ 4 = β ^ (4p) · η ^ 4 = ζ · (β ^ 4 · δ) ^ p.
+--      Since gcd(4, p) = 1, the field L is also the splitting field of the
+--      irreducible X ^ p - μ ^ 4. So L is the splitting field of X ^ p - ζ.
+--   - The root ζ is primitive. If ζ = 1, then X ^ p - 1 splits over F and L = F,
+--      contradicting [L : F] = p. So ζ is a primitive p-th root of unity.
+--   - A primitive p²-th root. A root ξ ∈ L of X ^ p - ζ is a primitive p²-th root
+--      of unity. So ℚ(ξ) ⊆ L.

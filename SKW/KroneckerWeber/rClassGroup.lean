@@ -21,7 +21,10 @@ set_option linter.style.header false
 @[expose] public section
 
 /-!
-# Class group argument for Kronecker-Weber
+# Class group argument for Kronecker-Weber (old version)
+
+Parked copy of the former `ClassGroup.lean`, out of the build, in the namespace
+`KroneckerWeber2`. `kw_unit_root_of_unity` is restated in `SKW.KroneckerWeber.KroneckerWeber`.
 
 Uses Stickelberger's theorem to show that if `(μ) = 𝔞ᵖ` in `𝓞_F`, then `𝔞` is principal,
 hence `μ = αᵖ · η` for a unit `η ∈ 𝓞_F×`. A further unit argument shows `η` is a `p`-th power
@@ -29,6 +32,8 @@ times a root of unity, so `L = F(ᵖ√μ) = ℚ(ζ_{p²})`.
 -/
 
 open NumberField Ideal Polynomial Module IsCyclotomicExtension Rat
+
+namespace KroneckerWeber2
 
 noncomputable section IsScalarTower
 
@@ -205,5 +210,7 @@ lemma kw_unit_root_of_unity {μ : F} [IsSplittingField F L (X ^ p - C μ)]
 --     Nat.add_one_sub_one, pow_one, mul_comm]
 
 end IsScalarTower
+
+end KroneckerWeber2
 
 end

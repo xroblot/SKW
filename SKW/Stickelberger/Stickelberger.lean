@@ -1222,7 +1222,7 @@ theorem isPrincipal_prod_smul_pow_of_coprime (k : Type*) [Field k] [NumberField 
   exact Submodule.IsPrincipal.map_ringHom e <|
     isPrincipal_prod_smul_pow_of_orderOf_eq p f d L m k₀ 𝔭₀ hmd rfl
 
-theorem stickelberger_theorem (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero m]
+theorem _root_.stickelberger_theorem (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero m]
     [IsCyclotomicExtension {m} ℚ k] (C : ClassGroup (𝓞 k)) :
     ∏ a : (ZMod m)ˣ, (((galEquivZMod m k).symm a)⁻¹ • C) ^ a.val.val = 1 := by
   obtain ⟨⟨I, hI⟩, rfl, hI'⟩ := ClassGroup.exists_mk0_eq_and_isCoprime C
@@ -1264,8 +1264,8 @@ def stickelbergerElement (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero
   ∑ a : (ZMod m)ˣ, MonoidAlgebra.single ((galEquivZMod m k).symm a)⁻¹ a.val.val
 
 /-- The Stickelberger element annihilates the class group. -/
-theorem pow_stickelbergerElement_eq_one (k : Type*) [Field k] [NumberField k] (m : ℕ) [NeZero m]
-    [IsCyclotomicExtension {m} ℚ k] (C : ClassGroup (𝓞 k)) :
+theorem _root_.pow_stickelbergerElement_eq_one (k : Type*) [Field k] [NumberField k] (m : ℕ)
+    [NeZero m] [IsCyclotomicExtension {m} ℚ k] (C : ClassGroup (𝓞 k)) :
     C ^ stickelbergerElement k m = 1 := by
   simp_rw [stickelbergerElement, MonoidAlgebra.pow_sum, MonoidAlgebra.pow_single]
   exact stickelberger_theorem k m C
