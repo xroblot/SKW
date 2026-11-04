@@ -50,6 +50,45 @@ lemma IsPrimitiveRoot.eq_pow_mul_of_pow_eq {R : Type*} [CommRing R] [IsDomain R]
   obtain ⟨j, hj, rfl⟩ := hx
   exact ⟨j, hj, rfl⟩
 
+/-- Version of `Algebra.adjoin_root_eq_top_of_isSplittingField` without the irreducibility of
+`X ^ n - C a`. -/
+lemma Algebra.adjoin_root_eq_top_of_isSplittingField' {K : Type*} [Field K] {n : ℕ}
+    (hζ : (primitiveRoots n K).Nonempty) {a : K} {L : Type*} [Field L] [Algebra K L]
+    [IsSplittingField K L (X ^ n - C a)] {α : L} (hα : α ^ n = algebraMap K L a) :
+    Algebra.adjoin K {α} = ⊤ := by
+  obtain ⟨ζ, hζ⟩ := hζ
+  have : NeZero n := ⟨fun h ↦ by simp [h] at hζ⟩
+  replace hζ := (isPrimitiveRoot_of_mem_primitiveRoots hζ).map_of_injective
+    (algebraMap K L).injective
+  rw [← top_le_iff, ← IsSplittingField.adjoin_rootSet L (X ^ n - C a), Algebra.adjoin_le_iff]
+  intro x hx
+  rw [mem_rootSet_of_ne (X_pow_sub_C_ne_zero (NeZero.pos n) a), aeval_sub, aeval_X_pow, aeval_C,
+    sub_eq_zero, ← hα] at hx
+  obtain ⟨j, -, rfl⟩ := hζ.eq_pow_mul_of_pow_eq hx
+  exact Subalgebra.mul_mem _ (Subalgebra.pow_mem _ (Subalgebra.algebraMap_mem _ _) _)
+    (Algebra.self_mem_adjoin_singleton K α)
+
+/-- Version of `IntermediateField.adjoin_root_eq_top_of_isSplittingField` without the
+irreducibility of `X ^ n - C a`. -/
+lemma IntermediateField.adjoin_root_eq_top_of_isSplittingField' {K : Type*} [Field K] {n : ℕ}
+    (hζ : (primitiveRoots n K).Nonempty) {a : K} {L : Type*} [Field L] [Algebra K L]
+    [IsSplittingField K L (X ^ n - C a)] {α : L} (hα : α ^ n = algebraMap K L a) : K⟮α⟯ = ⊤ :=
+  (eq_adjoin_of_eq_algebra_adjoin _ _ _
+    (Algebra.adjoin_root_eq_top_of_isSplittingField' hζ hα).symm).symm
+
+/-- If `K` contains a primitive `n`-th root of unity and the splitting field `L` of `X ^ n - C a`
+has degree `n` over `K`, then `X ^ n - C a` is irreducible. -/
+lemma irreducible_X_pow_sub_C_of_isSplittingField {K : Type*} [Field K] {n : ℕ}
+    (hζ : (primitiveRoots n K).Nonempty) {a : K} {L : Type*} [Field L] [Algebra K L]
+    [IsSplittingField K L (X ^ n - C a)] (hn : Module.finrank K L = n) :
+    Irreducible (X ^ n - C a) := by
+  have : NeZero n := ⟨fun h ↦ by simp [h] at hζ⟩
+  have : FiniteDimensional K L := IsSplittingField.finiteDimensional L (X ^ n - C a)
+  obtain ⟨α, hα⟩ : ∃ α : L, α ^ n = algebraMap K L a := ⟨_, rootOfSplitsXPowSubC_pow a L⟩
+  have htop := IntermediateField.adjoin_root_eq_top_of_isSplittingField' hζ hα
+  rw [← hn] at hα ⊢
+  exact irreducible_X_pow_sub_C_of_root_adjoin_eq_top hα htop
+
 /-- Kummer group characterization: let `K` be a field with a primitive `n`-th root of unity `ζ`,
 `a ∈ Kˣ` with `X ^ n - a` irreducible, `α` a root of `X ^ n - a` in `L = K(α)`, and
 `σ ∈ Gal(L/K)` the automorphism defined by `σ(α) = ζ * α`.

@@ -72,6 +72,7 @@ end
 
 variable [IsCyclotomicExtension {p} ℚ F]
 
+variable (F) in
 /-- If `L/ℚ` is Galois of degree `p * (p - 1)`, then `L/F` is cyclic Galois of degree `p`. -/
 lemma kw_kummer₀ [NumberField L] [IsGalois ℚ L] (hL : finrank ℚ L = p * (p - 1)) :
     IsGalois F L ∧ IsCyclic Gal(L/F) ∧ finrank F L = p := by
@@ -85,11 +86,11 @@ lemma kw_kummer₀ [NumberField L] [IsGalois ℚ L] (hL : finrank ℚ L = p * (p
 
 
 open IsCMField in
-/-- If `η * conj η` is a `p`-th power, then `η = ξ * δ ^ p` with `ξ ^ p = 1`. -/
+/-- If `η * conj η` is a `p`-th power, then `η = ζ * δ ^ p` with `ζ ^ p = 1`. -/
 lemma kw_unit_eq_mul_pow (hp' : Odd p) [IsCMField F] {η : (𝓞 F)ˣ} {w : F}
     (hη : ((η : 𝓞 F) : F) * complexConj F ((η : 𝓞 F) : F) = w ^ p) :
-    ∃ ξ δ : F, ξ ^ p = 1 ∧ ((η : 𝓞 F) : F) = ξ * δ ^ p := by
-  obtain ⟨ζ, ε, hε, h⟩ := exists_torsion_realunits_pow_indexRealUnits_eq_mul η
+    ∃ ζ δ : F, ζ ^ p = 1 ∧ ((η : 𝓞 F) : F) = ζ * δ ^ p := by
+  obtain ⟨ω, ε, hε, h⟩ := exists_torsion_realunits_pow_indexRealUnits_eq_mul η
   rw [Rat.indexRealUnits_eq_one' p _ (by grind), pow_one] at h
   obtain ⟨γ, hγ⟩ : ∃ γ : F, ε = γ ^ p := by
     have : η.val * (complexConj F) η.val = ε.val ^ 2 := by
@@ -101,17 +102,17 @@ lemma kw_unit_eq_mul_pow (hp' : Odd p) [IsCMField F] {η : (𝓞 F)ˣ} {w : F}
     rw [mul_pow, ← zpow_natCast, zpow_comm, zpow_natCast, ← hη, this, ← zpow_natCast, ← zpow_mul,
       ← zpow_natCast, ← zpow_mul', ← zpow_add₀ ε.coe_ne_zero, ← Nat.gcd_eq_gcd_ab,
       Nat.coprime_two_left.mpr hp', Nat.cast_one, zpow_one]
-  have hζ : (ζ.val : F) ^ (2 * p) = 1 := by
+  have hω : (ω.val : F) ^ (2 * p) = 1 := by
     rw [show 2 * p = Nat.card (Units.torsion F) by
       rw [← Units.torsionOrder, Rat.torsionOrder_eq (n := p),
         ite_eq_right (Nat.not_even_iff_odd.mpr hp')], ← map_pow, ← Units.val_pow_eq_pow_val,
         ← SubmonoidClass.coe_pow, pow_card_eq_one', Subgroup.coe_one, Units.val_one, map_one]
-  refine ⟨(ζ.val : F) ^ (p + 1), ζ.val * γ, ?_, ?_⟩
+  refine ⟨(ω.val : F) ^ (p + 1), ω.val * γ, ?_, ?_⟩
   · have h : (p + 1) * p = (2 * p) * ((p + 1) / 2) := by
       rw [mul_comm 2, mul_assoc, Nat.mul_div_eq_iff_dvd.mpr, mul_comm]
       grind
-    rw [← pow_mul, h, pow_mul, hζ, one_pow]
-  · rw [mul_pow, ← mul_assoc, ← pow_add, show p + 1 + p = 2 * p + 1 by ring, pow_add, hζ, one_mul,
+    rw [← pow_mul, h, pow_mul, hω, one_pow]
+  · rw [mul_pow, ← mul_assoc, ← pow_add, show p + 1 + p = 2 * p + 1 by ring, pow_add, hω, one_mul,
       pow_one, ← hγ, ← map_mul, ← Units.val_mul, ← h]
 
 section
@@ -325,3 +326,75 @@ lemma kw_unit_root_of_unity (hp' : Odd p) {𝔞 : FractionalIdeal (𝓞 F)⁰ F}
 end
 
 end
+
+-- Proof of `prop_kw_exponent_p`.
+--   1. The base field. Let ζ = ξ ^ p, a primitive p-th root of unity, and F = ℚ(ζ), of degree
+--      p - 1 over ℚ.
+--   2. The compositum. Let L = K F. The field L is unramified outside p, since K and F both are.
+--      The degrees of K and F are p and p - 1, which are coprime, so K ∩ F = ℚ and
+--      [L : ℚ] = p (p - 1).
+--   3. Kummer theory. By kw_kummer₀, the extension L/F is cyclic of degree p, and by kw_kummer,
+--      L is the splitting field over F of X ^ p - μ for some nonzero μ ∈ F. The polynomial
+--      X ^ p - μ is irreducible: otherwise μ is a p-th power in F, so X ^ p - μ splits over F,
+--      and L = F, contradicting [L : F] = p.
+--   4. The ideal of μ. Since L is unramified outside p, kw_mu_pth_power_ideal gives (μ) = 𝔞 ^ p
+--      for a fractional ideal 𝔞 of F.
+--   5. Conclusion. By kw_unit_root_of_unity, the field L is ℚ(ζ_{p²}), that is ℚ(ξ). Hence
+--      K ≤ L = ℚ(ξ).
+
+/-- Every cyclic extension of `ℚ` of prime degree `p` (odd) unramified outside `p` is contained in
+`ℚ(ζ_{p²}) = ℚ⟮ξ⟯`. -/
+theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ : A}
+    (hξ : IsPrimitiveRoot ξ (p ^ 2)) (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K]
+    [IsCyclic Gal(K/ℚ)] (hK : finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
+    K ≤ ℚ⟮ξ⟯ := by
+  have : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ :=
+    hξ.intermediateField_adjoin_isCyclotomicExtension' ℚ
+  have : IsAbelianGalois ℚ K := .of_isCyclic ℚ K
+  let ζ := ξ ^ p
+  have hζ : IsPrimitiveRoot ζ p := hξ.pow (NeZero.pos _) <| by rw [pow_two]
+  let F := ℚ⟮ζ⟯
+  have : IsCyclotomicExtension {p} ℚ F :=
+    hζ.intermediateField_adjoin_isCyclotomicExtension' ℚ
+  have : NumberField F := numberField {p} ℚ F
+  have : IsAbelianGalois ℚ F := isAbelianGalois {p} ℚ F
+  let L := K ⊔ F
+  have : IsCyclotomicExtension {p ^ 2} ℚ L := by
+    let : Algebra F L := (inclusion (le_sup_right : F ≤ L)).toRingHom.toAlgebra
+    have : Module.finrank ℚ ↑(K ⊓ F) = 1 := by
+      refine Nat.eq_one_of_dvd_coprimes ?_ (finrank_dvd_of_le_right inf_le_left)
+        (finrank_dvd_of_le_right inf_le_right)
+      rw [hK, Rat.finrank p, Nat.totient_prime hp.out]
+      exact (Nat.coprime_self_sub_right hp.out.one_le).mpr (Nat.coprime_one_right p)
+    have hL : Module.finrank ℚ L = p * (p - 1) := by
+      rw [IntermediateField.LinearDisjoint.finrank_sup, hK, Rat.finrank p, Nat.totient_prime hp.out]
+      rwa [LinearDisjoint.iff_inf_eq_bot, ← IntermediateField.finrank_eq_one_iff]
+    obtain ⟨_, _, hrF⟩ := kw_kummer₀ F hL
+    obtain ⟨μ, hμ₀, _⟩ := kw_kummer hrF
+    have hIrr : Irreducible (X ^ p - C μ) :=
+      irreducible_X_pow_sub_C_of_isSplittingField (primitiveRoots_nonempty p ℚ F) hrF
+    have hramL : UnramifiedOutside L p :=
+      unramifiedOutside_sup p _ _ hKram (UnramifiedOutside.of_isCyclotomicExtension' p F)
+    obtain ⟨𝔞, h𝔞⟩ := kw_mu_pth_power_ideal hrF hIrr hp' hramL
+    exact kw_unit_root_of_unity hrF hIrr hp' h𝔞
+  rw [isCyclotomicExtension_eq {p ^ 2} ℚ _ ℚ⟮ξ⟯ L]
+  exact le_sup_left
+
+/-- Two cyclic extensions of `ℚ` of prime degree `p` (odd) unramified outside `p` are equal. -/
+theorem prop_kw_exponent_p_eq (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ : A}
+    (hξ : IsPrimitiveRoot ξ (p ^ 2)) (K₁ K₂ : IntermediateField ℚ A) [NumberField K₁]
+    [IsGalois ℚ K₁] [IsCyclic Gal(K₁/ℚ)] (hK₁ : finrank ℚ K₁ = p) (hKram₁ : UnramifiedOutside K₁ p)
+    [NumberField K₂] [IsGalois ℚ K₂] [IsCyclic Gal(K₂/ℚ)] (hK₂ : finrank ℚ K₂ = p)
+    (hKram₂ : UnramifiedOutside K₂ p) :
+    K₁ = K₂ := by
+  sorry
+
+/-- Every cyclic extension of `ℚ` of odd prime power degree `pᵐ` unramified outside `p` is
+cyclotomic: contained in `ℚ(ζ_{p^{m+1}}) = ℚ⟮ξ (p^(m+1))⟯` inside the ambient field `A`. -/
+theorem prop_kw_odd_prime_power [Fact (Odd p)] {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
+    (hξ : ∀ n, IsPrimitiveRoot (ξ n) n) (m : ℕ) (hm : 0 < m) (K : IntermediateField ℚ A)
+    [NumberField K] [IsAbelianGalois ℚ K] (hK : finrank ℚ K = p ^ m)
+    (hKram : UnramifiedOutside K p) :
+    K ≤ ℚ⟮ξ (p ^ (m + 1))⟯ := by
+
+  sorry

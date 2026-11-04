@@ -93,6 +93,20 @@ lemma isUnramifiedIn_of_isCyclotomicExtension {K : Type*} [Field K] [NumberField
   refine Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one.mpr fun P _ hP ↦ ?_
   exact IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p K P hpn
 
+/-- The cyclotomic field `ℚ(ζ_{p ^ k})` is unramified outside `p`. -/
+lemma UnramifiedOutside.of_isCyclotomicExtension (k : ℕ) (K : Type*) [Field K] [NumberField K]
+    [hp : Fact p.Prime] [IsCyclotomicExtension {p ^ k} ℚ K] : UnramifiedOutside K p :=
+  fun q hq hqp ↦
+    have : Fact q.Prime := ⟨hq⟩
+    isUnramifiedIn_of_isCyclotomicExtension q (n := p ^ k) fun h ↦
+      hqp <| (Nat.prime_dvd_prime_iff_eq hq hp.out).mp (hq.dvd_of_dvd_pow h)
+
+/-- The cyclotomic field `ℚ(ζ_{p})` is unramified outside `p`. -/
+lemma UnramifiedOutside.of_isCyclotomicExtension' (K : Type*) [Field K] [NumberField K]
+    [Fact p.Prime] [hK : IsCyclotomicExtension {p } ℚ K] : UnramifiedOutside K p := by
+  rw [← pow_one p] at hK
+  exact .of_isCyclotomicExtension p 1 K
+
 open NumberField IntermediateField in
 /-- Top-field version of `unramifiedOutside_sup`: if `K` and `F` are both unramified outside `p` and
 together generate the whole field (`K ⊔ F = ⊤`), then `L` itself is unramified outside `p`. The

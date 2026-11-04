@@ -16,7 +16,10 @@ set_option linter.style.header false
 @[expose] public section
 
 /-!
-# Kronecker-Weber for odd prime power cyclic extensions
+# Kronecker-Weber for odd prime power cyclic extensions (old version)
+
+Parked copy of the former `OddPrimePower.lean`, out of the build, in the namespace
+`KroneckerWeber2`. `prop_kw_odd_prime_power` is restated in `SKW.KroneckerWeber.KroneckerWeber`.
 
 Every cyclic extension of `ℚ` of odd prime power degree `pᵐ` unramified outside `p` is
 contained in `ℚ(ζ_{p^{m+1}})`.
@@ -29,6 +32,8 @@ contradicting `prop_kw_exponent_p`.
 -/
 
 open NumberField Ideal IntermediateField IsCyclotomicExtension
+
+namespace KroneckerWeber2
 
 noncomputable section
 
@@ -165,5 +170,7 @@ theorem prop_kw_odd_prime_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ →
       prop_kw_exponent_p_eq p hp'.out (hξ (p ^ 2)) F₁ F₂ hf₁ hr₁ hf₂ hr₂)).le.trans hK'₁
 
 end
+
+end KroneckerWeber2
 
 end
