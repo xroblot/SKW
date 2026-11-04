@@ -5,6 +5,7 @@ public import Mathlib.NumberTheory.FundamentalDiscriminant
 public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
 public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
 public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.NumberTheory.RamificationInertia.Unramified
 public import Mathlib.NumberTheory.RamificationInertia.HilbertTheory
@@ -100,3 +101,18 @@ theorem NumberField.QuadraticField.discr_pos (K : Type*) [Field K] [NumberField 
     [IsTotallyReal K] (hK : Module.finrank ℚ K = 2) :
     0 < NumberField.discr K :=
   (isTotallyReal_iff_discr_pos K hK).mp ‹_›
+
+/-- Reduction modulo `ζ - 1` is invariant under every ring endomorphism of `𝓞 K`, where `ζ` is a
+primitive `n`-th root of unity. From Mathlib PR
+[#45512](https://github.com/leanprover-community/mathlib4/pull/45512). -/
+theorem IsCyclotomicExtension.Rat.quotientMk_span_zeta_sub_one_comp (n : ℕ) {K : Type*} [Field K]
+    [NumberField K] [NeZero n] [IsCyclotomicExtension {n} ℚ K] {ζ : K}
+    (hζ : IsPrimitiveRoot ζ n) (σ : 𝓞 K →+* 𝓞 K) :
+    (Ideal.Quotient.mk (span {hζ.toInteger - 1})).comp σ = Ideal.Quotient.mk _ := by
+  sorry
+
+theorem IsCyclotomicExtension.Rat.quotientMk_span_zeta_sub_one_comp_apply (n : ℕ) {K : Type*}
+    [Field K] [NumberField K] [NeZero n] [IsCyclotomicExtension {n} ℚ K] {ζ : K}
+    (hζ : IsPrimitiveRoot ζ n) (σ : 𝓞 K →+* 𝓞 K) (x : 𝓞 K) :
+    Ideal.Quotient.mk (span {hζ.toInteger - 1}) (σ x) = Ideal.Quotient.mk _ x :=
+  RingHom.congr_fun (quotientMk_span_zeta_sub_one_comp n hζ σ) x

@@ -7,6 +7,7 @@ public import SKW.Prereqs.KummerExtension
 public import SKW.Prereqs.OtherPR
 public import SKW.Prereqs.Unramified
 public import SKW.Stickelberger.Stickelberger
+public import SKW.Prereqs.CMField
 
 public import Mathlib.Algebra.FiniteSupport.Basic
 public import Mathlib.Algebra.GroupWithZero.Torsion
@@ -102,6 +103,36 @@ section
 
 variable [NumberField L] [IsAbelianGalois ℚ L] {μ : F} [hS : IsSplittingField F L (X ^ p - C μ)]
   (hIrr : Irreducible (X ^ p - C μ))
+
+open IsCMField in
+/-- If `η * conj η` is a `p`-th power, then `η = ξ * δ ^ p` with `ξ ^ p = 1`. -/
+lemma kw_unit_eq_mul_pow [IsCMField F] (hp' : Odd p) {η : (𝓞 F)ˣ} {w : F}
+    (hη : (η.val : F) * complexConj F (η.val : F) = w ^ p) :
+    ∃ ξ δ : F, ξ ^ p = 1 ∧ ((η : 𝓞 F) : F) = ξ * δ ^ p := by
+  obtain ⟨ζ, ε, hε, h⟩ := exists_torsion_realunits_pow_indexRealUnits_eq_mul η
+  rw [Rat.indexRealUnits_eq_one' p _ (by grind), pow_one] at h
+  have ⟨γ, hγ⟩ : ∃ γ : F, ε = γ ^ p := by
+    have : η.val * (complexConj F) η.val = ε.val ^ 2 := by
+      rw [← coe_ringOfIntegersComplexConj, ← coe_unitsComplexConj, ← Units.coe_mul, ← Units.coe_pow,
+        RingOfIntegers.eq_iff, ← Units.ext_iff, h, map_mul, unitsComplexConj_torsion,
+        (unitsComplexConj_eq_self_iff _ ε).mpr hε, Subgroup.coe_inv, mul_mul_mul_comm,
+        mul_inv_cancel, one_mul, sq]
+    refine ⟨w ^ Nat.gcdA 2 p * ε ^ Nat.gcdB 2 p, ?_⟩
+    rw [mul_pow, ← zpow_natCast, zpow_comm, zpow_natCast, ← hη, this, ← zpow_natCast, ← zpow_mul,
+      ← zpow_natCast, ← zpow_mul', ← zpow_add₀ ε.coe_ne_zero, ← Nat.gcd_eq_gcd_ab,
+      Nat.coprime_two_left.mpr hp', Nat.cast_one, zpow_one]
+  have hζ : (ζ.val : F) ^ (2 * p) = 1 := by
+    rw [show 2 * p = Nat.card (Units.torsion F) by
+      rw [← Units.torsionOrder, IsCyclotomicExtension.Rat.torsionOrder_eq (n := p),
+        ite_eq_right (Nat.not_even_iff_odd.mpr hp')], ← map_pow, ← Units.val_pow_eq_pow_val,
+        ← SubmonoidClass.coe_pow, pow_card_eq_one', Subgroup.coe_one, Units.val_one, map_one]
+  refine ⟨(ζ.val : F) ^ (p + 1), ζ.val * γ, ?_, ?_⟩
+  · have h : (p + 1) * p = (2 * p) * ((p + 1) / 2) := by
+      rw [mul_comm 2, mul_assoc, Nat.mul_div_eq_iff_dvd.mpr, mul_comm]
+      grind
+    rw [← pow_mul, h, pow_mul, hζ, one_pow]
+  · rw [mul_pow, ← mul_assoc, ← pow_add, show p + 1 + p = 2 * p + 1 by ring, pow_add, hζ, one_mul,
+      pow_one, ← hγ, ← map_mul, ← Units.val_mul, ← h]
 
 include hIrr hrF
 
@@ -241,16 +272,31 @@ lemma kw_class_trivial {𝔞 : FractionalIdeal (𝓞 F)⁰ F} (h𝔞 : 𝔞 ^ p 
 --      1 = ∏_a (σ_a⁻¹ [𝔞]) ^ a = ∏_a [𝔞] ^ (a⁻¹ · a) = [𝔞] ^ (p - 1).
 --   - Conclusion. Together with [𝔞] ^ p = 1, this gives [𝔞] = 1, so 𝔞 = (β) with β ∈ Fˣ.
 
-/-- If `𝔞 ^ p = (μ)` for a fractional ideal `𝔞`, then `L` is the cyclotomic extension
-`ℚ(ζ_{p²})`. -/
-lemma kw_unit_root_of_unity (hp' : Odd p) {𝔞 : FractionalIdeal (𝓞 F)⁰ F}
+open IsCMField in
+/-- If `𝔞 ^ p = (μ)`, then `μ = β ^ p * η` for a unit `η` such that
+  `η * conj η` is a `p`-th power. -/
+theorem kw_unit_conj_pow [IsCMField F] {𝔞 : FractionalIdeal (𝓞 F)⁰ F}
     (h𝔞 : 𝔞 ^ p = spanSingleton (𝓞 F)⁰ μ) :
-    IsCyclotomicExtension {p ^ 2} ℚ L := by
-  sorry
-
-end
-
-
+    ∃ (β w : F) (η : (𝓞 F)ˣ), μ = β ^ p * (η : 𝓞 F) ∧
+      ((η : 𝓞 F) : F) * complexConj F ((η : 𝓞 F) : F) = w ^ p := by
+  have hμ₀ : μ ≠ 0 := ne_zero_of_irreducible_X_pow_sub_C' hp.out.ne_one hIrr
+  obtain ⟨c, hc⟩ : ∃ c, c ^ p = complexConj F μ * μ⁻¹ ^ (p - 1) := by
+    obtain ⟨c, hc₁, hc₂⟩ := kw_abelian_kummer p F hrF hIrr (IsCMField.ratComplexConj F)
+    refine ⟨c, ?_⟩
+    rw [Rat.galEquivZMod_ratComplexConj, IsCMField.ratComplexConj_apply] at hc₂
+    rw [hc₂, mul_assoc, left_eq_mul₀ (pow_ne_zero p hc₁), inv_pow,
+      mul_inv_eq_one₀ (pow_ne_zero (p - 1) hμ₀), Units.val_neg, Units.val_one,
+      ZMod.val_neg_of_ne_zero, ZMod.val_one]
+  obtain ⟨β, hβ⟩ := kw_class_trivial p F hrF hIrr h𝔞
+  rw [← pow_left_inj hp.out.ne_zero, ← map_pow] at hβ
+  obtain ⟨η, hη⟩ := spanSingleton_eq_spanSingleton.mp <| hβ.symm.trans h𝔞
+  rw [Units.smul_def, Algebra.smul_def, ← RingOfIntegers.coe_eq_algebraMap] at hη
+  refine ⟨β, c * μ * (β * complexConj F β)⁻¹, η, by rwa [mul_comm, eq_comm], ?_⟩
+  have : β ≠ 0 := fun h ↦ hμ₀ <| by rw [← hη, h, zero_pow hp.out.ne_zero, mul_zero]
+  have : complexConj F β ≠ 0 := by rwa [_root_.map_ne_zero]
+  simp only [mul_pow, hc, ← hη, mul_inv, map_mul, map_pow, mul_pow, inv_pow]
+  field_simp
+  rw [← pow_succ', mul_assoc, ← pow_succ', Nat.sub_add_cancel hp.out.one_le]
 
 --   2. A unit appears. From (β) ^ p = (μ) we get (μ / β ^ p) = (1), so
 --      μ = β ^ p · η with η ∈ (𝓞 F)ˣ. With μ ∈ F this is simpler than in the old
@@ -261,17 +307,45 @@ end
 --      η · σ(η) = w ^ p for some w ∈ F.
 
 --   4. Units of the CM field F. The field F is CM since p is odd.
---   - By the CM unit index, η ^ 2 = ζ' · ε with ζ' a root of unity and ε a real unit.
---   - The torsion of F has order 2p, so squaring once more gives η ^ 4 = ζ · ε'
---      with ζ ^ p = 1 and ε' real.
---   - Then σ(η) ^ 4 = ζ⁻¹ · ε', so ε' ^ 2 = (η · σ(η)) ^ 4 = (w ^ 4) ^ p.
---   - Since gcd(2, p) = 1, it follows that ε' = δ ^ p for some δ ∈ F.
+--   - The index of the real units of F is 1, so η = ζ' · ε with ζ' a root of unity and ε a
+--      real unit.
+--   - Then η · σ(η) = ε ^ 2 = w ^ p. Since gcd(2, p) = 1, it follows that ε = γ ^ p for some γ ∈ F.
+--   - The torsion of F has order 2p, so η = ζ · δ ^ p with ζ = ζ' ^ (p + 1), ζ ^ p = 1 and
+--      δ = ζ' · γ.
 
---   5. The field L is ℚ(ζ_{p²}).
---   - Reduce to X ^ p - ζ. We have μ ^ 4 = β ^ (4p) · η ^ 4 = ζ · (β ^ 4 · δ) ^ p.
---      Since gcd(4, p) = 1, the field L is also the splitting field of the
---      irreducible X ^ p - μ ^ 4. So L is the splitting field of X ^ p - ζ.
---   - The root ζ is primitive. If ζ = 1, then X ^ p - 1 splits over F and L = F,
---      contradicting [L : F] = p. So ζ is a primitive p-th root of unity.
---   - A primitive p²-th root. A root ξ ∈ L of X ^ p - ζ is a primitive p²-th root
---      of unity. So ℚ(ξ) ⊆ L.
+/-- If `𝔞 ^ p = (μ)` for a fractional ideal `𝔞`, then `L` is the cyclotomic extension
+`ℚ(ζ_{p²})`. -/
+lemma kw_unit_root_of_unity (hp' : Odd p) {𝔞 : FractionalIdeal (𝓞 F)⁰ F}
+    (h𝔞 : 𝔞 ^ p = spanSingleton (𝓞 F)⁰ μ) :
+    IsCyclotomicExtension {p ^ 2} ℚ L := by
+  have hμ₀ : μ ≠ 0 := ne_zero_of_irreducible_X_pow_sub_C' hp.out.ne_one hIrr
+  have : IsCMField F := Rat.isCMField F ⟨p, Set.mem_singleton p, hp.out.odd_iff.mp hp'⟩
+  obtain ⟨β, w, η, hμ, hη⟩ := kw_unit_conj_pow p F hrF hIrr h𝔞
+  obtain ⟨ζ, δ, hζ, hη'⟩ := kw_unit_eq_mul_pow p F hp' hη
+  have hμ₁ : μ = ζ * (β * δ) ^ p := by
+    rw [hμ, hη']
+    ring
+  have hζ₁ : ζ ≠ 1 := fun h ↦ by
+    rw [h, one_mul] at hμ₁
+    exact pow_ne_of_irreducible_X_pow_sub_C hIrr dvd_rfl hp.out.ne_one (β * δ) hμ₁.symm
+  let α := rootOfSplitsXPowSubC hp.out.pos μ L
+  let ξ : L := α * algebraMap F L (β * δ)⁻¹
+  have hξ : ξ ^ p = algebraMap F L ζ := by
+    rw [mul_pow, rootOfSplitsXPowSubC_pow, hμ₁, ← map_pow, ← map_mul, mul_assoc, ← mul_pow,
+      mul_inv_cancel₀, one_pow, mul_one]
+    exact fun h ↦ hμ₀ <| by rwa [h, zero_pow hp.out.ne_zero, mul_zero] at hμ₁
+  have h₁ : orderOf ξ = p ^ 2 := by
+    refine orderOf_eq_prime_pow ?_ ?_
+    · rwa [pow_one, hξ, FaithfulSMul.algebraMap_eq_one_iff]
+    · rw [pow_add, pow_one, pow_mul, hξ, ← map_pow, hζ, map_one]
+  have h₂ : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ :=
+    (IsPrimitiveRoot.iff_orderOf.mpr h₁).intermediateField_adjoin_isCyclotomicExtension ℚ
+  have h₃ : ℚ ⟮ξ⟯ = ⊤ := by
+    refine eq_of_le_of_finrank_eq le_top ?_
+    rw [Rat.finrank (p ^ 2) ℚ⟮ξ⟯, Nat.totient_prime_pow hp.out Nat.two_pos, Nat.succ_sub_one,
+      pow_one, finrank_top', ← finrank_mul_finrank ℚ F L, Rat.finrank p, Nat.totient_prime hp.out,
+      hrF, mul_comm]
+  rw [h₃] at h₂
+  exact IsCyclotomicExtension.equiv _ _ _ topEquiv
+
+end
