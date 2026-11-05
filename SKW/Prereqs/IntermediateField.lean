@@ -42,6 +42,14 @@ instance {K L : Type*} [Field K] [Field L] [NumberField K] [NumberField L] [Alge
   IsGaloisGroup.of_isFractionRing _ (𝓞 F) (𝓞 L) F L
 
 open IntermediateField in
+/-- In a finite Galois extension, two intermediate fields are equal iff they have the same fixing
+subgroup. -/
+theorem IsGalois.fixingSubgroup_inj {K L : Type*} [Field K] [Field L] [Algebra K L]
+    [FiniteDimensional K L] [IsGalois K L] {F₁ F₂ : IntermediateField K L} :
+    F₁.fixingSubgroup = F₂.fixingSubgroup ↔ F₁ = F₂ :=
+  ⟨fun h ↦ by rw [← fixedField_fixingSubgroup F₁, h, fixedField_fixingSubgroup], congr_arg _⟩
+
+open IntermediateField in
 /-- `lift` preserves the rank over the base field. -/
 theorem IntermediateField.rank_lift {K L : Type*} [Field K] [Field L] [Algebra K L]
     {F : IntermediateField K L} (E : IntermediateField K F) :

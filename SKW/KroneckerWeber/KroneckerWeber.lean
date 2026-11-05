@@ -327,21 +327,6 @@ end
 
 end
 
--- Proof of `prop_kw_exponent_p`.
---   1. The base field. Let ζ = ξ ^ p, a primitive p-th root of unity, and F = ℚ(ζ), of degree
---      p - 1 over ℚ.
---   2. The compositum. Let L = K F. The field L is unramified outside p, since K and F both are.
---      The degrees of K and F are p and p - 1, which are coprime, so K ∩ F = ℚ and
---      [L : ℚ] = p (p - 1).
---   3. Kummer theory. By kw_kummer₀, the extension L/F is cyclic of degree p, and by kw_kummer,
---      L is the splitting field over F of X ^ p - μ for some nonzero μ ∈ F. The polynomial
---      X ^ p - μ is irreducible: otherwise μ is a p-th power in F, so X ^ p - μ splits over F,
---      and L = F, contradicting [L : F] = p.
---   4. The ideal of μ. Since L is unramified outside p, kw_mu_pth_power_ideal gives (μ) = 𝔞 ^ p
---      for a fractional ideal 𝔞 of F.
---   5. Conclusion. By kw_unit_root_of_unity, the field L is ℚ(ζ_{p²}), that is ℚ(ξ). Hence
---      K ≤ L = ℚ(ξ).
-
 /-- Every cyclic extension of `ℚ` of prime degree `p` (odd) unramified outside `p` is contained in
 `ℚ(ζ_{p²}) = ℚ⟮ξ⟯`. -/
 theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {ξ : A}
@@ -387,7 +372,20 @@ theorem prop_kw_exponent_p_eq (hp' : Odd p) {A : Type*} [Field A] [CharZero A] {
     [NumberField K₂] [IsGalois ℚ K₂] [IsCyclic Gal(K₂/ℚ)] (hK₂ : finrank ℚ K₂ = p)
     (hKram₂ : UnramifiedOutside K₂ p) :
     K₁ = K₂ := by
-  sorry
+  have h₁ := prop_kw_exponent_p hp' hξ K₁ hK₁ hKram₁
+  let K₁' := restrict h₁
+  have h₂ := prop_kw_exponent_p hp' hξ K₂ hK₂ hKram₂
+  let K₂' := restrict h₂
+  suffices K₁' = K₂' by
+    rwa [← lift_inj, lift_restrict h₁, lift_restrict h₂] at this
+  have : IsCyclotomicExtension {p ^ 2} ℚ ℚ⟮ξ⟯ :=
+    hξ.intermediateField_adjoin_isCyclotomicExtension' ℚ
+  have : NumberField ℚ⟮ξ⟯ := numberField {p ^ 2} ℚ _
+  have : IsAbelianGalois ℚ ℚ⟮ξ⟯ := isAbelianGalois {p ^ 2} ℚ _
+  have : IsCyclic Gal(ℚ⟮ξ⟯/ℚ) := Rat.isCyclic_of_prime_pow _ 2 <| hp'.ne_two_of_dvd_nat dvd_rfl
+  rw [← IsGalois.fixingSubgroup_inj, IsCyclic.subgroup_eq_iff_index_eq,
+    ← finrank_eq_fixingSubgroup_index, ← finrank_eq_fixingSubgroup_index, finrank_restrict,
+    finrank_restrict, hK₁, hK₂]
 
 /-- Every cyclic extension of `ℚ` of odd prime power degree `pᵐ` unramified outside `p` is
 cyclotomic: contained in `ℚ(ζ_{p^{m+1}}) = ℚ⟮ξ (p^(m+1))⟯` inside the ambient field `A`. -/

@@ -11,6 +11,7 @@ public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 public import Mathlib.NumberTheory.NumberField.CMField
 public import Mathlib.RingTheory.RootsOfUnity.CyclotomicUnits
+public import Mathlib.RingTheory.ZMod.UnitsCyclic
 
 set_option linter.style.header false
 
@@ -337,5 +338,37 @@ theorem indexRealUnits_eq_one' [hK : IsCyclotomicExtension {p} ℚ K] (hp₂ : p
     indexRealUnits K = 1 := by
   rw [← pow_one p] at hK
   exact indexRealUnits_eq_one p 0 K hp₂
+
+end IsCyclotomicExtension.Rat
+
+namespace IsCyclotomicExtension.Rat
+
+section
+
+variable (n : ℕ) [NeZero n] (K : Type*) [Field K] [NumberField K] [IsCyclotomicExtension {n} ℚ K]
+
+/-- The Galois group of `ℚ(ζₙ)` is cyclic iff `(ℤ/nℤ)ˣ` is cyclic. -/
+theorem isCyclic_iff_isCyclic_units : IsCyclic Gal(K/ℚ) ↔ IsCyclic (ZMod n)ˣ :=
+  (galEquivZMod n K).isCyclic
+
+/-- The Galois group of `ℚ(ζₙ)` is cyclic iff `n = 1`, `2`, `4`, `p ^ m` or `2 * p ^ m` for an odd
+prime `p` and `1 ≤ m`. -/
+theorem isCyclic_iff : IsCyclic Gal(K/ℚ) ↔ n = 1 ∨ n = 2 ∨ n = 4 ∨
+    ∃ (p m : ℕ), p.Prime ∧ Odd p ∧ 1 ≤ m ∧ (n = p ^ m ∨ n = 2 * p ^ m) := by
+  rw [isCyclic_iff_isCyclic_units n, ZMod.isCyclic_units_iff]
+  simp [NeZero.ne n]
+
+end
+
+variable (K : Type*) [Field K] [NumberField K] {p : ℕ} [hp : Fact p.Prime]
+
+/-- The Galois group of `ℚ(ζ_{p ^ k})` is cyclic for `p` an odd prime. -/
+theorem isCyclic_of_prime_pow (k : ℕ) (hp' : p ≠ 2) [IsCyclotomicExtension {p ^ k} ℚ K] :
+    IsCyclic Gal(K/ℚ) :=
+  (isCyclic_iff_isCyclic_units (p ^ k) K).mpr (ZMod.isCyclic_units_of_prime_pow p hp.out hp' k)
+
+/-- The Galois group of `ℚ(ζ_p)` is cyclic for `p` a prime. -/
+theorem isCyclic_of_prime [IsCyclotomicExtension {p} ℚ K] : IsCyclic Gal(K/ℚ) :=
+  (isCyclic_iff_isCyclic_units p K).mpr (ZMod.isCyclic_units_prime hp.out)
 
 end IsCyclotomicExtension.Rat
