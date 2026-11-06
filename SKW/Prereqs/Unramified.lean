@@ -22,6 +22,12 @@ unramified in `S'`. Intended for eventual upstreaming.
 
 @[expose] public section
 
+/-- If `G` is a finite Galois group of `L/K`, then `L/K` is separable. -/
+theorem IsGaloisGroup.isSeparable (G K L : Type*) [Group G] [Field K] [Field L] [Algebra K L]
+    [MulSemiringAction G L] [Finite G] [IsGaloisGroup G K L] : Algebra.IsSeparable K L :=
+  have := IsGaloisGroup.isGalois G K L
+  inferInstance
+
 namespace Algebra
 
 variable {R S S' : Type*} [CommRing R] [CommRing S] [CommRing S']
@@ -61,7 +67,90 @@ theorem IsUnramifiedIn.tower_top {R S T : Type*} [CommRing R] [CommRing S] [Comm
   have := h Q inferInstance (Ideal.LiesOver.trans Q 𝔓 𝔭)
   exact Algebra.IsUnramifiedAt.of_restrictScalars R Q
 
+/-- Let `K` and `L` be fraction fields of `R` and `S`. If `L/K` is separable, then `S` is
+unramified over `R` at the zero ideal. -/
+theorem isUnramifiedAt_bot_of_isSeparable {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
+    [IsDomain S] (K L : Type*) [Field K] [Field L] [Algebra R K] [IsFractionRing R K]
+    [Algebra S L] [IsFractionRing S L] [Algebra K L] [Algebra R L] [IsScalarTower R K L]
+    [IsScalarTower R S L] [Algebra.IsSeparable K L] :
+    IsUnramifiedAt R (⊥ : Ideal S) := by
+  have : IsFractionRing S (Localization.AtPrime (⊥ : Ideal S)) := by
+    simpa [Ideal.primeCompl_bot] using Localization.isLocalization (M := (⊥ : Ideal S).primeCompl)
+  have : FormallyUnramified R K := .of_isLocalization (nonZeroDivisors R)
+  have : FormallyUnramified K L := .of_isSeparable K L
+  have : FormallyUnramified R L := .comp R K L
+  exact .of_equiv ((IsLocalization.algEquiv (nonZeroDivisors S) _ L).restrictScalars R).symm
+
 end Algebra
+
+namespace Ideal.IsInertiaRing
+
+open Ideal
+
+variable {A B C : Type*} [CommRing A] [CommRing B] [CommRing C] [Algebra A B] [Algebra A C]
+  [Algebra C B] [IsScalarTower A C B] (G : Type*) [Group G] [Finite G] [MulSemiringAction G B]
+  [IsGaloisGroup G A B] (P : Ideal B) [hP : P.IsPrime] {p : Ideal A} [P.LiesOver p]
+  [hC : P.IsInertiaRing G C] [IsDomain A] [IsDomain B] [IsDomain C] [Module.Finite A B]
+  [Module.Flat A B] [Module.Flat C B] [Ring.HasFiniteQuotients A] [Ring.HasFiniteQuotients B]
+  [Algebra.EssFiniteType A C]
+
+/-
+Proof of `isUnramifiedAt`.
+
+The ramification index of `P.under C` over `A` is `1` (`IsInertiaRing.ramificationIdx_eq` in
+#35808). The residue fields are finite (`Ring.HasFiniteQuotients`), hence perfect, so the residue
+field extension is separable, and `Ideal.ramificationIdx_eq_one_iff` concludes.
+If `P = ⊥`, then `B` is a field, hence so are `A` and `C` (`isField_of_isIntegral_of_isField`).
+The extension `C/A` is separable since `B/A` is Galois, and `isUnramifiedAt_bot_of_isSeparable`
+concludes.
+-/
+
+attribute [local instance] FractionRing.liftAlgebra in
+include G in
+/-- The prime of an inertia ring `C` of `P` lying under `P` is unramified over `A`. -/
+theorem isUnramifiedAt : Algebra.IsUnramifiedAt A (P.under C) := by
+  obtain rfl | hP := eq_or_ne P ⊥
+  · have : FaithfulSMul A C := .tower_bot A C B
+    have : Algebra.IsSeparable (FractionRing A) (FractionRing B) := by
+      let := IsFractionRing.mulSemiringAction G B (FractionRing B)
+      exact (IsGaloisGroup.to_isFractionRing G A B _ _).isSeparable G _ _
+    have : Algebra.IsSeparable (FractionRing A) (FractionRing C) :=
+      Algebra.isSeparable_tower_bot_of_isSeparable _ _ (FractionRing B)
+    simpa using Algebra.isUnramifiedAt_bot_of_isSeparable (R := A) (S := C)
+      (FractionRing A) (FractionRing C)
+  · have : Algebra.IsIntegral A C := .tower_bot B
+    have : NeZero (under A (under C P)) := ⟨by simpa [under_under] using under_ne_bot _ hP⟩
+    rw [← ramificationIdx_eq_one_iff]
+    exact IsInertiaRing.ramificationIdx_eq G P C (under C P) <| under_ne_bot _ hP
+
+/-
+Proof of `isUnramifiedIn`.
+
+Let `𝓠` be a prime of `C` over `p` and `Q` a prime of `B` over `𝓠` (`Ideal.exists_ideal_liesOver`).
+Then `Q = σ • P` for some `σ ∈ G` (`exists_smul_eq_of_isGaloisGroup`), so the inertia group of `Q`
+is `σ (inertia G P) σ⁻¹ = inertia G P` since it is normal. Hence `C` is also an inertia ring of `Q`,
+and `𝓠 = Q.under C` is unramified over `A` by `isUnramifiedAt` applied to `Q`.
+-/
+
+include G in
+/-- If the inertia group of `P` is normal (e.g. if `G` is commutative), then `p` is unramified in
+an inertia ring `C` of `P`. -/
+theorem isUnramifiedIn [(inertia G P).Normal] : Algebra.IsUnramifiedIn C p := by
+  have : Algebra.IsIntegral C B := .tower_top A
+  intro 𝓠 h𝓠₁ h𝓠₂
+  obtain ⟨Q, ⟨_, hQ⟩⟩ := Ideal.nonempty_primesOver (S := B) 𝓠
+  have : Q.IsInertiaRing G C := by
+    have : Q.LiesOver p := LiesOver.trans Q 𝓠 p
+    obtain ⟨σ, hσ⟩ := exists_smul_eq_of_isGaloisGroup p P Q G
+    have : inertia G Q = inertia G P := by
+      rw [← hσ, inertia_smul]
+      exact Subgroup.Normal.conj_smul_eq_self σ _
+    exact { toIsGaloisGroup := this ▸ hC.toIsGaloisGroup }
+  rw [liesOver_iff] at hQ
+  simp_rw [hQ]
+  exact isUnramifiedAt G Q
+
+end Ideal.IsInertiaRing
 
 open NumberField Ideal IntermediateField
 

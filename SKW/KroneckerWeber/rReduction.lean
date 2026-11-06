@@ -30,7 +30,10 @@ set_option linter.style.header false
 @[expose] public section
 
 /-!
-# Reduction steps for Kronecker-Weber
+# Reduction steps for Kronecker-Weber (old version)
+
+Parked copy of the former `Reduction.lean`, out of the build, in the namespace `KroneckerWeber2`.
+The results used elsewhere are restated in `SKW.KroneckerWeber.KroneckerWeber`.
 
 This file establishes the reduction steps that allow us to prove Kronecker-Weber by induction:
 
@@ -47,6 +50,8 @@ The reduction of the general (abelian) case to the cyclic prime power case
 -/
 
 open NumberField Ideal Pointwise Module IntermediateField
+
+namespace KroneckerWeber2
 
 noncomputable section
 
@@ -427,5 +432,7 @@ lemma kw_eq_of_unique_prime_subfield {A : Type*} [Field A] [CharZero A]
   exact kw_cyclic_compositum K K' (hK.trans hK'.symm).dvd
 
 end
+
+end KroneckerWeber2
 
 end

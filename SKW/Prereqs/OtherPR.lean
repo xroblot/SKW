@@ -28,25 +28,38 @@ theorem Ideal.ramificationIdx_sup_eq_one {L : Type*} [Field L] [NumberField L]
     ramificationIdx P ℤ = 1 := by
   sorry
 
-/-- A prime is unramified in the inertia field of a prime above it. Extracted from the
-inertia-field API of Mathlib PR
-[#36733](https://github.com/leanprover-community/mathlib4/pull/36733). -/
-theorem IsInertiaField.ramificationIdx_eq (K L : Type*) {A B : Type*} [Field K] [Field L]
-    [Algebra K L] [CommRing A] [CommRing B] [MulSemiringAction Gal(L/K) B] (E 𝓞E : Type*)
-    [Field E] [CommRing 𝓞E] [Algebra E L] (P : Ideal B) (𝓟E : Ideal 𝓞E) [Algebra A 𝓞E]
-    [IsInertiaField K L P E] [Algebra 𝓞E B] [P.LiesOver 𝓟E] :
-    ramificationIdx 𝓟E A = 1 := by
+/-- Let `C` be an inertia ring of `P` and `𝓟` the prime of `C` below `P`. Then `𝓟` is unramified
+over `A`. From Mathlib PR [#35808](https://github.com/leanprover-community/mathlib4/pull/35808). -/
+theorem Ideal.IsInertiaRing.ramificationIdx_eq {A B : Type*} [CommRing A] [CommRing B]
+    (G : Type*) [Group G] [Finite G] [MulSemiringAction G B] (P : Ideal B) [P.IsPrime]
+    (C : Type*) [CommRing C] [Algebra C B] [Algebra A B] [Algebra A C] [IsScalarTower A C B]
+    {p : Ideal A} [P.LiesOver p] (𝓟 : Ideal C) [P.LiesOver 𝓟] [P.IsInertiaRing G C]
+    [IsGaloisGroup G A B] [Module.Finite A B] [IsDomain A] [IsDomain B] [IsDomain C]
+    [Module.Flat A B] [Module.Flat C B] [Ring.HasFiniteQuotients A] [Ring.HasFiniteQuotients B]
+    (hp : p ≠ ⊥) :
+    𝓟.ramificationIdx A = 1 := by
   sorry
 
-/-- In an abelian Galois number field `L/ℚ`,
-  the inertia field of a prime `𝔔` lying over the rational
-prime `q` is unramified at `q` (the inertia field is Galois here, so unramifiedness holds at every
-prime over `q`, not just the one below `𝔔`). Extracted from the inertia-field API of Mathlib PR
-[#36733](https://github.com/leanprover-community/mathlib4/pull/36733). -/
-theorem isUnramifiedIn_fixedField_inertia {L : Type*} [Field L] [NumberField L]
-    [IsAbelianGalois ℚ L] {q : ℕ} (𝔔 : Ideal (𝓞 L)) [𝔔.IsPrime]
-    [𝔔.LiesOver (span {(q : ℤ)})] :
-    Algebra.IsUnramifiedIn (𝓞 (fixedField (inertia Gal(L/ℚ) 𝔔))) (span {(q : ℤ)}) := by
+/-- Let `C` be an inertia ring of `P` and `𝓟` the prime of `C` below `P`. Then `P` is the only
+prime of `B` above `𝓟`. From Mathlib PR
+[#35808](https://github.com/leanprover-community/mathlib4/pull/35808). -/
+theorem Ideal.IsInertiaRing.primesOver_eq_singleton {B : Type*} [CommRing B] (G : Type*) [Group G]
+    [MulSemiringAction G B] (P : Ideal B) (C : Type*) [CommRing C] [Algebra C B] (𝓟 : Ideal C)
+    [P.LiesOver 𝓟] [P.IsInertiaRing G C] [P.IsPrime] [Finite (Ideal.inertia G P)] :
+    Ideal.primesOver 𝓟 B = {P} := by
+  refine Set.eq_singleton_iff_unique_mem.mpr ⟨⟨inferInstance, inferInstance⟩, fun Q ⟨_, _⟩ ↦ ?_⟩
+  obtain ⟨σ, rfl⟩ := Ideal.exists_smul_eq_of_isGaloisGroup 𝓟 P Q (Ideal.inertia G P)
+  exact Ideal.inertia_le_stabilizer _ σ.prop
+
+open Ideal in
+/-- Let `C` be an inertia ring of `P` and `𝓟` the prime of `C` below `P`. Then the inertia degree
+of `𝓟` in `B` equals `1`. From Mathlib PR
+[#35808](https://github.com/leanprover-community/mathlib4/pull/35808), where `P` is maximal. -/
+theorem Ideal.IsInertiaRing.inertiaDegIn_eq {B : Type*} [CommRing B] (G : Type*) [Group G]
+    [Finite G] [MulSemiringAction G B] (P : Ideal B) [P.IsPrime] (C : Type*) [CommRing C]
+    [Algebra C B] (𝓟 : Ideal C) [P.LiesOver 𝓟] [P.IsInertiaRing G C] [Ring.HasFiniteQuotients B]
+    [Algebra.IsIntegral C B] (hP : P ≠ ⊥) :
+    inertiaDegIn 𝓟 B = 1 := by
   sorry
 
 /-- The discriminant of a quadratic field is a fundamental discriminant. From Mathlib PR

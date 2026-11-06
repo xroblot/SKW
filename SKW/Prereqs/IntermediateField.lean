@@ -50,6 +50,16 @@ theorem IsGalois.fixingSubgroup_inj {K L : Type*} [Field K] [Field L] [Algebra K
   ⟨fun h ↦ by rw [← fixedField_fixingSubgroup F₁, h, fixedField_fixingSubgroup], congr_arg _⟩
 
 open IntermediateField in
+/-- In a finite Galois extension, the fixing subgroup of `F₁` is contained in that of `F₂` iff
+`F₂ ≤ F₁`. -/
+theorem IsGalois.fixingSubgroup_le_fixingSubgroup_iff {K L : Type*} [Field K] [Field L]
+    [Algebra K L] [FiniteDimensional K L] [IsGalois K L] {F₁ F₂ : IntermediateField K L} :
+    F₁.fixingSubgroup ≤ F₂.fixingSubgroup ↔ F₂ ≤ F₁ :=
+  ⟨fun h ↦ by
+    rw [← fixedField_fixingSubgroup F₁, ← fixedField_fixingSubgroup F₂]
+    exact fixedField_le h, fixingSubgroup_le⟩
+
+open IntermediateField in
 /-- `lift` preserves the rank over the base field. -/
 theorem IntermediateField.rank_lift {K L : Type*} [Field K] [Field L] [Algebra K L]
     {F : IntermediateField K L} (E : IntermediateField K F) :

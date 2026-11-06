@@ -6,7 +6,7 @@ public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.RingTheory.ZMod.UnitsCyclic
 
 public import SKW.KroneckerWeber.KroneckerWeber
-public import SKW.KroneckerWeber.Reduction
+public import SKW.KroneckerWeber.rReduction
 public import SKW.Prereqs.Unramified
 public import SKW.Prereqs.NumberField
 public import SKW.Prereqs.IntermediateField
