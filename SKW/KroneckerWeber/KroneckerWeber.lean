@@ -817,8 +817,8 @@ order `pᵐ (p - 1)` (`IsCyclotomicExtension.Rat.finrank`, `Nat.totient_prime_po
    unramified outside `p` are equal by `prop_kw_exponent_p_eq`. Hence `K = F ≤ C`.
 -/
 
-/-- Every abelian extension of `ℚ` of odd prime power degree `pᵐ` unramified outside `p` is
-cyclotomic: contained in `ℚ(ζ_{p^{m+1}}) = Qζ (p ^ (m + 1))` inside the ambient field `A`. -/
+/-- Every abelian extension of `ℚ` of odd prime power degree `p ^ m` unramified outside `p` is
+cyclotomic: it is contained in `ℚ(ζ_{p^{m+1}})`. -/
 theorem prop_kw_odd_prime_power [hp' : Fact (Odd p)] {m : ℕ} {K : IntermediateField ℚ A}
     [NumberField K] [IsAbelianGalois ℚ K] (hK : finrank ℚ K = p ^ m)
     (hKram : UnramifiedOutside K p) :
@@ -846,6 +846,20 @@ theorem prop_kw_odd_prime_power [hp' : Fact (Odd p)] {m : ℕ} {K : Intermediate
   exact kw_eq_of_unique_prime_subfield hK hF hKram hFram
     fun F₁ F₂ _ _ _ _ _ _ hF₁ hF₂ hrF₁ hrF₂ hF₁ram hF₂ram ↦
       prop_kw_exponent_p_eq Qζ hp'.out hrF₁ hrF₂ hF₁ram hF₂ram
+
+/-- Every cyclic extension of `ℚ` of odd prime power degree `p ^ m` is contained in a cyclotomic
+field `ℚ(ζ_n)` for some nonzero `n`. -/
+theorem kw_cyclic_odd_primePow_le_cyclotomic [Fact (Odd p)] {K : IntermediateField ℚ A}
+    [NumberField K] [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)] {m : ℕ} (hK : finrank ℚ K = p ^ m) :
+    ∃ n, n ≠ 0 ∧ K ≤ Qζ n := by
+  obtain ⟨F, _, _, _, ⟨k, hF⟩, hFram, n, hn, hKF⟩ := kw_reduce_to_unramified_outside_p Qζ ⟨m, hK⟩
+  have : IsAbelianGalois ℚ F := .of_isCyclic ℚ F
+  have hpk : p ^ (k + 1) ≠ 0 := pow_ne_zero _ hp.out.ne_zero
+  refine ⟨(p ^ (k + 1)).lcm n, Nat.lcm_ne_zero hpk hn, ?_⟩
+  rw [cyclotomic_lcm Qζ hpk hn]
+  calc K ≤ K ⊔ Qζ n := le_sup_left
+    _ = F ⊔ Qζ n := hKF
+    _ ≤ Qζ (p ^ (k + 1)) ⊔ Qζ n := sup_le_sup_right (prop_kw_odd_prime_power Qζ hF hFram) _
 
 end
 
