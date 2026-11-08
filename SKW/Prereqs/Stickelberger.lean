@@ -483,7 +483,7 @@ theorem Ideal.prime_of_isMaximal {R : Type*} [CommRing R] [CharZero R]
   refine (prime_iff_isPrime (IsMaximal.ne_bot_of_isIntegral_int I)).mpr <| IsMaximal.isPrime' I
 
 theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDedekindDomain R]
-    [Infinite R] [Algebra.IsIntegral ℤ R] (I : Ideal R) [I.IsPrime] {p k : ℕ}
+    [Algebra.IsIntegral ℤ R] (I : Ideal R) [I.IsPrime] {p k : ℕ}
     [hp : Fact (Nat.Prime p)] (hI : Ideal.absNorm I ∣ p ^ k) :
     I.LiesOver (Ideal.span {(p : ℤ)}) := by
   have : NeZero I := ⟨by

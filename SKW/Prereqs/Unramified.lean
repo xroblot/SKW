@@ -46,7 +46,7 @@ ring-tower generalisation of "a subfield of an extension unramified at `𝔭` is
 at `𝔭`". -/
 theorem IsUnramifiedIn.tower_bot {R S T : Type*} [CommRing R] [CommRing S] [CommRing T]
     [Algebra R S] [Algebra R T] [Algebra S T] [IsScalarTower R S T] [Algebra.EssFiniteType R S]
-    [Algebra.EssFiniteType R T] [Algebra.IsIntegral S T] [IsDedekindDomain S] [FaithfulSMul S T]
+    [Algebra.EssFiniteType R T] [Algebra.IsIntegral S T] [FaithfulSMul S T]
     [Module.Flat S T] [IsDomain T]
     {𝔭 : Ideal R} (h : Algebra.IsUnramifiedIn T 𝔭) :
     Algebra.IsUnramifiedIn S 𝔭 := by
