@@ -198,7 +198,7 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
         IsGalois ℚ K' ∧ IsCyclic Gal(K'/ℚ) ∧ UnramifiedOutside K' 2 ∧ IsTotallyReal K' := by
     -- `K'` is the maximal real subfield, i.e. the fixed field of complex conjugation
     obtain ⟨hdeg, hgal, hcyc, hram⟩ :=
-      fixedField_spec_of_index_eq_prime_pow (p := 2) (m := m) ℚ⟮ξ (2 ^ (m + 2))⟯ hCram
+      fixedField_spec_of_index_eq_prime_pow (p := 2) (m := m) hCram
         (Subgroup.zpowers (IsCMField.ratComplexConj ℚ⟮ξ (2 ^ (m + 2))⟯))
         (by -- index `2 ^ m`: half of `[ℚ(ζ_{2^{m+2}}) : ℚ] = 2 ^ (m + 1)`
           rw [Subgroup.index_eq_card_div, Nat.card_zpowers, IsCMField.orderOf_ratComplexConj,
@@ -226,19 +226,14 @@ theorem prop_kw_2_power_real {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     change IsTotallyReal ↑(K ⊔ K').toSubfield
     rw [sup_toSubfield]
     apply NumberField.isTotallyReal_sup'
-  refine (kw_eq_of_unique_prime_subfield K K' hK hK'deg hKram hK'ram ?_).le.trans hK'le
-  intro F₁ F₂ hle₁ hle₂ hf₁ hf₂ hr₁ hr₂
+  refine (kw_eq_of_unique_prime_subfield hK hK'deg hKram hK'ram ?_).le.trans hK'le
+  intro F₁ F₂ _ _ _ _ _ _ hle₁ hle₂ hf₁ hf₂ hr₁ hr₂
   let : Algebra F₁ ↑(K ⊔ K') := (inclusion hle₁).toAlgebra
   let : Algebra F₂ ↑(K ⊔ K') := (inclusion hle₂).toAlgebra
   have : IsScalarTower ℚ F₁ ↑(K ⊔ K') :=
     IsScalarTower.of_algebraMap_eq fun x => ((inclusion hle₁).commutes x).symm
   have : IsScalarTower ℚ F₂ ↑(K ⊔ K') :=
     IsScalarTower.of_algebraMap_eq fun x => ((inclusion hle₂).commutes x).symm
-  have : FiniteDimensional ℚ F₁ := Module.finite_of_finrank_eq_succ hf₁
-  have : FiniteDimensional ℚ F₂ := Module.finite_of_finrank_eq_succ hf₂
-  have : NumberField F₁ := {}
-  have : NumberField F₂ := {}
-  have : IsGalois ℚ F₂ := (IsAbelianGalois.tower_bot ℚ F₂ ↑(K ⊔ K')).toIsGalois
   have : IsTotallyReal F₁ := IsTotallyReal.of_algebra F₁ ↑(K ⊔ K')
   have : IsTotallyReal F₂ := IsTotallyReal.of_algebra F₂ ↑(K ⊔ K')
   exact prop_kw_2_quadratic_real_unique F₁ hf₁ hr₁ F₂ hf₂ hr₂

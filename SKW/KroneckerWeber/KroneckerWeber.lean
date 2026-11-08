@@ -16,7 +16,7 @@ public import Mathlib.RingTheory.ClassGroup.Basic
 set_option linter.style.header false
 
 /-!
-# The Kummer step of the Kronecker-Weber theorem
+# The odd prime power case of the Kronecker-Weber theorem
 
 Let `p` be an odd prime, `F = ℚ(ζ_p)` and `L/F` a cyclic extension of degree `p`, with `L/ℚ`
 abelian.
@@ -34,6 +34,21 @@ This file establishes
 - `kw_class_trivial`: such an ideal `𝔞` is principal (Stickelberger).
 - `kw_unit_conj_pow`: then `μ = β ^ p * η` for a unit `η` with `η * conj η` a `p`-th power.
 - `kw_unit_root_of_unity`: then `L` is the cyclotomic extension `ℚ(ζ_{p²})`.
+
+It then reduces the odd prime power case to extensions unramified outside `p`, and treats those.
+
+- `ramificationIdxIn_sup_eq_lcm`: tame Abhyankar, the ramification index in a compositum is the lcm
+  of the ramification indices.
+- `kw_ramification_reduction`: removing a ramified prime `q ≠ p` from a cyclic extension of
+  `p`-power degree, up to compositum with `ℚ(ζ_q)`.
+- `kw_reduce_to_unramified_outside_p`: iterating it, a cyclic extension of `p`-power degree is
+  cyclotomic iff some cyclic extension of `p`-power degree unramified outside `p` is.
+- `kw_eq_of_unique_prime_subfield`: two abelian extensions of degree `pᵐ` unramified outside `p`
+  are equal if their compositum has only one subfield of degree `p`.
+- `prop_kw_exponent_p`, `prop_kw_exponent_p_eq`: a cyclic extension of degree `p` unramified
+  outside `p` is contained in `ℚ(ζ_{p²})`, hence is unique.
+- `prop_kw_odd_prime_power`: an abelian extension of degree `pᵐ` unramified outside `p` is
+  contained in `ℚ(ζ_{p^{m+1}})`.
 -/
 
 @[expose] public section
@@ -330,100 +345,6 @@ end
 
 section
 
-/-- Two cyclic `p`-extensions `K₁`, `K₂` of `ℚ` inside a common ambient `A`, whose compositum
-`K₁ ⊔ K₂` is cyclic over `ℚ`, are comparable (`K₁ ≤ K₂`) once `[K₁:ℚ] ∣ [K₂:ℚ]`. -/
-lemma kw_cyclic_compositum {A : Type*} [Field A] [CharZero A] (K₁ K₂ : IntermediateField ℚ A)
-    [NumberField ↑(K₁ ⊔ K₂)] [IsGalois ℚ ↑(K₁ ⊔ K₂)] [IsCyclic Gal(↑(K₁ ⊔ K₂)/ℚ)]
-    (h : finrank ℚ K₁ ∣ finrank ℚ K₂) : K₁ ≤ K₂ := by
-  let L := K₁ ⊔ K₂
-  let K₁' := restrict (le_sup_left : K₁ ≤ L)
-  let K₂' := restrict (le_sup_right : K₂ ≤ L)
-  suffices K₁' ≤ K₂' from (restrict_le_restrict_iff  _ _).mp this
-  rwa [← IsGalois.fixingSubgroup_le_fixingSubgroup_iff, IsCyclic.subgroup_le_iff_index_dvd,
-    ← finrank_eq_fixingSubgroup_index, ← finrank_eq_fixingSubgroup_index, finrank_restrict,
-    finrank_restrict]
-
-omit hp in
-/-- Let `C/ℚ` be abelian and unramified outside `p`, and `H` a subgroup of `Gal(C/ℚ)` of index `pᵐ`
-with cyclic quotient. Then the fixed field of `H`, seen in `A`, is a cyclic extension of `ℚ` of
-degree `pᵐ`, unramified outside `p`. -/
-lemma fixedField_spec_of_index_eq_prime_pow {A : Type*} [Field A] [CharZero A]
-    (C : IntermediateField ℚ A) [NumberField C] [IsAbelianGalois ℚ C]
-    (hCram : UnramifiedOutside C p) {m : ℕ} (H : Subgroup Gal(C/ℚ))
-    (hindex : H.index = p ^ m) (hcyc : IsCyclic (Gal(C/ℚ) ⧸ H)) :
-    finrank ℚ (lift (fixedField H)) = p ^ m ∧ IsGalois ℚ (lift (fixedField H)) ∧
-      IsCyclic Gal(lift (fixedField H)/ℚ) ∧ UnramifiedOutside (lift (fixedField H)) p := by
-  let F := fixedField H
-  refine ⟨?_, IsGalois.of_algEquiv (liftAlgEquiv _), ?_, ?_⟩
-  · rwa [finrank_lift, finrank_eq_fixingSubgroup_index, fixingSubgroup_fixedField]
-  · have : IsGaloisGroup H F C := IsGaloisGroup.of_fixedPoints_eq _ ℚ _ H F rfl
-    rwa [(AlgEquiv.autCongr (liftAlgEquiv _)).symm.isCyclic,
-      (IsGaloisGroup.quotientMulEquiv Gal(C/ℚ) Gal(F/ℚ) ℚ F C H).symm.isCyclic ]
-  · have : NumberField (lift F) := {
-      to_charZero := IntermediateField.charZero (lift F),
-      to_finiteDimensional := finiteDimensional_lift }
-    let : Algebra (lift F) C := (inclusion (lift_le _)).toRingHom.toAlgebra
-    exact UnramifiedOutside.tower_bot p hCram
-
-/-
-Proof of `kw_eq_of_unique_prime_subfield`.
-
-Let `L = K ⊔ K'`. It is abelian over `ℚ` (compositum of abelian extensions), unramified outside `p`
-(`unramifiedOutside_sup'`), and its degree divides `p²ᵐ` (`finrank_sup_dvd_mul_of_isGalois`), so
-`Gal(L/ℚ)` is an abelian `p`-group.
-1. A subgroup of index `p` of `Gal(L/ℚ)` is the fixing subgroup of its fixed field `F`, a subfield
-   of `L` of degree `p` (`finrank_eq_fixingSubgroup_index`, `fixingSubgroup_fixedField`). The field
-   `F` is Galois over `ℚ` (`L/ℚ` is abelian), cyclic (prime degree) and unramified outside `p`
-   (`UnramifiedOutside.tower_bot`). By `huniq`, two subgroups of index `p` have the same fixed
-   field, hence are equal.
-2. So `Gal(L/ℚ)` is cyclic (`IsPGroup.not_isCyclic_iff_exists_ne_index_eq_prime`).
-3. The fields `K` and `K'` have the same degree, so `K ≤ K'` and `K' ≤ K` (`kw_cyclic_compositum`).
--/
-
-/-- Two abelian extensions `K₁`, `K₂` of `ℚ` of the same degree `pᵐ`, both unramified outside `p`,
-are equal if the compositum `K₁ ⊔ K₂` has only one subfield of degree `p`. (The hypothesis `huniq`
-asks this only for cyclic subfields unramified outside `p`, which all degree `p` subfields of
-`K₁ ⊔ K₂` are.) -/
-lemma kw_eq_of_unique_prime_subfield {A : Type*} [Field A] [CharZero A]
-    (K₁ K₂ : IntermediateField ℚ A) [NumberField K₁] [IsAbelianGalois ℚ K₁]
-    [NumberField K₂] [IsAbelianGalois ℚ K₂] {m : ℕ}
-    (hK₁ : finrank ℚ K₁ = p ^ m) (hK₂ : finrank ℚ K₂ = p ^ m)
-    (hK₁ram : UnramifiedOutside K₁ p) (hK₂ram : UnramifiedOutside K₂ p)
-    (huniq : ∀ (F₁ F₂ : IntermediateField ℚ A), F₁ ≤ K₁ ⊔ K₂ → F₂ ≤ K₁ ⊔ K₂ → finrank ℚ F₁ = p →
-      finrank ℚ F₂ = p → UnramifiedOutside F₁ p → UnramifiedOutside F₂ p → F₁ = F₂) :
-    K₁ = K₂ := by
-  let L := K₁ ⊔ K₂
-  let K₁' : IntermediateField ℚ L := restrict le_sup_left
-  let K₂' : IntermediateField ℚ L := restrict le_sup_right
-  convert_to K₁' = K₂'
-  · rw [← lift_inj, lift_restrict, lift_restrict]
-  suffices IsCyclic Gal(L/ℚ) by
-    rw [← IsGalois.fixingSubgroup_inj, IsCyclic.subgroup_eq_iff_index_eq,
-      ← finrank_eq_fixingSubgroup_index, ← finrank_eq_fixingSubgroup_index, finrank_restrict,
-      finrank_restrict, hK₁, hK₂]
-  have hP : IsPGroup p Gal(L/ℚ) := by
-    have := finrank_sup_dvd_mul_of_isGalois K₁ K₂
-    rw [hK₁, hK₂, ← pow_add, ← IsGalois.card_aut_eq_finrank] at this
-    refine isPGroup_iff_card_dvd_pow.mpr ⟨m + m, this⟩
-  have hLram : UnramifiedOutside L p := unramifiedOutside_sup p K₁ K₂ hK₁ram hK₂ram
-  by_contra hCL
-  obtain ⟨H₁, H₂, h, Hi₁, Hi₂⟩ := (IsPGroup.not_isCyclic_iff_exists_ne_index_eq_prime hP).mp hCL
-  refine h ?_
-  rw [← IsGalois.fixedField_inj, ← lift_inj]
-  refine huniq (lift (fixedField H₁)) (lift (fixedField H₂)) (lift_le _) (lift_le _) ?_ ?_ ?_ ?_
-  · rwa [finrank_lift, finrank_eq_fixingSubgroup_index, fixingSubgroup_fixedField]
-  · rwa [finrank_lift, finrank_eq_fixingSubgroup_index, fixingSubgroup_fixedField]
-  · have : NumberField (lift (fixedField H₁)) := {
-      to_charZero := IntermediateField.charZero (lift (fixedField H₁)),
-      to_finiteDimensional := finiteDimensional_lift }
-    let : Algebra (lift (fixedField H₁)) L := (inclusion (lift_le _)).toRingHom.toAlgebra
-    exact UnramifiedOutside.tower_bot p hLram
-  · have : NumberField (lift (fixedField H₂)) := {
-      to_charZero := IntermediateField.charZero (lift (fixedField H₂)),
-      to_finiteDimensional := finiteDimensional_lift }
-    let : Algebra (lift (fixedField H₂)) L := (inclusion (lift_le _)).toRingHom.toAlgebra
-    exact UnramifiedOutside.tower_bot p hLram
-
 /-
 Proof of `ramificationIdxIn_sup_eq_lcm`.
 
@@ -444,8 +365,8 @@ ramification indices multiply in towers (`ramificationIdxIn_mul_ramificationIdxI
 a prime `p ∤ [K:ℚ]`, the ramification index of `p` in `K` is the lcm of its ramification indices in
 `E` and `F`. -/
 theorem ramificationIdxIn_sup_eq_lcm {K : Type*} [Field K] [NumberField K] [IsGalois ℚ K]
-    (E F : IntermediateField ℚ K) [IsGalois ℚ E] [IsGalois ℚ F] (hEF : E ⊔ F = ⊤) {p : ℕ}
-    [hp : Fact p.Prime] (htame : ¬ p ∣ finrank ℚ K) :
+    {E F : IntermediateField ℚ K} [IsGalois ℚ E] [IsGalois ℚ F] (hEF : E ⊔ F = ⊤)
+    (htame : ¬ p ∣ finrank ℚ K) :
     (span {(p : ℤ)}).ramificationIdxIn (𝓞 K) =
       Nat.lcm ((span {(p : ℤ)}).ramificationIdxIn (𝓞 E))
         ((span {(p : ℤ)}).ramificationIdxIn (𝓞 F)) := by
@@ -491,11 +412,11 @@ Write `e_K`, `e_E`, `e_L` for the ramification indices of `q` in `K`, `E`, `L`.
 /-- In an abelian `L/ℚ` with `E = ℚ(ζ_q) ⊆ L` and `K ⊆ L` of degree `pᵐ` such that `K ⊔ E = ⊤`, a
 tame prime `q` has ramification index `q - 1` in `L`, and the prime of `E` below a prime `𝔔 ∣ q`
 of `𝓞 L` has ramification index `1` in `L`. -/
-lemma ramificationIdx_eq_of_sup_eq_top {L : Type*} [Field L] [NumberField L]
-    [IsAbelianGalois ℚ L] (K E : IntermediateField ℚ L) [IsGalois ℚ K] [IsGalois ℚ E]
-    (htop : K ⊔ E = ⊤) {q : ℕ} [hq : Fact q.Prime] (hqp : q ≠ p) [IsCyclotomicExtension {q} ℚ E]
-    {m : ℕ} (hK : finrank ℚ K = p ^ m) (htame : ¬ q ∣ finrank ℚ L) (𝔔 : Ideal (𝓞 L))
-    [𝔔.IsMaximal] [h𝔔 : 𝔔.LiesOver (span {(q : ℤ)})] :
+lemma ramificationIdx_eq_of_sup_eq_top {q : ℕ} [hq : Fact q.Prime] (hqp : q ≠ p) {L : Type*}
+    [Field L] [NumberField L] [IsAbelianGalois ℚ L] {K E : IntermediateField ℚ L} [IsGalois ℚ K]
+    [IsGalois ℚ E] [IsCyclotomicExtension {q} ℚ E] {m : ℕ} (hK : finrank ℚ K = p ^ m)
+    (htop : K ⊔ E = ⊤) (htame : ¬ q ∣ finrank ℚ L) (𝔔 : Ideal (𝓞 L)) [𝔔.IsMaximal]
+    [h𝔔 : 𝔔.LiesOver (span {(q : ℤ)})] :
     (span {(q : ℤ)}).ramificationIdxIn (𝓞 L) = q - 1 ∧
       (under (𝓞 E) 𝔔).ramificationIdxIn (𝓞 L) = 1 := by
   suffices (span {(q : ℤ)}).ramificationIdxIn (𝓞 L) = q - 1 by
@@ -504,7 +425,7 @@ lemma ramificationIdx_eq_of_sup_eq_top {L : Type*} [Field L] [NumberField L]
       ramificationIdxIn_mul_ramificationIdxIn _ Gal(E/ℚ) _ Gal(L/ℚ) Gal(L/E), this,
       Rat.ramificationIdxIn_eq_of_prime q, mul_one]
   have : FaithfulSMul Gal(K/ℚ) (𝓞 K) := IsGaloisGroup.faithful ℤ
-  have := ramificationIdxIn_sup_eq_lcm K E htop htame (p := q)
+  have := ramificationIdxIn_sup_eq_lcm htop htame
   rwa [Rat.ramificationIdxIn_eq_of_prime q E, Nat.lcm_eq_right] at this
   rw [← card_inertia_eq_ramificationIdxIn (span {(q : ℤ)}) (under (𝓞 K) 𝔔) (G := Gal(K/ℚ))]
   have := card_inertia_dvd_card_sub_one' (G := Gal(K/ℚ)) (S := 𝓞 K) (R := ℤ) (under (𝓞 K) 𝔔) ?_
@@ -534,13 +455,13 @@ Let `I` be the inertia group of `𝔔`. By `ramificationIdx_eq_of_sup_eq_top`, i
 
 /-- In an abelian `L/ℚ` with `E = ℚ(ζ_q) ⊆ L` and `K ⊆ L` of degree `pᵐ` such that `K ⊔ E = ⊤`, the
 inertia group of a tame prime `𝔔 ∣ q` of `𝓞 L` is a complement of `Gal(L/E)`. -/
-lemma inertia_isComplement_fixingSubgroup {L : Type*} [Field L] [NumberField L]
-    [IsAbelianGalois ℚ L] (K E : IntermediateField ℚ L) [IsGalois ℚ K] [IsGalois ℚ E]
-    (htop : K ⊔ E = ⊤) {q : ℕ} [hq : Fact q.Prime] (hqp : q ≠ p) [IsCyclotomicExtension {q} ℚ E]
-    {m : ℕ} (hK : finrank ℚ K = p ^ m) (htame : ¬ q ∣ finrank ℚ L) (𝔔 : Ideal (𝓞 L))
-    [𝔔.IsMaximal] [h𝔔 : 𝔔.LiesOver (span {(q : ℤ)})] :
+lemma inertia_isComplement_fixingSubgroup {q : ℕ} [hq : Fact q.Prime] (hqp : q ≠ p) {L : Type*}
+    [Field L] [NumberField L] [IsAbelianGalois ℚ L] {K E : IntermediateField ℚ L} [IsGalois ℚ K]
+    [IsGalois ℚ E] [IsCyclotomicExtension {q} ℚ E] {m : ℕ} (hK : finrank ℚ K = p ^ m)
+    (htop : K ⊔ E = ⊤) (htame : ¬ q ∣ finrank ℚ L) (𝔔 : Ideal (𝓞 L)) [𝔔.IsMaximal]
+    [𝔔.LiesOver (span {(q : ℤ)})] :
     Subgroup.IsComplement' (Ideal.inertia Gal(L/ℚ) 𝔔) E.fixingSubgroup := by
-  obtain ⟨_, _⟩ := ramificationIdx_eq_of_sup_eq_top K E htop hqp hK htame 𝔔
+  obtain ⟨_, _⟩ := ramificationIdx_eq_of_sup_eq_top hqp hK htop htame 𝔔
   refine Subgroup.isComplement'_of_card_mul_and_disjoint ?_ ?_
   · rwa [IsGalois.card_aut_eq_finrank, ← finrank_mul_finrank ℚ E L,
       IsGalois.card_fixingSubgroup_eq_finrank, mul_left_inj' finrank_pos.ne',
@@ -575,10 +496,10 @@ A prime `q'` unramified in `K` is either `q`, or unramified in `E`
 set_option backward.isDefEq.respectTransparency false in
 /-- Ramification reduction inside `L = K ⊔ ℚ(ζ_q)`: there is a cyclic `F ≤ L` of `p`-power degree,
 unramified at `q` and at every prime where `K` is unramified, with `F ⊔ ℚ(ζ_q) = ⊤`. -/
-lemma kw_ramification_reduction_of_sup_eq_top {L : Type*} [Field L] [NumberField L]
-    [IsAbelianGalois ℚ L] (K E : IntermediateField ℚ L) [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
-    [IsGalois ℚ E] (htop : K ⊔ E = ⊤) {q : ℕ} (hq : q.Prime) (hqp : q ≠ p)
-    [IsCyclotomicExtension {q} ℚ E] {m : ℕ} (hK : finrank ℚ K = p ^ m) :
+lemma kw_ramification_reduction_of_sup_eq_top {q : ℕ} (hq : q.Prime) (hqp : q ≠ p) {L : Type*}
+    [Field L] [NumberField L] [IsAbelianGalois ℚ L] {K E : IntermediateField ℚ L} [IsGalois ℚ K]
+    [IsCyclic Gal(K/ℚ)] [IsGalois ℚ E] [IsCyclotomicExtension {q} ℚ E] {m : ℕ}
+    (hK : finrank ℚ K = p ^ m) (htop : K ⊔ E = ⊤) :
     ∃ F : IntermediateField ℚ L, IsGalois ℚ F ∧ IsCyclic Gal(F/ℚ) ∧ (∃ k, finrank ℚ F = p ^ k) ∧
       Algebra.IsUnramifiedIn (𝓞 F) (span {(q : ℤ)}) ∧
         (∀ q' : ℕ, q'.Prime → Algebra.IsUnramifiedIn (𝓞 K) (span {(q' : ℤ)}) →
@@ -593,7 +514,7 @@ lemma kw_ramification_reduction_of_sup_eq_top {L : Type*} [Field L] [NumberField
   obtain ⟨𝔔, _, _⟩ : ∃ 𝔔 : Ideal (𝓞 L), 𝔔.IsMaximal ∧ 𝔔.LiesOver (span {(q : ℤ)}) :=
     exists_maximal_ideal_liesOver_of_isIntegral (span {(q : ℤ)})
   obtain ⟨h₁, ⟨e⟩⟩ := IsGaloisGroup.fixedPoints_sup_eq_top_of_isComplement _ _ _ <|
-    inertia_isComplement_fixingSubgroup K E htop hqp hK htame 𝔔
+    inertia_isComplement_fixingSubgroup hqp hK htop htame 𝔔
   let f := (restrictRestrictAlgEquivMapHom ℚ K E L).comp
     (((IsGalois.normalAutEquivQuotient (Ideal.inertia Gal(L/ℚ) 𝔔)).symm.trans e).trans
         (fixingSubgroupEquiv E)).toMonoidHom
@@ -617,6 +538,132 @@ lemma kw_ramification_reduction_of_sup_eq_top {L : Type*} [Field L] [NumberField
       exact isUnramifiedIn_of_isCyclotomicExtension r <|
         (Nat.prime_dvd_prime_iff_eq hr hq).not.mpr hrq.symm
 
+end
+
+section
+
+variable {A : Type*} [Field A] [CharZero A]
+
+omit hp in
+/-- For a family `Qζ` of cyclotomic fields, `Qζ (lcm a b) = Qζ a ⊔ Qζ b` when `a, b ≠ 0`. -/
+theorem cyclotomic_lcm (Qζ : ℕ → IntermediateField ℚ A) [∀ n, IsCyclotomicExtension {n} ℚ (Qζ n)]
+    {a b : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) :
+    Qζ (a.lcm b) = Qζ a ⊔ Qζ b := by
+  have : NeZero a := ⟨ha⟩
+  have : NeZero b := ⟨hb⟩
+  have := isCyclotomicExtension_lcm_sup ℚ A a b (Qζ a) (Qζ b)
+  exact isCyclotomicExtension_eq {a.lcm b} ℚ A _ _
+
+/-- Two cyclic `p`-extensions `K₁`, `K₂` of `ℚ` inside a common ambient `A`, whose compositum
+`K₁ ⊔ K₂` is cyclic over `ℚ`, are comparable (`K₁ ≤ K₂`) once `[K₁:ℚ] ∣ [K₂:ℚ]`. -/
+lemma kw_cyclic_compositum {K₁ K₂ : IntermediateField ℚ A}
+    [NumberField ↑(K₁ ⊔ K₂)] [IsGalois ℚ ↑(K₁ ⊔ K₂)] [IsCyclic Gal(↑(K₁ ⊔ K₂)/ℚ)]
+    (h : finrank ℚ K₁ ∣ finrank ℚ K₂) : K₁ ≤ K₂ := by
+  let L := K₁ ⊔ K₂
+  let K₁' := restrict (le_sup_left : K₁ ≤ L)
+  let K₂' := restrict (le_sup_right : K₂ ≤ L)
+  suffices K₁' ≤ K₂' from (restrict_le_restrict_iff  _ _).mp this
+  rwa [← IsGalois.fixingSubgroup_le_fixingSubgroup_iff, IsCyclic.subgroup_le_iff_index_dvd,
+    ← finrank_eq_fixingSubgroup_index, ← finrank_eq_fixingSubgroup_index, finrank_restrict,
+    finrank_restrict]
+
+omit hp in
+/-- Let `C/ℚ` be abelian and unramified outside `p`, and `H` a subgroup of `Gal(C/ℚ)` of index `pᵐ`
+with cyclic quotient. Then the fixed field of `H`, seen in `A`, is a cyclic extension of `ℚ` of
+degree `pᵐ`, unramified outside `p`. -/
+lemma fixedField_spec_of_index_eq_prime_pow {C : IntermediateField ℚ A} [NumberField C]
+    [IsAbelianGalois ℚ C]
+    (hCram : UnramifiedOutside C p) {m : ℕ} (H : Subgroup Gal(C/ℚ))
+    (hindex : H.index = p ^ m) (hcyc : IsCyclic (Gal(C/ℚ) ⧸ H)) :
+    finrank ℚ (lift (fixedField H)) = p ^ m ∧ IsGalois ℚ (lift (fixedField H)) ∧
+      IsCyclic Gal(lift (fixedField H)/ℚ) ∧ UnramifiedOutside (lift (fixedField H)) p := by
+  let F := fixedField H
+  refine ⟨?_, IsGalois.of_algEquiv (liftAlgEquiv _), ?_, ?_⟩
+  · rwa [finrank_lift, finrank_eq_fixingSubgroup_index, fixingSubgroup_fixedField]
+  · have : IsGaloisGroup H F C := IsGaloisGroup.of_fixedPoints_eq _ ℚ _ H F rfl
+    rwa [(AlgEquiv.autCongr (liftAlgEquiv _)).symm.isCyclic,
+      (IsGaloisGroup.quotientMulEquiv Gal(C/ℚ) Gal(F/ℚ) ℚ F C H).symm.isCyclic ]
+  · have : NumberField (lift F) := {
+      to_charZero := IntermediateField.charZero (lift F),
+      to_finiteDimensional := finiteDimensional_lift }
+    let : Algebra (lift F) C := (inclusion (lift_le _)).toRingHom.toAlgebra
+    exact UnramifiedOutside.tower_bot p hCram
+
+/-- A subfield of degree `p` of an abelian extension of `ℚ` is a number field, Galois over `ℚ`, with
+cyclic Galois group. -/
+lemma numberField_isGalois_isCyclic_of_finrank_eq {L F : IntermediateField ℚ A}
+    [IsAbelianGalois ℚ L] (hFL : F ≤ L) (hF : finrank ℚ F = p) :
+    NumberField F ∧ IsGalois ℚ F ∧ IsCyclic Gal(F/ℚ) := by
+  have : FiniteDimensional ℚ F := Module.finite_of_finrank_pos (hF ▸ hp.out.pos)
+  have : IsGalois ℚ F := IsGalois.of_algEquiv (restrictAlgEquiv hFL).symm
+  exact ⟨{}, this, isCyclic_of_prime_card (p := p) (by rw [IsGalois.card_aut_eq_finrank, hF])⟩
+
+/-
+Proof of `kw_eq_of_unique_prime_subfield`.
+
+Let `L = K₁ ⊔ K₂`. It is abelian over `ℚ` (compositum of abelian extensions), unramified outside
+`p` (`unramifiedOutside_sup`), and its degree divides `p²ᵐ` (`finrank_sup_dvd_mul_of_isGalois`), so
+`Gal(L/ℚ)` is an abelian `p`-group.
+1. A subgroup of index `p` of `Gal(L/ℚ)` is the fixing subgroup of its fixed field `F`, a subfield
+   of `L` of degree `p` (`finrank_eq_fixingSubgroup_index`, `fixingSubgroup_fixedField`). The field
+   `F` is a number field, Galois over `ℚ` and cyclic
+   (`numberField_isGalois_isCyclic_of_finrank_eq`), and unramified outside `p`
+   (`UnramifiedOutside.tower_bot`). By `huniq`, two subgroups of index `p` have the same fixed
+   field, hence are equal (`IsGalois.fixedField_inj`).
+2. So `Gal(L/ℚ)` is cyclic (`IsPGroup.not_isCyclic_iff_exists_ne_index_eq_prime`).
+3. In a cyclic group, subgroups of the same index are equal (`IsCyclic.subgroup_eq_iff_index_eq`).
+   The fields `K₁` and `K₂` have the same degree, so their fixing subgroups in `Gal(L/ℚ)` are
+   equal, hence `K₁ = K₂` (`IsGalois.fixingSubgroup_inj`).
+-/
+
+/-- Two abelian extensions `K₁`, `K₂` of `ℚ` of the same degree `pᵐ`, both unramified outside `p`,
+are equal if the compositum `K₁ ⊔ K₂` has only one subfield of degree `p`. (The hypothesis `huniq`
+asks this only for cyclic subfields unramified outside `p`, which all degree `p` subfields of
+`K₁ ⊔ K₂` are.) -/
+lemma kw_eq_of_unique_prime_subfield {K₁ K₂ : IntermediateField ℚ A} [NumberField K₁]
+    [IsAbelianGalois ℚ K₁] [NumberField K₂] [IsAbelianGalois ℚ K₂] {m : ℕ}
+    (hK₁ : finrank ℚ K₁ = p ^ m) (hK₂ : finrank ℚ K₂ = p ^ m)
+    (hK₁ram : UnramifiedOutside K₁ p) (hK₂ram : UnramifiedOutside K₂ p)
+    (huniq : ∀ (F₁ F₂ : IntermediateField ℚ A) [NumberField F₁] [IsGalois ℚ F₁]
+      [IsCyclic Gal(F₁/ℚ)] [NumberField F₂] [IsGalois ℚ F₂] [IsCyclic Gal(F₂/ℚ)],
+      F₁ ≤ K₁ ⊔ K₂ → F₂ ≤ K₁ ⊔ K₂ → finrank ℚ F₁ = p → finrank ℚ F₂ = p →
+      UnramifiedOutside F₁ p → UnramifiedOutside F₂ p → F₁ = F₂) :
+    K₁ = K₂ := by
+  let L := K₁ ⊔ K₂
+  let K₁' : IntermediateField ℚ L := restrict le_sup_left
+  let K₂' : IntermediateField ℚ L := restrict le_sup_right
+  convert_to K₁' = K₂'
+  · rw [← lift_inj, lift_restrict, lift_restrict]
+  suffices IsCyclic Gal(L/ℚ) by
+    rw [← IsGalois.fixingSubgroup_inj, IsCyclic.subgroup_eq_iff_index_eq,
+      ← finrank_eq_fixingSubgroup_index, ← finrank_eq_fixingSubgroup_index, finrank_restrict,
+      finrank_restrict, hK₁, hK₂]
+  have hP : IsPGroup p Gal(L/ℚ) := by
+    have := finrank_sup_dvd_mul_of_isGalois K₁ K₂
+    rw [hK₁, hK₂, ← pow_add, ← IsGalois.card_aut_eq_finrank] at this
+    refine isPGroup_iff_card_dvd_pow.mpr ⟨m + m, this⟩
+  have hLram : UnramifiedOutside L p := unramifiedOutside_sup p K₁ K₂ hK₁ram hK₂ram
+  by_contra hCL
+  obtain ⟨H₁, H₂, h, Hi₁, Hi₂⟩ := (IsPGroup.not_isCyclic_iff_exists_ne_index_eq_prime hP).mp hCL
+  refine h ?_
+  rw [← IsGalois.fixedField_inj, ← lift_inj]
+  have hF₁ : finrank ℚ (lift (fixedField H₁)) = p := by
+    rwa [finrank_lift, finrank_eq_fixingSubgroup_index, fixingSubgroup_fixedField]
+  have hF₂ : finrank ℚ (lift (fixedField H₂)) = p := by
+    rwa [finrank_lift, finrank_eq_fixingSubgroup_index, fixingSubgroup_fixedField]
+  obtain ⟨_, _, _⟩ := numberField_isGalois_isCyclic_of_finrank_eq (lift_le _) hF₁
+  obtain ⟨_, _, _⟩ := numberField_isGalois_isCyclic_of_finrank_eq (lift_le _) hF₂
+  refine huniq (lift (fixedField H₁)) (lift (fixedField H₂)) (lift_le _) (lift_le _) hF₁ hF₂ ?_ ?_
+  · let : Algebra (lift (fixedField H₁)) L := (inclusion (lift_le _)).toRingHom.toAlgebra
+    exact UnramifiedOutside.tower_bot p hLram
+  · let : Algebra (lift (fixedField H₂)) L := (inclusion (lift_le _)).toRingHom.toAlgebra
+    exact UnramifiedOutside.tower_bot p hLram
+
+section
+
+variable (Qζ : ℕ → IntermediateField ℚ A) [∀ n, IsCyclotomicExtension {n} ℚ (Qζ n)]
+  [∀ n, NumberField (Qζ n)] [∀ n, IsAbelianGalois ℚ (Qζ n)]
+
 /-
 Proof of `kw_ramification_reduction`.
 
@@ -631,11 +678,8 @@ Put `E = Qζ q` and `L = K ⊔ E`, abelian over `ℚ` (`IsAbelianGalois.sup`). V
 /-- Ramification reduction: given `K/ℚ` cyclic of degree `pᵐ` with `q ≠ p` ramified, there is a
 cyclic `F/ℚ` of `p`-power degree, unramified at `q` and at every prime where `K` is unramified,
 such that `K ⊔ ℚ(ζ_q) = F ⊔ ℚ(ζ_q)`. -/
-lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] (Qζ : ℕ → IntermediateField ℚ A)
-    [∀ n, IsCyclotomicExtension {n} ℚ (Qζ n)] [∀ n, NumberField (Qζ n)]
-    [∀ n, IsAbelianGalois ℚ (Qζ n)]
-    (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [hCK : IsCyclic Gal(K/ℚ)]
-    (hK : ∃ k, finrank ℚ K = p ^ k) (q : ℕ) (hq : q.Prime) (hqp : q ≠ p) :
+lemma kw_ramification_reduction {q : ℕ} (hq : q.Prime) (hqp : q ≠ p) {K : IntermediateField ℚ A}
+    [NumberField K] [IsGalois ℚ K] [hCK : IsCyclic Gal(K/ℚ)] (hK : ∃ k, finrank ℚ K = p ^ k) :
     ∃ (F : IntermediateField ℚ A) (_ : NumberField F),
       IsGalois ℚ F ∧ IsCyclic Gal(F/ℚ) ∧ (∃ k, finrank ℚ F = p ^ k) ∧
       Algebra.IsUnramifiedIn (𝓞 F) (span {(q : ℤ)}) ∧
@@ -652,8 +696,8 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] (Qζ : ℕ �
     rw [← lift_inj, lift_sup, lift_restrict, lift_restrict, lift_top]
   have : IsCyclic Gal(K₀/ℚ) := (restrictAlgEquiv le_sup_left).autCongr.isCyclic.mp hCK
   have : IsCyclotomicExtension {q} ℚ E₀ := .equiv _ ℚ (Qζ q) (restrictAlgEquiv le_sup_right)
-  obtain ⟨F₀, _, h₁, _, h₂, h₃, h₄⟩ := kw_ramification_reduction_of_sup_eq_top K₀ E₀ htop hq hqp
-    (by rwa [finrank_restrict])
+  obtain ⟨F₀, _, h₁, _, h₂, h₃, h₄⟩ := kw_ramification_reduction_of_sup_eq_top hq hqp
+    (by rwa [finrank_restrict]) htop
   refine ⟨lift F₀, .of_ringEquiv _ _ (liftAlgEquiv F₀).toRingEquiv, .of_algEquiv (liftAlgEquiv F₀),
     (liftAlgEquiv F₀).autCongr.isCyclic.mp h₁, by simpa [finrank_lift], ?_, fun r hr hr' ↦ ?_, ?_⟩
   · exact Algebra.IsUnramifiedIn.of_algEquiv
@@ -664,16 +708,6 @@ lemma kw_ramification_reduction {A : Type*} [Field A] [CharZero A] (Qζ : ℕ �
       (RingOfIntegers.mapIntAlgEquiv (restrictAlgEquiv le_sup_left).toRingEquiv) hr'
   · have :=  congr_arg lift <| htop.trans h₄.symm
     rwa [lift_sup, lift_sup, lift_restrict, lift_restrict] at this
-
-omit hp in
-/-- For a family `Qζ` of cyclotomic fields, `Qζ (lcm a b) = Qζ a ⊔ Qζ b` when `a, b ≠ 0`. -/
-theorem cyclotomic_lcm {A : Type*} [Field A] [CharZero A] (Qζ : ℕ → IntermediateField ℚ A)
-    [∀ n, IsCyclotomicExtension {n} ℚ (Qζ n)] {a b : ℕ} (ha : a ≠ 0) (hb : b ≠ 0) :
-    Qζ (a.lcm b) = Qζ a ⊔ Qζ b := by
-  have : NeZero a := ⟨ha⟩
-  have : NeZero b := ⟨hb⟩
-  have := isCyclotomicExtension_lcm_sup ℚ A a b (Qζ a) (Qζ b)
-  exact isCyclotomicExtension_eq {a.lcm b} ℚ A _ _
 
 /-
 Proof of `kw_reduce_to_unramified_outside_p`.
@@ -693,12 +727,8 @@ gets `K ⊔ ℚ(ζ_lcm(r, n)) = F ⊔ ℚ(ζ_lcm(r, n))` (`sup_assoc`, `sup_comm
 /-- Iterating the ramification reduction over the finitely many primes `q ≠ p` ramified in `K`,
 one obtains a cyclic `F/ℚ` of `p`-power degree, unramified outside `p`, with
 `K ⊔ Qζ n = F ⊔ Qζ n` for some `n ≠ 0` (so `K` is cyclotomic iff `F` is). -/
-lemma kw_reduce_to_unramified_outside_p {A : Type*} [Field A] [CharZero A]
-    (Qζ : ℕ → IntermediateField ℚ A)
-    [∀ n, IsCyclotomicExtension {n} ℚ (Qζ n)] [∀ n, NumberField (Qζ n)]
-    [∀ n, IsAbelianGalois ℚ (Qζ n)]
-    (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
-    (hK : ∃ k, finrank ℚ K = p ^ k) :
+lemma kw_reduce_to_unramified_outside_p {K : IntermediateField ℚ A} [NumberField K]
+    [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)] (hK : ∃ k, finrank ℚ K = p ^ k) :
     ∃ (F : IntermediateField ℚ A) (_ : NumberField F) (_ : IsGalois ℚ F) (_ : IsCyclic Gal(F/ℚ)),
       (∃ k, finrank ℚ F = p ^ k) ∧
       (∀ q : ℕ, q.Prime → q ≠ p → Algebra.IsUnramifiedIn (𝓞 F) (span {(q : ℤ)})) ∧
@@ -719,26 +749,19 @@ lemma kw_reduce_to_unramified_outside_p {A : Type*} [Field A] [CharZero A]
           fun q hq hqp ↦ ?_, 1, one_ne_zero, rfl⟩
       contrapose! hS
       exact ⟨q, hq, hqp, hS⟩
-    · obtain ⟨E, _, _, _, hE, hEr, hEram, hKE⟩ := kw_ramification_reduction Qζ K hK r hr hrp
+    · obtain ⟨E, _, _, _, hE, hEr, hEram, hKE⟩ := kw_ramification_reduction Qζ hr hrp hK
       have hlt : {q | q.Prime ∧ q ≠ p ∧
           ¬ Algebra.IsUnramifiedIn (𝓞 E) (span {(q : ℤ)})}.ncard < N :=
         h ▸ Set.ncard_lt_ncard ⟨by grind, by aesop⟩ (hfin K)
-      obtain ⟨F, _, _, _, hF, hFram, n, hn, hEF⟩ := h_ind _ hlt E hE rfl
+      obtain ⟨F, _, _, _, hF, hFram, n, hn, hEF⟩ := h_ind _ hlt hE rfl
       refine ⟨F, ‹_›, ‹_›, ‹_›, hF, hFram, r.lcm n, Nat.lcm_ne_zero hr.ne_zero hn, ?_⟩
       rw [cyclotomic_lcm Qζ hr.ne_zero hn, ← sup_assoc, hKE, sup_assoc, sup_comm (Qζ r),
         ← sup_assoc, hEF, sup_assoc]
 
-end
-
-section
-
 /-- Every cyclic extension of `ℚ` of prime degree `p` (odd) unramified outside `p` is contained in
 `ℚ(ζ_{p²}) = Qζ (p ^ 2)`. -/
-theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A]
-    (Qζ : ℕ → IntermediateField ℚ A)
-    [∀ n, IsCyclotomicExtension {n} ℚ (Qζ n)] [∀ n, NumberField (Qζ n)]
-    [∀ n, IsAbelianGalois ℚ (Qζ n)]
-    (K : IntermediateField ℚ A) [NumberField K] [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
+theorem prop_kw_exponent_p (hp' : Odd p) {K : IntermediateField ℚ A} [NumberField K]
+    [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
     (hK : finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
     K ≤ Qζ (p ^ 2) := by
   have : IsAbelianGalois ℚ K := .of_isCyclic ℚ K
@@ -764,18 +787,15 @@ theorem prop_kw_exponent_p (hp' : Odd p) {A : Type*} [Field A] [CharZero A]
   rw [isCyclotomicExtension_eq {p ^ 2} ℚ _ (Qζ (p ^ 2)) L]
   exact le_sup_left
 
+include Qζ in
 /-- Two cyclic extensions of `ℚ` of prime degree `p` (odd) unramified outside `p` are equal. -/
-theorem prop_kw_exponent_p_eq (hp' : Odd p) {A : Type*} [Field A] [CharZero A]
-    (Qζ : ℕ → IntermediateField ℚ A)
-    [∀ n, IsCyclotomicExtension {n} ℚ (Qζ n)] [∀ n, NumberField (Qζ n)]
-    [∀ n, IsAbelianGalois ℚ (Qζ n)]
-    (K₁ K₂ : IntermediateField ℚ A) [NumberField K₁]
-    [IsGalois ℚ K₁] [IsCyclic Gal(K₁/ℚ)] (hK₁ : finrank ℚ K₁ = p) (hKram₁ : UnramifiedOutside K₁ p)
-    [NumberField K₂] [IsGalois ℚ K₂] [IsCyclic Gal(K₂/ℚ)] (hK₂ : finrank ℚ K₂ = p)
+theorem prop_kw_exponent_p_eq (hp' : Odd p) {K₁ K₂ : IntermediateField ℚ A} [NumberField K₁]
+    [IsGalois ℚ K₁] [IsCyclic Gal(K₁/ℚ)] [NumberField K₂] [IsGalois ℚ K₂] [IsCyclic Gal(K₂/ℚ)]
+    (hK₁ : finrank ℚ K₁ = p) (hK₂ : finrank ℚ K₂ = p) (hKram₁ : UnramifiedOutside K₁ p)
     (hKram₂ : UnramifiedOutside K₂ p) :
     K₁ = K₂ := by
-  have h₁ := prop_kw_exponent_p hp' Qζ K₁ hK₁ hKram₁
-  have h₂ := prop_kw_exponent_p hp' Qζ K₂ hK₂ hKram₂
+  have h₁ := prop_kw_exponent_p Qζ hp' hK₁ hKram₁
+  have h₂ := prop_kw_exponent_p Qζ hp' hK₂ hKram₂
   suffices restrict h₁ = restrict h₂ by
     rwa [← lift_inj, lift_restrict h₁, lift_restrict h₂] at this
   have : IsCyclic Gal(Qζ (p ^ 2)/ℚ) :=
@@ -784,17 +804,49 @@ theorem prop_kw_exponent_p_eq (hp' : Odd p) {A : Type*} [Field A] [CharZero A]
     ← finrank_eq_fixingSubgroup_index, ← finrank_eq_fixingSubgroup_index, finrank_restrict,
     finrank_restrict, hK₁, hK₂]
 
-/-- Every cyclic extension of `ℚ` of odd prime power degree `pᵐ` unramified outside `p` is
+/-
+Proof of `prop_kw_odd_prime_power`.
+
+Let `C = ℚ(ζ_{p^{m+1}})`. Its Galois group is cyclic (`Rat.isCyclic_of_prime_pow`, `p` odd) of
+order `pᵐ (p - 1)` (`IsCyclotomicExtension.Rat.finrank`, `Nat.totient_prime_pow`).
+1. Let `g` generate `Gal(C/ℚ)` and `H = ⟨g^{pᵐ}⟩`, of index `pᵐ` (`Subgroup.index_zpowers_zpow`),
+   with cyclic quotient (a quotient of a cyclic group). By `fixedField_spec_of_index_eq_prime_pow`
+   (with `UnramifiedOutside.of_isCyclotomicExtension` for `C`), its fixed field `F`, seen in `A`, is
+   abelian over `ℚ` of degree `pᵐ` and unramified outside `p`; also `F ≤ C` (`lift_le`).
+2. Apply `kw_eq_of_unique_prime_subfield` to `K` and `F`: two cyclic subfields of degree `p`
+   unramified outside `p` are equal by `prop_kw_exponent_p_eq`. Hence `K = F ≤ C`.
+-/
+
+/-- Every abelian extension of `ℚ` of odd prime power degree `pᵐ` unramified outside `p` is
 cyclotomic: contained in `ℚ(ζ_{p^{m+1}}) = Qζ (p ^ (m + 1))` inside the ambient field `A`. -/
-theorem prop_kw_odd_prime_power [Fact (Odd p)] {A : Type*} [Field A] [CharZero A]
-    (Qζ : ℕ → IntermediateField ℚ A)
-    [∀ n, IsCyclotomicExtension {n} ℚ (Qζ n)] [∀ n, NumberField (Qζ n)]
-    [∀ n, IsAbelianGalois ℚ (Qζ n)]
-    (m : ℕ) (hm : 0 < m) (K : IntermediateField ℚ A)
+theorem prop_kw_odd_prime_power [hp' : Fact (Odd p)] {m : ℕ} {K : IntermediateField ℚ A}
     [NumberField K] [IsAbelianGalois ℚ K] (hK : finrank ℚ K = p ^ m)
     (hKram : UnramifiedOutside K p) :
     K ≤ Qζ (p ^ (m + 1)) := by
+  let C := Qζ (p ^ (m + 1))
+  have hC : IsCyclic Gal(C/ℚ) :=
+    Rat.isCyclic_of_prime_pow (p := p) C (m + 1) (hp'.out.ne_two_of_dvd_nat dvd_rfl)
+  obtain ⟨g, hg⟩ := isCyclic_iff_exists_zpowers_eq_top.mp hC
+  let H := Subgroup.zpowers (g ^ (p ^ m : ℤ))
+  have Hi : H.index = p ^ m := by
+    rw [Subgroup.index_zpowers_zpow hg, orderOf_eq_card_of_zpowers_eq_top hg,
+      IsGalois.card_aut_eq_finrank, Rat.finrank (p ^ (m + 1)), Nat.totient_prime_pow hp.out
+      m.succ_pos]
+    simp
+  obtain ⟨hF, _, _, hFram⟩ := fixedField_spec_of_index_eq_prime_pow
+    (UnramifiedOutside.of_isCyclotomicExtension p (m + 1) C) H Hi inferInstance
+  set F := lift (fixedField H)
+  have : NumberField F := {
+    to_charZero := IntermediateField.charZero F,
+    to_finiteDimensional := finiteDimensional_lift }
+  have : IsAbelianGalois ℚ F := .of_algHom (liftAlgEquiv (fixedField H)).symm.toAlgHom
+  suffices K = F by
+    rw [this]
+    exact lift_le (fixedField H)
+  exact kw_eq_of_unique_prime_subfield hK hF hKram hFram
+    fun F₁ F₂ _ _ _ _ _ _ hF₁ hF₂ hrF₁ hrF₂ hF₁ram hF₂ram ↦
+      prop_kw_exponent_p_eq Qζ hp'.out hrF₁ hrF₂ hF₁ram hF₂ram
 
-  sorry
+end
 
 end

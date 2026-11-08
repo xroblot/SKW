@@ -45,7 +45,7 @@ lemma kw_cyclic_primePow_le_cyclotomic {p : ℕ} (hp : p.Prime) {A : Type*} [Fie
   have : ∀ n, NumberField ℚ⟮ξ n⟯ := sorry
   have : ∀ n, IsAbelianGalois ℚ ℚ⟮ξ n⟯ := sorry
   obtain ⟨F, _, _, _, ⟨k, hF₁⟩, hF₂, n₀, hn₀, hKF⟩ :=
-    kw_reduce_to_unramified_outside_p (fun n ↦ ℚ⟮ξ n⟯) K ⟨m, hK⟩
+    kw_reduce_to_unramified_outside_p (fun n ↦ ℚ⟮ξ n⟯) ⟨m, hK⟩
   replace hn₀ : 0 < n₀ := Nat.pos_of_ne_zero hn₀
   obtain ⟨c, hc, hF₃⟩ : ∃ c, 0 < c ∧ F ≤ ℚ⟮ξ c⟯ := by
     obtain rfl | hk := k.eq_zero_or_pos
@@ -55,7 +55,7 @@ lemma kw_cyclic_primePow_le_cyclotomic {p : ℕ} (hp : p.Prime) {A : Type*} [Fie
       · have : Fact (Odd p) := ⟨hp.odd_of_ne_two hodd⟩
         have : IsAbelianGalois ℚ F := .of_isCyclic ℚ F
         exact ⟨p ^ (k + 1), pow_pos (Fact.out : p.Prime).pos _,
-          prop_kw_odd_prime_power (fun n ↦ ℚ⟮ξ n⟯) k hk F hF₁ hF₂⟩
+          prop_kw_odd_prime_power (fun n ↦ ℚ⟮ξ n⟯) hF₁ hF₂⟩
   refine ⟨c.lcm n₀, Nat.pos_of_ne_zero (Nat.lcm_ne_zero hc.ne' hn₀.ne'), ?_⟩
   have : K ≤ K ⊔ ℚ⟮ξ n₀⟯ := le_sup_left
   refine le_trans this ?_

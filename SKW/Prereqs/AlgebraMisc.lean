@@ -120,6 +120,11 @@ theorem Subgroup.card_dvd_lcm_of_isCyclic_of_injective {G A B : Type*} [Group G]
   exact Nat.lcm_dvd ((_root_.orderOf_dvd_natCard _).trans (Nat.dvd_lcm_left _ _))
       ((_root_.orderOf_dvd_natCard _).trans (Nat.dvd_lcm_right _ _))
 
+/-- A quotient of a cyclic group is cyclic. -/
+@[to_additive /-- A quotient of an additive cyclic group is cyclic. -/]
+instance {G : Type*} [Group G] [IsCyclic G] (H : Subgroup G) [H.Normal] : IsCyclic (G ⧸ H) :=
+  isCyclic_of_surjective _ (QuotientGroup.mk'_surjective H)
+
 /-- In a cyclic group, the lcm of the indices of two subgroups of trivial intersection is the order
 of the group. -/
 theorem Subgroup.lcm_index_eq_card_of_isCyclic_of_inf_eq_bot {G : Type*} [Group G] [IsCyclic G]
