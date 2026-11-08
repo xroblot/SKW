@@ -287,8 +287,9 @@ subextensions whose compositum is the whole field, and `f` is the pair of restri
 `Nat.card (inertia) = e` for the top field and each subextension, this gives the weak Abhyankar
 bound `e(KΛ) ∣ Nat.lcm (e(K)) (e(Λ))`.
 
-Note: this is a thin adapter over `card_dvd_lcm_of_isCyclic_of_injective` (establish `IsCyclic` via
-`isCyclic_inertia`, then apply it), not general enough to reuse elsewhere. If a caller appears,
+Note: this is a thin adapter over `Subgroup.card_dvd_lcm_of_isCyclic_of_injective` (establish
+`IsCyclic` via `isCyclic_inertia`, then apply it), not general enough to reuse elsewhere. If a
+caller appears,
 inline it at the use site; if none does, delete it and call the general lemma directly. -/
 theorem card_inertia_dvd_lcm [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
     [Finite (S ⧸ Q)] [FaithfulSMul G S]
@@ -297,7 +298,7 @@ theorem card_inertia_dvd_lcm [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [N
     (hf : Function.Injective f) :
     Nat.card (Q.inertia (MulAction.stabilizer G Q)) ∣ Nat.lcm (Nat.card A) (Nat.card B) :=
   haveI := isCyclic_inertia Q htame
-  card_dvd_lcm_of_isCyclic_of_injective hf
+  Subgroup.card_dvd_lcm_of_isCyclic_of_injective hf
 
 /-- **Tame Abhyankar (index form).** If the inertia of `Q` in `G` is cyclic, then for two subgroups
 `H₁ H₂ ≤ G` with `H₁ ⊓ H₂ = ⊥`, the order of the inertia divides the lcm of the indices, *inside the
@@ -305,15 +306,16 @@ inertia*, of `H₁` and `H₂`. Intended use: `G = Gal(L/F)`, `H₁ = Gal(L/K₁
 `K₁ ⊔ K₂ = ⊤`; these indices are then the ramification indices `e(K₁)`, `e(K₂)`, giving the weak
 Abhyankar bound `e(L) ∣ Nat.lcm (e K₁) (e K₂)`.
 
-Note: this is a thin adapter over `card_dvd_lcm_of_isCyclic_of_inf_eq_bot`, not general enough to
-reuse elsewhere. If a caller appears, inline it at the use site; if none does,
+Note: this is a thin adapter over `Subgroup.lcm_index_eq_card_of_isCyclic_of_inf_eq_bot`, not
+general enough to reuse elsewhere. If a caller appears, inline it at the use site; if none does,
   delete it and call the
 general lemma directly. -/
 theorem card_inertia_dvd_lcm_index (Q : Ideal S) (hI : IsCyclic (Q.inertia G))
     {H₁ H₂ : Subgroup G} (h : H₁ ⊓ H₂ = ⊥) :
     Nat.card (Q.inertia G) ∣
       Nat.lcm (H₁.subgroupOf (Q.inertia G)).index (H₂.subgroupOf (Q.inertia G)).index := by
-  refine card_dvd_lcm_of_isCyclic_of_inf_eq_bot (eq_bot_iff.mpr fun x hx ↦ ?_)
+  refine (Subgroup.lcm_index_eq_card_of_isCyclic_of_inf_eq_bot
+    (eq_bot_iff.mpr fun x hx ↦ ?_)).symm.dvd
   obtain ⟨h1, h2⟩ := Subgroup.mem_inf.mp hx
   have hx' : (x : G) ∈ H₁ ⊓ H₂ :=
     Subgroup.mem_inf.mpr ⟨Subgroup.mem_subgroupOf.mp h1, Subgroup.mem_subgroupOf.mp h2⟩

@@ -111,23 +111,24 @@ theorem not_dvd_orderOf_units_of_expChar {R : Type*} [CommRing R] [IsReduced R] 
   to
 some `(a, b)` of order `lcm (orderOf a) (orderOf b)`, and each component order divides the
 corresponding cardinality.) -/
-theorem card_dvd_lcm_of_isCyclic_of_injective {G A B : Type*} [Group G] [Group A] [Group B]
+theorem Subgroup.card_dvd_lcm_of_isCyclic_of_injective {G A B : Type*} [Group G] [Group A] [Group B]
     [IsCyclic G] {f : G →* A × B} (hf : Function.Injective f) :
     Nat.card G ∣ Nat.lcm (Nat.card A) (Nat.card B) := by
   obtain ⟨g, hg⟩ := IsCyclic.exists_generator (α := G)
   rw [← Subgroup.card_top, ← (Subgroup.eq_top_iff' _).mpr hg, Nat.card_zpowers g,
     ← orderOf_injective f hf g, Prod.orderOf]
-  exact Nat.lcm_dvd ((orderOf_dvd_natCard _).trans (Nat.dvd_lcm_left _ _))
-      ((orderOf_dvd_natCard _).trans (Nat.dvd_lcm_right _ _))
+  exact Nat.lcm_dvd ((_root_.orderOf_dvd_natCard _).trans (Nat.dvd_lcm_left _ _))
+      ((_root_.orderOf_dvd_natCard _).trans (Nat.dvd_lcm_right _ _))
 
-/-- Subgroup form of `card_dvd_lcm_of_isCyclic_of_injective`: a cyclic group with two normal
-subgroups of trivial intersection has order dividing the lcm of the two quotient orders. -/
-theorem card_dvd_lcm_of_isCyclic_of_inf_eq_bot {G : Type*} [Group G] [IsCyclic G]
-    {H₁ H₂ : Subgroup G} [H₁.Normal] [H₂.Normal] (h : H₁ ⊓ H₂ = ⊥) :
-    Nat.card G ∣ Nat.lcm H₁.index H₂.index :=
-  card_dvd_lcm_of_isCyclic_of_injective (f := (QuotientGroup.mk' H₁).prod (QuotientGroup.mk' H₂))
-    (by rw [← MonoidHom.ker_eq_bot_iff, MonoidHom.ker_prod, QuotientGroup.ker_mk',
-      QuotientGroup.ker_mk', h])
+/-- In a cyclic group, the lcm of the indices of two subgroups of trivial intersection is the order
+of the group. -/
+theorem Subgroup.lcm_index_eq_card_of_isCyclic_of_inf_eq_bot {G : Type*} [Group G] [IsCyclic G]
+    {H₁ H₂ : Subgroup G} (h : H₁ ⊓ H₂ = ⊥) :
+    Nat.lcm H₁.index H₂.index = Nat.card G :=
+  dvd_antisymm (Nat.lcm_dvd H₁.index_dvd_card H₂.index_dvd_card) <|
+    card_dvd_lcm_of_isCyclic_of_injective (f := (QuotientGroup.mk' H₁).prod (QuotientGroup.mk' H₂))
+      (by rw [← MonoidHom.ker_eq_bot_iff, MonoidHom.ker_prod, QuotientGroup.ker_mk',
+        QuotientGroup.ker_mk', h])
 
 /-- `subgroupOf` distributes over `⊓` (the general case of `inf_subgroupOf_left`/`_right`); this is
 `Subgroup.comap_inf` for the inclusion `C.subtype`. -/

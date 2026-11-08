@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.RamificationInertia.Galois
 public import Mathlib.NumberTheory.RamificationInertia.Unramified
 public import Mathlib.RingTheory.Ideal.Int
 public import Mathlib.RingTheory.RamificationInertia.Ramification
@@ -299,5 +300,30 @@ theorem coe_equivPrimesOverPrimesOver_symm_apply (x : Σ P : p.primesOver A, P.1
     ((equivPrimesOverPrimesOver A B p).symm x : Ideal B) = x.2 :=
   rfl
 -/
+
+end Ideal
+
+namespace Ideal
+
+section dvd_finrank
+
+variable {A : Type*} [CommRing A] [IsDomain A] (p : Ideal A) [p.IsPrime]
+  (B : Type*) [CommRing B] [IsDomain B] [Algebra A B] [Module.Finite A B] [Module.Flat A B]
+  [FaithfulSMul A B] (G : Type*) [Group G] [Finite G] [MulSemiringAction G B]
+  [IsGaloisGroup G A B]
+
+include G in
+theorem ramificationIdxIn_dvd_finrank : p.ramificationIdxIn B ∣ Module.finrank A B := by
+  rw [← IsGaloisGroup.card_eq_finrank' G,
+    ← ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn p B G]
+  exact dvd_mul_of_dvd_right (dvd_mul_right _ _) _
+
+include G in
+theorem inertiaDegIn_dvd_finrank : p.inertiaDegIn B ∣ Module.finrank A B := by
+  rw [← IsGaloisGroup.card_eq_finrank' G,
+    ← ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn p B G]
+  exact dvd_mul_of_dvd_right (dvd_mul_left _ _) _
+
+end dvd_finrank
 
 end Ideal

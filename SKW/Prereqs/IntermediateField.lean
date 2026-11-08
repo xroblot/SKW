@@ -50,6 +50,14 @@ theorem IsGalois.fixingSubgroup_inj {K L : Type*} [Field K] [Field L] [Algebra K
   ⟨fun h ↦ by rw [← fixedField_fixingSubgroup F₁, h, fixedField_fixingSubgroup], congr_arg _⟩
 
 open IntermediateField in
+/-- In a finite extension, two subgroups of the automorphism group are equal iff they have the same
+fixed field. -/
+theorem IsGalois.fixedField_inj {K L : Type*} [Field K] [Field L] [Algebra K L]
+    [FiniteDimensional K L] {H₁ H₂ : Subgroup Gal(L/K)} :
+    fixedField H₁ = fixedField H₂ ↔ H₁ = H₂ :=
+  ⟨fun h ↦ by rw [← fixingSubgroup_fixedField H₁, h, fixingSubgroup_fixedField], congr_arg _⟩
+
+open IntermediateField in
 /-- In a finite Galois extension, the fixing subgroup of `F₁` is contained in that of `F₂` iff
 `F₂ ≤ F₁`. -/
 theorem IsGalois.fixingSubgroup_le_fixingSubgroup_iff {K L : Type*} [Field K] [Field L]

@@ -62,6 +62,35 @@ theorem Ideal.IsInertiaRing.inertiaDegIn_eq {B : Type*} [CommRing B] (G : Type*)
     inertiaDegIn 𝓟 B = 1 := by
   sorry
 
+/-- The inertia field of `P` in `L/K`: the subfield of `L` fixed by the inertia subgroup of `P`.
+From Mathlib PR [#35991](https://github.com/leanprover-community/mathlib4/pull/35991). -/
+def Ideal.inertiaField (K L : Type*) [Field K] [Field L] [Algebra K L] {B : Type*} [CommRing B]
+    (P : Ideal B) [MulSemiringAction Gal(L/K) B] : IntermediateField K L :=
+  fixedField (inertia Gal(L/K) P)
+
+/-- Let `F` be an intermediate field of `L/K`. The inertia field of `P` for `L/F` is the
+compositum of `F` with the inertia field of `P` for `L/K`. From Mathlib PR
+[#35991](https://github.com/leanprover-community/mathlib4/pull/35991). -/
+theorem Ideal.inertiaField_restrictScalars (K L : Type*) [Field K] [Field L] [Algebra K L]
+    {B : Type*} [CommRing B] (P : Ideal B) [MulSemiringAction Gal(L/K) B]
+    (F : IntermediateField K L) [Algebra B L] [IsFractionRing B L]
+    [SMulDistribClass Gal(L/K) B L] [MulSemiringAction Gal(L/F) B] [SMulDistribClass Gal(L/F) B L]
+    [FiniteDimensional K L] [IsGalois K L] :
+    (P.inertiaField F L).restrictScalars K = F ⊔ P.inertiaField K L := by
+  sorry
+
+/-- The degree `[L : E]` of `L` over the inertia field `E` equals the ramification index of `p`
+in `B`. From Mathlib PR [#36733](https://github.com/leanprover-community/mathlib4/pull/36733). -/
+theorem Ideal.finrank_inertiaField_top {A B : Type*} (K L : Type*) [Field K] [Field L]
+    [Algebra K L] [CommRing B] (P : Ideal B) [MulSemiringAction Gal(L/K) B] [CommRing A]
+    [IsDomain A] [IsIntegrallyClosed A] [IsDomain B] [Algebra B L] [IsFractionRing B L]
+    [SMulDistribClass Gal(L/K) B L] [Algebra A K] [IsFractionRing A K] [Algebra A B] [Algebra A L]
+    [IsScalarTower A K L] [IsScalarTower A B L] [Algebra.IsIntegral A B] [Module.Finite A B]
+    [Module.Flat A B] [FiniteDimensional K L] [IsGalois K L] (p : Ideal A) [P.LiesOver p]
+    [P.IsMaximal] [p.IsMaximal] [PerfectField p.ResidueField] :
+    Module.finrank (P.inertiaField K L) L = p.ramificationIdxIn B := by
+  sorry
+
 /-- The discriminant of a quadratic field is a fundamental discriminant. From Mathlib PR
 [#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
 `[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/

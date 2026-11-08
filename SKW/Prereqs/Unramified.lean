@@ -67,6 +67,19 @@ theorem IsUnramifiedIn.tower_top {R S T : Type*} [CommRing R] [CommRing S] [Comm
   have := h Q inferInstance (Ideal.LiesOver.trans Q 𝔓 𝔭)
   exact Algebra.IsUnramifiedAt.of_restrictScalars R Q
 
+/-- Let `f : R ≃+* R'` and `g : S ≃+* S'` be ring isomorphisms compatible with the algebra maps.
+If `𝔭` is unramified in `S`, then `𝔭.map f` is unramified in `S'`. -/
+theorem IsUnramifiedIn.of_equiv_equiv {R S R' S' : Type*} [CommRing R] [CommRing S]
+    [CommRing R'] [CommRing S'] [Algebra R S] [Algebra R' S'] {f : R ≃+* R'} {g : S ≃+* S'}
+    (hcomp : (algebraMap R' S').comp f = (g : S →+* S').comp (algebraMap R S)) {𝔭 : Ideal R}
+    (h : Algebra.IsUnramifiedIn S 𝔭) : Algebra.IsUnramifiedIn S' (𝔭.map f) := by
+  let : Algebra R R' := f.toRingHom.toAlgebra
+  let : Algebra R S' := ((algebraMap R' S').comp f.toRingHom).toAlgebra
+  have : IsScalarTower R R' S' := .of_algebraMap_eq' rfl
+  have : (𝔭.map f).LiesOver 𝔭 := ⟨(Ideal.comap_map_of_bijective _ f.bijective).symm⟩
+  let e : S ≃ₐ[R] S' := .ofRingEquiv (f := g) fun x ↦ (RingHom.congr_fun hcomp x).symm
+  exact (h.of_algEquiv e).tower_top _
+
 /-- Let `K` and `L` be fraction fields of `R` and `S`. If `L/K` is separable, then `S` is
 unramified over `R` at the zero ideal. -/
 theorem isUnramifiedAt_bot_of_isSeparable {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
@@ -197,6 +210,19 @@ lemma UnramifiedOutside.of_isCyclotomicExtension' (K : Type*) [Field K] [NumberF
   exact .of_isCyclotomicExtension p 1 K
 
 open NumberField IntermediateField in
+/-- Let `K` and `F` be subfields of `L` with `K ⊔ F = ⊤`. If a nonzero ideal `p` of `ℤ` is
+unramified in `𝓞 K` and in `𝓞 F`, then it is unramified in `𝓞 L`. -/
+lemma isUnramifiedIn_sup' {L : Type*} [Field L] [NumberField L] (K F : IntermediateField ℚ L)
+    (htop : K ⊔ F = ⊤) {p : Ideal ℤ} (hp : p ≠ ⊥) (hK : Algebra.IsUnramifiedIn (𝓞 K) p)
+    (hF : Algebra.IsUnramifiedIn (𝓞 F) p) :
+    Algebra.IsUnramifiedIn (𝓞 L) p := by
+  refine Algebra.isUnramifiedIn_iff_forall_ramificationIdx_eq_one.mpr fun 𝔮 _ h𝔮 ↦ ?_
+  have := LiesOver.tower_bot 𝔮 (under (𝓞 K) 𝔮) p
+  have := LiesOver.tower_bot 𝔮 (under (𝓞 F) 𝔮) p
+  exact ramificationIdx_sup_eq_one htop
+    (ramificationIdx_eq_one_iff.mpr (hK _ (IsPrime.under (𝓞 K) 𝔮) inferInstance))
+    (ramificationIdx_eq_one_iff.mpr (hF _ (IsPrime.under (𝓞 F) 𝔮) inferInstance)) hp
+
 /-- Top-field version of `unramifiedOutside_sup`: if `K` and `F` are both unramified outside `p` and
 together generate the whole field (`K ⊔ F = ⊤`), then `L` itself is unramified outside `p`. The
 general form `unramifiedOutside_sup` (compositum inside an arbitrary ambient) reduces to this. -/
