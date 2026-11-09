@@ -7,8 +7,6 @@ public import Mathlib.RingTheory.ClassGroup.Basic
 public import Mathlib.RingTheory.FractionalIdeal.Extended
 
 public import SKW.PRed2Mathlib.FiniteFieldSum
-public import SKW.PRed2Mathlib.MulCharIsUnit
-public import SKW.PRed2Mathlib.NatPowSubOne
 public import SKW.Prereqs.AlgebraMisc
 
 set_option linter.style.header false
@@ -75,9 +73,8 @@ theorem IsCyclotomicExtension.Rat.isCoprime_discr_of_coprime (n₁ n₂ : ℕ) [
     [IsCyclotomicExtension {n₁} ℚ K₁] [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
     IsCoprime (NumberField.discr K₁) (NumberField.discr K₂) := by
   rw [Int.isCoprime_iff_nat_coprime, natAbs_discr  n₁ K₁, natAbs_discr  n₂ K₂]
-  refine Nat.Coprime.coprime_div_left ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos _))
-  refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd (NeZero.pos
-    _))
+  refine Nat.Coprime.coprime_div_left ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd _)
+  refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd _)
   exact Nat.Coprime.pow_left _ (Nat.Coprime.pow_right _ h)
 
 theorem IntermediateField.linearDisjoint_iff_linearDisjoint_fieldRange {F E : Type*} [Field F]

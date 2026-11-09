@@ -17,7 +17,6 @@ public import Mathlib.Algebra.GroupWithZero.Associated
 public import Mathlib.RingTheory.Multiplicity
 public import Mathlib.RingTheory.UniqueFactorizationDomain.FactorSet
 
-public import SKW.PRed2Mathlib.MultiplicityPow
 
 set_option linter.style.header false
 
@@ -383,3 +382,6 @@ theorem count_congr_factors_congr (e : α ≃* β) (p a : Associates α) :
 end Associates
 
 end AssociatesCount
+
+/-- An integer is odd iff it is not divisible by `2`. -/
+theorem Int.not_two_dvd_iff_odd {n : ℤ} : ¬ 2 ∣ n ↔ Odd n := by grind

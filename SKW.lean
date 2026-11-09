@@ -3,13 +3,9 @@ import SKW.Misc
 import SKW.PRed2Mathlib.Subfield
 import SKW.PRed2Mathlib.Teichmuller
 import SKW.PRed2Mathlib.FiniteFieldSum
-import SKW.PRed2Mathlib.MulCharIsUnit
-import SKW.PRed2Mathlib.NatPowSubOne
-import SKW.PRed2Mathlib.MultiplicityPow
 import SKW.Prereqs.AlgebraMisc
 import SKW.Prereqs.ClassGroup
 import SKW.PRed2Mathlib.CyclotomicField
-import SKW.PRed2Mathlib.ZModUnits
 import SKW.Prereqs.CyclotomicField
 import SKW.Prereqs.Digits
 import SKW.Prereqs.FractionalIdeal

@@ -45,13 +45,8 @@ theorem mapIntAlgHom_apply (f : K →+* L) (x : 𝓞 K) : (mapIntAlgHom f x : L)
 /-- The `ℤ`-algebra isomorphism `(𝓞 K) ≃ₐ[ℤ] (𝓞 L)` given by restricting a ring isomorphism
   `e : K ≃+* L` to `𝓞 K`. Unlike `RingOfIntegers.mapAlgEquiv`, whose base is `𝓞 k`, this has base
   `ℤ`, which is convenient when the natural common base of `K` and `L` is `ℚ` (as `𝓞 ℚ` is only
-  isomorphic to, not equal to, `ℤ`).
-
-  Remark: the `commutes'` field is inlined to keep this self-contained; once
-  `RingEquiv.toIntAlgEquiv` (Mathlib PR #40298) is available it can be golfed to
-  `(mapRingEquiv e).toIntAlgEquiv`. -/
-def mapIntAlgEquiv (e : K ≃+* L) : (𝓞 K) ≃ₐ[ℤ] (𝓞 L) :=
-  { mapRingEquiv e with commutes' := fun _ => by simp }
+  isomorphic to, not equal to, `ℤ`). -/
+def mapIntAlgEquiv (e : K ≃+* L) : (𝓞 K) ≃ₐ[ℤ] (𝓞 L) := (mapRingEquiv e).toIntAlgEquiv
 
 @[simp]
 theorem mapIntAlgEquiv_apply (e : K ≃+* L) (x : 𝓞 K) : (mapIntAlgEquiv e x : L) = e (x : K) := rfl

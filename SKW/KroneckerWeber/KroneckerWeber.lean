@@ -904,8 +904,7 @@ theorem prop_kw_2_power {m : ℕ} {K : IntermediateField ℚ A} [NumberField K]
   have hCQ : IsCyclic (Gal(C/ℚ) ⧸ H) := by
     rw [MulEquiv.isCyclic (QuotientGroup.congr _ _ (Rat.galEquivZMod (2 ^ (m + 2)) _) rfl),
       MonoidHom.map_zpowers, MonoidHom.coe_ofClass, Rat.galEquivZMod_ratComplexConj]
-    -- have := ZMod.isCyclic_units_two_pow_quotient_neg_one
-    sorry
+    exact ZMod.isCyclic_units_two_pow_quotient_neg_one _
   obtain ⟨hF, _, _, hFram⟩ := fixedField_spec_of_index_eq_prime_pow
     (UnramifiedOutside.of_isCyclotomicExtension 2 (m + 2) C) H Hi hCQ
   set F := lift (fixedField H)
@@ -919,12 +918,18 @@ theorem prop_kw_2_power {m : ℕ} {K : IntermediateField ℚ A} [NumberField K]
   suffices K = F by
     rw [this]
     exact lift_le (fixedField H)
-  have : IsTotallyReal ↑(K ⊔ F) := sorry
+  have : IsTotallyReal ↑(K ⊔ F) := by
+    change IsTotallyReal ↑(K ⊔ F).toSubfield
+    rw [sup_toSubfield]
+    exact isTotallyReal_sup'
   exact kw_eq_of_unique_prime_subfield hK hF hKram hFram
     fun F₁ F₂ _ _ _ _ _ _ hF₁ hF₂ hrF₁ hrF₂ hF₁ram hF₂ram ↦ by
-      have : IsTotallyReal F₁ := sorry
-      have : IsTotallyReal F₂ := sorry
-      -- DIFF: uniqueness of the real quadratic field `ℚ(√2)` instead of `prop_kw_exponent_p_eq`
+      have : IsTotallyReal F₁ := by
+        let : Algebra F₁ ↑(K ⊔ F) := (inclusion hF₁).toRingHom.toAlgebra
+        exact IsTotallyReal.of_algebra F₁ ↑(K ⊔ F)
+      have : IsTotallyReal F₂ := by
+        let : Algebra F₂ ↑(K ⊔ F) := (inclusion hF₂).toRingHom.toAlgebra
+        exact IsTotallyReal.of_algebra F₂ ↑(K ⊔ F)
       exact prop_kw_2_quadratic_real_unique F₁ hrF₁ hF₁ram F₂ hrF₂ hF₂ram
 
 /-- Every abelian extension of `ℚ` of degree `2 ^ m` unramified outside `2` is cyclotomic: it is

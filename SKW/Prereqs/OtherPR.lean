@@ -99,11 +99,6 @@ theorem NumberField.QuadraticField.isFundamentalDiscr_discr (K : Type*) [Field K
     Int.IsFundamentalDiscr (NumberField.discr K) := by
   sorry
 
-/-- An integer is odd iff it is not divisible by `2`. From Mathlib PR
-[#43088](https://github.com/leanprover-community/mathlib4/pull/43088), where it is added to
-`Mathlib/Algebra/Ring/Int/Parity.lean`. -/
-theorem Int.not_two_dvd_iff_odd {n : ℤ} : ¬ 2 ∣ n ↔ Odd n := by grind
-
 /-- The discriminant is a complete invariant of quadratic fields. From Mathlib PR
 [#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
 `[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
