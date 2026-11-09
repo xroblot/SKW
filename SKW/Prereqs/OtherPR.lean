@@ -121,6 +121,14 @@ theorem NumberField.QuadraticField.exists_sq_eq_discr (K : Type*) [Field K] [Num
     ∃ x : K, x ^ 2 = (NumberField.discr K : K) := by
   sorry
 
+/-- The discriminant of a quadratic field is not `1`. From Mathlib PR
+[#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
+`[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/
+theorem NumberField.QuadraticField.discr_ne_one (K : Type*) [Field K] [NumberField K]
+    (hK : Module.finrank ℚ K = 2) :
+    NumberField.discr K ≠ 1 := by
+  sorry
+
 /-- The discriminant of a quadratic field is not a square. From Mathlib PR
 [#43490](https://github.com/leanprover-community/mathlib4/pull/43490), where it is stated for
 `[Algebra.IsQuadraticExtension ℚ K]` (#42554). -/

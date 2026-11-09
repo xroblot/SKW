@@ -253,6 +253,7 @@ theorem IsCyclotomicExtension.Rat.apply_eq_pow_iff_galEquivZMod_eq {n : ℕ} [Ne
     ← (hζ.isUnit_unit (NeZero.ne n)).eq_orderOf, ← ZMod.natCast_eq_natCast_iff,
     ZMod.natCast_zmod_val, ZMod.natCast_zmod_val]
 
+
 open IsCyclotomicExtension IsCyclotomicExtension.Rat in
 /-- In a cyclotomic field, complex conjugation corresponds to `-1` under `galEquivZMod`. -/
 theorem IsCyclotomicExtension.Rat.galEquivZMod_ratComplexConj (n : ℕ) [NeZero n] (K : Type*)

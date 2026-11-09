@@ -24,7 +24,10 @@ set_option linter.style.header false
 @[expose] public section
 
 /-!
-# Kronecker-Weber for 2-power cyclic extensions
+# Kronecker-Weber for 2-power cyclic extensions (old version)
+
+Parked copy of the former `TwoPower.lean`, out of the build, in the namespace `KroneckerWeber2`.
+The results used elsewhere are restated in `SKW.KroneckerWeber.KroneckerWeber`.
 
 The `p = 2` case of the reduction to prime power degree, handled by **Lemmermeyer's argument**
 (Prop. 1.5). Unlike the odd case (`prop_kw_odd_prime_power`), this needs **no** Kummer/class-group
@@ -52,6 +55,8 @@ The engines are `kw_cyclic_compositum`, the non-cyclic-`2`-group fact
 open NumberField NumberField.QuadraticField Ideal
 
 noncomputable section
+
+namespace KroneckerWeber2
 
 /-- A quadratic field unramified outside `2` has discriminant `-8`, `-4` or `8`, that is, it is
 `ℚ(√-2)`, `ℚ(i)` or `ℚ(√2)`. -/
@@ -380,5 +385,7 @@ theorem prop_kw_2_power {A : Type*} [Field A] [CharZero A] {ξ : ℕ → A}
     lia
 
 end
+
+end KroneckerWeber2
 
 end
