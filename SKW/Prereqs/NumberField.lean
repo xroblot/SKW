@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.NumberTheory.NumberField.Basic
+public import Mathlib.NumberTheory.NumberField.InfinitePlace.Ramification
 public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
 
 set_option linter.style.header false
@@ -56,3 +57,41 @@ theorem mapIntAlgEquiv_symm_apply (e : K ≃+* L) (x : 𝓞 L) :
     ((mapIntAlgEquiv e).symm x : K) = e.symm (x : L) := rfl
 
 end NumberField.RingOfIntegers
+
+namespace NumberField
+
+open InfinitePlace
+
+variable {K : Type*} [Field K] [Algebra ℚ K] [IsGalois ℚ K]
+
+theorem InfinitePlace.isReal_of_isGalois {w : InfinitePlace K} (hw : w.IsReal)
+    (w' : InfinitePlace K) :
+    w'.IsReal := by
+  obtain ⟨σ, rfl⟩ : ∃ σ, σ • w = w' := exists_smul_eq_of_comap_eq (k := ℚ) (Subsingleton.elim _ _)
+  exact isReal_smul_iff.mpr hw
+
+theorem InfinitePlace.isComplex_of_isGalois {w : InfinitePlace K} (hw : w.IsComplex)
+    (w' : InfinitePlace K) :
+    w'.IsComplex := by
+  obtain ⟨σ, rfl⟩ := exists_smul_eq_of_comap_eq (k := ℚ) (w := w) (w' := w') (Subsingleton.elim _ _)
+  exact isComplex_smul_iff.mpr hw
+
+theorem isTotallyReal_iff_exists_isReal [Nonempty (InfinitePlace K)] :
+    IsTotallyReal K ↔ ∃ w : InfinitePlace K, w.IsReal :=
+  ⟨fun h ↦ ⟨Classical.arbitrary _, h.isReal _⟩, fun ⟨_, hw⟩ ↦ ⟨isReal_of_isGalois hw⟩⟩
+
+theorem isTotallyComplex_iff_exists_isComplex [Nonempty (InfinitePlace K)] :
+    IsTotallyComplex K ↔ ∃ w : InfinitePlace K, w.IsComplex := by
+  refine ⟨fun h ↦ ⟨Classical.arbitrary _, h.isComplex _⟩, fun ⟨w, hw⟩ ↦ ⟨fun w' ↦ ?_⟩⟩
+  exact not_isReal_iff_isComplex.mp fun h ↦ not_isReal_iff_isComplex.mpr hw (isReal_of_isGalois h w)
+
+theorem isTotallyComplex_iff_not_isTotallyReal [Nonempty (InfinitePlace K)] :
+    IsTotallyComplex K ↔ ¬ IsTotallyReal K := by
+  simp_rw [isTotallyComplex_iff_exists_isComplex, isTotallyReal_iff, not_forall,
+    not_isReal_iff_isComplex]
+
+theorem isTotallyReal_iff_not_isTotallyComplex [Nonempty (InfinitePlace K)] :
+    IsTotallyReal K ↔ ¬ IsTotallyComplex K := by
+  rw [isTotallyComplex_iff_not_isTotallyReal, not_not]
+
+end NumberField

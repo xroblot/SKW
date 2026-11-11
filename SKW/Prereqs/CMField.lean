@@ -167,13 +167,21 @@ instance [NumberField K] [IsGalois ℚ K] : IsGalois ℚ K⁺ :=
   IsGaloisGroup.isGalois (Gal(K/ℚ) ⧸ Subgroup.zpowers (ratComplexConj K)) ℚ K⁺
 
 open IntermediateField in
+/-- The subfield of a CM field fixed by complex conjugation is its maximal real subfield. -/
+theorem toSubfield_fixedField_ratComplexConj :
+    (fixedField (Subgroup.zpowers (ratComplexConj K))).toSubfield = maximalRealSubfield K := by
+  ext x
+  rw [Subfield.mem_mk, Subring.mem_mk, Subalgebra.mem_toSubsemiring, mem_toSubalgebra,
+    mem_fixedField_iff, Subgroup.forall_mem_zpowers, ← complexConj_eq_self_iff]
+  exact (MulAction.mem_fixedBy_zpowers_iff_mem_fixedBy (g := ratComplexConj K)).trans <| by simp
+
+open IntermediateField in
 /-- The subfield of a CM field fixed by complex conjugation is totally real. -/
-theorem isTotallyReal_fixedField_ratComplexConj :
+instance isTotallyReal_fixedField_ratComplexConj :
     IsTotallyReal (fixedField (Subgroup.zpowers (ratComplexConj K))) := by
   change IsTotallyReal (fixedField (Subgroup.zpowers (ratComplexConj K))).toSubfield
-  refine isTotallyReal_iff_le_maximalRealSubfield.mpr fun x hx ↦ ?_
-  rw [mem_toSubfield, mem_fixedField_iff, Subgroup.forall_mem_zpowers] at hx
-  exact (complexConj_eq_self_iff _ _).mp <| hx 1
+  rw [toSubfield_fixedField_ratComplexConj]
+  infer_instance
 
 end
 

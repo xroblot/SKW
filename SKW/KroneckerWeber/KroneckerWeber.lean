@@ -17,7 +17,7 @@ public import Mathlib.RingTheory.ZMod.UnitsCyclic
 set_option linter.style.header false
 
 /-!
-# The odd prime power case of the Kronecker-Weber theorem
+# The prime power case of the Kronecker-Weber theorem
 
 Let `p` be an odd prime, `F = ℚ(ζ_p)` and `L/F` a cyclic extension of degree `p`, with `L/ℚ`
 abelian.
@@ -50,6 +50,16 @@ It then reduces the odd prime power case to extensions unramified outside `p`, a
   outside `p` is contained in `ℚ(ζ_{p²})`, hence is unique.
 - `prop_kw_odd_prime_power`: an abelian extension of degree `pᵐ` unramified outside `p` is
   contained in `ℚ(ζ_{p^{m+1}})`.
+
+For `p = 2`:
+- `prop_kw_2_quadratic_real_unique`: `ℚ(√2)` is the only totally real quadratic field unramified
+  outside `2` (its discriminant is `8`, `kw_2_quadratic_real_discr`).
+- `exists_maximalReal`: an abelian CM field has a totally real abelian subfield of half its degree.
+- `prop_kw_2_power`, `prop_kw_2_power'`: an abelian extension of degree `2ᵐ` unramified outside `2`,
+  first totally real then arbitrary, is contained in `ℚ(ζ_{2^{m+2}})`.
+
+Finally `kw_cyclic_odd_primePow_le_cyclotomic` and `kw_cyclic_two_pow_le_cyclotomic`: a cyclic
+extension of prime power degree is contained in a cyclotomic field.
 -/
 
 @[expose] public section
@@ -555,35 +565,19 @@ theorem cyclotomic_lcm (Qζ : ℕ → IntermediateField ℚ A) [∀ n, IsCycloto
   have := isCyclotomicExtension_lcm_sup ℚ A a b (Qζ a) (Qζ b)
   exact isCyclotomicExtension_eq {a.lcm b} ℚ A _ _
 
-/-- Two cyclic `p`-extensions `K₁`, `K₂` of `ℚ` inside a common ambient `A`, whose compositum
-`K₁ ⊔ K₂` is cyclic over `ℚ`, are comparable (`K₁ ≤ K₂`) once `[K₁:ℚ] ∣ [K₂:ℚ]`. -/
-lemma kw_cyclic_compositum {K₁ K₂ : IntermediateField ℚ A}
-    [NumberField ↑(K₁ ⊔ K₂)] [IsGalois ℚ ↑(K₁ ⊔ K₂)] [IsCyclic Gal(↑(K₁ ⊔ K₂)/ℚ)]
-    (h : finrank ℚ K₁ ∣ finrank ℚ K₂) : K₁ ≤ K₂ := by
-  let L := K₁ ⊔ K₂
-  let K₁' := restrict (le_sup_left : K₁ ≤ L)
-  let K₂' := restrict (le_sup_right : K₂ ≤ L)
-  suffices K₁' ≤ K₂' from (restrict_le_restrict_iff  _ _).mp this
-  rwa [← IsGalois.fixingSubgroup_le_fixingSubgroup_iff, IsCyclic.subgroup_le_iff_index_dvd,
-    ← finrank_eq_fixingSubgroup_index, ← finrank_eq_fixingSubgroup_index, finrank_restrict,
-    finrank_restrict]
-
 omit hp in
-/-- Let `C/ℚ` be abelian and unramified outside `p`, and `H` a subgroup of `Gal(C/ℚ)` of index `pᵐ`
-with cyclic quotient. Then the fixed field of `H`, seen in `A`, is a cyclic extension of `ℚ` of
-degree `pᵐ`, unramified outside `p`. -/
+/-- Let `C/ℚ` be abelian and unramified outside `p`, and `H` a subgroup of `Gal(C/ℚ)` of index `pᵐ`.
+Then the fixed field of `H`, seen in `A`, is a Galois extension of `ℚ` of degree `pᵐ`, unramified
+outside `p`. -/
 lemma fixedField_spec_of_index_eq_prime_pow {C : IntermediateField ℚ A} [NumberField C]
     [IsAbelianGalois ℚ C]
     (hCram : UnramifiedOutside C p) {m : ℕ} (H : Subgroup Gal(C/ℚ))
-    (hindex : H.index = p ^ m) (hcyc : IsCyclic (Gal(C/ℚ) ⧸ H)) :
+    (hindex : H.index = p ^ m) :
     finrank ℚ (lift (fixedField H)) = p ^ m ∧ IsGalois ℚ (lift (fixedField H)) ∧
-      IsCyclic Gal(lift (fixedField H)/ℚ) ∧ UnramifiedOutside (lift (fixedField H)) p := by
+      UnramifiedOutside (lift (fixedField H)) p := by
   let F := fixedField H
-  refine ⟨?_, IsGalois.of_algEquiv (liftAlgEquiv _), ?_, ?_⟩
+  refine ⟨?_, IsGalois.of_algEquiv (liftAlgEquiv _), ?_⟩
   · rwa [finrank_lift, finrank_eq_fixingSubgroup_index, fixingSubgroup_fixedField]
-  · have : IsGaloisGroup H F C := IsGaloisGroup.of_fixedPoints_eq _ ℚ _ H F rfl
-    rwa [(AlgEquiv.autCongr (liftAlgEquiv _)).symm.isCyclic,
-      (IsGaloisGroup.quotientMulEquiv Gal(C/ℚ) Gal(F/ℚ) ℚ F C H).symm.isCyclic ]
   · have : NumberField (lift F) := {
       to_charZero := IntermediateField.charZero (lift F),
       to_finiteDimensional := finiteDimensional_lift }
@@ -619,14 +613,14 @@ Let `L = K₁ ⊔ K₂`. It is abelian over `ℚ` (compositum of abelian extensi
 
 /-- Two abelian extensions `K₁`, `K₂` of `ℚ` of the same degree `pᵐ`, both unramified outside `p`,
 are equal if the compositum `K₁ ⊔ K₂` has only one subfield of degree `p`. (The hypothesis `huniq`
-asks this only for cyclic subfields unramified outside `p`, which all degree `p` subfields of
-`K₁ ⊔ K₂` are.) -/
+asks this only for subfields unramified outside `p`, which all degree `p` subfields of `K₁ ⊔ K₂`
+are.) -/
 lemma kw_eq_of_unique_prime_subfield {K₁ K₂ : IntermediateField ℚ A} [NumberField K₁]
     [IsAbelianGalois ℚ K₁] [NumberField K₂] [IsAbelianGalois ℚ K₂] {m : ℕ}
     (hK₁ : finrank ℚ K₁ = p ^ m) (hK₂ : finrank ℚ K₂ = p ^ m)
     (hK₁ram : UnramifiedOutside K₁ p) (hK₂ram : UnramifiedOutside K₂ p)
-    (huniq : ∀ (F₁ F₂ : IntermediateField ℚ A) [NumberField F₁] [IsGalois ℚ F₁]
-      [IsCyclic Gal(F₁/ℚ)] [NumberField F₂] [IsGalois ℚ F₂] [IsCyclic Gal(F₂/ℚ)],
+    (huniq : ∀ (F₁ F₂ : IntermediateField ℚ A) [NumberField F₁] [IsGalois ℚ F₁] [NumberField F₂]
+      [IsGalois ℚ F₂],
       F₁ ≤ K₁ ⊔ K₂ → F₂ ≤ K₁ ⊔ K₂ → finrank ℚ F₁ = p → finrank ℚ F₂ = p →
       UnramifiedOutside F₁ p → UnramifiedOutside F₂ p → F₁ = F₂) :
     K₁ = K₂ := by
@@ -652,22 +646,26 @@ lemma kw_eq_of_unique_prime_subfield {K₁ K₂ : IntermediateField ℚ A} [Numb
     rwa [finrank_lift, finrank_eq_fixingSubgroup_index, fixingSubgroup_fixedField]
   have hF₂ : finrank ℚ (lift (fixedField H₂)) = p := by
     rwa [finrank_lift, finrank_eq_fixingSubgroup_index, fixingSubgroup_fixedField]
-  obtain ⟨_, _, _⟩ := numberField_isGalois_isCyclic_of_finrank_eq (lift_le _) hF₁
-  obtain ⟨_, _, _⟩ := numberField_isGalois_isCyclic_of_finrank_eq (lift_le _) hF₂
+  obtain ⟨_, _, -⟩ := numberField_isGalois_isCyclic_of_finrank_eq (lift_le _) hF₁
+  obtain ⟨_, _, -⟩ := numberField_isGalois_isCyclic_of_finrank_eq (lift_le _) hF₂
   refine huniq (lift (fixedField H₁)) (lift (fixedField H₂)) (lift_le _) (lift_le _) hF₁ hF₂ ?_ ?_
   · let : Algebra (lift (fixedField H₁)) L := (inclusion (lift_le _)).toRingHom.toAlgebra
     exact UnramifiedOutside.tower_bot p hLram
   · let : Algebra (lift (fixedField H₂)) L := (inclusion (lift_le _)).toRingHom.toAlgebra
     exact UnramifiedOutside.tower_bot p hLram
 
--- 1. The discriminant is a fundamental discriminant divisible only by 2, so it is ±2^k.
--- 2. It is positive because K is totally real (discr_pos).
- --  3. Among 1, 4, 8, only 8 is the discriminant of a quadratic field: 1 is not one,
- -- and 4 is not fundamental.
+/-
+Proof of `kw_2_quadratic_real_discr`.
+
+1. The discriminant is a fundamental discriminant divisible only by `2`, so it is `±2^k`.
+2. It is positive because `K` is totally real (`QuadraticField.discr_pos`).
+3. Among `1`, `4`, `8`, only `8` is the discriminant of a quadratic field: `1` is not one
+   (`QuadraticField.discr_ne_one`) and `4` is not fundamental.
+-/
 
 /-- A totally real quadratic field unramified outside `2` has discriminant `8`, that is, it is
 `ℚ(√2)`. -/
-theorem kw_2_quadratic_real_discr (K : Type*) [Field K] [NumberField K] [IsTotallyReal K]
+theorem kw_2_quadratic_real_discr {K : Type*} [Field K] [NumberField K] [IsTotallyReal K]
     (hK : finrank ℚ K = 2) (hKram : UnramifiedOutside K 2) : discr K = 8 := by
   obtain ⟨k, hk⟩ : ∃ k, (discr K).natAbs = 2 ^ k := by
     refine ⟨(discr K).natAbs.primeFactorsList.length,
@@ -688,20 +686,36 @@ theorem kw_2_quadratic_real_discr (K : Type*) [Field K] [NumberField K] [IsTotal
 
 /-- Two totally real quadratic extensions of `ℚ` unramified outside `2` are equal (both are
 `ℚ(√2)`). -/
-theorem prop_kw_2_quadratic_real_unique (K₁ : IntermediateField ℚ A) [NumberField K₁]
-    [IsTotallyReal K₁] (hK₁ : finrank ℚ K₁ = 2) (hK₁ram : UnramifiedOutside K₁ 2)
-    (K₂ : IntermediateField ℚ A) [NumberField K₂] [IsTotallyReal K₂]
-    (hK₂ : finrank ℚ K₂ = 2) (hK₂ram : UnramifiedOutside K₂ 2) :
+theorem prop_kw_2_quadratic_real_unique {K₁ K₂ : IntermediateField ℚ A} [NumberField K₁]
+    [IsTotallyReal K₁] [NumberField K₂] [IsTotallyReal K₂] (hK₁ : finrank ℚ K₁ = 2)
+    (hK₂ : finrank ℚ K₂ = 2) (hK₁ram : UnramifiedOutside K₁ 2) (hK₂ram : UnramifiedOutside K₂ 2) :
     K₁ = K₂ := by
   obtain ⟨e⟩ := (QuadraticField.nonempty_algEquiv_iff_discr_eq K₁ K₂ hK₁ hK₂).mpr <| by
-    rw [kw_2_quadratic_real_discr _ hK₁ hK₁ram, kw_2_quadratic_real_discr _ hK₂ hK₂ram]
+    rw [kw_2_quadratic_real_discr hK₁ hK₁ram, kw_2_quadratic_real_discr hK₂ hK₂ram]
   have : Algebra.IsQuadraticExtension ℚ K₁ := ⟨hK₁⟩
   rw [← lift_top _ K₂, ← e.fieldRange_eq_top, lift, AlgHom.map_fieldRange,
     AlgHom.fieldRange_of_normal]
 
+/-- An abelian CM IntermediateField `C` has a totally real abelian subfield `F`
+(its maximal real subfield) with `[C : ℚ] = 2 [F : ℚ]`. -/
+lemma exists_maximalReal (C : IntermediateField ℚ A) [NumberField C] [IsCMField C]
+    [IsAbelianGalois ℚ C] :
+    ∃ (F : IntermediateField ℚ A) (_ : NumberField F) (_ : IsTotallyReal F)
+      (_ : IsAbelianGalois ℚ F), F ≤ C ∧ finrank ℚ C = 2 * finrank ℚ F := by
+  let H := Subgroup.zpowers (IsCMField.ratComplexConj C)
+  let F := lift (fixedField H)
+  have : NumberField F := .of_ringEquiv _ _ (liftAlgEquiv (fixedField H)).toRingEquiv
+  have : IsTotallyReal F := .ofRingEquiv (liftAlgEquiv (fixedField H)).toRingEquiv
+  have hFC : finrank ℚ C = 2 * finrank ℚ F := by
+    rw [IsCMField.finrank_eq_two_mul C, finrank_lift,
+      ← IsCMField.toSubfield_fixedField_ratComplexConj C]
+    rfl
+  exact ⟨F, inferInstance, inferInstance, .of_algHom (liftAlgEquiv (fixedField H)).symm.toAlgHom,
+    lift_le _, hFC⟩
+
 section CyclotomicFamily
 
-variable (Qζ : ℕ → IntermediateField ℚ A) [∀ n, IsCyclotomicExtension {n} ℚ (Qζ n)]
+variable (Qζ : ℕ → IntermediateField ℚ A) [hCC : ∀ n, IsCyclotomicExtension {n} ℚ (Qζ n)]
   [∀ n, NumberField (Qζ n)] [∀ n, IsAbelianGalois ℚ (Qζ n)]
 
 /-
@@ -801,9 +815,10 @@ lemma kw_reduce_to_unramified_outside_p {K : IntermediateField ℚ A} [NumberFie
 /-- Every cyclic extension of `ℚ` of prime degree `p` (odd) unramified outside `p` is contained in
 `ℚ(ζ_{p²}) = Qζ (p ^ 2)`. -/
 theorem prop_kw_exponent_p (hp' : Odd p) {K : IntermediateField ℚ A} [NumberField K]
-    [IsGalois ℚ K] [IsCyclic Gal(K/ℚ)]
-    (hK : finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
+    [IsGalois ℚ K] (hK : finrank ℚ K = p) (hKram : UnramifiedOutside K p) :
     K ≤ Qζ (p ^ 2) := by
+  have : IsCyclic Gal(K/ℚ) :=
+    isCyclic_of_prime_card (p := p) (by rw [IsGalois.card_aut_eq_finrank, hK])
   have : IsAbelianGalois ℚ K := .of_isCyclic ℚ K
   let L := K ⊔ Qζ p
   have : IsCyclotomicExtension {p ^ 2} ℚ L := by
@@ -830,7 +845,7 @@ theorem prop_kw_exponent_p (hp' : Odd p) {K : IntermediateField ℚ A} [NumberFi
 include Qζ in
 /-- Two cyclic extensions of `ℚ` of prime degree `p` (odd) unramified outside `p` are equal. -/
 theorem prop_kw_exponent_p_eq (hp' : Odd p) {K₁ K₂ : IntermediateField ℚ A} [NumberField K₁]
-    [IsGalois ℚ K₁] [IsCyclic Gal(K₁/ℚ)] [NumberField K₂] [IsGalois ℚ K₂] [IsCyclic Gal(K₂/ℚ)]
+    [IsGalois ℚ K₁] [NumberField K₂] [IsGalois ℚ K₂]
     (hK₁ : finrank ℚ K₁ = p) (hK₂ : finrank ℚ K₂ = p) (hKram₁ : UnramifiedOutside K₁ p)
     (hKram₂ : UnramifiedOutside K₂ p) :
     K₁ = K₂ := by
@@ -850,10 +865,10 @@ Proof of `prop_kw_odd_prime_power`.
 Let `C = ℚ(ζ_{p^{m+1}})`. Its Galois group is cyclic (`Rat.isCyclic_of_prime_pow`, `p` odd) of
 order `pᵐ (p - 1)` (`IsCyclotomicExtension.Rat.finrank`, `Nat.totient_prime_pow`).
 1. Let `g` generate `Gal(C/ℚ)` and `H = ⟨g^{pᵐ}⟩`, of index `pᵐ` (`Subgroup.index_zpowers_zpow`),
-   with cyclic quotient (a quotient of a cyclic group). By `fixedField_spec_of_index_eq_prime_pow`
-   (with `UnramifiedOutside.of_isCyclotomicExtension` for `C`), its fixed field `F`, seen in `A`, is
-   abelian over `ℚ` of degree `pᵐ` and unramified outside `p`; also `F ≤ C` (`lift_le`).
-2. Apply `kw_eq_of_unique_prime_subfield` to `K` and `F`: two cyclic subfields of degree `p`
+   By `fixedField_spec_of_index_eq_prime_pow` (with `UnramifiedOutside.of_isCyclotomicExtension`
+   for `C`), its fixed field `F`, seen in `A`, is abelian over `ℚ` of degree `pᵐ` and unramified
+   outside `p`; also `F ≤ C` (`lift_le`).
+2. Apply `kw_eq_of_unique_prime_subfield` to `K` and `F`: two subfields of degree `p`
    unramified outside `p` are equal by `prop_kw_exponent_p_eq`. Hence `K = F ≤ C`.
 -/
 
@@ -873,8 +888,8 @@ theorem prop_kw_odd_prime_power [hp' : Fact (Odd p)] {m : ℕ} {K : Intermediate
       IsGalois.card_aut_eq_finrank, Rat.finrank (p ^ (m + 1)), Nat.totient_prime_pow hp.out
       m.succ_pos]
     simp
-  obtain ⟨hF, _, _, hFram⟩ := fixedField_spec_of_index_eq_prime_pow
-    (UnramifiedOutside.of_isCyclotomicExtension p (m + 1) C) H Hi inferInstance
+  obtain ⟨hF, _, hFram⟩ := fixedField_spec_of_index_eq_prime_pow
+    (UnramifiedOutside.of_isCyclotomicExtension p (m + 1) C) H Hi
   set F := lift (fixedField H)
   have : NumberField F := {
     to_charZero := IntermediateField.charZero F,
@@ -884,7 +899,7 @@ theorem prop_kw_odd_prime_power [hp' : Fact (Odd p)] {m : ℕ} {K : Intermediate
     rw [this]
     exact lift_le (fixedField H)
   exact kw_eq_of_unique_prime_subfield hK hF hKram hFram
-    fun F₁ F₂ _ _ _ _ _ _ hF₁ hF₂ hrF₁ hrF₂ hF₁ram hF₂ram ↦
+    fun F₁ F₂ _ _ _ _ hF₁ hF₂ hrF₁ hrF₂ hF₁ram hF₂ram ↦
       prop_kw_exponent_p_eq Qζ hp'.out hrF₁ hrF₂ hF₁ram hF₂ram
 
 /-- Every totally real abelian extension of `ℚ` of degree `2 ^ m` unramified outside `2` is
@@ -894,43 +909,31 @@ theorem prop_kw_2_power {m : ℕ} {K : IntermediateField ℚ A} [NumberField K]
     (hKram : UnramifiedOutside K 2) :
     K ≤ Qζ (2 ^ (m + 2)) := by
   let C := Qζ (2 ^ (m + 2))
-  have : IsCMField C := Rat.isCMField (Qζ (2 ^ (m + 2))) (S := {(2 ^ (m + 2) :)}) ⟨_, rfl, by grind⟩
-  let H := Subgroup.zpowers (IsCMField.ratComplexConj C)
-  have Hi : H.index = 2 ^ m := by
-    rw [Subgroup.index_eq_card_div, Nat.card_zpowers, IsCMField.orderOf_ratComplexConj,
-      IsGalois.card_aut_eq_finrank, Rat.finrank (2 ^ (m + 2)),
-      Nat.totient_prime_pow Nat.prime_two (by norm_num), Nat.add_one_sub_one,
-      Nat.add_one_sub_one, mul_one, Nat.pow_succ, Nat.mul_div_cancel _ zero_lt_two]
-  have hCQ : IsCyclic (Gal(C/ℚ) ⧸ H) := by
-    rw [MulEquiv.isCyclic (QuotientGroup.congr _ _ (Rat.galEquivZMod (2 ^ (m + 2)) _) rfl),
-      MonoidHom.map_zpowers, MonoidHom.coe_ofClass, Rat.galEquivZMod_ratComplexConj]
-    exact ZMod.isCyclic_units_two_pow_quotient_neg_one _
-  obtain ⟨hF, _, _, hFram⟩ := fixedField_spec_of_index_eq_prime_pow
-    (UnramifiedOutside.of_isCyclotomicExtension 2 (m + 2) C) H Hi hCQ
-  set F := lift (fixedField H)
-  have : NumberField F := {
-    to_charZero := IntermediateField.charZero F,
-    to_finiteDimensional := finiteDimensional_lift }
-  have : IsAbelianGalois ℚ F := .of_algHom (liftAlgEquiv (fixedField H)).symm.toAlgHom
-  have : IsTotallyReal F := by
-    rw [isTotallyReal_iff_ofRingEquiv  (liftAlgEquiv (fixedField H)).toRingEquiv.symm]
-    exact IsCMField.isTotallyReal_fixedField_ratComplexConj _
+  have : IsCMField C := Rat.isCMField C (S := {(2 ^ (m + 2) :)}) ⟨_, rfl, by grind⟩
+  obtain ⟨F, _, _, _, hFC, hdeg⟩ := exists_maximalReal C
+  have hF : finrank ℚ F = 2 ^ m := by
+    rw [Rat.finrank (2 ^ (m + 2)), Nat.totient_prime_pow Nat.prime_two (by norm_num),
+      Nat.add_one_sub_one, Nat.add_one_sub_one, mul_one, pow_succ, mul_comm] at hdeg
+    exact (Nat.eq_of_mul_eq_mul_left zero_lt_two hdeg).symm
+  have hFram : UnramifiedOutside F 2 := by
+    let : Algebra F C := (inclusion hFC).toRingHom.toAlgebra
+    exact UnramifiedOutside.tower_bot 2 (UnramifiedOutside.of_isCyclotomicExtension 2 (m + 2) C)
   suffices K = F by
     rw [this]
-    exact lift_le (fixedField H)
+    exact hFC
   have : IsTotallyReal ↑(K ⊔ F) := by
     change IsTotallyReal ↑(K ⊔ F).toSubfield
     rw [sup_toSubfield]
     exact isTotallyReal_sup'
   exact kw_eq_of_unique_prime_subfield hK hF hKram hFram
-    fun F₁ F₂ _ _ _ _ _ _ hF₁ hF₂ hrF₁ hrF₂ hF₁ram hF₂ram ↦ by
+    fun F₁ F₂ _ _ _ _ hF₁ hF₂ hrF₁ hrF₂ hF₁ram hF₂ram ↦ by
       have : IsTotallyReal F₁ := by
         let : Algebra F₁ ↑(K ⊔ F) := (inclusion hF₁).toRingHom.toAlgebra
         exact IsTotallyReal.of_algebra F₁ ↑(K ⊔ F)
       have : IsTotallyReal F₂ := by
         let : Algebra F₂ ↑(K ⊔ F) := (inclusion hF₂).toRingHom.toAlgebra
         exact IsTotallyReal.of_algebra F₂ ↑(K ⊔ F)
-      exact prop_kw_2_quadratic_real_unique F₁ hrF₁ hF₁ram F₂ hrF₂ hF₂ram
+      exact prop_kw_2_quadratic_real_unique hrF₁ hrF₂ hF₁ram hF₂ram
 
 /-- Every abelian extension of `ℚ` of degree `2 ^ m` unramified outside `2` is cyclotomic: it is
 contained in `ℚ(ζ_{2^{m+2}})`. -/
@@ -939,7 +942,44 @@ theorem prop_kw_2_power' {m : ℕ} {K : IntermediateField ℚ A} [NumberField K]
     K ≤ Qζ (2 ^ (m + 2)) := by
   by_cases hreal : IsTotallyReal K
   · exact prop_kw_2_power Qζ hK hKram
-  sorry
+  have : IsTotallyComplex K := isTotallyComplex_iff_not_isTotallyReal.mpr hreal
+  let F := K ⊔ (Qζ 4)
+  suffices F ≤ Qζ (2 ^ (m + 2)) from le_trans le_sup_left this
+  have : IsTotallyComplex F := by
+    let : Algebra K F := (inclusion le_sup_left).toRingHom.toAlgebra
+    exact isTotallyComplex_of_algebra K F
+  obtain ⟨F', _, hF'₀, _, hF'₁, hF'₂⟩ := exists_maximalReal F
+  suffices F' ≤ Qζ (2 ^ (m + 2)) by
+    have hFF' : F' ⊔ Qζ 4 = F := by
+      have : Nat.Prime (relfinrank F' F) := by
+        have := finrank_bot_mul_relfinrank hF'₁
+        rw [hF'₂, mul_comm, mul_left_inj' finrank_pos.ne'] at this
+        exact this ▸ Nat.prime_two
+      refine (eq_or_eq_of_relfinrank_prime (M := F' ⊔ Qζ 4) le_sup_left
+          (sup_le hF'₁ le_sup_right) this).resolve_left fun h ↦
+            isTotallyReal_iff_not_isTotallyComplex.mp hF'₀ ?_
+      let : Algebra (Qζ 4) ↑(F' ⊔ Qζ 4) := (inclusion le_sup_right).toRingHom.toAlgebra
+      have : IsTotallyComplex (Qζ 4) := Rat.isTotallyComplex _ (by norm_num : 2 < 4)
+      exact h ▸ isTotallyComplex_of_algebra (Qζ 4) _
+    rw [← hFF', sup_le_iff]
+    refine ⟨this, isCyclotomicExtension_le_of_dvd ℚ A 4 (2 ^ (m + 2)) _ _ (by lia)⟩
+  obtain ⟨k, hk₁, hk₂⟩ : ∃ k ≤ m, finrank ℚ F' = 2 ^ k := by
+    have : finrank ℚ F ∣ 2 ^ (m + 1) := by
+      calc
+        _ ∣ finrank ℚ K * finrank ℚ (Qζ 4) := finrank_sup_dvd_mul_of_isGalois K (Qζ 4)
+        _ = 2 ^ m * Nat.totient (2 ^ 2) := by rw [hK, Rat.finrank 4 (Qζ 4), show 4 = 2 ^ 2 by rfl]
+        _ = 2 ^ (m + 1) := by
+          rw [Nat.totient_prime_pow Nat.prime_two zero_lt_two]
+          ring
+    rw [hF'₂, pow_succ', Nat.mul_dvd_mul_iff_left zero_lt_two] at this
+    exact (Nat.dvd_prime_pow Nat.prime_two).mp <| this
+  have : Qζ (2 ^ (k + 2)) ≤ Qζ (2 ^ (m + 2)) := by
+    refine isCyclotomicExtension_le_of_dvd ℚ _ (2 ^ (k + 2)) (2 ^ (m + 2)) _ _ ?_
+    exact (Nat.pow_dvd_pow_iff_le_right one_lt_two).mpr (by lia)
+  refine le_trans (prop_kw_2_power (K := F') Qζ hk₂ ?_) this
+  let : Algebra F' F := (inclusion hF'₁).toRingHom.toAlgebra
+  exact UnramifiedOutside.tower_bot 2 (L := F) <|
+    unramifiedOutside_sup _ _ _ hKram <| UnramifiedOutside.of_isCyclotomicExtension 2 2 _
 
 /-- Every cyclic extension of `ℚ` of odd prime power degree `p ^ m` is contained in a cyclotomic
 field `ℚ(ζ_n)` for some nonzero `n`. -/

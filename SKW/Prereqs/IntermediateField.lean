@@ -9,6 +9,7 @@ public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import Mathlib.GroupTheory.FiniteAbelian.Duality
 
 public import Mathlib.FieldTheory.IntermediateField.Algebraic
+public import Mathlib.FieldTheory.Relrank
 public import Mathlib.LinearAlgebra.Dimension.Domain
 public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.Torsion
@@ -385,3 +386,48 @@ theorem IntermediateField.lift_iSup (F E : Type*) [Field F] [Field E] [Algebra F
   induction S using Finset.induction with
   | empty => simp
   | insert i s _ hi => rw [Finset.iSup_insert, Finset.iSup_insert, lift_sup, hi]
+
+namespace IntermediateField
+
+open Module
+
+variable {F E : Type*} [Field F] [Field E] [Algebra F E] {K : IntermediateField F E}
+
+theorem one_lt_finrank_iff [FiniteDimensional F K] : 1 < finrank F K ↔ K ≠ ⊥ := by
+  rw [ne_eq, ← finrank_eq_one_iff]
+  have := finrank_pos (R := F) (M := K)
+  lia
+
+theorem one_lt_finrank_iff_ne_top [FiniteDimensional K E] : 1 < finrank K E ↔ K ≠ ⊤ := by
+  rw [ne_eq, ← finrank_eq_one_iff_eq_top]
+  have := finrank_pos (R := K) (M := E)
+  lia
+
+example {L : IntermediateField F E} [Algebra K L] :
+    1 < finrank K L ↔ K ≠ L := by
+  
+  sorry
+
+end IntermediateField
+
+/-- If `L / K` has prime degree, then any subfield between `K` and `L` is `K` or `L`. -/
+theorem Subfield.eq_or_eq_of_relfinrank_prime {E : Type*} [Field E] {K L M : Subfield E}
+    (hKM : K ≤ M) (hML : M ≤ L) (hp : (relfinrank K L).Prime) : M = K ∨ M = L := by
+  rw [← relfinrank_mul_relfinrank hKM hML, Nat.prime_mul_iff] at hp
+  obtain ⟨-, h⟩ | ⟨-, h⟩ := hp
+  · exact .inr <| le_antisymm hML (relfinrank_eq_one_iff.mp h)
+  · exact .inl <| le_antisymm (relfinrank_eq_one_iff.mp h) hKM
+
+namespace IntermediateField
+
+variable {F E : Type*} [Field F] [Field E] [Algebra F E]
+
+/-- If `L / K` has prime degree, then any intermediate field between `K` and `L` is `K` or `L`. -/
+theorem eq_or_eq_of_relfinrank_prime {K L M : IntermediateField F E} (hKM : K ≤ M) (hML : M ≤ L)
+    (hp : (relfinrank K L).Prime) : M = K ∨ M = L := by
+  rw [← relfinrank_mul_relfinrank hKM hML, Nat.prime_mul_iff] at hp
+  obtain ⟨-, h⟩ | ⟨-, h⟩ := hp
+  · exact .inr <| le_antisymm hML (relfinrank_eq_one_iff.mp h)
+  · exact .inl <| le_antisymm (relfinrank_eq_one_iff.mp h) hKM
+
+end IntermediateField
