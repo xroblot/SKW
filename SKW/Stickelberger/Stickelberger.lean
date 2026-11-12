@@ -4,7 +4,7 @@ public import Mathlib.NumberTheory.AddCharacter.Trace
 public import Mathlib.NumberTheory.JacobiSum.Basic
 public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import SKW.PRed2Mathlib.CyclotomicField
-public import SKW.Stickelberger.Teichmuller
+public import SKW.PRed2Mathlib.Teichmuller
 
 set_option linter.style.header false
 

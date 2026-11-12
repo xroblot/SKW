@@ -5,6 +5,5 @@ import SKW.PRed2Mathlib.FiniteFieldSum
 import SKW.PRed2Mathlib.CyclotomicField
 import SKW.Prereqs.KroneckerWeber
 import SKW.Stickelberger.Stickelberger
-import SKW.Stickelberger.Teichmuller
 import SKW.KroneckerWeber.KroneckerWeber
 import SKW.Upstream

@@ -60,8 +60,10 @@ how the pieces fit together.
 
 ## Organization
 
-* `SKW/Stickelberger/Teichmuller.lean`, `SKW/Stickelberger/Stickelberger.lean` and
-  `SKW/KroneckerWeber/KroneckerWeber.lean` contain the main development.
+* `SKW/Stickelberger/Stickelberger.lean` and `SKW/KroneckerWeber/KroneckerWeber.lean` contain the
+  main development; the Teichmüller character they rely on has been submitted to Mathlib
+  ([#45940](https://github.com/leanprover-community/mathlib4/pull/45940)) and lives in
+  `SKW/PRed2Mathlib/Teichmuller.lean` until it is merged.
 * `SKW/Prereqs/Stickelberger.lean` and `SKW/Prereqs/KroneckerWeber.lean` gather the general
   results these files need that are not (yet) in Mathlib.
 * `SKW/Prereqs/OtherPR.lean` holds the admitted statements listed above, and `SKW/PRed2Mathlib/`
