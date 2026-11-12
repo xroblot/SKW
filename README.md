@@ -18,8 +18,8 @@ waiting on Mathlib pull requests (see [Status](#status) below).
 unity) factor in terms of Gauss sums: it produces an explicit element of the group ring
 `ℤ[Gal(ℚ(ζ)/ℚ)]` — the *Stickelberger element* — that annihilates the class group of
 `ℚ(ζ)`. In this project it is stated as
-[`Stickelberger`](https://xroblot.github.io/SKW/docs/SKW/Stickelberger/Stickelberger.html#Stickelberger):
-a certain product of Galois conjugates of a prime ideal `𝔭` above `p` is principal.
+[`stickelberger_theorem`](https://xroblot.github.io/SKW/docs/SKW/Stickelberger/Stickelberger.html#stickelberger_theorem):
+the Stickelberger element annihilates the ideal class group of a cyclotomic field.
 
 **The Kronecker-Weber theorem** states that every abelian extension of `ℚ` is contained in
 a cyclotomic field `ℚ(ζₙ)` for some `n`. It is stated as
@@ -32,26 +32,42 @@ theorem following the approach of Lemmermeyer's paper
 ## Status
 
 Both `Stickelberger` and `kronecker_weber` are proved, and no file of this project contains
-a `sorry` of its own. What remains are nine statements admitted on purpose, each of
-them a result submitted (or to be added) to Mathlib and awaiting review; until those land,
+a `sorry` of its own. What remains are ten statements admitted on purpose, each of them a
+result submitted to Mathlib and awaiting review; until those land,
 `#print axioms kronecker_weber` still reports `sorryAx`.
 
 | PR | content | statements |
 |---|---|---|
-| [#36733](https://github.com/leanprover-community/mathlib4/pull/36733) | decomposition field and inertia field of a prime | 2 |
+| [#35808](https://github.com/leanprover-community/mathlib4/pull/35808) | primes of an inertia ring are unramified | 1 |
+| [#35991](https://github.com/leanprover-community/mathlib4/pull/35991) | inertia field of a prime in an intermediate extension | 1 |
+| [#36733](https://github.com/leanprover-community/mathlib4/pull/36733) | degree over the inertia field is the ramification index | 1 |
 | [#36843](https://github.com/leanprover-community/mathlib4/pull/36843) | a compositum of unramified extensions is unramified | 1 |
-| [#43490](https://github.com/leanprover-community/mathlib4/pull/43490) | quadratic fields and their discriminant | 4 |
+| [#43490](https://github.com/leanprover-community/mathlib4/pull/43490) | quadratic fields and their discriminant | 3 |
 | [#43493](https://github.com/leanprover-community/mathlib4/pull/43493) | complex embeddings of quadratic fields | 1 |
 | [#44588](https://github.com/leanprover-community/mathlib4/pull/44588) | reduction of roots of unity modulo an ideal | 1 |
+| [#45512](https://github.com/leanprover-community/mathlib4/pull/45512) | reduction modulo `ζ - 1` in a cyclotomic field | 1 |
 
-The first four live in [`SKW.Prereqs.OtherPR`](https://xroblot.github.io/SKW/docs/SKW/Prereqs/OtherPR.html), the last one
-in [`SKW.PRed2Mathlib.Teichmuller`](https://xroblot.github.io/SKW/docs/SKW/PRed2Mathlib/Teichmuller.html).
+All but the one from #44588 live in
+[`SKW.Prereqs.OtherPR`](https://xroblot.github.io/SKW/docs/SKW/Prereqs/OtherPR.html), which also
+states a few other results of these PRs that the proof does not use; the one from #44588 is in
+[`SKW.PRed2Mathlib.Teichmuller`](https://xroblot.github.io/SKW/docs/SKW/PRed2Mathlib/Teichmuller.html).
 
 As each PR is merged, the corresponding stub is deleted and its uses redirected to the
 upstream name. The [blueprint](https://xroblot.github.io/SKW/blueprint/) tracks the
 mathematical proof and its Lean status, and the
 [dependency graph](https://xroblot.github.io/SKW/blueprint/dep_graph_document.html) shows
 how the pieces fit together.
+
+## Organization
+
+* `SKW/Stickelberger/Teichmuller.lean`, `SKW/Stickelberger/Stickelberger.lean` and
+  `SKW/KroneckerWeber/KroneckerWeber.lean` contain the main development.
+* `SKW/Prereqs/Stickelberger.lean` and `SKW/Prereqs/KroneckerWeber.lean` gather the general
+  results these files need that are not (yet) in Mathlib.
+* `SKW/Prereqs/OtherPR.lean` holds the admitted statements listed above, and `SKW/PRed2Mathlib/`
+  the results already submitted to Mathlib, to be deleted once merged.
+* `SKW/Upstream.lean` collects results not needed for the proof but worth adding to Mathlib.
+* `Archive/` keeps older material that is no longer built.
 
 ## License
 
