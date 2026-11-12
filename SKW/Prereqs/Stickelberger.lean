@@ -1,10 +1,26 @@
 module
 
+public import Mathlib.Algebra.CharP.Reduced
+public import Mathlib.Algebra.Group.Subgroup.Order
+public import Mathlib.Algebra.Group.Subgroup.ZPowers.Lemmas
+public import Mathlib.Algebra.GroupWithZero.Associated
+public import Mathlib.Algebra.MonoidAlgebra.Basic
+public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
+public import Mathlib.GroupTheory.FiniteAbelian.Basic
+public import Mathlib.GroupTheory.GroupAction.Quotient
+public import Mathlib.GroupTheory.Nilpotent
+public import Mathlib.GroupTheory.QuotientGroup.Basic
+public import Mathlib.GroupTheory.SpecificGroups.Cyclic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 public import Mathlib.NumberTheory.NumberField.Discriminant.Different
 public import Mathlib.RingTheory.ClassGroup.Basic
 public import Mathlib.RingTheory.FractionalIdeal.Extended
+public import Mathlib.RingTheory.IntegralDomain
+public import Mathlib.RingTheory.Localization.FractionRing
+public import Mathlib.RingTheory.Multiplicity
+public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
+public import Mathlib.RingTheory.UniqueFactorizationDomain.FactorSet
 
 public import SKW.PRed2Mathlib.FiniteFieldSum
 
@@ -828,3 +844,88 @@ theorem sum_inv_mul_pow_succ (i : ℕ) :
   grind
 
 end FiniteField
+
+-- From `SKW.Prereqs.AlgebraMisc`.
+section
+
+@[to_additive (attr := simp)]
+theorem MulEquiv.ofBijective_symm_apply_apply {M N F : Type*} [Mul M] [Mul N] [FunLike F M N]
+    [MulHomClass F M N] (f : F) (hf : Function.Bijective f) (a : M) :
+    (ofBijective f hf).symm (f a) = a := (symm_apply_eq (ofBijective f hf)).mpr rfl
+
+/-- The order of a unit of finite order of a reduced commutative ring is not divisible by the
+exponential characteristic `p`, when `p ≠ 1`. -/
+theorem not_dvd_orderOf_units_of_expChar {R : Type*} [CommRing R] [IsReduced R] (p : ℕ)
+    [ExpChar R p] (hp : p ≠ 1) (u : Rˣ) (hu : IsOfFinOrder u) : ¬ p ∣ orderOf u := by
+  refine fun ⟨m, hm⟩ ↦ hp ?_
+  rsuffices ⟨c, hc⟩ : m * p ∣ m
+  · rw [mul_assoc, left_eq_mul₀ (by grind [orderOf_ne_zero_iff])] at hc
+    exact Nat.eq_one_of_mul_eq_one_right hc
+  rw [mul_comm, ← hm, ← orderOf_units, orderOf_dvd_iff_pow_eq_one,
+    ← ExpChar.pow_prime_pow_mul_eq_one_iff p 1, pow_one, ← orderOf_dvd_iff_pow_eq_one,
+    orderOf_units, hm]
+
+-- TODO(SKW): upstream, next to `multiplicity_map_eq`.
+/-- The multiplicity is invariant under a group acting by multiplicative automorphisms. -/
+theorem multiplicity_smul {G α : Type*} [Group G] [Monoid α] [MulDistribMulAction G α] (g : G)
+    {a b : α} : multiplicity (g • a) (g • b) = multiplicity a b :=
+  multiplicity_map_eq (MulDistribMulAction.toMulEquiv α g)
+
+-- TODO(SKW): upstream, next to `Finset.emultiplicity_prod`.
+/-- The multiplicity of a prime in a finite product is the sum of the multiplicities. -/
+theorem Finset.multiplicity_prod {α β : Type*} [CommMonoidWithZero α] [IsCancelMulZero α]
+    {p : α} (hp : Prime p) (s : Finset β) (f : β → α) (hfin : FiniteMultiplicity p (∏ x ∈ s, f x)) :
+    multiplicity p (∏ x ∈ s, f x) = ∑ x ∈ s, multiplicity p (f x) := by
+  classical
+  induction s using Finset.induction with
+  | empty => simp
+  | insert a s has ih =>
+    rw [Finset.prod_insert has] at hfin
+    rw [Finset.prod_insert has, Finset.sum_insert has, multiplicity_mul hp hfin,
+      ih hfin.mul_right]
+
+end
+
+-- From `SKW.Prereqs.GroupRingAction`.
+section
+
+namespace MonoidAlgebra
+variable {G M : Type*} [Monoid G]
+
+section CommMonoid
+variable [CommMonoid M] [MulDistribMulAction G M]
+
+/-- The action of `ℕ[G]` on a commutative monoid `M` on which `G` acts by monoid homomorphisms:
+`m ^ ∑ nᵍ g = ∏ (g • m) ^ nᵍ`. -/
+instance : Pow M (MonoidAlgebra ℕ G) where
+  pow m θ := θ.coeff.prod fun g n ↦ (g • m) ^ n
+
+theorem pow_def (m : M) (θ : MonoidAlgebra ℕ G) :
+    m ^ θ = θ.coeff.prod fun g n ↦ (g • m) ^ n := rfl
+
+@[simp]
+theorem pow_zero (m : M) : m ^ (0 : MonoidAlgebra ℕ G) = 1 := by
+  simp [pow_def]
+
+@[simp]
+theorem pow_single (m : M) (g : G) (n : ℕ) : m ^ single g n = (g • m) ^ n := by
+  simp [pow_def]
+
+theorem pow_add (m : M) (θ θ' : MonoidAlgebra ℕ G) : m ^ (θ + θ') = m ^ θ * m ^ θ' := by
+  simp_rw [pow_def, coeff_add]
+  exact Finsupp.prod_add_index' (fun _ ↦ _root_.pow_zero _) fun _ ↦ _root_.pow_add _
+
+theorem pow_sum {ι : Type*} (m : M) (s : Finset ι) (θ : ι → MonoidAlgebra ℕ G) :
+    m ^ (∑ i ∈ s, θ i) = ∏ i ∈ s, m ^ θ i := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert i s hi ih => rw [Finset.sum_insert hi, Finset.prod_insert hi, pow_add, ih]
+
+@[simp]
+theorem pow_one (m : M) : m ^ (1 : MonoidAlgebra ℕ G) = m := by
+  simp [one_def]
+end CommMonoid
+end MonoidAlgebra
+
+end

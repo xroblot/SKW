@@ -64,10 +64,13 @@ theorem MulSemiringAction.toRingHom_one {G R : Type*} [Monoid G] [Semiring R]
 
 /-! ### MulEquiv / AlgHom / AlgEquiv -/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 @[to_additive (attr := simp)]
 theorem MulEquiv.ofBijective_symm_apply_apply {M N F : Type*} [Mul M] [Mul N] [FunLike F M N]
     [MulHomClass F M N] (f : F) (hf : Function.Bijective f) (a : M) :
     (ofBijective f hf).symm (f a) = a := (symm_apply_eq (ofBijective f hf)).mpr rfl
+-/
 
 /-! ### Coprime exponent power extraction -/
 
@@ -103,6 +106,8 @@ theorem orderOf_zpow_dvd {G : Type*} [Group G] (x : G) (n : ℤ) :
   rw [← orderOf_pow_natAbs]
   exact orderOf_pow_dvd _
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 /-- The order of a unit of finite order of a reduced commutative ring is not divisible by the
 exponential characteristic `p`, when `p ≠ 1`. -/
 theorem not_dvd_orderOf_units_of_expChar {R : Type*} [CommRing R] [IsReduced R] (p : ℕ)
@@ -114,6 +119,7 @@ theorem not_dvd_orderOf_units_of_expChar {R : Type*} [CommRing R] [IsReduced R] 
   rw [mul_comm, ← hm, ← orderOf_units, orderOf_dvd_iff_pow_eq_one,
     ← ExpChar.pow_prime_pow_mul_eq_one_iff p 1, pow_one, ← orderOf_dvd_iff_pow_eq_one,
     orderOf_units, hm]
+-/
 
 /-! ### Cyclic groups in a product -/
 
@@ -313,12 +319,17 @@ theorem isCyclic_of_subgroup_card_injective {G : Type*} [Group G] [Finite G]
     _ ≤ ∑ d ∈ n.divisors, d.totient := Finset.sum_le_sum fun d _ ↦ key d
     _ = n := Nat.sum_totient n
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 -- TODO(SKW): upstream, next to `multiplicity_map_eq`.
 /-- The multiplicity is invariant under a group acting by multiplicative automorphisms. -/
 theorem multiplicity_smul {G α : Type*} [Group G] [Monoid α] [MulDistribMulAction G α] (g : G)
     {a b : α} : multiplicity (g • a) (g • b) = multiplicity a b :=
   multiplicity_map_eq (MulDistribMulAction.toMulEquiv α g)
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 -- TODO(SKW): upstream, next to `Finset.emultiplicity_prod`.
 /-- The multiplicity of a prime in a finite product is the sum of the multiplicities. -/
 theorem Finset.multiplicity_prod {α β : Type*} [CommMonoidWithZero α] [IsCancelMulZero α]
@@ -331,6 +342,7 @@ theorem Finset.multiplicity_prod {α β : Type*} [CommMonoidWithZero α] [IsCanc
     rw [Finset.prod_insert has] at hfin
     rw [Finset.prod_insert has, Finset.sum_insert has, multiplicity_mul hp hfin,
       ih hfin.mul_right]
+-/
 
 -- TODO(SKW): upstream, next to `FiniteMultiplicity.mul_iff`.
 /-- The multiplicity of a prime in a finite product is finite iff it is finite in each factor. -/

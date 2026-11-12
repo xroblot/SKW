@@ -10,7 +10,6 @@ public import SKW.PRed2Mathlib.CyclotomicField
 
 public import SKW.Stickelberger.Teichmuller
 
-public import SKW.Prereqs.GroupRingAction
 public import SKW.Prereqs.Stickelberger
 
 -- public import SKW.Prereqs.ClassGroup

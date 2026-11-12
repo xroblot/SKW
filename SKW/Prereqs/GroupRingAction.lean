@@ -2,6 +2,8 @@ module
 
 public import Mathlib.Algebra.MonoidAlgebra.Basic
 
+public import SKW.Prereqs.Stickelberger
+
 set_option linter.style.header false
 
 /-!
@@ -21,41 +23,62 @@ section CommMonoid
 
 variable [CommMonoid M] [MulDistribMulAction G M]
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 /-- The action of `ℕ[G]` on a commutative monoid `M` on which `G` acts by monoid homomorphisms:
 `m ^ ∑ nᵍ g = ∏ (g • m) ^ nᵍ`. -/
 instance : Pow M (MonoidAlgebra ℕ G) where
   pow m θ := θ.coeff.prod fun g n ↦ (g • m) ^ n
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem pow_def (m : M) (θ : MonoidAlgebra ℕ G) :
     m ^ θ = θ.coeff.prod fun g n ↦ (g • m) ^ n := rfl
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 @[simp]
 theorem pow_zero (m : M) : m ^ (0 : MonoidAlgebra ℕ G) = 1 := by
   simp [pow_def]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 @[simp]
 theorem pow_single (m : M) (g : G) (n : ℕ) : m ^ single g n = (g • m) ^ n := by
   simp [pow_def]
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem pow_add (m : M) (θ θ' : MonoidAlgebra ℕ G) : m ^ (θ + θ') = m ^ θ * m ^ θ' := by
   simp_rw [pow_def, coeff_add]
   exact Finsupp.prod_add_index' (fun _ ↦ _root_.pow_zero _) fun _ ↦ _root_.pow_add _
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem pow_sum {ι : Type*} (m : M) (s : Finset ι) (θ : ι → MonoidAlgebra ℕ G) :
     m ^ (∑ i ∈ s, θ i) = ∏ i ∈ s, m ^ θ i := by
   classical
   induction s using Finset.induction_on with
   | empty => simp
   | insert i s hi ih => rw [Finset.sum_insert hi, Finset.prod_insert hi, pow_add, ih]
+-/
 
 theorem pow_nsmul (m : M) (n : ℕ) (θ : MonoidAlgebra ℕ G) : m ^ (n • θ) = (m ^ θ) ^ n := by
   induction n with
   | zero => simp
   | succ n ih => rw [succ_nsmul, pow_add, ih, pow_succ]
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 @[simp]
 theorem pow_one (m : M) : m ^ (1 : MonoidAlgebra ℕ G) = m := by
   simp [one_def]
+-/
 
 @[simp]
 theorem one_pow (θ : MonoidAlgebra ℕ G) : (1 : M) ^ θ = 1 := by

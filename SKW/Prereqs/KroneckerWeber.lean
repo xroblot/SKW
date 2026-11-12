@@ -1,6 +1,7 @@
 module
 
 public import Mathlib.Algebra.CharP.Reduced
+public import Mathlib.Algebra.Field.Subfield.Basic
 public import Mathlib.Algebra.Group.Subgroup.Order
 public import Mathlib.Algebra.Group.Subgroup.ZPowers.Lemmas
 public import Mathlib.Algebra.GroupWithZero.Associated
@@ -8,6 +9,7 @@ public import Mathlib.Algebra.IsPrimePow
 public import Mathlib.Algebra.Ring.Action.Basic
 public import Mathlib.Algebra.Ring.Action.Group
 public import Mathlib.Data.Nat.Factorization.Basic
+public import Mathlib.FieldTheory.Finite.Basic
 public import Mathlib.FieldTheory.Galois.Abelian
 public import Mathlib.FieldTheory.Galois.IsGaloisGroup
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
@@ -16,6 +18,7 @@ public import Mathlib.FieldTheory.IntermediateField.Algebraic
 public import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
 public import Mathlib.FieldTheory.KummerExtension
 public import Mathlib.FieldTheory.LinearDisjoint
+public import Mathlib.FieldTheory.Normal.Basic
 public import Mathlib.FieldTheory.Relrank
 public import Mathlib.GroupTheory.FiniteAbelian.Basic
 public import Mathlib.GroupTheory.FiniteAbelian.Duality
@@ -28,6 +31,7 @@ public import Mathlib.GroupTheory.Torsion
 public import Mathlib.LinearAlgebra.Determinant
 public import Mathlib.LinearAlgebra.Dimension.Domain
 public import Mathlib.LinearAlgebra.Dimension.Free
+public import Mathlib.NumberTheory.ArithmeticFunction.Defs
 public import Mathlib.NumberTheory.NumberField.Basic
 public import Mathlib.NumberTheory.NumberField.CMField
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
@@ -35,7 +39,9 @@ public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 public import Mathlib.NumberTheory.NumberField.InfinitePlace.Ramification
 public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
+public import Mathlib.NumberTheory.NumberField.Units.Basic
 public import Mathlib.NumberTheory.RamificationInertia.Galois
+public import Mathlib.NumberTheory.RamificationInertia.Ramification
 public import Mathlib.NumberTheory.RamificationInertia.Unramified
 public import Mathlib.RingTheory.DedekindDomain.Basic
 public import Mathlib.RingTheory.DedekindDomain.Dvr
@@ -64,11 +70,9 @@ public import Mathlib.RingTheory.Unramified.Locus
 public import Mathlib.RingTheory.ZMod.UnitsCyclic
 
 public import SKW.PRed2Mathlib.CyclotomicField
-public import SKW.Prereqs.Normal
-public import SKW.Prereqs.NumberTheory
+public import SKW.PRed2Mathlib.Subfield
 public import SKW.Prereqs.OtherPR
 public import SKW.Prereqs.Stickelberger
-public import SKW.Prereqs.Subfield
 
 set_option linter.style.header false
 
