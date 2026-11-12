@@ -4,6 +4,8 @@ public import Mathlib.NumberTheory.NumberField.CMField
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.FieldTheory.Galois.IsGaloisGroup
 
+public import SKW.Prereqs.KroneckerWeber
+
 set_option linter.style.header false
 
 open NumberField IsCMField Units
@@ -18,11 +20,14 @@ namespace NumberField.IsCMField
 
 variable {K : Type*} [Field K]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem exists_torsion_realunits_pow_indexRealUnits_eq_mul (u : (𝓞 K)ˣ) :
     ∃ ζ : Units.torsion K, ∃ v : (𝓞 K)ˣ, v ∈ realUnits K ∧ u ^ indexRealUnits K = ζ * v := by
   obtain ⟨⟨v, hv⟩, ζ,
     h⟩ := Subgroup.mem_sup'.mp <| Subgroup.pow_index_mem (realUnits K ⊔ torsion K) u
   exact ⟨ζ, v, hv, by rwa [eq_comm, mul_comm]⟩
+-/
 
 variable [CharZero K] [IsCMField K] [NumberField K]
 
@@ -34,11 +39,14 @@ theorem exists_torsion_realunits_pow_two_eq_mul (u : (𝓞 K)ˣ) :
     rw [SubmonoidClass.coe_pow, ← mul_pow, ← h, hi, pow_one]
   · exact ⟨ζ, v, hv, by rwa [← hi]⟩
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- The `Units.val` of `unitsComplexConj` is `ringOfIntegersComplexConj` of the `Units.val`. Not a
 `simp` lemma: `simp` rewrites the left-hand side further, through `Units.coe_mapEquiv`. -/
 theorem coe_unitsComplexConj {K : Type*} [Field K] [CharZero K] [IsCMField K]
     [Algebra.IsIntegral ℚ K] (u : (𝓞 K)ˣ) :
     (unitsComplexConj K u).val = ringOfIntegersComplexConj K u.val := rfl
+-/
 
 end NumberField.IsCMField
 
@@ -48,6 +56,8 @@ end Units
 
 section RootsOfUnity
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- A complex-conjugation-type automorphism sends a root of unity to its inverse. -/
 theorem NumberField.ComplexEmbedding.IsConj.eq_inv_of_pow_eq_one {K : Type*} [Field K]
     {k : Type*} [Field k] [Algebra k K] {φ : K →+* ℂ} {σ : Gal(K/k)}
@@ -56,14 +66,20 @@ theorem NumberField.ComplexEmbedding.IsConj.eq_inv_of_pow_eq_one {K : Type*} [Fi
   apply φ.injective
   rw [IsConj.eq hσ, RCLike.star_def, ← Complex.inv_eq_conj, map_inv₀]
   exact Complex.norm_eq_one_of_pow_eq_one (by rw [← map_pow, hζ, map_one]) (NeZero.ne n)
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- A complex-conjugation-type automorphism sends a primitive root of unity to its inverse. -/
 theorem NumberField.ComplexEmbedding.IsConj.eq_inv_of_isPrimitiveRoot {K : Type*} [Field K]
     {k : Type*} [Field k] [Algebra k K] {φ : K →+* ℂ} {σ : Gal(K/k)}
     (hσ : IsConj φ σ) {ζ : K} {n : ℕ} [NeZero n] (hζ : IsPrimitiveRoot ζ n) :
     σ ζ = ζ⁻¹ :=
   hσ.eq_inv_of_pow_eq_one hζ.pow_eq_one
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Complex conjugation of a CM field sends a primitive root of unity to its inverse. This is the
 version of `NumberField.IsCMField.complexConj_torsion` for an arbitrary primitive root. -/
 theorem NumberField.IsCMField.complexConj_eq_inv_of_isPrimitiveRoot {K : Type*} [Field K]
@@ -71,6 +87,7 @@ theorem NumberField.IsCMField.complexConj_eq_inv_of_isPrimitiveRoot {K : Type*} 
     complexConj K ζ = ζ⁻¹ :=
   (isConj_complexConj K
     (Classical.choice (inferInstance : Nonempty (K →+* ℂ)))).eq_inv_of_isPrimitiveRoot hζ
+-/
 
 end RootsOfUnity
 
@@ -86,12 +103,18 @@ variable (K : Type*) [Field K] [CharZero K] [Algebra.IsIntegral ℚ K] [IsCMFiel
 
 local notation3 "K⁺" => maximalRealSubfield K
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Complex conjugation of the CM field `K`, as an element of `Gal(K/ℚ)`. -/
 noncomputable def ratComplexConj : Gal(K/ℚ) :=
   (complexConj K).restrictScalars ℚ
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 @[simp]
 theorem ratComplexConj_apply (x : K) : ratComplexConj K x = complexConj K x := rfl
+-/
 
 def zpowersRatComplexConjEquiv :
     Subgroup.zpowers (complexConj K) ≃* Subgroup.zpowers (ratComplexConj K) :=
@@ -126,12 +149,15 @@ theorem eq_ratComplexConj {φ : K →+* ℂ} {σ : Gal(K/ℚ)} (hσ : ComplexEmb
 
 variable (K)
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 omit [Algebra.IsIntegral ℚ K] in
 /-- A CM field has twice the degree of its maximal real subfield. -/
 theorem finrank_eq_two_mul :
     Module.finrank ℚ K = 2 * Module.finrank ℚ K⁺ := by
   rw [← Module.finrank_mul_finrank ℚ K⁺ K, Algebra.IsQuadraticExtension.finrank_eq_two K⁺ K,
     mul_comm]
+-/
 
 /-- Complex conjugation has order `2` in `Gal(K/ℚ)`. -/
 theorem orderOf_ratComplexConj : orderOf (ratComplexConj K) = 2 :=
@@ -166,6 +192,8 @@ instance isGaloisGroup_quotient_ratComplexConj [NumberField K] [IsGalois ℚ K] 
 instance [NumberField K] [IsGalois ℚ K] : IsGalois ℚ K⁺ :=
   IsGaloisGroup.isGalois (Gal(K/ℚ) ⧸ Subgroup.zpowers (ratComplexConj K)) ℚ K⁺
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open IntermediateField in
 /-- The subfield of a CM field fixed by complex conjugation is its maximal real subfield. -/
 theorem toSubfield_fixedField_ratComplexConj :
@@ -174,7 +202,10 @@ theorem toSubfield_fixedField_ratComplexConj :
   rw [Subfield.mem_mk, Subring.mem_mk, Subalgebra.mem_toSubsemiring, mem_toSubalgebra,
     mem_fixedField_iff, Subgroup.forall_mem_zpowers, ← complexConj_eq_self_iff]
   exact (MulAction.mem_fixedBy_zpowers_iff_mem_fixedBy (g := ratComplexConj K)).trans <| by simp
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open IntermediateField in
 /-- The subfield of a CM field fixed by complex conjugation is totally real. -/
 instance isTotallyReal_fixedField_ratComplexConj :
@@ -182,6 +213,7 @@ instance isTotallyReal_fixedField_ratComplexConj :
   change IsTotallyReal (fixedField (Subgroup.zpowers (ratComplexConj K))).toSubfield
   rw [toSubfield_fixedField_ratComplexConj]
   infer_instance
+-/
 
 end
 

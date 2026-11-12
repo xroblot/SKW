@@ -7,7 +7,6 @@ public import Mathlib.RingTheory.ClassGroup.Basic
 public import Mathlib.RingTheory.FractionalIdeal.Extended
 
 public import SKW.PRed2Mathlib.FiniteFieldSum
-public import SKW.Prereqs.AlgebraMisc
 
 set_option linter.style.header false
 
@@ -21,6 +20,17 @@ This file gathers the results from the `SKW.Prereqs` files that are needed in
 -/
 
 open NumberField
+
+theorem MulSemiringAction.toRingHom_mul {G R : Type*} [Monoid G] [Semiring R]
+    [MulSemiringAction G R] (g h : G) :
+    MulSemiringAction.toRingHom G R (g * h) =
+      (MulSemiringAction.toRingHom G R g).comp (MulSemiringAction.toRingHom G R h) :=
+  RingHom.ext fun x ↦ mul_smul g h x
+
+theorem MulSemiringAction.toRingHom_one {G R : Type*} [Monoid G] [Semiring R]
+    [MulSemiringAction G R] :
+    MulSemiringAction.toRingHom G R 1 = RingHom.id R :=
+  RingHom.ext fun x ↦ one_smul G x
 
 theorem NumberField.isUnit_iff_natAbs_norm {K : Type*} [Field K] [NumberField K] {x :
   RingOfIntegers K} :

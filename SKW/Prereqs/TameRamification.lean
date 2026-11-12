@@ -11,6 +11,7 @@ public import Mathlib.NumberTheory.RamificationInertia.Galois
 
 public import SKW.Prereqs.Cotangent
 public import SKW.Prereqs.AlgebraMisc
+public import SKW.Prereqs.KroneckerWeber
 
 set_option linter.style.header false
 
@@ -53,6 +54,8 @@ open scoped Pointwise
 variable {R S : Type*} [CommRing R] [CommRing S] [Algebra R S]
 variable {G : Type*} [Group G] [MulSemiringAction G S] [SMulCommClass G R S]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- An arithmetic Frobenius `σ` acts on the residue ring `S ⧸ Q` as the `N𝔭`-th power map, for any
 action of `σ` on `S ⧸ Q` compatible with its action on `S` (`SMulDistribClass`, giving
 `σ • mk x = mk (σ • x)` via `algebraMap.smul'`). -/
@@ -63,24 +66,36 @@ theorem _root_.IsArithFrobAt.smul_residue {M : Type*} [Monoid M] [MulSemiringAct
   obtain ⟨x, rfl⟩ := Ideal.Quotient.mk_surjective c
   rw [← Ideal.Quotient.algebraMap_eq, ← algebraMap.smul']
   exact H.mk_apply x
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- A subgroup element is an arithmetic Frobenius if its image in `G` is (the subgroup acts via the
 inclusion, so the actions agree definitionally). -/
 theorem _root_.IsArithFrobAt.of_coe {H : Subgroup G} {σ : H} {Q : Ideal S}
     (h : IsArithFrobAt R (σ : G) Q) : IsArithFrobAt R σ Q := h
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 variable (G) in
 /-- The **tame character** `θ : I(Q) → (S ⧸ Q)ˣ`, the determinant of the `S ⧸ Q`-linear action of an
 inertia element on the cotangent space `Q ⧸ Q ^ 2`. -/
 noncomputable def tameCharacter (Q : Ideal S) :
     Q.inertia (MulAction.stabilizer G Q) →* (S ⧸ Q)ˣ :=
   LinearEquiv.det.comp (DistribMulAction.toModuleAut (S ⧸ Q) Q.Cotangent)
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem tameCharacter_apply (Q : Ideal S) (τ : Q.inertia (MulAction.stabilizer G Q)) :
     tameCharacter G Q τ = (DistribMulAction.toLinearEquiv (S ⧸ Q) Q.Cotangent τ).det := rfl
+-/
 
 open Module
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- (Rigidity, L2) Multiplicativity of `τ` propagates the order-two vanishing along the `Q`-adic
 filtration: from `τ • x ≡ x mod Q ^ 2` on `Q`,
   one gets `τ • x ≡ x mod Q ^ (n + 2)` on `Q ^ (n+1)`. -/
@@ -103,7 +118,10 @@ theorem sub_mem_pow_of_sub_mem (Q : Ideal S) (τ : Q.inertia (MulAction.stabiliz
           exact Submodule.mul_mem_mul hx (h _ hy)
       · rw [smul_add, add_sub_add_comm]
         exact Submodule.add_mem _ hx hy
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- (Rigidity, L3) If `τ` is inertia, fixes every graded piece, and has order prime to the residue
 characteristic, then `τ • x ≡ x` modulo every power of `Q`. Proof: `τ ^ m = id + m·δ + …` with
 `δ = τ - id`; since `m` is a unit in `S ⧸ Q`, the bound on `δ` improves by one at each power. -/
@@ -135,14 +153,20 @@ theorem sub_mem_pow_of_coprime (Q : Ideal S) [Q.IsMaximal]
       simp_rw [h₁, Finset.sum_const, Finset.card_range, nsmul_eq_mul] at h₂
       rwa [IsUnit.mul_right_eq_zero, Quotient.eq_zero_iff_mem] at h₂
       exact Quotient.isUnit_mk_pow_of_notMem _ hord
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- The localization of a Dedekind domain at a nonzero maximal ideal is a discrete valuation ring.
 A local instance so that `Ideal.finrank_cotangent_eq_one` applies to the cotangent line
   `Q ⧸ Q ^ 2`. -/
 private instance [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q] :
     IsDiscreteValuationRing (Localization.AtPrime Q) :=
   IsLocalization.AtPrime.isDiscreteValuationRing_of_dedekind_domain S (NeZero.ne Q) _
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- In dimension one, the cotangent action of an inertia element is the homothety by its tame
 character: `cotangentInertiaAction G Q τ = θ(τ) • id`. -/
 theorem cotangentInertiaAction_apply_eq_smul [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal]
@@ -152,7 +176,10 @@ theorem cotangentInertiaAction_apply_eq_smul [IsDedekindDomain S] (Q : Ideal S) 
   rw [tameCharacter_apply, LinearEquiv.coe_det]
   exact LinearMap.apply_eq_det_smul_of_finrank_eq_one Q.finrank_cotangent_eq_one
     (DistribMulAction.toLinearEquiv (S ⧸ Q) Q.Cotangent τ) v
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- (Rigidity, L1) If `θ(τ) = 1` then `τ` fixes the cotangent line `Q ⧸ Q ^ 2`: for `x ∈ Q`,
 `τ • x ≡ x mod Q ^ 2`. Uses that `Q ⧸ Q ^ 2` is one-dimensional over the field `S ⧸ Q`, so
 `det = 1` forces the action to be the identity. -/
@@ -167,7 +194,10 @@ theorem sub_mem_sq_of_tameCharacter_eq_one [IsDedekindDomain S] (Q : Ideal S) [Q
       ← tameCharacter_apply, h, Units.val_one]
   simpa [DistribMulAction.toLinearEquiv_apply, MulAction.subgroup_smul_def,
     smul_toCotangent, toCotangent_eq] using LinearEquiv.congr_fun this (Q.toCotangent ⟨x, hx⟩)
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- (Rigidity, L4) An inertia element acting trivially on `S` is trivial. Uses Krull's intersection
 theorem (`⋂ₙ Q ^ n = ⊥`) to pass from "trivial modulo every power" to "trivial", and faithfulness
 of the action to conclude `τ = 1`. -/
@@ -176,7 +206,10 @@ theorem eq_one_of_forall_sub_mem_pow [IsDedekindDomain S] [FaithfulSMul G S] (Q 
     (h : ∀ (n : ℕ) (x : S), τ • x - x ∈ Q ^ n) : τ = 1 := by
   refine FaithfulSMul.eq_of_smul_eq_smul (α := S) fun x ↦ ?_
   simpa [iInf_pow_eq_bot_of_isDomain _ hQ.ne_top, sub_eq_zero] using mem_iInf.mpr fun i ↦ h i x
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- **Rigidity** (filtration-free): an inertia element of order prime to the residue
 characteristic on which the tame character vanishes is trivial. -/
 theorem eq_one_of_tameCharacter_eq_one [IsDedekindDomain S] [FaithfulSMul G S] (Q : Ideal S)
@@ -187,7 +220,10 @@ theorem eq_one_of_tameCharacter_eq_one [IsDedekindDomain S] [FaithfulSMul G S] (
   · apply sub_mem_pow_of_sub_mem
     exact fun x a ↦ sub_mem_sq_of_tameCharacter_eq_one Q τ h a
   · exact hord
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 variable (G) in
 theorem tameCharacter_injective [IsDedekindDomain S] [FaithfulSMul G S] (Q : Ideal S) [Q.IsMaximal]
     [NeZero Q] (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
@@ -196,7 +232,10 @@ theorem tameCharacter_injective [IsDedekindDomain S] [FaithfulSMul G S] (Q : Ide
   contrapose htame
   obtain ⟨q, hq⟩ := Nat.cast_dvd_cast (α := S) <| orderOf_dvd_natCard τ
   exact hq ▸ Ideal.mul_mem_right _ _ htame
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 attribute [local instance] Ideal.Quotient.field in
 /-- **Frobenius equivariance**: conjugating an inertia element by an arithmetic Frobenius
 raises the tame character to the `N 𝔭`-th power. (Conjugation lands back in inertia by
@@ -216,7 +255,10 @@ theorem tameCharacter_conj [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZ
     show v = σ • (σ⁻¹ • v) by rw [smul_inv_smul], MulAction.subgroup_smul_def,
     MulAut.conjNormal_apply, ← smul_smul, inv_smul_smul, ← smul_smul,
     ← MulAction.subgroup_smul_def, cotangentInertiaAction_apply_eq_smul, stabilizer_smul_smul]
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- **Tame inertia is cyclic**: if the order of the inertia group is prime to the residue
 characteristic (tame ramification), the inertia group is cyclic. -/
 theorem isCyclic_inertia [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q] [Finite (S ⧸
@@ -224,7 +266,10 @@ theorem isCyclic_inertia [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZer
     (htame : ↑(Nat.card (Q.inertia (MulAction.stabilizer G Q))) ∉ Q) :
     IsCyclic (Q.inertia (MulAction.stabilizer G Q)) :=
   isCyclic_of_injective _ (tameCharacter_injective G Q htame)
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- **Abelian tame ramification**: for an abelian action, the order of the inertia group
 (the ramification index) divides `N𝔭 - 1`. -/
 theorem card_inertia_dvd_card_sub_one [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
@@ -237,7 +282,10 @@ theorem card_inertia_dvd_card_sub_one [IsDedekindDomain S] (Q : Ideal S) [Q.IsMa
     orderOf_dvd_iff_zpow_eq_one, Nat.cast_sub hσ.card_pos, Nat.cast_one, zpow_sub_one,
     zpow_natCast, ← tameCharacter_conj Q ⟨σ, hσ.mem_stabilizer⟩ hσ.of_coe τ,
     MulAut.conjNormal_apply_of_isMulCommutative, mul_inv_cancel]
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 variable (G) in
 /-- Inertia computed inside the full group `G` agrees with inertia computed inside the decomposition
 group `MulAction.stabilizer G Q`: every inertia element fixes `Q` (`inertia_le_stabilizer`), so the
@@ -245,7 +293,10 @@ inclusion of the decomposition group restricts to an isomorphism of inertia grou
 def inertiaStabilizerEquiv (Q : Ideal S) :
     Q.inertia (MulAction.stabilizer G Q) ≃* Q.inertia G :=
   Subgroup.subgroupOfEquivOfLe Q.inertia_le_stabilizer
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- **Rigidity, full-group form** of `isCyclic_inertia`: tame inertia inside the full group `G`
 (not merely inside the decomposition group) is cyclic. -/
 theorem isCyclic_inertia' [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZero Q]
@@ -253,7 +304,10 @@ theorem isCyclic_inertia' [IsDedekindDomain S] (Q : Ideal S) [Q.IsMaximal] [NeZe
       IsCyclic (Q.inertia G) :=
   (inertiaStabilizerEquiv G Q).isCyclic.mp <|
     isCyclic_inertia Q (by rwa [Nat.card_congr (inertiaStabilizerEquiv G Q).toEquiv])
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- The tameness hypothesis `↑(Nat.card (Q.inertia G)) ∉ Q` used by `isCyclic_inertia'` is exactly
 the classical tameness condition: the residue characteristic (`absNorm` of the prime `Q ∩ ℤ`) does
 not divide the ramification index `e(Q)`. -/
@@ -262,6 +316,7 @@ theorem card_inertia_notMem_iff [IsDomain S] (Q : Ideal S) [Q.IsPrime] [Module.F
     ↑(Nat.card (Q.inertia G)) ∉ Q ↔ ¬ (under ℤ Q).absNorm ∣ ramificationIdx Q ℤ := by
   rw [← Int.cast_natCast, Int.cast_mem_ideal_iff, Int.natCast_dvd_natCast,
     card_inertia_eq_ramificationIdxIn (under ℤ Q), ramificationIdxIn_eq_ramificationIdx _ Q G]
+-/
 
 theorem card_inertia_notMem_of_not_dvd (Q : Ideal S) (h : ¬ (under ℤ Q).absNorm ∣ Nat.card G) :
     ↑(Nat.card (Q.inertia G)) ∉ Q := by
@@ -269,6 +324,8 @@ theorem card_inertia_notMem_of_not_dvd (Q : Ideal S) (h : ¬ (under ℤ Q).absNo
   contrapose h
   exact dvd_trans h <| Subgroup.card_subgroup_dvd_card _
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- **Abelian tame ramification,
   full-group form** of `card_inertia_dvd_card_sub_one`: for an abelian
 action the order of the full-group inertia (the ramification index) divides `N𝔭 - 1`. -/
@@ -279,6 +336,7 @@ theorem card_inertia_dvd_card_sub_one' [IsDedekindDomain S] (Q : Ideal S) [Q.IsM
   rw [← Nat.card_congr (inertiaStabilizerEquiv G Q).toEquiv]
   exact card_inertia_dvd_card_sub_one Q
     (by rwa [Nat.card_congr (inertiaStabilizerEquiv G Q).toEquiv])
+-/
 
 /-- **Tame Abhyankar (inertia form).** In the tame setting the inertia at `Q` is cyclic, so whenever
 it embeds into a product `A × B` of finite groups its order divides `Nat.lcm (Nat.card A)

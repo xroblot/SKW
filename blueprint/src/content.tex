@@ -1036,7 +1036,7 @@ $\mathfrak{a}^{\Theta} = \prod_{a \in (\ZZ/m\ZZ)^\times} \sigma_a^{-1}(\mathfrak
 \begin{corollary}
   \label{cor:stickelberger_annihilates}
   \uses{thm:stickelberger, lem:class_coprime_rep}
-  \lean{Stickelberger.stickelberger_theorem}
+  \lean{stickelberger_theorem}
   \leanok
   Let $k$ be a number field isomorphic to $\QQ(\zeta_m)$. The Stickelberger element $\Theta$
   annihilates the ideal class group $\mathrm{Cl}(k)$: for every ideal class $c$,
@@ -1102,10 +1102,10 @@ $KK'$.
 
 \begin{proof}
   \leanok
-  Take for $A$ an algebraic closure of $K$, and choose a primitive $n$-th root of unity in $A$ for
-  every $n \geq 1$. The image of $K$ in $A$ is an abelian extension of $\QQ$, so by
-  \ref{lem:kw_reduce_to_prime_power} it lies in $\QQ(\zeta_n)$ for some $n \geq 1$. The field
-  $\QQ(\zeta_n)$ is isomorphic to the abstract cyclotomic field of level $n$.
+  Take $A = \mathbb{C}$ and $\zeta_n = e^{2i\pi/n}$, and fix an embedding $K \to \mathbb{C}$.
+  The image of $K$ is an abelian extension of $\QQ$, so by \ref{lem:kw_reduce_to_prime_power} it
+  lies in $\QQ(\zeta_n)$ for some $n \geq 1$. The field $\QQ(\zeta_n)$ is isomorphic to the
+  abstract cyclotomic field of level $n$.
 \end{proof}
 
 \begin{lemma}
@@ -1124,10 +1124,27 @@ $KK'$.
 \end{proof}
 
 \begin{lemma}
+  \label{lem:kw_reduce_to_prime_power_aux}
+  \lean{cyclotomic_lcm, kw_reduce_to_prime_power_aux}
+  \leanok
+  Let $K \subseteq A$ be an abelian extension of $\QQ$ which is the compositum of finitely many
+  subfields $C_i$, each contained in some $\QQ(\zeta_{n_i})$ with $n_i \geq 1$. Then
+  $K \subseteq \QQ(\zeta_n)$ for some $n \geq 1$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  By induction on the number of factors, using $\QQ(\zeta_a)\QQ(\zeta_b) =
+  \QQ(\zeta_{\operatorname{lcm}(a,b)})$ for $a, b \geq 1$. A subfield of $K$ is again abelian over
+  $\QQ$, so the induction hypothesis applies to the compositum of all factors but one.
+\end{proof}
+
+\begin{lemma}
   \label{lem:kw_reduce_to_prime_power}
   \lean{kw_reduce_to_prime_power}
   \leanok
-  \uses{lem:kw_abelian_cyclic_decomp, lem:kw_cyclic_primePow_le_cyclotomic}
+  \uses{lem:kw_abelian_cyclic_decomp, lem:kw_reduce_to_prime_power_aux,
+    lem:kw_cyclic_primePow_le_cyclotomic}
   Let $K \subseteq A$ be a number field with $K/\QQ$ abelian. Then $K \subseteq \QQ(\zeta_n)$ for
   some $n \geq 1$.
 \end{lemma}
@@ -1136,13 +1153,12 @@ $KK'$.
   \leanok
   By \ref{lem:kw_abelian_cyclic_decomp}, the field $K$ is the compositum of finitely many cyclic
   subextensions $C_i$ of prime power degree. By \ref{lem:kw_cyclic_primePow_le_cyclotomic},
-  each $C_i$ lies in some $\QQ(\zeta_{n_i})$. By induction on the number of factors, $K$ lies in
-  $\QQ(\zeta_n)$ with $n$ the least common multiple of the $n_i$.
+  each $C_i$ lies in some $\QQ(\zeta_{n_i})$. Conclude by \ref{lem:kw_reduce_to_prime_power_aux}.
 \end{proof}
 
 \begin{lemma}
   \label{lem:kw_cyclic_primePow_le_cyclotomic}
-  \lean{kw_cyclic_primePow_le_cyclotomic}
+  \lean{kw_cyclic_odd_primePow_le_cyclotomic, kw_cyclic_two_pow_le_cyclotomic}
   \leanok
   \uses{lem:kw_reduce_to_unramified_outside_p, prop:kw_odd_prime_power, prop:kw_2_power}
   Let $p$ be a prime and $K \subseteq A$ a cyclic extension of $\QQ$ of degree $p^m$. Then
@@ -1291,64 +1307,81 @@ number $q$ and $q \nmid \#G$, then $Q$ is tame (\texttt{Ideal.card\_inertia\_not
 
 \begin{lemma}
   \label{lem:card_dvd_lcm_cyclic}
-  \lean{card_dvd_lcm_of_isCyclic_of_inf_eq_bot}
+  \lean{Subgroup.lcm_index_eq_card_of_isCyclic_of_inf_eq_bot}
   \leanok
-  Let $H_1, H_2$ be subgroups of a finite cyclic group $C$ with $H_1 \cap H_2 = 1$. Then $\#C$
-  divides $\operatorname{lcm}([C : H_1], [C : H_2])$.
+  Let $H_1, H_2$ be subgroups of a finite cyclic group $C$ with $H_1 \cap H_2 = 1$. Then
+  $\#C = \operatorname{lcm}([C : H_1], [C : H_2])$.
 \end{lemma}
 
 \begin{proof}
   \leanok
   The map $C \to C/H_1 \times C/H_2$ is injective, and the exponent of the target divides the
-  least common multiple of the two orders. A cyclic group has order equal to its exponent.
+  least common multiple of the two orders. A cyclic group has order equal to its exponent, so
+  $\#C$ divides the lcm. Conversely both indices divide $\#C$.
 \end{proof}
+
+In the following statements, $e_p(K)$ denotes the ramification index of a prime number $p$ in a
+Galois extension $K/\QQ$, that is, $e(\fP \mid p)$ for any prime $\fP$ of $K$ above $p$.
 
 \begin{lemma}[Tame Abhyankar]
   \label{lem:ramificationIdx_sup_dvd_lcm}
-  \lean{ramificationIdx_sup_dvd_lcm}
+  \lean{ramificationIdxIn_sup_eq_lcm}
   \leanok
   \uses{lem:tame_inertia_cyclic, lem:card_dvd_lcm_cyclic}
   Let $K/\QQ$ be a finite Galois extension, $E, F$ two Galois subextensions with $EF = K$, and
-  $\fP$ a prime of $K$ above a prime number $p$ with $p \nmid [K:\QQ]$. Then
+  $p$ a prime number with $p \nmid [K:\QQ]$. Then
   \[
-    e(\fP\mid p) \ \big|\ \operatorname{lcm}\big(e(\fP\cap E\mid p),\ e(\fP\cap F\mid p)\big).
+    e_p(K) = \operatorname{lcm}\big(e_p(E),\ e_p(F)\big).
   \]
 \end{lemma}
 
 \begin{proof}
   \leanok
-  Let $G = \Gal(K/\QQ)$ and $I = I(\fP) \subseteq G$. As $p \nmid \#G$, the prime $\fP$ is tame,
-  so $I$ is cyclic by \ref{lem:tame_inertia_cyclic}, of order $e(\fP\mid p)$. Write $H_E =
-  \Gal(K/E)$ and $H_F = \Gal(K/F)$. The group $I \cap H_E$ is the inertia group of $\fP$ in
-  $K/E$, so the multiplicativity of ramification indices in $\QQ \subseteq E \subseteq K$ gives
-  $[I : I\cap H_E] = e(\fP\cap E\mid p)$, and likewise for $F$. Since $EF = K$, we have $H_E \cap
-  H_F = 1$, and \ref{lem:card_dvd_lcm_cyclic} applies to $I \cap H_E$ and $I \cap H_F$.
+  Let $\fP$ be a prime of $K$ above $p$, $G = \Gal(K/\QQ)$ and $I = I(\fP) \subseteq G$. As
+  $p \nmid \#G$, the prime $\fP$ is tame, so $I$ is cyclic by \ref{lem:tame_inertia_cyclic}, of
+  order $e_p(K)$. Write $H_E = \Gal(K/E)$ and $H_F = \Gal(K/F)$. The group $I \cap H_E$ is the
+  inertia group of $\fP$ in $K/E$, so the multiplicativity of ramification indices in
+  $\QQ \subseteq E \subseteq K$ gives $[I : I\cap H_E] = e_p(E)$, and likewise for $F$. Since
+  $EF = K$, we have $H_E \cap H_F = 1$, and \ref{lem:card_dvd_lcm_cyclic} applies to $I \cap H_E$
+  and $I \cap H_F$.
+\end{proof}
+
+In the next two lemmas, $L/\QQ$ is a finite abelian extension, and $K, E \subseteq L$ are subfields
+with $KE = L$, $[K:\QQ] = p^m$ and $E \cong \QQ(\zeta_q)$, where $q \neq p$ are primes and
+$q \nmid [L:\QQ]$. Let $\fQ$ be a prime of $L$ above $q$.
+
+\begin{lemma}
+  \label{lem:ramificationIdx_eq_of_sup_eq_top}
+  \lean{ramificationIdx_eq_of_sup_eq_top}
+  \leanok
+  \uses{lem:abelian_tame_ramificationIdx_dvd, lem:ramificationIdx_sup_dvd_lcm}
+  One has $e_q(L) = q - 1$, and the prime $\fQ \cap E$ is unramified in $L$.
+\end{lemma}
+
+\begin{proof}
+  \leanok
+  By \ref{lem:ramificationIdx_sup_dvd_lcm}, $e_q(L) = \operatorname{lcm}(e_q(K), e_q(E))$ and
+  $e_q(E) = q - 1$. The extension $K/\QQ$ is abelian and $e_q(K)$ divides $[K:\QQ] = p^m$, which
+  is prime to $q$, so \ref{lem:abelian_tame_ramificationIdx_dvd} gives that $e_q(K)$ divides
+  $q - 1$. Hence $e_q(L) = q - 1$. The multiplicativity of ramification indices in
+  $\QQ \subseteq E \subseteq L$ then gives $e(\fQ \mid \fQ\cap E) = 1$.
 \end{proof}
 
 \begin{lemma}[Tame inertia complement]
   \label{lem:inertia_isComplement_fixingSubgroup}
   \lean{inertia_isComplement_fixingSubgroup}
   \leanok
-  \uses{lem:abelian_tame_ramificationIdx_dvd, lem:ramificationIdx_sup_dvd_lcm}
-  Let $L/\QQ$ be a finite abelian extension, and let $K, E \subseteq L$ be subfields with $KE = L$,
-  $[K:\QQ] = p^m$ and $E \cong \QQ(\zeta_q)$, where $q \neq p$ are primes and $q \nmid [L:\QQ]$.
-  Let $\fQ$ be a prime of $L$ above $q$. Then the inertia group $I = I(\fQ) \subseteq \Gal(L/\QQ)$
-  is a complement of $\Gal(L/E)$: one has $I \cap \Gal(L/E) = 1$ and $\#I \cdot \#\Gal(L/E) =
-  [L:\QQ]$.
+  \uses{lem:ramificationIdx_eq_of_sup_eq_top}
+  The inertia group $I = I(\fQ) \subseteq \Gal(L/\QQ)$ is a complement of $\Gal(L/E)$: one has
+  $I \cap \Gal(L/E) = 1$ and $\#I \cdot \#\Gal(L/E) = [L:\QQ]$.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  We first show that $e(\fQ\mid q) = q - 1$. By \ref{lem:ramificationIdx_sup_dvd_lcm},
-  $e(\fQ\mid q)$ divides the least common multiple of $e(\fQ\cap K\mid q)$ and
-  $e(\fQ\cap E\mid q) = q-1$. The extension $K/\QQ$ is abelian and $q \nmid p^m$, so
-  \ref{lem:abelian_tame_ramificationIdx_dvd} gives that $e(\fQ\cap K\mid q)$ divides $q - 1$.
-  Hence $e(\fQ\mid q)$ divides $q - 1$. Conversely $q - 1 = e(\fQ\cap E\mid q)$ divides
-  $e(\fQ\mid q)$.
-
-  It follows that $e(\fQ \mid \fQ\cap E) = 1$. This ramification index is the order of
-  $I \cap \Gal(L/E)$, the inertia group of $\fQ$ in $L/E$, so $I \cap \Gal(L/E) = 1$. Finally
-  $\#I \cdot \#\Gal(L/E) = (q-1)[L:E] = [E:\QQ][L:E] = [L:\QQ]$.
+  By \ref{lem:ramificationIdx_eq_of_sup_eq_top}, $\#I = e_q(L) = q - 1$, so $\#I \cdot
+  \#\Gal(L/E) = (q-1)[L:E] = [E:\QQ][L:E] = [L:\QQ]$. The group $I \cap \Gal(L/E)$ is the inertia
+  group of $\fQ$ in $L/E$, of order $e(\fQ \mid \fQ\cap E) = 1$ by
+  \ref{lem:ramificationIdx_eq_of_sup_eq_top}.
 \end{proof}
 
 \begin{lemma}[Inertia field from a complement]
@@ -1368,7 +1401,7 @@ number $q$ and $q \nmid \#G$, then $Q$ is tame (\texttt{Ideal.card\_inertia\_not
 
 \begin{lemma}
   \label{lem:kw_ramification_reduction}
-  \lean{kw_ramification_reduction}
+  \lean{kw_ramification_reduction_of_sup_eq_top, kw_ramification_reduction}
   \leanok
   \uses{lem:inertia_isComplement_fixingSubgroup, lem:inertia_field_from_complement}
   Let $K \subseteq A$ be a cyclic extension of $\QQ$ of degree $p^m$, and let $q \neq p$ be a prime
@@ -1412,16 +1445,15 @@ number $q$ and $q \nmid \#G$, then $Q$ is tame (\texttt{Ideal.card\_inertia\_not
 
 \begin{proof}
   \leanok
-  Let $S$ be the finite set of prime divisors of the discriminant of $K$. Every prime $q \neq p$
-  outside $S$ is unramified in $K$. We prove the statement by induction on $S$, for all cyclic
-  extensions $K$ of $p$-power degree in which every prime $q \neq p$ outside $S$ is unramified.
+  The set $S_K$ of primes $q \neq p$ ramified in $K$ is finite, since its elements divide the
+  discriminant of $K$. We argue by strong induction on $\#S_K$, for all cyclic extensions $K$ of
+  $p$-power degree.
 
-  If $S$ is empty, take $F = K$ and $n = 1$. Otherwise write $S = \{r\} \cup S'$. If $r = p$, or
-  if $r$ is unramified in $K$, the induction hypothesis applies to $K$ and $S'$. Otherwise
+  If $S_K$ is empty, take $F = K$ and $n = 1$. Otherwise pick $r \in S_K$.
   \ref{lem:kw_ramification_reduction} gives a cyclic extension $E$ of $p$-power degree, unramified
-  at $r$ and at every prime unramified in $K$, with $K\QQ(\zeta_r) = E\QQ(\zeta_r)$. The
-  induction hypothesis applied to $E$ and $S'$ gives $F$ and $n$ with $E\QQ(\zeta_n) =
-  F\QQ(\zeta_n)$. Then
+  at $r$ and at every prime unramified in $K$, with $K\QQ(\zeta_r) = E\QQ(\zeta_r)$. Then $S_E$ is
+  a proper subset of $S_K$, and the induction hypothesis applied to $E$ gives $F$ and $n$ with
+  $E\QQ(\zeta_n) = F\QQ(\zeta_n)$. Then
   \[
     K\QQ(\zeta_{\operatorname{lcm}(n,r)}) = K\QQ(\zeta_r)\QQ(\zeta_n)
       = E\QQ(\zeta_r)\QQ(\zeta_n) = F\QQ(\zeta_n)\QQ(\zeta_r)
@@ -1432,56 +1464,40 @@ number $q$ and $q \nmid \#G$, then $Q$ is tame (\texttt{Ideal.card\_inertia\_not
 \section{Comparing cyclic extensions}
 
 \begin{lemma}
-  \label{lem:kw_cyclic_compositum}
-  \lean{kw_cyclic_compositum}
-  \leanok
-  Let $K, K' \subseteq A$ be number fields such that $KK'/\QQ$ is Galois with cyclic Galois
-  group. If $[K:\QQ]$ divides $[K':\QQ]$, then $K \subseteq K'$.
-\end{lemma}
-
-\begin{proof}
-  \leanok
-  Let $G = \Gal(KK'/\QQ)$. By the Galois correspondence, it suffices to show that
-  $\Gal(KK'/K') \subseteq \Gal(KK'/K)$. In the cyclic group $G$, a subgroup is contained in
-  another if and only if its order divides the order of the other. The orders are $[KK':K'] =
-  [KK':\QQ]/[K':\QQ]$ and $[KK':K] = [KK':\QQ]/[K:\QQ]$, and the first divides the second since
-  $[K:\QQ]$ divides $[K':\QQ]$.
-\end{proof}
-
-\begin{lemma}
   \label{lem:kw_fixedField_index}
   \lean{fixedField_spec_of_index_eq_prime_pow}
   \leanok
   \uses{def:unramified_outside}
   Let $C \subseteq A$ be an abelian extension of $\QQ$, unramified outside $p$, and let $H$ be a
-  subgroup of $\Gal(C/\QQ)$ of index $p^m$ with cyclic quotient. Then the fixed field $C^{H}$ is a
-  cyclic extension of $\QQ$ of degree $p^m$, unramified outside $p$.
+  subgroup of $\Gal(C/\QQ)$ of index $p^m$. Then the fixed field $C^{H}$ is a Galois extension of
+  $\QQ$ of degree $p^m$, unramified outside $p$.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  By the Galois correspondence, $[C^{H} : \QQ] = [\Gal(C/\QQ) : H] = p^m$ and $\Gal(C^{H}/\QQ)
-  \cong \Gal(C/\QQ)/H$, which is cyclic. A subfield of $C$ is unramified outside $p$ because $C$
-  is.
+  By the Galois correspondence, $[C^{H} : \QQ] = [\Gal(C/\QQ) : H] = p^m$, and $C^{H}/\QQ$ is
+  Galois since $C/\QQ$ is abelian. A subfield of $C$ is unramified outside $p$ because $C$ is.
 \end{proof}
 
 \begin{lemma}
   \label{lem:kw_eq_of_unique_prime_subfield}
   \lean{kw_eq_of_unique_prime_subfield}
   \leanok
-  \uses{lem:kw_cyclic_compositum, lem:unramified_outside_sup}
+  \uses{lem:unramified_outside_sup}
   Let $K, K' \subseteq A$ be abelian extensions of $\QQ$ of the same degree $p^m$, both unramified
-  outside $p$. Assume that any two cyclic subextensions of $KK'$ of degree $p$ over $\QQ$ and
-  unramified outside $p$ are equal. Then $K = K'$.
+  outside $p$. Assume that any two subfields of $KK'$ of degree $p$ over $\QQ$, Galois and
+  unramified outside $p$, are equal. Then $K = K'$.
 \end{lemma}
 
 \begin{proof}
   \leanok
   The group $\Gal(KK'/\QQ)$ is an abelian $p$-group, since $[KK':\QQ]$ divides $p^{2m}$. If it
   were not cyclic, it would have two distinct subgroups of index $p$. Their fixed fields would be
-  two distinct cyclic subfields of $KK'$ of degree $p$, unramified outside $p$ by
-  \ref{lem:unramified_outside_sup}, a contradiction. So $KK'/\QQ$ is cyclic, and
-  \ref{lem:kw_cyclic_compositum} gives $K \subseteq K'$. The degrees being equal, $K = K'$.
+  two distinct subfields of $KK'$ of degree $p$, Galois over $\QQ$ and unramified outside $p$ by
+  \ref{lem:unramified_outside_sup}, a contradiction. So $\Gal(KK'/\QQ)$ is cyclic. In a cyclic
+  group, two subgroups of the same index are equal. The subgroups $\Gal(KK'/K)$ and
+  $\Gal(KK'/K')$ both have index $p^m$, so they are equal, and $K = K'$ by the Galois
+  correspondence.
 \end{proof}
 
 \section{The odd case}
@@ -1508,36 +1524,23 @@ In this subsection, $p$ is an odd prime and $F$ is a number field with $F \cong 
   \label{lem:kw_kummer}
   \lean{kw_kummer}
   \leanok
-  Let $L/F$ be a cyclic extension of degree $p$. Then there is a nonzero $\mu \in \cO_F$ such that
+  Let $L/F$ be a cyclic extension of degree $p$. Then there is a nonzero $\mu \in F$ such that
   $L$ is the splitting field of $X^p - \mu$ over $F$.
 \end{lemma}
 
 \begin{proof}
   \leanok
   The field $F$ contains the $p$-th roots of unity, so by Kummer theory $L = F(\alpha)$ with
-  $\alpha^p = x \in F$. Choose a nonzero integer $d$ with $dx \in \cO_F$. Then $\mu = d^p x$ lies
-  in $\cO_F$, the element $d\alpha$ is a root of $X^p - \mu$, and $L = F(d\alpha)$ is the
-  splitting field of $X^p - \mu$. Finally $\mu \neq 0$, since otherwise $L = F$.
+  $\alpha^p = \mu \in F$, and $L$ is the splitting field of $X^p - \mu$. Finally $\mu \neq 0$,
+  since otherwise $L = F$.
 \end{proof}
 
 For the rest of this subsection, $L/F$ is a cyclic extension of degree $p$ with $L/\QQ$ abelian,
-and $\mu \in \cO_F$ is nonzero, with $X^p - \mu$ irreducible over $F$ and $L$ the splitting field
-of $X^p - \mu$. For $a \in (\ZZ/p\ZZ)^\times$, we write $\sigma_a$ for the element of
+and $\mu \in F$ is nonzero, with $X^p - \mu$ irreducible over $F$ and $L$ the splitting field of
+$X^p - \mu$. For a prime $\fq$ of $\cO_F$, we write $v_{\fq}(\mu)$ for the exponent of $\fq$ in
+the fractional ideal $(\mu)$. For $a \in (\ZZ/p\ZZ)^\times$, we write $\sigma_a$ for the element of
 $\Gal(F/\QQ)$ with $\sigma_a(\zeta) = \zeta^a$ for every $p$-th root of unity $\zeta$, and we
 identify $a$ with its representative in $\{1, \dots, p-1\}$.
-
-\begin{lemma}
-  \label{lem:kw_exists_pth_root}
-  \lean{exists_pth_root}
-  \leanok
-  There is a nonzero $\alpha \in \cO_L$ with $\alpha^p = \mu$.
-\end{lemma}
-
-\begin{proof}
-  \leanok
-  Take a root $\alpha \in L$ of $X^p - \mu$. It is integral since $\alpha^p = \mu$ is, and nonzero
-  since $L \neq F$.
-\end{proof}
 
 \begin{lemma}
   \label{lem:kw_abelian_kummer}
@@ -1570,11 +1573,10 @@ identify $a$ with its representative in $\{1, \dots, p-1\}$.
 \begin{proof}
   \leanok
   Write $\sigma = \sigma_a$ and $r = v_{\fq}(\mu)$. By \ref{lem:kw_abelian_kummer},
-  $\sigma(\mu) = \xi^p\mu^a$. Choose a nonzero integer $d$ such that $\beta = d\xi$ lies in
-  $\cO_F$; then $\sigma(d^p\mu) = \beta^p\mu^a$. Since $\sigma(\fq) = \fq$, the valuations at
-  $\fq$ of $\sigma(x)$ and $x$ agree, so
+  $\sigma(\mu) = \xi^p\mu^a$. Since $\sigma(\fq) = \fq$, the valuations at $\fq$ of $\sigma(\mu)$
+  and $\mu$ agree, so
   \[
-    p\,v_{\fq}(d) + r = p\,v_{\fq}(\beta) + a r.
+    r = p\,v_{\fq}(\xi) + a r.
   \]
   Reducing modulo $p$ gives $r \equiv ar \pmod p$. As $p \nmid r$, this forces $a \equiv 1
   \pmod p$, that is, $\sigma = 1$.
@@ -1582,9 +1584,9 @@ identify $a$ with its representative in $\{1, \dots, p-1\}$.
 
 \begin{lemma}
   \label{lem:kw_mu_val_p}
-  \lean{kw_mu_val_p}
+  \lean{kw_mu_val_p_of_liesOver, kw_mu_val_p_of_liesOver_ne, kw_mu_val_p}
   \leanok
-  \uses{lem:kw_split_prime, lem:kw_exists_pth_root, def:unramified_outside}
+  \uses{lem:kw_split_prime, def:unramified_outside}
   Assume that $L$ is unramified outside $p$. Then $p \mid v_{\fq}(\mu)$ for every prime $\fq$ of
   $\cO_F$.
 \end{lemma}
@@ -1598,8 +1600,7 @@ identify $a$ with its representative in $\{1, \dots, p-1\}$.
   some $\sigma \neq 1$, and \ref{lem:kw_split_prime} gives $p \mid v_{\fq}(\mu)$.
 
   Assume now that $q \neq p$, and let $\fQ$ be a prime of $L$ above $\fq$. The prime $q$ is
-  unramified in $L$ and in $F$, so $e(\fQ\mid\fq) = 1$. Let $\alpha \in \cO_L$ with $\alpha^p =
-  \mu$ (\ref{lem:kw_exists_pth_root}). Then
+  unramified in $L$, so $e(\fQ\mid\fq) = 1$. Let $\alpha \in L$ be a root of $X^p - \mu$. Then
   \[
     v_{\fq}(\mu) = e(\fQ\mid\fq)\, v_{\fq}(\mu) = v_{\fQ}(\mu) = v_{\fQ}(\alpha^p)
       = p\, v_{\fQ}(\alpha).
@@ -1611,8 +1612,8 @@ identify $a$ with its representative in $\{1, \dots, p-1\}$.
   \lean{kw_mu_pth_power_ideal}
   \leanok
   \uses{lem:kw_mu_val_p}
-  Assume that $L$ is unramified outside $p$. Then $(\mu) = \mathfrak{a}^p$ for some nonzero ideal
-  $\mathfrak{a}$ of $\cO_F$.
+  Assume that $L$ is unramified outside $p$. Then $(\mu) = \mathfrak{a}^p$ for some fractional
+  ideal $\mathfrak{a}$ of $F$.
 \end{lemma}
 
 \begin{proof}
@@ -1630,7 +1631,7 @@ We keep the setting of the previous subsection.
   \lean{kw_class_trivial}
   \leanok
   \uses{cor:stickelberger_annihilates, lem:kw_abelian_kummer}
-  Let $\mathfrak{a}$ be a nonzero ideal of $\cO_F$ with $\mathfrak{a}^p = (\mu)$. Then
+  Let $\mathfrak{a}$ be a fractional ideal of $F$ with $\mathfrak{a}^p = (\mu)$. Then
   $\mathfrak{a}$ is principal.
 \end{lemma}
 
@@ -1658,80 +1659,65 @@ We keep the setting of the previous subsection.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:kw_mu_unit}
-  \lean{kw_mu_unit}
+  \label{lem:kw_unit_conj_pow}
+  \lean{kw_unit_conj_pow}
   \leanok
-  Let $\mathfrak{a}$ be a nonzero principal ideal of $\cO_F$ with $\mathfrak{a}^p = (\mu)$. Then
-  $\mu = \alpha^p\eta$ for some nonzero $\alpha \in \cO_F$ and some unit $\eta \in \cO_F^\times$.
+  \uses{lem:kw_class_trivial, lem:kw_abelian_kummer}
+  Let $\mathfrak{a}$ be a fractional ideal of $F$ with $\mathfrak{a}^p = (\mu)$, and write $c$ for
+  the complex conjugation of $F$. Then $\mu = \beta^p\eta$ for some $\beta \in F$ and some unit
+  $\eta \in \cO_F^\times$ such that $\eta\,c(\eta)$ is a $p$-th power in $F$.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  Write $\mathfrak{a} = (\alpha)$. Then $(\alpha^p) = (\mu)$, so $\mu = \alpha^p\eta$ with $\eta$
-  a unit, and $\alpha \neq 0$ since $\mu \neq 0$.
-\end{proof}
-
-\begin{lemma}
-  \label{lem:kw_conj_mul_eq_pow}
-  \lean{kw_conj_mul_eq_pow}
-  \leanok
-  \uses{lem:kw_abelian_kummer}
-  Let $\alpha \in \cO_F$ and $\eta \in \cO_F^\times$ with $\mu = \alpha^p\eta$. Then
-  $\eta\,\sigma_{-1}(\eta)$ is a $p$-th power in $F$.
-\end{lemma}
-
-\begin{proof}
-  \leanok
-  By \ref{lem:kw_abelian_kummer} with $a = p - 1$, there is $\xi \in F^\times$ with
-  $\sigma_{-1}(\mu) = \xi^p\mu^{p-1} = (\xi\mu)^p\mu^{-1}$. Substituting $\mu = \alpha^p\eta$,
+  By \ref{lem:kw_class_trivial}, $\mathfrak{a} = (\beta)$ for some $\beta \in F$, nonzero since
+  $\mu \neq 0$. Then $(\beta^p) = (\mu)$, so $\mu = \beta^p\eta$ with $\eta$ a unit. The complex
+  conjugation is $\sigma_{-1}$, so by \ref{lem:kw_abelian_kummer} with $a = p - 1$ there is
+  $\xi \in F^\times$ with $c(\mu) = \xi^p\mu^{p-1} = (\xi\mu)^p\mu^{-1}$. Substituting
+  $\mu = \beta^p\eta$,
   \[
-    \sigma_{-1}(\alpha)^p\,\sigma_{-1}(\eta) = (\xi\mu)^p\,\alpha^{-p}\,\eta^{-1},
+    c(\beta)^p\,c(\eta) = (\xi\mu)^p\,\beta^{-p}\,\eta^{-1},
   \]
-  whence $\eta\,\sigma_{-1}(\eta) = \big(\xi\mu/(\alpha\,\sigma_{-1}(\alpha))\big)^p$.
+  whence $\eta\,c(\eta) = \big(\xi\mu/(\beta\,c(\beta))\big)^p$.
 \end{proof}
 
 \begin{lemma}
-  \label{lem:kw_exists_realUnit_torsion}
-  \lean{kw_exists_realUnit_torsion}
+  \label{lem:kw_unit_eq_mul_pow}
+  \lean{kw_unit_eq_mul_pow}
   \leanok
-  \uses{lem:kw_conj_mul_eq_pow}
-  Let $\alpha \in \cO_F$ and $\eta \in \cO_F^\times$ with $\mu = \alpha^p\eta$. Then
-  $\eta^4 = \zeta\,\delta^p$ for some $p$-th root of unity $\zeta$ and some nonzero $\delta \in F$.
+  Let $\eta \in \cO_F^\times$ be such that $\eta\,c(\eta) = w^p$ for some $w \in F$. Then
+  $\eta = \zeta\,\delta^p$ for some $p$-th root of unity $\zeta$ and some $\delta \in F$.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  The field $F$ is a CM field, and the automorphism $\sigma_{-1}$ is its complex conjugation. Every
-  unit of a CM field has a square of the form $\zeta_0\varepsilon_0$, with $\zeta_0$ a root of unity
-  and $\varepsilon_0$ a real unit
-  (\texttt{NumberField.IsCMField.exists\_torsion\_realunits\_pow\_two\_eq\_mul}). Squaring,
-  $\eta^4 = \zeta\varepsilon$ with $\zeta = \zeta_0^2$ and $\varepsilon = \varepsilon_0^2$. The
-  roots of unity of $F$ form a group of order $2p$, so $\zeta^p = \zeta_0^{2p} = 1$.
-
-  The automorphism $\sigma_{-1}$ fixes $\varepsilon$ and inverts $\zeta$, so $\sigma_{-1}(\eta)^4 =
-  \zeta^{-1}\varepsilon$. Multiplying, $\varepsilon^2 = (\eta\,\sigma_{-1}(\eta))^4$. By
-  \ref{lem:kw_conj_mul_eq_pow}, $\eta\,\sigma_{-1}(\eta) = w^p$, so $\varepsilon^2 = (w^4)^p$. As
-  $\gcd(2,p) = 1$, it follows that $\varepsilon = \delta^p$ for some nonzero $\delta \in F$.
+  The field $F$ is a CM field and, since $F \cong \QQ(\zeta_p)$, every unit of $F$ is the product
+  of a root of unity and a real unit: $\eta = \omega\varepsilon$
+  (\texttt{NumberField.IsCMField.exists\_torsion\_realunits\_pow\_indexRealUnits\_eq\_mul}, the
+  index of the real units being $1$). As $c(\omega) = \omega^{-1}$ and $c(\varepsilon) =
+  \varepsilon$, we get $\varepsilon^2 = \eta\,c(\eta) = w^p$. As $\gcd(2,p) = 1$, it follows that
+  $\varepsilon = \gamma^p$ for some $\gamma \in F$. The roots of unity of $F$ form a group of order
+  $2p$, so $\omega^{2p} = 1$. Then $\eta = \omega^{p+1}(\omega\gamma)^p$, and
+  $(\omega^{p+1})^p = 1$ since $2p$ divides $(p+1)p$.
 \end{proof}
 
 \begin{lemma}
   \label{lem:kw_unit_root_of_unity}
   \lean{kw_unit_root_of_unity}
   \leanok
-  \uses{lem:kw_class_trivial, lem:kw_mu_unit, lem:kw_exists_realUnit_torsion}
-  Let $\mathfrak{a}$ be a nonzero ideal of $\cO_F$ with $\mathfrak{a}^p = (\mu)$. Then $L$ is the
+  \uses{lem:kw_unit_conj_pow, lem:kw_unit_eq_mul_pow}
+  Let $\mathfrak{a}$ be a fractional ideal of $F$ with $\mathfrak{a}^p = (\mu)$. Then $L$ is the
   cyclotomic field of level $p^2$, that is, $L = \QQ(\xi)$ for a primitive $p^2$-th root of unity
   $\xi \in L$.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  By \ref{lem:kw_class_trivial} and \ref{lem:kw_mu_unit}, $\mu = \alpha^p\eta$ with $\alpha \neq 0$
-  and $\eta$ a unit, and by \ref{lem:kw_exists_realUnit_torsion}, $\eta^4 = \zeta\delta^p$. As
-  $\gcd(4,p) = 1$, the polynomial $X^p - \mu^4$ is irreducible over $F$ and $L$ is its splitting
-  field. Since $\mu^4 = \zeta(\alpha^4\delta)^p$, the field $L$ is also the splitting field of
-  $X^p - \zeta$. In particular $\zeta \neq 1$, since otherwise $L = F$, so $\zeta$ is a primitive
-  $p$-th root of unity. A root $\xi \in L$ of $X^p - \zeta$ is then a primitive $p^2$-th root of
+  By \ref{lem:kw_unit_conj_pow} and \ref{lem:kw_unit_eq_mul_pow}, $\mu = \beta^p\eta$ and
+  $\eta = \zeta\delta^p$, so $\mu = \zeta(\beta\delta)^p$ with $\zeta^p = 1$. If $\zeta = 1$, then
+  $\mu$ is a $p$-th power in $F$, contradicting the irreducibility of $X^p - \mu$. So $\zeta$ is a
+  primitive $p$-th root of unity. Let $\alpha \in L$ be a root of $X^p - \mu$ and
+  $\xi = \alpha/(\beta\delta)$. Then $\xi^p = \zeta$, so $\xi$ is a primitive $p^2$-th root of
   unity. Finally $\QQ(\xi) \subseteq L$ and both fields have degree $p(p-1)$ over $\QQ$, so
   $L = \QQ(\xi)$.
 \end{proof}
@@ -1750,17 +1736,17 @@ We keep the setting of the previous subsection.
 
 \begin{proof}
   \leanok
-  Put $F = \QQ(\zeta_{p^2}^p)$, so that $F \cong \QQ(\zeta_p)$, and $M = KF$. The field $F$ is
+  Put $F = \QQ(\zeta_p)$ and $M = KF$. The field $F$ is
   unramified outside $p$, hence so is $M$ by \ref{lem:unramified_outside_sup}, and $M/\QQ$ is
   abelian. Since $[K:\QQ] = p$ and $[F:\QQ] = p-1$ are coprime, $K \cap F = \QQ$ and $[M:\QQ] =
   p(p-1)$. By \ref{lem:kw_kummer_degree}, the extension $M/F$ is cyclic of degree $p$, and by
-  \ref{lem:kw_kummer}, $M$ is the splitting field of $X^p - \mu$ for some nonzero $\mu \in \cO_F$.
+  \ref{lem:kw_kummer}, $M$ is the splitting field of $X^p - \mu$ for some nonzero $\mu \in F$.
   The polynomial $X^p - \mu$ is irreducible: otherwise $\mu$ would be a $p$-th power in $F$, and
   $X^p - \mu$ would split over $F$, giving $M = F$.
 
-  By \ref{lem:kw_mu_pth_power_ideal}, $(\mu) = \mathfrak{a}^p$ with $\mathfrak{a} \neq 0$. By
-  \ref{lem:kw_unit_root_of_unity}, the field $M$ is the cyclotomic field of level $p^2$, so $M =
-  \QQ(\zeta_{p^2})$. Hence $K \subseteq M = \QQ(\zeta_{p^2})$.
+  By \ref{lem:kw_mu_pth_power_ideal}, $(\mu) = \mathfrak{a}^p$ for a fractional ideal
+  $\mathfrak{a}$. By \ref{lem:kw_unit_root_of_unity}, the field $M$ is the cyclotomic field of
+  level $p^2$, so $M = \QQ(\zeta_{p^2})$. Hence $K \subseteq M = \QQ(\zeta_{p^2})$.
 \end{proof}
 
 \begin{corollary}
@@ -1784,17 +1770,17 @@ We keep the setting of the previous subsection.
   \lean{prop_kw_odd_prime_power}
   \leanok
   \uses{cor:kw_exponent_p_unique, lem:kw_eq_of_unique_prime_subfield, lem:kw_fixedField_index}
-  Let $p$ be an odd prime, $m \geq 1$, and $K \subseteq A$ an abelian extension of $\QQ$ of degree
-  $p^m$, unramified outside $p$. Then $K \subseteq \QQ(\zeta_{p^{m+1}})$.
+  Let $p$ be an odd prime and $K \subseteq A$ an abelian extension of $\QQ$ of degree $p^m$,
+  unramified outside $p$. Then $K \subseteq \QQ(\zeta_{p^{m+1}})$.
 \end{proposition}
 
 \begin{proof}
   \leanok
   Put $C = \QQ(\zeta_{p^{m+1}})$. It is unramified outside $p$, and since $p$ is odd,
   $\Gal(C/\QQ) \cong (\ZZ/p^{m+1}\ZZ)^\times$ is cyclic of order $p^{m}(p-1)$. Let $\sigma$ be a
-  generator and $H = \langle \sigma^{p^m}\rangle$, a subgroup of index $p^m$ with cyclic quotient.
-  By \ref{lem:kw_fixedField_index}, the field $K' = C^{H}$ is a cyclic extension of $\QQ$ of
-  degree $p^m$, unramified outside $p$. By \ref{cor:kw_exponent_p_unique}, the hypothesis of
+  generator and $H = \langle \sigma^{p^m}\rangle$, a subgroup of index $p^m$. By
+  \ref{lem:kw_fixedField_index}, the field $K' = C^{H}$ is an abelian extension of $\QQ$ of degree
+  $p^m$, unramified outside $p$. By \ref{cor:kw_exponent_p_unique}, the hypothesis of
   \ref{lem:kw_eq_of_unique_prime_subfield} holds, so $K = K' \subseteq C$.
 \end{proof}
 
@@ -1805,22 +1791,20 @@ case.
 
 \begin{lemma}
   \label{lem:kw_2_quadratic_discr}
-  \lean{kw_2_quadratic_discr}
+  \lean{kw_2_quadratic_real_discr}
   \leanok
   \uses{def:unramified_outside}
-  A quadratic field unramified outside $2$ has discriminant $-8$, $-4$ or $8$.
+  A totally real quadratic field unramified outside $2$ has discriminant $8$.
 \end{lemma}
 
 \begin{proof}
   \leanok
   Let $d$ be the discriminant. A prime number divides $d$ if and only if it ramifies, so $2$ is
-  the only possible prime divisor of $d$. The discriminant of a quadratic field is a fundamental
-  discriminant (Mathlib PR \#43490), so $d \equiv 0$ or $1 \pmod 4$.
-
-  If $d \equiv 1 \pmod 4$, then $d$ is odd. By Minkowski's bound $|d| > 2$, so $d$ has a prime
-  divisor, which is odd: a contradiction. Hence $d = 4m$. Since $4m$ is a fundamental
-  discriminant, the integer $m$ is squarefree and $m \not\equiv 1 \pmod 4$. As the only prime
-  dividing $m$ is $2$, this leaves $m \in \{-1, 2, -2\}$, that is, $d \in \{-4, 8, -8\}$.
+  the only possible prime divisor of $d$, and $|d| = 2^k$. The discriminant of a totally real
+  quadratic field is positive (Mathlib PR \#43493), so $d = 2^k$. It is a fundamental discriminant
+  (Mathlib PR \#43490) different from $1$. Now $d = 2$ is not $0$ or $1$ modulo $4$, $d = 4$ is
+  not fundamental, and neither is $d = 2^k$ for $k \geq 4$, since $d/4$ is then divisible by $4$.
+  Hence $d = 8$.
 \end{proof}
 
 \begin{proposition}
@@ -1833,73 +1817,41 @@ case.
 
 \begin{proof}
   \leanok
-  By \ref{lem:kw_2_quadratic_discr}, each discriminant is $-8$, $-4$ or $8$. The discriminant of a
-  totally real quadratic field is positive (Mathlib PR \#43493), so both discriminants equal $8$.
-  Two quadratic fields with the same discriminant are isomorphic (Mathlib PR \#43490), and a
-  quadratic field is normal over $\QQ$, so $K_1 = K_2$ as subfields of $A$.
+  By \ref{lem:kw_2_quadratic_discr}, both discriminants equal $8$. Two quadratic fields with the
+  same discriminant are isomorphic (Mathlib PR \#43490), and a quadratic field is normal over
+  $\QQ$, so $K_1 = K_2$ as subfields of $A$.
 \end{proof}
 
 \begin{lemma}
   \label{lem:kw_maximalReal_fixedField}
-  \lean{maximalReal_eq_lift_fixedField}
+  \lean{NumberField.IsCMField.toSubfield_fixedField_ratComplexConj, exists_maximalReal}
   \leanok
-  Let $L \subseteq A$ be a CM field with complex conjugation $c \in \Gal(L/\QQ)$. Then its maximal
-  real subfield $L^+$ is the fixed field of $\langle c\rangle$.
+  Let $C \subseteq A$ be an abelian CM field. Then $C$ has a totally real abelian subfield $F$
+  with $[C:\QQ] = 2[F:\QQ]$, namely its maximal real subfield $C^+$.
 \end{lemma}
 
 \begin{proof}
   \leanok
-  An element of $L$ lies in $L^+$ if and only if it is fixed by $c$. Since $c$ has order $2$,
-  being fixed by $c$ is the same as being fixed by $\langle c\rangle$.
-\end{proof}
-
-\begin{lemma}
-  \label{lem:galEquivZMod_complexConj}
-  \lean{IsCyclotomicExtension.Rat.galEquivZMod_ratComplexConj}
-  \leanok
-  Under the isomorphism $\Gal(\QQ(\zeta_n)/\QQ) \cong (\ZZ/n\ZZ)^\times$, complex conjugation
-  corresponds to $-1$.
-\end{lemma}
-
-\begin{proof}
-  \leanok
-  Complex conjugation sends every root of unity to its inverse, so it sends $\zeta_n$ to
-  $\zeta_n^{-1} = \zeta_n^{n-1}$.
-\end{proof}
-
-\begin{lemma}
-  \label{lem:zmod_two_pow_units_quotient}
-  \lean{ZMod.isCyclic_units_two_pow_quotient_neg_one}
-  \leanok
-  For every $n \geq 0$, the quotient $(\ZZ/2^{n+2}\ZZ)^\times / \langle -1 \rangle$ is cyclic.
-\end{lemma}
-
-\begin{proof}
-  \leanok
-  The subgroups generated by $5$ and by $-1$ are complementary in $(\ZZ/2^{n+2}\ZZ)^\times$, so the
-  quotient is isomorphic to the cyclic group generated by $5$.
+  Let $c$ be the complex conjugation of $C$. The maximal real subfield $C^+$ is the fixed field of
+  $\langle c\rangle$: an element of $C$ lies in $C^+$ if and only if it is fixed by $c$. It is
+  totally real, abelian over $\QQ$ as a subfield of $C$, and $[C:C^+] = 2$.
 \end{proof}
 
 \begin{proposition}
   \label{prop:kw_2_power_real}
-  \lean{prop_kw_2_power_real}
+  \lean{prop_kw_2_power'}
   \leanok
   \uses{prop:kw_2_quadratic_real_unique, lem:kw_eq_of_unique_prime_subfield,
-    lem:kw_fixedField_index, lem:kw_maximalReal_fixedField, lem:galEquivZMod_complexConj,
-    lem:zmod_two_pow_units_quotient}
-  Let $K \subseteq A$ be a totally real cyclic extension of $\QQ$ of degree $2^m$, unramified
+    lem:kw_maximalReal_fixedField}
+  Let $K \subseteq A$ be a totally real abelian extension of $\QQ$ of degree $2^m$, unramified
   outside $2$. Then $K \subseteq \QQ(\zeta_{2^{m+2}})$.
 \end{proposition}
 
 \begin{proof}
   \leanok
-  Put $C = \QQ(\zeta_{2^{m+2}})$, a CM field unramified outside $2$, and let $c$ be its complex
-  conjugation. The subgroup $\langle c\rangle$ has order $2$, hence index $2^m$ in $\Gal(C/\QQ)$.
-  By \ref{lem:galEquivZMod_complexConj}, the quotient $\Gal(C/\QQ)/\langle c\rangle$ is isomorphic
-  to $(\ZZ/2^{m+2}\ZZ)^\times/\langle -1\rangle$, which is cyclic by
-  \ref{lem:zmod_two_pow_units_quotient}. By \ref{lem:kw_fixedField_index} and
-  \ref{lem:kw_maximalReal_fixedField}, the maximal real subfield $K' = C^+$ is a cyclic extension
-  of $\QQ$ of degree $2^m$, unramified outside $2$, and it is totally real.
+  Put $C = \QQ(\zeta_{2^{m+2}})$, an abelian CM field of degree $2^{m+1}$, unramified outside $2$.
+  By \ref{lem:kw_maximalReal_fixedField}, its maximal real subfield $K' = C^+$ is a totally real
+  abelian extension of $\QQ$ of degree $2^m$, unramified outside $2$ as a subfield of $C$.
 
   The compositum $KK'$ is totally real, so every subfield of $KK'$ is totally real. By
   \ref{prop:kw_2_quadratic_real_unique}, any two quadratic subfields of $KK'$ unramified outside
@@ -1910,28 +1862,24 @@ case.
   \label{prop:kw_2_power}
   \lean{prop_kw_2_power}
   \leanok
-  \uses{prop:kw_2_power_real, lem:unramified_outside_sup}
-  Let $K \subseteq A$ be a cyclic extension of $\QQ$ of degree $2^m$, unramified outside $2$.
+  \uses{prop:kw_2_power_real, lem:kw_maximalReal_fixedField, lem:unramified_outside_sup}
+  Let $K \subseteq A$ be an abelian extension of $\QQ$ of degree $2^m$, unramified outside $2$.
   Then $K \subseteq \QQ(\zeta_{2^{m+2}})$.
 \end{proposition}
 
 \begin{proof}
   \leanok
-  If $K$ is totally real, this is \ref{prop:kw_2_power_real}. Otherwise let $L = K\QQ(i)$, with
-  $i = \zeta_4$. It is a totally complex abelian extension of $\QQ$, unramified outside $2$ by
-  \ref{lem:unramified_outside_sup}, of degree $2^l$ with $l \leq m+1$; it is a CM field. Let
-  $M = L^+$ be its maximal real subfield, of degree $2^k$ with $k \leq l$. As $L$ is totally
-  complex, $M \neq L$, so $k \leq m$. The field $M$ is abelian and unramified outside $2$.
+  An abelian number field is either totally real or totally complex. If $K$ is totally real, this
+  is \ref{prop:kw_2_power_real}. Otherwise let $L = K\QQ(i)$, with $i = \zeta_4$. It is a totally
+  complex abelian extension of $\QQ$, hence a CM field, unramified outside $2$ by
+  \ref{lem:unramified_outside_sup}, and its degree divides $2^{m+1}$. By
+  \ref{lem:kw_maximalReal_fixedField}, its maximal real subfield $M = L^+$ is totally real, abelian,
+  with $[L:M] = 2$, so $[M:\QQ] = 2^k$ with $k \leq m$. It is unramified outside $2$ as a subfield
+  of $L$.
 
-  The field $M$ is cyclic over $\QQ$. Indeed, $\Gal(M/\QQ) \cong \Gal(L/\QQ)/\langle c\rangle$,
-  where $c$ is the complex conjugation of $L$. The restriction map $\Gal(L/\QQ) \to \Gal(K/\QQ)
-  \times \Gal(\QQ(i)/\QQ)$ is injective, so $\Gal(M/\QQ)$ embeds into the quotient of
-  $\Gal(K/\QQ) \times \Gal(\QQ(i)/\QQ)$ by the image of $\langle c\rangle$. The restriction of $c$
-  to $\QQ(i)$ generates $\Gal(\QQ(i)/\QQ)$, so this quotient is generated by the image of the
-  cyclic group $\Gal(K/\QQ) \times 1$. Hence it is cyclic, and so is $\Gal(M/\QQ)$.
-
-  By \ref{prop:kw_2_power_real}, $M \subseteq \QQ(\zeta_{2^{k+2}})$. Since $[L:M] = 2$ and
-  $i \notin M$, we get $L = M\QQ(i)$. Therefore
+  The field $M\QQ(i)$ lies between $M$ and $L$, and $[L:M] = 2$ is prime, so $M\QQ(i)$ is $M$ or
+  $L$. It is not $M$, since $M$ is totally real and $\QQ(i)$ is not, so $L = M\QQ(i)$. By
+  \ref{prop:kw_2_power_real}, $M \subseteq \QQ(\zeta_{2^{k+2}})$. Therefore
   \[
     K \subseteq L = M\QQ(i) \subseteq \QQ(\zeta_{2^{k+2}})\QQ(\zeta_4)
       \subseteq \QQ(\zeta_{2^{m+2}}).

@@ -10,6 +10,7 @@ public import Mathlib.RingTheory.LocalRing.ResidueField.Ideal
 public import Mathlib.RingTheory.DedekindDomain.Ideal.Lemmas
 
 public import SKW.Prereqs.Stickelberger
+public import SKW.Prereqs.KroneckerWeber
 
 set_option linter.style.header false
 
@@ -19,6 +20,8 @@ open NumberField
 
 /-! ### Ideal -/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 @[simps]
 def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike F R S]
     [RingHomClass F R S] (e : F) : Ideal R ≃+* Ideal S where
@@ -27,13 +30,17 @@ def Ideal.mapEquiv {R S F : Type*} [CommSemiring R] [CommSemiring S] [EquivLike 
   __ := Ideal.mapHom e
   left_inv _ := by simpa using comap_map_of_bijective _ (EquivLike.bijective e)
   right_inv _ := by simpa using Ideal.map_comap_of_surjective _ (EquivLike.surjective e) _
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem Ideal.mapEquiv_eq_bot_iff {R S F : Type*} [CommSemiring R] [CommSemiring S]
     [EquivLike F R S] [RingHomClass F R S] (e : F) (I : Ideal R) :
     I.mapEquiv e = ⊥ ↔ I = ⊥ := by
   refine ⟨fun h ↦ ?_, fun h ↦ by simp [h]⟩
   rwa [← RingEquiv.eq_symm_apply, mapEquiv_symm_apply,
     comap_bot_of_injective _ (EquivLike.injective e)] at h
+-/
 
 theorem Ideal.mapEquiv_eq_top_iff {R S F : Type*} [CommSemiring R] [CommSemiring S]
     [EquivLike F R S] [RingHomClass F R S] (e : F) (I : Ideal R) :
@@ -41,12 +48,17 @@ theorem Ideal.mapEquiv_eq_top_iff {R S F : Type*} [CommSemiring R] [CommSemiring
   refine ⟨fun h ↦ ?_, fun h ↦ by simp [h, map_top]⟩
   rwa [← RingEquiv.eq_symm_apply, mapEquiv_symm_apply, comap_top] at h
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem IsDedekindDomain.HeightOneSpectrum.equivOfRingEquiv_apply_asIdeal {R S : Type*}
     [CommRing R] [CommRing S] (f : R ≃+* S) (v : HeightOneSpectrum R) :
     (equivOfRingEquiv f v).asIdeal = v.asIdeal.map f := by
   simp only [equivOfRingEquiv_apply, ← RingEquiv.toRingHom_eq_coe, comap_asIdeal]
   exact Ideal.comap_symm f
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Every height one prime of `R` lies below a height one prime of `S`. -/
 theorem IsDedekindDomain.HeightOneSpectrum.under_surjective {R S : Type*} [CommRing R]
     [CommRing S] [IsDedekindDomain R] [IsDomain S] [Algebra R S] [Algebra.IsIntegral R S]
@@ -57,16 +69,23 @@ theorem IsDedekindDomain.HeightOneSpectrum.under_surjective {R S : Type*} [CommR
   obtain ⟨Q, hQ, hQ'⟩ := Ideal.exists_maximal_ideal_liesOver_of_isIntegral (S := S) v.asIdeal
   exact ⟨⟨Q, hQ.isPrime, Ideal.ne_bot_of_liesOver_of_ne_bot v.ne_bot Q⟩,
     HeightOneSpectrum.ext <| by simp [under_asIdeal, (Ideal.liesOver_iff _ _).mp hQ']⟩
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- For a maximal ideal `I`, `R ⧸ I` is already its own fraction field, so the canonical map to
 the residue field `κ(I) = ResidueField R_I` of the localization is an isomorphism. -/
 noncomputable def Ideal.residueFieldEquiv {R : Type*} [CommRing R] (I : Ideal R) [I.IsMaximal] :
     R ⧸ I ≃+* I.ResidueField :=
   RingEquiv.ofBijective _ I.bijective_algebraMap_quotient_residueField
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 @[simp]
 theorem Ideal.residueFieldEquiv_mk {R : Type*} [CommRing R] (I : Ideal R) [I.IsMaximal] (x : R) :
     I.residueFieldEquiv (Ideal.Quotient.mk I x) = algebraMap R I.ResidueField x := rfl
+-/
 
 @[simp]
 theorem Ideal.residueFieldEquiv_symm_algebraMap {R : Type*} [CommRing R] (I : Ideal R)
@@ -74,11 +93,14 @@ theorem Ideal.residueFieldEquiv_symm_algebraMap {R : Type*} [CommRing R] (I : Id
     I.residueFieldEquiv.symm (algebraMap R I.ResidueField x) = Ideal.Quotient.mk I x := by
   rw [← residueFieldEquiv_mk, RingEquiv.symm_apply_apply]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open Pointwise in
 theorem Ideal.pointwise_smul_def' {M R : Type*} [Group M] [CommSemiring R] [MulSemiringAction M R]
   {a : M}
     (S : Ideal R) :
     a • S = mapEquiv (MulSemiringAction.toRingEquiv M R a) S := rfl
+-/
 
 theorem Ideal.infinite_of_not_isField {R : Type*} [CommRing R] [Nontrivial R]
     [IsCancelMulZero (Ideal R)] (h : ¬IsField R) :
@@ -171,6 +193,8 @@ theorem Ideal.IsDedekindDomain.prime_of_maximal {R : Type*} [CommRing R] [CharZe
   refine (prime_iff_isPrime (IsMaximal.ne_bot_of_isIntegral_int I)).mpr <| IsMaximal.isPrime' I
 -/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 -- Replace Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul?
 -- TODO(SKW): the statement is already unprimed, but the proof bridges back to the primed index
 -- because `emultiplicity_map_eq_ramificationIdx'_mul` has no unprimed version upstream. Once it
@@ -192,7 +216,10 @@ theorem Ideal.IsDedekindDomain.emultiplicity_map_eq_ramificationIdx_mul' {R : Ty
   · exact emultiplicity_map_eq_ramificationIdx'_mul hI
       (irreducible_iff_prime.mpr ((prime_iff_isPrime hv).mpr ‹_›))
       (irreducible_iff_prime.mpr ((prime_iff_isPrime hw).mpr ‹_›)) hw
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem Ideal.IsDedekindDomain.multiplicity_map_eq_ramificationIdx_mul {R : Type*} [CommRing R]
     {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R]
     [FaithfulSMul R S] {v : Ideal R} {w : Ideal S} (I : Ideal R) (hv : v ≠ ⊥) [w.IsPrime]
@@ -207,6 +234,7 @@ theorem Ideal.IsDedekindDomain.multiplicity_map_eq_ramificationIdx_mul {R : Type
     (FiniteMultiplicity.of_not_isUnit (isUnit_iff.not.mpr IsPrime.ne_top')
       hI).emultiplicity_eq_multiplicity] at h
   exact mod_cast h
+-/
 
 theorem Ideal.IsDedekindDomain.ramificationIdx_mul_emultiplicity_under_eq {R : Type*} [CommRing R]
     {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R]
@@ -216,18 +244,24 @@ theorem Ideal.IsDedekindDomain.ramificationIdx_mul_emultiplicity_under_eq {R : T
         emultiplicity w (map (algebraMap R S) I) :=
   (emultiplicity_map_eq_ramificationIdx_mul' I (under_ne_bot R hw) hw).symm
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem Ideal.IsDedekindDomain.ramificationIdx_mul_multiplicity_under_eq {R : Type*} [CommRing R]
     {S : Type*} [CommRing S] [Algebra R S] [IsDedekindDomain S] [IsDedekindDomain R]
     [FaithfulSMul R S] [Algebra.IsIntegral R S] {w : Ideal S} [w.IsPrime] (hw : w ≠ ⊥)
     {I : Ideal R} :
     w.ramificationIdx R * multiplicity (under R w) I = multiplicity w (map (algebraMap R S) I) :=
   (multiplicity_map_eq_ramificationIdx_mul I (under_ne_bot R hw) hw).symm
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open Pointwise in
 @[simp]
 theorem Ideal.smul_eq_bot_iff {M : Type*} {R : Type*} [Group M] [Semiring R] [MulSemiringAction M R]
     {m : M} {I : Ideal R} : m • I = ⊥ ↔ I = ⊥ := by
   rw [smul_eq_iff_eq_inv_smul, smul_bot]
+-/
 
 open Pointwise in
 @[simp]
@@ -242,6 +276,8 @@ theorem Ideal.smul_eq_top_iff {M : Type*} {R : Type*} [Group M] [CommRing R] [Mu
     {m : M} {I : Ideal R} : m • I = ⊤ ↔ I = ⊤ := by
   rw [smul_eq_iff_eq_inv_smul, smul_top]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open Pointwise in
 /-- An element of the stabilizer of `I` preserves `I`. -/
 theorem Ideal.smul_mem_of_mem_stabilizer {M R : Type*} [Group M] [CommRing R] [MulSemiringAction M
@@ -249,7 +285,10 @@ theorem Ideal.smul_mem_of_mem_stabilizer {M R : Type*} [Group M] [CommRing R] [M
     (I : Ideal R) (σ : MulAction.stabilizer M I) {x : R} (hx : x ∈ I) : σ • x ∈ I := by
   nth_rewrite 1 [← MulAction.mem_stabilizer_iff.mp σ.prop]
   exact smul_mem_pointwise_smul σ x I hx
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open Pointwise in
 /-- An element of the stabilizer of `I` preserves `I ^ k`. -/
 theorem Ideal.smul_mem_pow_of_mem_stabilizer {M R : Type*} [Group M] [CommRing R]
@@ -257,12 +296,16 @@ theorem Ideal.smul_mem_pow_of_mem_stabilizer {M R : Type*} [Group M] [CommRing R
     (hx : x ∈ I ^ k) : σ • x ∈ I ^ k := by
   nth_rewrite 1 [← MulAction.mem_stabilizer_iff.mp σ.prop, ← smul_pow']
   exact smul_mem_pointwise_smul σ x _ hx
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Ideal version of `AddSubgroup.subgroupOf_inertia`: the inertia of `I` in a subgroup `H ≤ G` is
 the restriction to `H` of the inertia in `G`. -/
 theorem Ideal.subgroupOf_inertia {R : Type*} [Ring R] (I : Ideal R) {G : Type*} [Group G]
     [MulAction G R] (H : Subgroup G) : (I.inertia G).subgroupOf H = I.inertia H :=
   AddSubgroup.subgroupOf_inertia I.toAddSubgroup H
+-/
 
 -- TODO(SKW): upstream to `Mathlib/RingTheory/Ideal/Over.lean`, at the end of the `primesOver`
 -- section.
@@ -312,11 +355,14 @@ variable {A : Type*} [CommRing A] [IsDomain A] (p : Ideal A) [p.IsPrime]
   [FaithfulSMul A B] (G : Type*) [Group G] [Finite G] [MulSemiringAction G B]
   [IsGaloisGroup G A B]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 include G in
 theorem ramificationIdxIn_dvd_finrank : p.ramificationIdxIn B ∣ Module.finrank A B := by
   rw [← IsGaloisGroup.card_eq_finrank' G,
     ← ncard_primesOver_mul_ramificationIdxIn_mul_inertiaDegIn p B G]
   exact dvd_mul_of_dvd_right (dvd_mul_right _ _) _
+-/
 
 include G in
 theorem inertiaDegIn_dvd_finrank : p.inertiaDegIn B ∣ Module.finrank A B := by

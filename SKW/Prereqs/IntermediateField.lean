@@ -15,6 +15,7 @@ public import SKW.Prereqs.AlgebraMisc
 public import SKW.Prereqs.Torsion
 public import SKW.Prereqs.Subfield
 public import SKW.Prereqs.Stickelberger
+public import SKW.Prereqs.KroneckerWeber
 
 set_option linter.style.header false
 
@@ -22,6 +23,8 @@ set_option linter.style.header false
 
 /-! ### Intermediate Fields -/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- The fixing subgroup of an intermediate field `F` is a Galois group of `L / F`. This bridges
 `IntermediateField.fixingSubgroup` to `IsGaloisGroup.intermediateField`, which is stated on the raw
 `fixingSubgroup Gal(L/K) (↑F)`; instance search does not unfold the
@@ -30,7 +33,10 @@ wrapper on its own, so without this the instance is not found for the `Intermedi
 instance {K L : Type*} [Field K] [Field L] [Algebra K L] [FiniteDimensional K L] [IsGalois K L]
     (F : IntermediateField K L) : IsGaloisGroup F.fixingSubgroup F L :=
   inferInstanceAs (IsGaloisGroup (fixingSubgroup Gal(L/K) (F : Set L)) F L)
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open scoped NumberField in
 /-- Ring-of-integers form of the previous instance. The generic `IsGaloisGroup G (𝓞 K) (𝓞 L)`
 instance does not fire for `G = F.fixingSubgroup` on its own, so we bridge it explicitly (its body,
@@ -41,7 +47,10 @@ instance {K L : Type*} [Field K] [Field L] [NumberField K] [NumberField L] [Alge
     [FiniteDimensional K L] [IsGalois K L] (F : IntermediateField K L) :
     IsGaloisGroup F.fixingSubgroup (𝓞 F) (𝓞 L) :=
   IsGaloisGroup.of_isFractionRing _ (𝓞 F) (𝓞 L) F L
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open IntermediateField in
 /-- In a finite Galois extension, two intermediate fields are equal iff they have the same fixing
 subgroup. -/
@@ -49,7 +58,10 @@ theorem IsGalois.fixingSubgroup_inj {K L : Type*} [Field K] [Field L] [Algebra K
     [FiniteDimensional K L] [IsGalois K L] {F₁ F₂ : IntermediateField K L} :
     F₁.fixingSubgroup = F₂.fixingSubgroup ↔ F₁ = F₂ :=
   ⟨fun h ↦ by rw [← fixedField_fixingSubgroup F₁, h, fixedField_fixingSubgroup], congr_arg _⟩
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open IntermediateField in
 /-- In a finite extension, two subgroups of the automorphism group are equal iff they have the same
 fixed field. -/
@@ -57,6 +69,7 @@ theorem IsGalois.fixedField_inj {K L : Type*} [Field K] [Field L] [Algebra K L]
     [FiniteDimensional K L] {H₁ H₂ : Subgroup Gal(L/K)} :
     fixedField H₁ = fixedField H₂ ↔ H₁ = H₂ :=
   ⟨fun h ↦ by rw [← fixingSubgroup_fixedField H₁, h, fixingSubgroup_fixedField], congr_arg _⟩
+-/
 
 open IntermediateField in
 /-- In a finite Galois extension, the fixing subgroup of `F₁` is contained in that of `F₂` iff
@@ -75,12 +88,15 @@ theorem IntermediateField.rank_lift {K L : Type*} [Field K] [Field L] [Algebra K
     Module.rank K (lift E) = Module.rank K E :=
   (liftAlgEquiv E).toLinearEquiv.rank_eq.symm
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open IntermediateField in
 /-- `lift` preserves the degree over the base field: `[lift E : K] = [E : K]`. -/
 theorem IntermediateField.finrank_lift {K L : Type*} [Field K] [Field L] [Algebra K L]
     {F : IntermediateField K L} (E : IntermediateField K F) :
     Module.finrank K (lift E) = Module.finrank K E :=
   (liftAlgEquiv E).toLinearEquiv.finrank_eq.symm
+-/
 
 open IntermediateField in
 /-- `lift` preserves finite-dimensionality over the base field. -/
@@ -96,19 +112,25 @@ theorem IntermediateField.rank_restrict {K L : Type*} [Field K] [Field L] [Algeb
     Module.rank K (restrict h) = Module.rank K F :=
   (restrictAlgEquiv h).toLinearEquiv.rank_eq.symm
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open IntermediateField in
 /-- `restrict` preserves the degree over the base field: `[restrict h : K] = [F : K]`. -/
 theorem IntermediateField.finrank_restrict {K L : Type*} [Field K] [Field L] [Algebra K L]
     {F E : IntermediateField K L} (h : F ≤ E) :
     Module.finrank K (restrict h) = Module.finrank K F :=
   (restrictAlgEquiv h).toLinearEquiv.finrank_eq.symm
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open IntermediateField in
 /-- `restrict` preserves finite-dimensionality over the base field. -/
 instance IntermediateField.finiteDimensional_restrict {K L : Type*} [Field K] [Field L]
     [Algebra K L] {F E : IntermediateField K L} {h : F ≤ E} [FiniteDimensional K F] :
     FiniteDimensional K (restrict h) :=
   Module.Finite.equiv (restrictAlgEquiv h).toLinearEquiv
+-/
 
 open IntermediateField in
 /-- `restrict` is order-reflecting in the restricted field: for `F₁, F₂ ≤ E`, one has
@@ -138,6 +160,8 @@ theorem IsGaloisGroup.finrank_fixedPoints_eq_index_subgroup (G K L : Type*) [Gro
   rw [← mul_left_inj' this, Module.finrank_mul_finrank, finrank_fixedPoints_eq_card_subgroup,
     Subgroup.index_mul_card, card_eq_finrank G K L]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Fixed-field is antitone (the Galois correspondence), so it sends `⊓` of subgroups to `⊔` of
 fixed fields: `fixedField (A ⊓ B) = fixedField A ⊔ fixedField B`. -/
 theorem FixedPoints.intermediateField_inf (G K L : Type*) [Group G] [Field K] [Field L]
@@ -148,7 +172,10 @@ theorem FixedPoints.intermediateField_inf (G K L : Type*) [Group G] [Field K] [F
     ← IsGaloisGroup.intermediateFieldEquivSubgroup_symm_apply_toDual G K L (H := A),
     ← IsGaloisGroup.intermediateFieldEquivSubgroup_symm_apply_toDual G K L (H := B),
     toDual_inf, OrderIso.map_sup]
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- **Inertia field from a complement.** For a Galois group `G` of `L/K` (`IsGaloisGroup G K L`), if
 a normal subgroup `I` is complemented by the fixing subgroup of an intermediate field `F`
 (`IsComplement' I (fixingSubgroup G (F : Set L))`), then the fixed field of `I` together with `F`
@@ -163,6 +190,7 @@ theorem IsGaloisGroup.fixedPoints_sup_eq_top_of_isComplement (G K L : Type*) [Gr
   refine ⟨?_, ⟨h.symm.QuotientMulEquiv⟩⟩
   rw [← fixedPoints_fixingSubgroup G K L F, ← FixedPoints.intermediateField_inf,
     disjoint_iff.mp h.disjoint, fixedPoints_bot]
+-/
 
 section restrictScalars
 
@@ -292,6 +320,8 @@ theorem IntermediateField.finrank_sup_mul_finrank_inf_eq {k L : Type*} [Field k]
 
 universe u
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open IntermediateField in
 /-- Every finite-dimensional abelian Galois extension `K/F` is the compositum of cyclic
 subextensions of prime power degree. (The character codomain is `AlgebraicClosure ℚ`, which has
@@ -331,7 +361,10 @@ lemma IsAbelianGalois.exists_isCyclic_primePow_iSup_eq_top
     obtain ⟨ψ, hψ⟩ := CommGroup.exists_apply_ne_one_of_hasEnoughRootsOfUnity Gal(K/F)
       (AlgebraicClosure ℚ) h
     exact hψ h_eq_one
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open IntermediateField Module in
 /-- If `B / F` is a finite Galois extension and the compositum `A ⊔ B` is all of `E`, then the
 relative degree `[E : A]` divides `[B : F]`. This is the ⊤-case: here `E` is genuinely an
@@ -345,7 +378,10 @@ theorem IntermediateField.finrank_dvd_finrank_of_isGalois_of_sup_eq_top {F E : T
   have : IsGalois A E := IsGalois.sup_right B A h
   rw [← IsGalois.card_aut_eq_finrank, ← IsGalois.card_aut_eq_finrank]
   exact Subgroup.card_dvd_of_injective _ <| restrictRestrictAlgEquivMapHom_injective B A h
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open Module in
 /-- If `B / F` is a finite Galois extension, then for any finite `A`, the degree of the compositum
 `A ⊔ B` over `F` divides `[A : F] * [B : F]`. (Equivalently, `[A ⊔ B : A] ∣ [B : F]`, which fails
@@ -368,6 +404,7 @@ theorem IntermediateField.finrank_sup_dvd_mul_of_isGalois {F E : Type*} [Field F
   have := mul_dvd_mul_left (finrank F A') <| finrank_dvd_finrank_of_isGalois_of_sup_eq_top A' B'
     this
   rwa [Module.finrank_mul_finrank, finrank_restrict, finrank_restrict] at this
+-/
 
 theorem IntermediateField.lift_iInf {F E : Type*} [Field F] [Field E] [Algebra F E]
     (K : IntermediateField F E) {ι : Type*} (S : Finset ι) (hS : S.Nonempty)
@@ -379,6 +416,8 @@ theorem IntermediateField.lift_iInf {F E : Type*} [Field F] [Field E] [Algebra F
   | cons i s h hs hi =>
       rw [Finset.cons_eq_insert, Finset.iInf_insert, Finset.iInf_insert, lift_inf, hi]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem IntermediateField.lift_iSup (F E : Type*) [Field F] [Field E] [Algebra F E]
     (K : IntermediateField F E) {ι : Type*} (S : Finset ι) (L : ι → IntermediateField F K) :
     lift (⨆ i ∈ S, L i) = ⨆ i ∈ S, lift (L i) := by
@@ -386,6 +425,7 @@ theorem IntermediateField.lift_iSup (F E : Type*) [Field F] [Field E] [Algebra F
   induction S using Finset.induction with
   | empty => simp
   | insert i s _ hi => rw [Finset.iSup_insert, Finset.iSup_insert, lift_sup, hi]
+-/
 
 namespace IntermediateField
 
@@ -422,6 +462,8 @@ namespace IntermediateField
 
 variable {F E : Type*} [Field F] [Field E] [Algebra F E]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- If `L / K` has prime degree, then any intermediate field between `K` and `L` is `K` or `L`. -/
 theorem eq_or_eq_of_relfinrank_prime {K L M : IntermediateField F E} (hKM : K ≤ M) (hML : M ≤ L)
     (hp : (relfinrank K L).Prime) : M = K ∨ M = L := by
@@ -429,5 +471,6 @@ theorem eq_or_eq_of_relfinrank_prime {K L M : IntermediateField F E} (hKM : K �
   obtain ⟨-, h⟩ | ⟨-, h⟩ := hp
   · exact .inr <| le_antisymm hML (relfinrank_eq_one_iff.mp h)
   · exact .inl <| le_antisymm (relfinrank_eq_one_iff.mp h) hKM
+-/
 
 end IntermediateField

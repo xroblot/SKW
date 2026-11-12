@@ -1,12 +1,7 @@
 module
 
-public import SKW.Prereqs.CyclotomicField
-public import SKW.Prereqs.FractionalIdeal
-public import SKW.Prereqs.Ideals
-public import SKW.Prereqs.KummerExtension
+public import SKW.Prereqs.KroneckerWeber
 public import SKW.Prereqs.OtherPR
-public import SKW.Prereqs.Unramified
-public import SKW.Prereqs.TameRamification
 public import SKW.Stickelberger.Stickelberger
 
 public import Mathlib.Algebra.FiniteSupport.Basic
@@ -19,10 +14,11 @@ set_option linter.style.header false
 /-!
 # The Kronecker-Weber theorem
 
-Let `p` be an odd prime, `F = ℚ(ζ_p)` and `L/F` a cyclic extension of degree `p`, with `L/ℚ`
-abelian.
+This file proves `kronecker_weber`: every abelian number field embeds in a cyclotomic field
+`CyclotomicField n ℚ`.
 
-This file establishes
+The first part treats, for an odd prime `p` and `F = ℚ(ζ_p)`, a cyclic extension `L/F` of degree
+`p` with `L/ℚ` abelian:
 - `kw_kummer₀`: if `L/ℚ` is Galois of degree `p * (p - 1)`, then `L/F` is cyclic of degree `p`.
 - `kw_kummer`: `L/F` is a Kummer extension `F(ᵖ√μ)` for some nonzero `μ ∈ F`.
 - `kw_unit_eq_mul_pow`: a unit `η` of `F` with `η * conj η` a `p`-th power is a `p`-th root of
@@ -36,34 +32,35 @@ This file establishes
 - `kw_unit_conj_pow`: then `μ = β ^ p * η` for a unit `η` with `η * conj η` a `p`-th power.
 - `kw_unit_root_of_unity`: then `L` is the cyclotomic extension `ℚ(ζ_{p ^ 2})`.
 
-It then reduces the odd prime power case to extensions unramified outside `p`, and treats those.
-
+The ramification results:
 - `ramificationIdxIn_sup_eq_lcm`: tame Abhyankar, the ramification index in a compositum is the lcm
   of the ramification indices.
-- `kw_ramification_reduction`: removing a ramified prime `q ≠ p` from a cyclic extension of
-  `p`-power degree, up to compositum with `ℚ(ζ_q)`.
-- `kw_reduce_to_unramified_outside_p`: iterating it, a cyclic extension of `p`-power degree is
-  cyclotomic iff some cyclic extension of `p`-power degree unramified outside `p` is.
+- `kw_ramification_reduction_of_sup_eq_top`: removing a tamely ramified prime `q ≠ p` from a cyclic
+  extension of `p`-power degree, inside its compositum with `ℚ(ζ_q)`.
+
+The remaining results concern subfields of a field `A` of characteristic zero. From
+`kw_reduce_to_prime_power_aux` on, they are stated for a family `Qζ : ℕ → IntermediateField ℚ A`
+with `Qζ n` cyclotomic of level `n`.
 - `kw_eq_of_unique_prime_subfield`: two abelian extensions of degree `p ^ m` unramified outside `p`
   are equal if their compositum has only one subfield of degree `p`.
-- `prop_kw_exponent_p`, `prop_kw_exponent_p_eq`: a cyclic extension of degree `p` unramified
-  outside `p` is contained in `ℚ(ζ_{p ^ 2})`, hence is unique.
-- `prop_kw_odd_prime_power`: an abelian extension of degree `p ^ m` unramified outside `p` is
-  contained in `ℚ(ζ_{p ^ (m + 1)})`.
-
-For `p = 2`:
 - `prop_kw_2_quadratic_real_unique`: `ℚ(√2)` is the only totally real quadratic field unramified
   outside `2` (its discriminant is `8`, `kw_2_quadratic_real_discr`).
 - `exists_maximalReal`: an abelian CM field has a totally real abelian subfield of half its degree.
-- `prop_kw_2_power`, `prop_kw_2_power'`: an abelian extension of degree `2 ^ m` unramified outside
+- `kw_reduce_to_prime_power_aux`: a finite compositum of subfields of cyclotomic fields is contained
+  in a cyclotomic field.
+- `kw_ramification_reduction`, `kw_reduce_to_unramified_outside_p`: a cyclic extension of
+  `p`-power degree is contained in a cyclotomic field iff some cyclic extension of `p`-power degree
+  unramified outside `p` is.
+- `prop_kw_exponent_p`, `prop_kw_exponent_p_eq`: for `p` odd, a cyclic extension of degree `p`
+  unramified outside `p` is contained in `ℚ(ζ_{p ^ 2})`, hence is unique.
+- `prop_kw_odd_prime_power`: for `p` odd, an abelian extension of degree `p ^ m` unramified outside
+  `p` is contained in `ℚ(ζ_{p ^ (m + 1)})`.
+- `prop_kw_2_power'`, `prop_kw_2_power`: an abelian extension of degree `2 ^ m` unramified outside
   `2`, first totally real then arbitrary, is contained in `ℚ(ζ_{2 ^ (m + 2)})`.
-
-Finally:
 - `kw_cyclic_odd_primePow_le_cyclotomic`, `kw_cyclic_two_pow_le_cyclotomic`: a cyclic extension of
   prime power degree is contained in a cyclotomic field.
 - `kw_reduce_to_prime_power`: an abelian extension of `ℚ` is the compositum of such extensions,
   hence is contained in a cyclotomic field.
-- `kronecker_weber`: every abelian number field embeds in a cyclotomic field `CyclotomicField n ℚ`.
 -/
 
 @[expose] public section

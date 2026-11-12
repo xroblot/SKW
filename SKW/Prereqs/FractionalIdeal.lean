@@ -9,6 +9,7 @@ public import Mathlib.RingTheory.Localization.FractionRing
 
 public import SKW.Prereqs.Ideals
 public import SKW.Prereqs.Stickelberger
+public import SKW.Prereqs.KroneckerWeber
 
 set_option linter.style.header false
 
@@ -219,11 +220,14 @@ end FractionRing
 end FractionalIdeal
 -/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem FractionalIdeal.num_ne_bot_of_ne_zero {R : Type*} [CommRing R] {S : Submonoid R} {P : Type*}
     [CommRing P] [Algebra R P] [IsDomain R] [Module.IsTorsionFree R P] (hS : 0 ∉ S)
     {I : FractionalIdeal S P} (hI : I ≠ 0) :
     I.num ≠ ⊥ :=
   (zero_of_num_eq_bot hS).mt hI
+-/
 
 namespace IsDedekindDomain.HeightOneSpectrum
 
@@ -231,19 +235,28 @@ open scoped Pointwise
 
 variable {G R : Type*} [Group G] [CommRing R] [MulSemiringAction G R]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- A group acting on `R` by ring automorphisms acts on the height one primes of `R`. -/
 instance : MulAction G (HeightOneSpectrum R) where
   smul g v := ⟨g • v.asIdeal, inferInstance, by simpa [Ideal.smul_eq_bot_iff] using v.ne_bot⟩
   one_smul v := HeightOneSpectrum.ext (one_smul G v.asIdeal)
   mul_smul g h v := HeightOneSpectrum.ext (mul_smul g h v.asIdeal)
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 @[simp]
 theorem smul_asIdeal (g : G) (v : HeightOneSpectrum R) : (g • v).asIdeal = g • v.asIdeal := rfl
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem smul_eq_equivOfRingEquiv (g : G) (v : HeightOneSpectrum R) :
     g • v = equivOfRingEquiv (MulSemiringAction.toRingEquiv G R g) v := by
   apply HeightOneSpectrum.ext
   rw [smul_asIdeal, equivOfRingEquiv_apply_asIdeal, Ideal.pointwise_smul_def', Ideal.mapEquiv_apply]
+-/
 
 end IsDedekindDomain.HeightOneSpectrum
 
@@ -256,6 +269,8 @@ open IsDedekindDomain HeightOneSpectrum FractionalIdeal Associates UniqueFactori
 variable {R : Type*} [CommRing R] [IsDedekindDomain R] (K : Type*) [Field K] [Algebra R K]
   [IsFractionRing R K] (v : HeightOneSpectrum R)
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- The `v`-adic valuation of an ideal `J` is the multiplicity of `v` in `J`. -/
 theorem FractionalIdeal.count_coe_eq_multiplicity (J : Ideal R) :
     count K v J = multiplicity v.asIdeal J := by
@@ -263,7 +278,10 @@ theorem FractionalIdeal.count_coe_eq_multiplicity (J : Ideal R) :
   · simp [FractionalIdeal.count_zero]
   rw [count_coe K v hJ, Ideal.count_associates_factors_eq hJ v.isPrime v.ne_bot,
     count_normalizedFactors_eq_multiplicity hJ]
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- The `v`-adic valuation of `I * J⁻¹`, for nonzero ideals `I` and `J`, is the difference of the
 multiplicities of `v` in `I` and `J`. -/
 theorem FractionalIdeal.count_coe_mul_inv_eq_multiplicity_sub {I J : Ideal R} (hI : I ≠ 0)
@@ -272,7 +290,10 @@ theorem FractionalIdeal.count_coe_mul_inv_eq_multiplicity_sub {I J : Ideal R} (h
       multiplicity v.asIdeal I - multiplicity v.asIdeal J := by
   rw [count_mul K v (coeIdeal_ne_zero.mpr hI) (inv_ne_zero (coeIdeal_ne_zero.mpr hJ)), count_inv,
     count_coe_eq_multiplicity, count_coe_eq_multiplicity, sub_eq_add_neg]
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- The `v`-adic valuation of a nonzero fractional ideal `I` is the difference of the
 multiplicities of `v` in `I.num` and in the ideal spanned by `I.den`. -/
 theorem FractionalIdeal.count_eq_multiplicity_num_sub {I : FractionalIdeal R⁰ K} (hI : I ≠ 0) :
@@ -280,7 +301,10 @@ theorem FractionalIdeal.count_eq_multiplicity_num_sub {I : FractionalIdeal R⁰ 
       multiplicity v.asIdeal I.num - multiplicity v.asIdeal (Ideal.span {(I.den : R)}) := by
   rw [← count_coe_mul_inv_eq_multiplicity_sub K v (num_eq_zero_iff.not.mpr hI) (by simp),
     coeIdeal_span_singleton, ← den_mul_self_eq_num', mul_comm, inv_mul_cancel_left₀ (by simp)]
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Two nonzero fractional ideals are equal if and only if they have the same valuation at every
 height one prime. -/
 theorem FractionalIdeal.eq_iff_count_eq {I J : FractionalIdeal R⁰ K} (hI : I ≠ 0) (hJ : J ≠ 0) :
@@ -289,6 +313,7 @@ theorem FractionalIdeal.eq_iff_count_eq {I J : FractionalIdeal R⁰ K} (hI : I �
   rw [← finprod_heightOneSpectrum_factorization' K hI,
     ← finprod_heightOneSpectrum_factorization' K hJ]
   simp_rw [h]
+-/
 
 end count
 
@@ -300,6 +325,8 @@ variable {R S : Type*} [CommRing R] [CommRing S] [IsDedekindDomain R] [IsDedekin
   [Algebra R S] [Algebra.IsIntegral R S] (K L : Type*) [Field K] [Field L] [Algebra R K]
   [IsFractionRing R K] [Algebra S L] [IsFractionRing S L]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- The `w`-adic valuation of the extension of a fractional ideal `I` is the ramification index of
 `w` times the valuation of `I` at the prime below `w`. -/
 theorem FractionalIdeal.count_extendedHom [Module.IsTorsionFree R S] (w : HeightOneSpectrum S)
@@ -318,6 +345,7 @@ theorem FractionalIdeal.count_extendedHom [Module.IsTorsionFree R S] (w : Height
       extended_coeIdeal_eq_map]
   · apply map_ne_bot_of_ne_bot
     exact FractionalIdeal.num_ne_bot_of_ne_zero zero_notMem_nonZeroDivisors hI
+-/
 
 end CountExtended
 
@@ -330,6 +358,8 @@ variable {R S : Type*} [CommRing R] [CommRing S] [IsDedekindDomain S]
   (K L : Type*) [Field K] [Field L] [Algebra R K] [IsFractionRing R K] [Algebra S L]
   [IsFractionRing S L]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem FractionalIdeal.extended_eq_map_num_mul_inv {f : R →+* S} (hf : R⁰ ≤ S⁰.comap f)
     (I : FractionalIdeal R⁰ K) :
     I.extended L hf = (I.num.map f) * (Ideal.span {f I.den} : FractionalIdeal S⁰ L)⁻¹ := by
@@ -338,7 +368,10 @@ theorem FractionalIdeal.extended_eq_map_num_mul_inv {f : R →+* S} (hf : R⁰ �
       ← extended_mul, coeIdeal_span_singleton, den_mul_self_eq_num', extended_coeIdeal_eq_map]
   · rw [coeIdeal_ne_zero, ne_eq, Ideal.span_singleton_eq_bot, ← ne_eq]
     exact nonZeroDivisors.ne_zero (hf I.den.2)
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem FractionalIdeal.ringEquivOfRingEquiv_eq_extended [IsDomain R] (f : R ≃+* S)
     (I : FractionalIdeal R⁰ K) :
     ringEquivOfRingEquiv K L f I =
@@ -347,14 +380,20 @@ theorem FractionalIdeal.ringEquivOfRingEquiv_eq_extended [IsDomain R] (f : R ≃
   rw [← coeToSubmodule_inj, coe_extended_eq_span, ringEquivOfRingEquiv_apply, coe_mk,
     ← Submodule.span_eq (Submodule.map _ _), Submodule.map_coe]
   rfl
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem FractionalIdeal.ringEquivOfRingEquiv_eq_map_num_mul_inv [IsDomain R] (f : R ≃+* S)
     (I : FractionalIdeal R⁰ K) :
     ringEquivOfRingEquiv K L f I =
       (I.num.map f) * (Ideal.span {f I.den} : FractionalIdeal S⁰ L)⁻¹ := by
   rw [ringEquivOfRingEquiv_eq_extended, extended_eq_map_num_mul_inv, Ideal.map_coe,
     RingEquiv.coe_toRingHom]
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem FractionalIdeal.count_ringEquivOfRingEquiv [IsDedekindDomain R] (f : R ≃+* S)
     (v : HeightOneSpectrum R) (I : FractionalIdeal R⁰ K) :
     count L (equivOfRingEquiv f v) (ringEquivOfRingEquiv K L f I) = count K v I := by
@@ -368,16 +407,23 @@ theorem FractionalIdeal.count_ringEquivOfRingEquiv [IsDedekindDomain R] (f : R �
   · rw [coeIdeal_ne_zero, ne_eq, Ideal.mapEquiv_eq_bot_iff]
     exact num_eq_zero_iff.not.mpr hI
   · simp [- spanSingleton_inv]
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem FractionalIdeal.smul_eq_ringEquivOfRingEquiv [IsDedekindDomain R] {G : Type*} [Group G]
     [MulSemiringAction G R] (g : G) (I : FractionalIdeal R⁰ K) :
     g • I = ringEquivOfRingEquiv K K (MulSemiringAction.toRingEquiv G R g) I := by
   rw [FractionalIdeal.smul_def, ringEquivOfRingEquiv_eq_extended]
   rfl
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 theorem FractionalIdeal.count_smul [IsDedekindDomain R] {G : Type*} [Group G]
     [MulSemiringAction G R] (v : HeightOneSpectrum R) (I : FractionalIdeal R⁰ K) (σ : G) :
     count K (σ • v) (σ • I) = count K v I := by
   rw [smul_eq_ringEquivOfRingEquiv, smul_eq_equivOfRingEquiv, count_ringEquivOfRingEquiv]
+-/
 
 end FractionalIdealCount

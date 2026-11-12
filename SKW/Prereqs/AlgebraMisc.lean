@@ -17,6 +17,9 @@ public import Mathlib.Algebra.GroupWithZero.Associated
 public import Mathlib.RingTheory.Multiplicity
 public import Mathlib.RingTheory.UniqueFactorizationDomain.FactorSet
 
+public import SKW.Prereqs.KroneckerWeber
+public import SKW.Prereqs.Stickelberger
+
 
 set_option linter.style.header false
 
@@ -31,6 +34,8 @@ theorem Algebra.adjoin_singleton_add {R A : Type*} [CommRing R] [Ring A] [Algebr
     convert Subalgebra.sub_mem _ (self_mem_adjoin_singleton R _) (algebraMap_mem _ y)
     rw [add_sub_cancel_right]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 open Function nonZeroDivisors in
 /-- The map of fraction fields induced by an injective `algebraMap A B` is `algebraMap K L`. -/
 @[simp]
@@ -41,7 +46,10 @@ theorem IsFractionRing.map_algebraMap_apply {A B K L : Type*} [CommRing A] [Comm
     map hj x = algebraMap K L x :=
   RingHom.congr_fun (IsLocalization.ringHom_ext A⁰ <| RingHom.ext fun a ↦ by
     simp [map, ← IsScalarTower.algebraMap_apply]) x
+-/
 
+-- Copied to `SKW.Prereqs.Stickelberger`.
+/-
 theorem MulSemiringAction.toRingHom_mul {G R : Type*} [Monoid G] [Semiring R]
     [MulSemiringAction G R] (g h : G) :
     MulSemiringAction.toRingHom G R (g * h) =
@@ -52,6 +60,7 @@ theorem MulSemiringAction.toRingHom_one {G R : Type*} [Monoid G] [Semiring R]
     [MulSemiringAction G R] :
     MulSemiringAction.toRingHom G R 1 = RingHom.id R :=
   RingHom.ext fun x ↦ one_smul G x
+-/
 
 /-! ### MulEquiv / AlgHom / AlgEquiv -/
 
@@ -78,12 +87,15 @@ theorem exists_eq_pow_of_pow_eq_pow_of_coprime {G : Type*} [CommGroupWithZero G]
 
 /-! ### Order of powers -/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Analogue of `IsPrimitiveRoot.pow` for `orderOf`: if `orderOf x = a * b` then
 `orderOf (x ^ a) = b`. -/
 theorem orderOf_pow_of_orderOf_eq_mul {G : Type*} [Monoid G] {x : G} {a b : ℕ}
     (hn : 0 < orderOf x) (h : orderOf x = a * b) : orderOf (x ^ a) = b := by
   have ha : a ≠ 0 := left_ne_zero_of_mul (h ▸ hn.ne')
   rw [orderOf_pow_of_dvd ha ⟨b, h⟩, h, Nat.mul_div_cancel_left b (Nat.pos_of_ne_zero ha)]
+-/
 
 /-- The `zpow` version of `orderOf_pow_dvd`: `orderOf (x ^ n)` divides `orderOf x` for `n : ℤ`. -/
 theorem orderOf_zpow_dvd {G : Type*} [Group G] (x : G) (n : ℤ) :
@@ -105,6 +117,8 @@ theorem not_dvd_orderOf_units_of_expChar {R : Type*} [CommRing R] [IsReduced R] 
 
 /-! ### Cyclic groups in a product -/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- The group-theoretic heart of the tame Abhyankar lemma: a cyclic group that embeds into a product
 `A × B` of finite groups has order dividing `Nat.lcm (Nat.card A) (Nat.card B)`. (A generator maps
   to
@@ -118,12 +132,15 @@ theorem Subgroup.card_dvd_lcm_of_isCyclic_of_injective {G A B : Type*} [Group G]
     ← orderOf_injective f hf g, Prod.orderOf]
   exact Nat.lcm_dvd ((_root_.orderOf_dvd_natCard _).trans (Nat.dvd_lcm_left _ _))
       ((_root_.orderOf_dvd_natCard _).trans (Nat.dvd_lcm_right _ _))
+-/
 
 /-- A quotient of a cyclic group is cyclic. -/
 @[to_additive /-- A quotient of an additive cyclic group is cyclic. -/]
 instance {G : Type*} [Group G] [IsCyclic G] (H : Subgroup G) [H.Normal] : IsCyclic (G ⧸ H) :=
   isCyclic_of_surjective _ (QuotientGroup.mk'_surjective H)
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- In a cyclic group, the lcm of the indices of two subgroups of trivial intersection is the order
 of the group. -/
 theorem Subgroup.lcm_index_eq_card_of_isCyclic_of_inf_eq_bot {G : Type*} [Group G] [IsCyclic G]
@@ -133,7 +150,10 @@ theorem Subgroup.lcm_index_eq_card_of_isCyclic_of_inf_eq_bot {G : Type*} [Group 
     card_dvd_lcm_of_isCyclic_of_injective (f := (QuotientGroup.mk' H₁).prod (QuotientGroup.mk' H₂))
       (by rw [← MonoidHom.ker_eq_bot_iff, MonoidHom.ker_prod, QuotientGroup.ker_mk',
         QuotientGroup.ker_mk', h])
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- `subgroupOf` distributes over `⊓` (the general case of `inf_subgroupOf_left`/`_right`); this is
 `Subgroup.comap_inf` for the inclusion `C.subtype`. -/
 @[to_additive /-- `addSubgroupOf` distributes over `⊓`; this is `AddSubgroup.comap_inf` for the
@@ -141,7 +161,10 @@ inclusion `C.subtype`. -/]
 theorem Subgroup.subgroupOf_inf {G : Type*} [Group G] (A B C : Subgroup G) :
     (A ⊓ B).subgroupOf C = A.subgroupOf C ⊓ B.subgroupOf C :=
   Subgroup.comap_inf A B C.subtype
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- `A.subgroupOf B` and `B.subgroupOf A` are isomorphic (both realize `A ⊓ B`). Mathlib only has
 `subgroupOfEquivOfLe`; this composes two copies of it through `A ⊓ B`. -/
 @[to_additive /-- `A.addSubgroupOf B` and `B.addSubgroupOf A` are isomorphic (both realize
@@ -152,7 +175,10 @@ def Subgroup.subgroupOfEquivComm {G : Type*} [Group G] (A B : Subgroup G) :
       (Subgroup.subgroupOfEquivOfLe inf_le_right)).trans
     ((MulEquiv.subgroupCongr (Subgroup.inf_subgroupOf_left B A).symm).trans
       (Subgroup.subgroupOfEquivOfLe inf_le_left)).symm
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Division-free companion to `Subgroup.card_mul_index`: `d` is the index of `H` iff
 `Nat.card H * d = Nat.card G`. -/
 @[to_additive AddSubgroup.index_eq_iff_card_mul_eq_card /-- Division-free companion to
@@ -161,6 +187,7 @@ theorem Subgroup.index_eq_iff_card_mul_eq_card {G : Type*} [Group G] [Finite G] 
     {d : ℕ} : H.index = d ↔ Nat.card H * d = Nat.card G :=
   ⟨fun h ↦ h ▸ H.card_mul_index,
     fun h ↦ Nat.eq_of_mul_eq_mul_left Nat.card_pos (H.card_mul_index.trans h.symm)⟩
+-/
 
 /-- The map `G ⧸ N →* H ⧸ M` induced by `f` is injectPive exactly when `N` is the whole preimage
 of `M`. Companion to `QuotientGroup.map_surjective_of_surjective`. -/
@@ -211,11 +238,14 @@ theorem isCyclic_quotient_of_sup_range_eq_top {A G : Type*} [Group A] [Group G] 
 
 /-! ### MISC -/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 @[simp]
 theorem MulAut.conjNormal_apply_of_isMulCommutative {G : Type*} [Group G] [IsMulCommutative G]
     {H : Subgroup G} [H.Normal] (g : G) (h : H) :
     conjNormal g h = h := by
   rw [Subtype.ext_iff, conjNormal_apply, mul_comm', inv_mul_cancel_left]
+-/
 
 @[simp]
 theorem MulAut.conjNormal_symm_apply_of_isMulCommutative {G : Type*} [Group G] [IsMulCommutative G]
@@ -228,10 +258,15 @@ theorem MulAut.conjNormal_symm_apply_of_isMulCommutative {G : Type*} [Group G] [
 section
 variable {G R : Type*} [CommGroup G] [Finite G] [CommRing R] [IsDomain R]
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 instance (φ : G →* Rˣ) : IsCyclic (G ⧸ φ.ker) :=
   haveI : Finite φ.range := Finite.Set.finite_range _
   isCyclic_of_injective (QuotientGroup.quotientKerEquivRange φ).toMonoidHom (MulEquiv.injective _)
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- The order of a character `φ : G →* Rˣ` (`R` a domain) equals the cardinality of the quotient of
 `G` by its kernel (equivalently, of its cyclic image). -/
 theorem MonoidHom.card_quotient_ker_eq_orderOf (φ : G →* Rˣ) :
@@ -245,6 +280,7 @@ theorem MonoidHom.card_quotient_ker_eq_orderOf (φ : G →* Rˣ) :
   · ext g
     simpa [Subtype.ext_iff, Units.ext_iff] using
       Monoid.pow_exponent_eq_one (G := φ.range) ⟨φ g, ⟨g, rfl⟩⟩
+-/
 
 @[to_additive]
 theorem Subgroup.index_ker_of_surjective {G H : Type*} [Group G] [Group H] (f : G →* H)

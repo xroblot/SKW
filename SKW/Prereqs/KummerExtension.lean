@@ -6,6 +6,7 @@ public import Mathlib.GroupTheory.QuotientGroup.Basic
 public import SKW.Prereqs.Normal
 public import Mathlib.FieldTheory.IntermediateField.Adjoin.Basic
 public import SKW.Prereqs.AlgebraMisc
+public import SKW.Prereqs.KroneckerWeber
 
 set_option linter.style.header false
 
@@ -39,6 +40,8 @@ section
 
 open Polynomial IntermediateField
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- If `ζ` is a primitive `n`-th root of unity and `x ^ n = α ^ n`, then `x = ζ ^ j * α`
 for some `j < n`. Generalizes the implicit content of `IsPrimitiveRoot.nthRoots_eq`. -/
 lemma IsPrimitiveRoot.eq_pow_mul_of_pow_eq {R : Type*} [CommRing R] [IsDomain R]
@@ -49,7 +52,10 @@ lemma IsPrimitiveRoot.eq_pow_mul_of_pow_eq {R : Type*} [CommRing R] [IsDomain R]
   simp only [hζ.nthRoots_eq rfl, Multiset.mem_map, Multiset.mem_range] at hx
   obtain ⟨j, hj, rfl⟩ := hx
   exact ⟨j, hj, rfl⟩
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Version of `Algebra.adjoin_root_eq_top_of_isSplittingField` without the irreducibility of
 `X ^ n - C a`. -/
 lemma Algebra.adjoin_root_eq_top_of_isSplittingField' {K : Type*} [Field K] {n : ℕ}
@@ -67,7 +73,10 @@ lemma Algebra.adjoin_root_eq_top_of_isSplittingField' {K : Type*} [Field K] {n :
   obtain ⟨j, -, rfl⟩ := hζ.eq_pow_mul_of_pow_eq hx
   exact Subalgebra.mul_mem _ (Subalgebra.pow_mem _ (Subalgebra.algebraMap_mem _ _) _)
     (Algebra.self_mem_adjoin_singleton K α)
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Version of `IntermediateField.adjoin_root_eq_top_of_isSplittingField` without the
 irreducibility of `X ^ n - C a`. -/
 lemma IntermediateField.adjoin_root_eq_top_of_isSplittingField' {K : Type*} [Field K] {n : ℕ}
@@ -75,7 +84,10 @@ lemma IntermediateField.adjoin_root_eq_top_of_isSplittingField' {K : Type*} [Fie
     [IsSplittingField K L (X ^ n - C a)] {α : L} (hα : α ^ n = algebraMap K L a) : K⟮α⟯ = ⊤ :=
   (eq_adjoin_of_eq_algebra_adjoin _ _ _
     (Algebra.adjoin_root_eq_top_of_isSplittingField' hζ hα).symm).symm
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- If `K` contains a primitive `n`-th root of unity and the splitting field `L` of `X ^ n - C a`
 has degree `n` over `K`, then `X ^ n - C a` is irreducible. -/
 lemma irreducible_X_pow_sub_C_of_isSplittingField {K : Type*} [Field K] {n : ℕ}
@@ -88,7 +100,10 @@ lemma irreducible_X_pow_sub_C_of_isSplittingField {K : Type*} [Field K] {n : ℕ
   have htop := IntermediateField.adjoin_root_eq_top_of_isSplittingField' hζ hα
   rw [← hn] at hα ⊢
   exact irreducible_X_pow_sub_C_of_root_adjoin_eq_top hα htop
+-/
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Kummer group characterization: let `K` be a field with a primitive `n`-th root of unity `ζ`,
 `a ∈ Kˣ` with `X ^ n - a` irreducible, `α` a root of `X ^ n - a` in `L = K(α)`, and
 `σ ∈ Gal(L/K)` the automorphism defined by `σ(α) = ζ * α`.
@@ -135,6 +150,7 @@ theorem exists_eq_algebraMap_mul_pow_of_pow_eq_algebraMap {K : Type*} [Field K] 
     contrapose hi
     simpa [j₀, Fin.ext_iff] using hζ.pow_inj (Fin.val_lt_of_le i hdB.le) hj (sub_eq_zero.mp hi)
   simp +contextual [j₀, this, Algebra.smul_def, B]
+-/
 
 variable {F : Type*} [Field F] {n : ℕ} [NeZero n] {K : Type*} [Field K] [Algebra K F]
   [IsGalois K F] {μ : F} {L : Type*} [Field L] [Algebra F L] [Algebra K L] [IsScalarTower K F L]
@@ -209,6 +225,8 @@ theorem isSplittingField_X_pow_sub_C_of_mul_pow (a : K) {x : K} (hx : x ≠ 0)
 
 end
 
+-- Copied to `SKW.Prereqs.KroneckerWeber`.
+/-
 /-- Version of `exists_root_adjoin_eq_top_of_isCyclic` with a nonzero root `α`. -/
 theorem exists_root_adjoin_eq_top_of_isCyclic' (K L : Type*) [Field K] [Field L] [Algebra K L]
     [FiniteDimensional K L] [IsGalois K L] [IsCyclic Gal(L/K)]
@@ -219,5 +237,6 @@ theorem exists_root_adjoin_eq_top_of_isCyclic' (K L : Type*) [Field K] [Field L]
   · rw [adjoin_zero] at hα'
     exact ⟨1, one_ne_zero, ⟨1, by simp⟩, by rwa [adjoin_one]⟩
   · exact ⟨α, h, hα, hα'⟩
+-/
 
 end
