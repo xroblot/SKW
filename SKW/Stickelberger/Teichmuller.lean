@@ -5,15 +5,6 @@ Authors: Xavier Roblot
 -/
 module
 
-public import Mathlib.NumberTheory.MulChar.Basic
-public import Mathlib.RingTheory.Ideal.Quotient.Basic
-public import Mathlib.RingTheory.RootsOfUnity.EnoughRootsOfUnity
-
--- for `MulEquiv.ofBijective_symm_apply_apply`, the `MulEquiv` half of a pair Mathlib only has
--- for `Equiv`; too small for a PR of its own, so it ships with this file.
-
--- for `rootsOfUnity.mapQuot` and `rootsOfUnity.coe_mapQuot`, submitted upstream as #44588,
--- which generalizes `Ideal.rootsOfUnityMapQuot`; this import goes once that merges.
 public import SKW.PRed2Mathlib.Teichmuller
 public import SKW.Prereqs.Stickelberger
 

@@ -1,27 +1,8 @@
 module
 
-public import Mathlib.Algebra.CharP.Reduced
-public import Mathlib.Algebra.Group.Subgroup.Order
-public import Mathlib.Algebra.Group.Subgroup.ZPowers.Lemmas
-public import Mathlib.Algebra.GroupWithZero.Associated
-public import Mathlib.Algebra.MonoidAlgebra.Basic
-public import Mathlib.FieldTheory.IntermediateField.Adjoin.Defs
-public import Mathlib.GroupTheory.FiniteAbelian.Basic
-public import Mathlib.GroupTheory.GroupAction.Quotient
 public import Mathlib.GroupTheory.Nilpotent
-public import Mathlib.GroupTheory.QuotientGroup.Basic
-public import Mathlib.GroupTheory.SpecificGroups.Cyclic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
-public import Mathlib.NumberTheory.NumberField.Discriminant.Different
-public import Mathlib.RingTheory.ClassGroup.Basic
-public import Mathlib.RingTheory.FractionalIdeal.Extended
-public import Mathlib.RingTheory.IntegralDomain
-public import Mathlib.RingTheory.Localization.FractionRing
-public import Mathlib.RingTheory.Multiplicity
-public import Mathlib.RingTheory.RootsOfUnity.PrimitiveRoots
-public import Mathlib.RingTheory.UniqueFactorizationDomain.FactorSet
-
 public import SKW.PRed2Mathlib.FiniteFieldSum
 
 set_option linter.style.header false

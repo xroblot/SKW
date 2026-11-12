@@ -1,13 +1,9 @@
 module
 
-public import SKW.Prereqs.KroneckerWeber
-public import SKW.Prereqs.OtherPR
-public import SKW.Stickelberger.Stickelberger
-
 public import Mathlib.Algebra.FiniteSupport.Basic
 public import Mathlib.Algebra.GroupWithZero.Torsion
-public import Mathlib.RingTheory.ClassGroup.Basic
-public import Mathlib.RingTheory.ZMod.UnitsCyclic
+public import SKW.Prereqs.KroneckerWeber
+public import SKW.Stickelberger.Stickelberger
 
 set_option linter.style.header false
 

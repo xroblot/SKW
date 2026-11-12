@@ -2,14 +2,8 @@ module
 
 public import Mathlib.Algebra.QuadraticAlgebra.Basic
 public import Mathlib.NumberTheory.FundamentalDiscriminant
-public import Mathlib.NumberTheory.NumberField.Discriminant.Defs
-public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
-public import Mathlib.NumberTheory.NumberField.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Basic
-public import Mathlib.NumberTheory.RamificationInertia.Ramification
-public import Mathlib.NumberTheory.RamificationInertia.Unramified
 public import Mathlib.NumberTheory.RamificationInertia.HilbertTheory
-public import Mathlib.FieldTheory.Galois.Abelian
 
 set_option linter.style.header false
 

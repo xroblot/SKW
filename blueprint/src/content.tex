@@ -1300,8 +1300,9 @@ is a one-dimensional $S/Q$-vector space.
 \end{proof}
 
 When $S = \cO_L$ for a Galois extension of number fields $L/K$ and $G = \Gal(L/K)$, the order of
-$I(Q)$ is the ramification index $e(Q \mid \fp)$. In particular, if $Q$ lies above the prime
-number $q$ and $q \nmid \#G$, then $Q$ is tame (\texttt{Ideal.card\_inertia\_notMem\_of\_not\_dvd}).
+$I(Q)$ is the ramification index $e(Q \mid \fp)$. If $Q$ lies above the prime number $q$, then $Q$
+is tame if and only if $q \nmid e(Q \mid q)$ (\texttt{Ideal.card\_inertia\_notMem\_iff}). In
+particular $Q$ is tame when $q \nmid \#G$.
 
 \subsection{Abhyankar's lemma and the inertia field}
 

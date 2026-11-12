@@ -1,6 +1,5 @@
 module
 
-public import Mathlib.Algebra.Field.Subfield.Basic
 public import Mathlib.NumberTheory.NumberField.InfinitePlace.TotallyRealComplex
 
 set_option linter.style.header false
