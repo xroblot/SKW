@@ -10,7 +10,10 @@ set_option linter.style.header false
 @[expose] public section
 
 /-!
-# The Kronecker-Weber theorem
+# The Kronecker-Weber theorem (old version)
+
+Parked copy of the former `Final.lean`, out of the build, in the namespace `KroneckerWeberFinal`.
+The statements are restated in `SKW.KroneckerWeber.KroneckerWeber`.
 
 Every abelian extension of `ℚ` is contained in a cyclotomic field.
 
@@ -27,6 +30,8 @@ Every abelian extension of `ℚ` is contained in a cyclotomic field.
 -/
 
 open NumberField IntermediateField IsCyclotomicExtension
+
+namespace KroneckerWeberFinal
 
 set_option backward.isDefEq.respectTransparency false in
 /-- Seam between the ramification reduction and the base cases: a cyclic extension of `ℚ` of
@@ -155,5 +160,7 @@ theorem kronecker_weber
       (hξ n).intermediateField_adjoin_isCyclotomicExtension' ℚ
   exact ⟨((algEquiv {n} ℚ ℚ⟮ξ n⟯ _).toAlgHom.comp (inclusion hK)).comp
     (IsScalarTower.toAlgHom ℚ K A).equivFieldRange.toAlgHom⟩
+
+end KroneckerWeberFinal
 
 end

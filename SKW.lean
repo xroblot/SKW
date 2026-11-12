@@ -25,4 +25,3 @@ import SKW.Prereqs.TameRamification
 import SKW.Stickelberger.Stickelberger
 import SKW.Stickelberger.Teichmuller
 import SKW.KroneckerWeber.KroneckerWeber
-import SKW.KroneckerWeber.Final
