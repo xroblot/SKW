@@ -3,6 +3,7 @@ module
 public import Mathlib.GroupTheory.Nilpotent
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
+public import SKW.PRed2Mathlib.CyclotomicAdjoin
 public import SKW.PRed2Mathlib.FiniteFieldSum
 
 set_option linter.style.header false
@@ -259,17 +260,6 @@ theorem IsPrimitiveRoot.isIntegral' {n : ℕ} {K L : Type*} [CommRing K] [CommRi
     {μ : L} (h : IsPrimitiveRoot μ n) (hpos : 0 < n) :
     IsIntegral K μ :=
   IsIntegral.tower_top (h.isIntegral hpos)
-
-open IntermediateField in
-/-- `E⟮ζ⟯` is a cyclotomic extension of `E` for `ζ` a primitive `n`-th root of unity.
-
-This should replace the existing `IsPrimitiveRoot.intermediateField_adjoin_isCyclotomicExtension`
-in Mathlib: it is more general, dropping the `[Algebra.IsIntegral E F]` hypothesis (`E⟮ζ⟯` only
-involves the algebraic element `ζ`, so integrality of the whole `F/E` is irrelevant). -/
-theorem IsPrimitiveRoot.intermediateField_adjoin_isCyclotomicExtension' (E : Type*) {F : Type*}
-    [Field E] [Field F] [Algebra E F] {n : ℕ} [NeZero n] {ζ : F} (hζ : IsPrimitiveRoot ζ n) :
-    IsCyclotomicExtension {n} E E⟮ζ⟯ :=
-  (isCyclotomicExtension_singleton_iff_eq_adjoin n E F E⟮ζ⟯ hζ).mpr rfl
 
 open IsCyclotomicExtension.Rat in
 theorem IsCyclotomicExtension.Rat.map_galEquivZMod_symm_apply {E F : Type*} [Field E] [Field F]
