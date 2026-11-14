@@ -200,6 +200,10 @@ Steps:
 - Push the branch to `origin` (the fork).
 - `gh pr create --repo leanprover-community/mathlib4 --base master ...` with a HEREDOC
   body. Note the resulting PR number/URL — it's needed for the quarantine step below.
+- Add the new PR as a dependency of the showcase PR (#46022 for Stickelberger, or the
+  Kronecker-Weber one): fetch its current body with `gh pr view 46022 --json body -q .body`
+  (never clobber edits made there), append `- [ ] depends on: #NEW` to the depends-on list
+  below its `---`, and update it with `gh pr edit 46022 --body-file`.
 
 ## 5. Quarantine the SKW copy in `PRed2Mathlib`
 
