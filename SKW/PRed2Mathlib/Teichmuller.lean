@@ -25,7 +25,7 @@ Once both PRs are merged and the `lake-manifest.json` pin is bumped past the mer
 file should be deleted, its import in `SKW.Stickelberger.Stickelberger` removed, and the usages
 redirected to the Mathlib versions. The Mathlib names differ:
 - `rootsOfUnity.mapQuot n I` is `Ideal.rootsOfUnityMapQuot I n` (arguments in the other order),
-  `rootsOfUnity.coe_mapQuot` is `Ideal.coe_rootsOfUnityMapQuot`, and
+  `rootsOfUnity.coe_mapQuot` is `Ideal.rootsOfUnityMapQuot_coe_apply`, and
   `rootsOfUnity.injective_mapQuot n I hn` is `Ideal.rootsOfUnityMapQuot_injective_of_notMem I hn`;
 - the field `bijective_mapQuot` is `bijective_rootsOfUnityMapQuot`, and `n` is implicit in
   `Ideal.HasTeichmullerLift.of_card` and `of_card_of_isPrime`;
