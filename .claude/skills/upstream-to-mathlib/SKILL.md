@@ -191,7 +191,7 @@ PR description style (from project memory):
   comparison with the alternatives considered — that belongs in the docstrings, or in a reply
   if a reviewer asks. A one-line PR gets a one-line description.
 - No `Co-Authored-By` trailer in commit messages.
-- Close the description with `:robot: This PR was extracted from the [SKW project](https://github.com/xroblot/SKW) by Claude.`
+- Close the description with `:robot: This result is used in the proof of Stickelberger's theorem in #46022. It was extracted by Claude from the [SKW project](https://github.com/xroblot/SKW).` (for a result serving Kronecker-Weber, name that theorem and its showcase PR number instead).
 - No bold titles in the description body.
 - List PR dependencies (`- [ ] depends on: #XXXX`) at the very bottom, after a `---`.
 

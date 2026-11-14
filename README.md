@@ -19,7 +19,10 @@ unity) factor in terms of Gauss sums: it produces an explicit element of the gro
 `ℤ[Gal(ℚ(ζ)/ℚ)]` — the *Stickelberger element* — that annihilates the class group of
 `ℚ(ζ)`. In this project it is stated as
 [`stickelberger_theorem`](https://xroblot.github.io/SKW/docs/SKW/Stickelberger/Stickelberger.html#stickelberger_theorem):
-the Stickelberger element annihilates the ideal class group of a cyclotomic field.
+the Stickelberger element annihilates the ideal class group of a cyclotomic field. The
+proof, adapted to Mathlib, is in the draft pull request
+[#46022](https://github.com/leanprover-community/mathlib4/pull/46022); the results it needs
+are being upstreamed one by one from this project.
 
 **The Kronecker-Weber theorem** states that every abelian extension of `ℚ` is contained in
 a cyclotomic field `ℚ(ζₙ)` for some `n`. It is stated as
