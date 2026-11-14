@@ -456,7 +456,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 
 \begin{lemma}
   \label{lem:galFEquiv}
-  \lean{Stickelberger.galFEquiv}
+  \lean{Stickelberger.restrictGalEquivZMod}
   \leanok
   Restriction to $K$ induces an isomorphism $\Gal(L/F) \cong \Gal(K/\QQ) \cong
   (\ZZ/(q-1)\ZZ)^\times$. For $\sigma \in \Gal(L/F)$, we denote by
@@ -473,7 +473,7 @@ Throughout this chapter and the next two, we assume that $p$ is an odd prime.
 \begin{lemma}
   \label{lem:gal_gaussSum_eq_gaussSum}
   \uses{def:gauss_sum_s, lem:galFEquiv, lem:map_ringHomComp_teichmuller_zpow_apply}
-  \lean{Stickelberger.smul_gaussSum_eq_mul_galFEquiv}
+  \lean{Stickelberger.smul_gaussSum_eq_mul_restrictGalEquivZMod}
   \leanok
   For all $\sigma \in \Gal(L/F)$ and $a \in \ZZ$,
   \[

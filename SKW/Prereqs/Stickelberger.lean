@@ -1,22 +1,29 @@
 module
 
 public import Mathlib.GroupTheory.Nilpotent
+public import Mathlib.NumberTheory.AddCharacter.Trace
+public import Mathlib.NumberTheory.JacobiSum.Basic
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
+public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
+public import SKW.PRed2Mathlib.CyclotomicField
 public import SKW.PRed2Mathlib.FiniteFieldSum
+public import SKW.PRed2Mathlib.Teichmuller
 
 set_option linter.style.header false
-
-public section
 
 /-!
 # Prerequisites for Stickelberger's theorem
 
-This file gathers the results from the `SKW.Prereqs` files that are needed in
-`SKW.Stickelberger.Stickelberger`.
+This file gathers the results needed in `SKW.Stickelberger.Stickelberger` that are not yet in
+Mathlib.
 -/
 
+public section
+
 open NumberField
+
+section Actions
 
 theorem MulSemiringAction.toRingHom_mul {G R : Type*} [Monoid G] [Semiring R]
     [MulSemiringAction G R] (g h : G) :
@@ -29,14 +36,66 @@ theorem MulSemiringAction.toRingHom_one {G R : Type*} [Monoid G] [Semiring R]
     MulSemiringAction.toRingHom G R 1 = RingHom.id R :=
   RingHom.ext fun x ↦ one_smul G x
 
-theorem NumberField.isUnit_iff_natAbs_norm {K : Type*} [Field K] [NumberField K] {x :
-  RingOfIntegers K} :
-    IsUnit x ↔ (Algebra.norm ℤ x).natAbs = 1 := by
-  rw [isUnit_iff_norm, ← Rat.natCast_injective.eq_iff, RingOfIntegers.coe_norm,
-    Nat.cast_natAbs, Nat.cast_one, ← Algebra.coe_norm_int, Int.cast_abs]
+/-- The multiplicity is invariant under a group acting by multiplicative automorphisms. -/
+theorem multiplicity_smul {G α : Type*} [Group G] [Monoid α] [MulDistribMulAction G α] (g : G)
+    {a b : α} : multiplicity (g • a) (g • b) = multiplicity a b :=
+  multiplicity_map_eq (MulDistribMulAction.toMulEquiv α g)
 
--- TODO(SKW): upstream, next to `ZMod.ringHom_map_cast` in `Mathlib/Data/ZMod/Basic.lean`, which
--- is the statement for a ring homomorphism into `ZMod n`, probably with `@[simp]` like it.
+/-- The multiplicity of a prime in a finite product is the sum of the multiplicities. -/
+theorem Finset.multiplicity_prod {α β : Type*} [CommMonoidWithZero α] [IsCancelMulZero α]
+    {p : α} (hp : Prime p) (s : Finset β) (f : β → α) (hfin : FiniteMultiplicity p (∏ x ∈ s, f x)) :
+    multiplicity p (∏ x ∈ s, f x) = ∑ x ∈ s, multiplicity p (f x) := by
+  classical
+  induction s using Finset.induction with
+  | empty => simp
+  | insert a s has ih =>
+    rw [Finset.prod_insert has] at hfin
+    rw [Finset.prod_insert has, Finset.sum_insert has, multiplicity_mul hp hfin,
+      ih hfin.mul_right]
+
+namespace MonoidAlgebra
+variable {G M : Type*} [Monoid G]
+
+section CommMonoid
+variable [CommMonoid M] [MulDistribMulAction G M]
+
+/-- The action of `ℕ[G]` on a commutative monoid `M` on which `G` acts by monoid homomorphisms:
+`m ^ ∑ nᵍ g = ∏ (g • m) ^ nᵍ`. -/
+instance : Pow M (MonoidAlgebra ℕ G) where
+  pow m θ := θ.coeff.prod fun g n ↦ (g • m) ^ n
+
+theorem pow_def (m : M) (θ : MonoidAlgebra ℕ G) :
+    m ^ θ = θ.coeff.prod fun g n ↦ (g • m) ^ n := rfl
+
+@[simp]
+theorem pow_zero (m : M) : m ^ (0 : MonoidAlgebra ℕ G) = 1 := by
+  simp [pow_def]
+
+@[simp]
+theorem pow_single (m : M) (g : G) (n : ℕ) : m ^ single g n = (g • m) ^ n := by
+  simp [pow_def]
+
+theorem pow_add (m : M) (θ θ' : MonoidAlgebra ℕ G) : m ^ (θ + θ') = m ^ θ * m ^ θ' := by
+  simp_rw [pow_def, coeff_add]
+  exact Finsupp.prod_add_index' (fun _ ↦ _root_.pow_zero _) fun _ ↦ _root_.pow_add _
+
+theorem pow_sum {ι : Type*} (m : M) (s : Finset ι) (θ : ι → MonoidAlgebra ℕ G) :
+    m ^ (∑ i ∈ s, θ i) = ∏ i ∈ s, m ^ θ i := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simp
+  | insert i s hi ih => rw [Finset.sum_insert hi, Finset.prod_insert hi, pow_add, ih]
+
+@[simp]
+theorem pow_one (m : M) : m ^ (1 : MonoidAlgebra ℕ G) = m := by
+  simp [one_def]
+end CommMonoid
+end MonoidAlgebra
+
+end Actions
+
+section ZModFiniteField
+
 /-- A ring homomorphism commutes with the cast from `ZMod n`. -/
 theorem ZMod.map_cast {n : ℕ} {R S : Type*} [Ring R] [Ring S] (f : R →+* S) (k : ZMod n) :
     f (ZMod.cast k) = ZMod.cast k := by
@@ -44,8 +103,6 @@ theorem ZMod.map_cast {n : ℕ} {R S : Type*} [Ring R] [Ring S] (f : R →+* S) 
   · exact map_intCast f k
   · exact map_natCast f k.val
 
--- TODO(SKW): no obvious home in Mathlib, `Mathlib/RingTheory/Trace/Basic.lean`, next to
--- `Algebra.trace_eq_of_equiv_equiv`, knowing nothing about `ZMod`.
 /-- The trace does not care whether the base ring is `ZMod p` or a ring isomorphic to it. -/
 theorem ZMod.cast_trace_eq_trace {p : ℕ} {A C : Type*} [CommRing A] [CommRing C]
     [Algebra A C] [Algebra (ZMod p) C] (e : A ≃+* ZMod p) (x : C) :
@@ -65,97 +122,28 @@ theorem ZMod.orderOf_pow_sub_one (a k : ℕ) (ha : 1 < a) :
   exact Nat.dvd_antisymm (orderOf_dvd_iff_pow_eq_one.mpr ((key k).mpr dvd_rfl))
     ((key _).mp (pow_orderOf_eq_one _))
 
-theorem smul_eq_galRestrict_apply (A : Type*) {K L B : Type*} [CommRing A] [Field K] [Field L]
-    [CommRing B] [Algebra A K] [IsFractionRing A K] [Algebra B L] [IsFractionRing B L]
-    [Algebra A B] [Algebra K L] [Algebra A L] [IsScalarTower A K L] [IsScalarTower A B L]
-    [IsIntegralClosure B A L] [Algebra.IsAlgebraic K L] [MulSemiringAction Gal(L/K) B]
-    [SMulDistribClass Gal(L/K) B L] (σ : Gal(L/K)) (x : B) :
-    σ • x = galRestrict A K L B σ x := by
-  apply FaithfulSMul.algebraMap_injective B L
-  rw [algebraMap.smul', AlgEquiv.smul_def, algebraMap_galRestrict_apply]
+namespace FiniteField
 
-open NumberField in
-theorem IsCyclotomicExtension.Rat.isCoprime_discr_of_coprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂]
-    (K₁ K₂ : Type*) [Field K₁] [Field K₂] [NumberField K₁] [NumberField K₂]
-    [IsCyclotomicExtension {n₁} ℚ K₁] [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
-    IsCoprime (NumberField.discr K₁) (NumberField.discr K₂) := by
-  rw [Int.isCoprime_iff_nat_coprime, natAbs_discr  n₁ K₁, natAbs_discr  n₂ K₂]
-  refine Nat.Coprime.coprime_div_left ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd _)
-  refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd _)
-  exact Nat.Coprime.pow_left _ (Nat.Coprime.pow_right _ h)
+open Finset
 
-theorem IntermediateField.linearDisjoint_iff_linearDisjoint_fieldRange {F E : Type*} [Field F]
-    [Field E] [Algebra F E] (A : IntermediateField F E) (L : Type*) [Field L] [Algebra F L]
-    [Algebra L E] [IsScalarTower F L E] :
-    A.LinearDisjoint L ↔ A.LinearDisjoint (IsScalarTower.toAlgHom F L E).fieldRange := by
-  rw [linearDisjoint_iff', AlgHom.fieldRange_toSubalgebra]
+variable (K : Type*) [Field K] [Fintype K]
 
-theorem IsCyclotomicExtension.Rat.linearDisjoint_of_coprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂]
-    {E : Type*} [Field E] [NumberField E] (K₁ : IntermediateField ℚ E) [NumberField K₁] (K₂ : Type*)
-    [Field K₂] [NumberField K₂] [Algebra K₂ E] [IsCyclotomicExtension {n₁} ℚ K₁]
-    [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
-    K₁.LinearDisjoint K₂ := by
-  have : IsCyclotomicExtension {n₂} ℚ (IsScalarTower.toAlgHom ℚ K₂ E).fieldRange :=
-    .equiv _ ℚ K₂ (IsScalarTower.toAlgHom ℚ K₂ E).equivFieldRange
-  have : IsGalois ℚ K₁ := IsCyclotomicExtension.isGalois {n₁} ℚ K₁
-  rw [IntermediateField.linearDisjoint_iff_linearDisjoint_fieldRange]
-  exact NumberField.linearDisjoint_of_isGalois_isCoprime_discr E _ _ <|
-    isCoprime_discr_of_coprime n₁ n₂ K₁ _ h
+local notation "q" => Fintype.card K
 
-open Module in
-lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Field E] [Algebra F E]
-    (K L : IntermediateField F E) [IsGalois F K] [FiniteDimensional F K] [FiniteDimensional F L]
-    [Algebra K ↑(K ⊔ L)] [IsScalarTower F K ↑(K ⊔ L)] (hinf : K ⊓ L = ⊥) :
-    finrank K ↑(K ⊔ L) = finrank F L := by
-  rw [← mul_right_inj', ← (LinearDisjoint.of_inf_eq_bot hinf).finrank_sup, finrank_mul_finrank]
-  exact finrank_pos.ne'
+/-- The sum of `x⁻¹ * x ^ (i + 1)` as `x` ranges over a finite field of cardinality `q` is equal
+to `-1` if `q - 1 ∣ i`, and to `0` otherwise. -/
+theorem sum_inv_mul_pow_succ (i : ℕ) :
+    ∑ x : K, x⁻¹ * x ^ (i + 1) = if q - 1 ∣ i then -1 else 0 := by
+  classical
+  rw [← sum_sdiff ({0} : Finset K).subset_univ, sum_singleton, inv_zero, zero_mul, add_zero,
+    sum_congr rfl (g := (· ^ i)), sum_sdiff_zero, sum_pow_units K i]
+  grind
 
-set_option maxHeartbeats 500000 in
--- reason for change
-set_option synthInstance.maxHeartbeats 100000 in
-set_option backward.isDefEq.respectTransparency false in
-open Module in
-theorem IntermediateField.finrank_sup_mul_finrank_inf_eq {k L : Type*} [Field k] [Field L] [Algebra
-  k L]
-    (E F : IntermediateField k L) [FiniteDimensional k E] [FiniteDimensional k F] [IsGalois k E] :
-    finrank k ↑(E ⊔ F) * finrank k ↑(E ⊓ F) = finrank k E * finrank k F := by
-  let : Algebra E ↑(E ⊔ F) := (inclusion le_sup_left).toRingHom.toAlgebra
-  have : FiniteDimensional k ↑(E ⊓ F) := FiniteDimensional.of_injective
-    (IntermediateField.inclusion inf_le_left).toLinearMap
-    (RingHom.injective _)
-  suffices h : finrank E ↑(E ⊔ F) = finrank ↑(E ⊓ F) F by
-    rwa [← finrank_mul_finrank k E ↑(E ⊔ F), ← finrank_mul_finrank k ↑(E ⊓ F) F, mul_assoc,
-      mul_right_inj' finrank_pos.ne', mul_comm, mul_right_inj' finrank_pos.ne']
-  let : Algebra ↑(E ⊓ F) ↑(E ⊔ F) := (inclusion inf_le_sup).toRingHom.toAlgebra
-  have : IsScalarTower ↑(E ⊓ F) E ↑(E ⊔ F) := IsScalarTower.of_algebraMap_eq' rfl
-  have : FiniteDimensional ↑(E ⊓ F) E := FiniteDimensional.right k _ _
-  have : FiniteDimensional ↑(E ⊓ F) F := FiniteDimensional.right k _ _
-  have : finrank ↑(E ⊓ F) E ≠ 0 := finrank_pos.ne'
-  rw [← mul_right_inj' this, finrank_mul_finrank]
-  let E' : IntermediateField ↑(E ⊓ F) L := E.extendScalars (F := E ⊓ F) inf_le_left
-  let F' : IntermediateField ↑(E ⊓ F) L := F.extendScalars (F := E ⊓ F) inf_le_right
-  let : Algebra E' ↑(E' ⊔ F') := (inclusion le_sup_left).toRingHom.toAlgebra
-  let e' : E ≃ₐ[↑(E ⊓ F)] E' := AlgEquiv.refl
-  let f' : F ≃ₐ[↑(E ⊓ F)] F' := AlgEquiv.refl
-  let h : ↑(E' ⊔ F') ≃ₗ[↑(E ⊓ F)] ((E ⊔ F).extendScalars (F := E ⊓ F) inf_le_sup) :=
-    LinearEquiv.ofEq ↑(E' ⊔ F').toSubalgebra.toSubmodule
-      ((E ⊔ F).extendScalars (F := E ⊓ F) inf_le_sup).toSubalgebra.toSubmodule
-        (by simpa using (extendScalars_sup (F := E ⊓ F) inf_le_left inf_le_right))
-  have : IsGalois ↑(E ⊓ F) E' := by
-    have : IsGalois ↑(E ⊓ F) E := IsGalois.tower_top_of_isGalois k _ _
-    exact IsGalois.of_algEquiv e'
-  have : FiniteDimensional ↑(E ⊓ F) E' := Module.Finite.equiv e'.toLinearEquiv
-  have : FiniteDimensional ↑(E ⊓ F) F' := Module.Finite.equiv f'.toLinearEquiv
-  calc finrank ↑(E ⊓ F) ↑(E ⊔ F)
-      = finrank ↑(E ⊓ F) ↑(E' ⊔ F') := ?_
-    _ = finrank ↑(E ⊓ F) E' * finrank E' ↑(E' ⊔ F') := by rw [finrank_mul_finrank]
-    _ = finrank ↑(E ⊓ F) E * finrank E' ↑(E' ⊔ F') := by rw [e'.toLinearEquiv.finrank_eq]
-    _ = finrank ↑(E ⊓ F) E * finrank ↑(E ⊓ F) F' := by
-        rw [← finrank_sup_eq_of_inf_eq_bot E' F']
-        ext; simp [E', F', mem_bot]
-    _ = finrank ↑(E ⊓ F) E * finrank ↑(E ⊓ F) F := by rw [f'.toLinearEquiv.finrank_eq]
-  · rw [LinearEquiv.finrank_eq (M := ↑(E ⊔ F)) (N := ↑(E' ⊔ F'))]
-    exact (LinearEquiv.refl ↑(E ⊓ F) ↑(E ⊔ F)).trans h.symm
+end FiniteField
+
+end ZModFiniteField
+
+section Arithmetic
 
 /-- Euler's totient function as an arithmetic function with values in `ℤ`. -/
 @[expose] def ArithmeticFunction.totient : ArithmeticFunction ℤ where
@@ -178,120 +166,6 @@ theorem Nat.totient_lcm_mul_totient_gcd (m n : ℕ) :
   rwa [ArithmeticFunction.totient_apply, ArithmeticFunction.totient_apply,
     ArithmeticFunction.totient_apply, ArithmeticFunction.totient_apply, ← Nat.cast_mul,
     ← Nat.cast_mul, Nat.cast_inj] at this
-
-open IntermediateField in
-set_option backward.isDefEq.respectTransparency false in
-theorem IsCyclotomicExtension.Rat.gcd_inf {K : Type*} [Field K] [NumberField K]
-    (n₁ n₂ : ℕ) (F₁ F₂ : IntermediateField ℚ K) [h₁ : IsCyclotomicExtension {n₁} ℚ F₁]
-    [h₂ : IsCyclotomicExtension {n₂} ℚ F₂] [NeZero n₁] [NeZero n₂] :
-    IsCyclotomicExtension {n₁.gcd n₂} ℚ ↑(F₁ ⊓ F₂) := by
-  let d := n₁.gcd n₂
-  have : NeZero d := ⟨Nat.gcd_ne_zero_left (NeZero.ne _)⟩
-  have : NeZero (n₁.lcm n₂) := ⟨Nat.lcm_ne_zero (NeZero.ne _) (NeZero.ne _)⟩
-  obtain ⟨ζ₁, hζ₁⟩ := h₁.1 rfl (NeZero.ne n₁)
-  replace hζ₁ := hζ₁.map_of_injective (FaithfulSMul.algebraMap_injective F₁ K)
-  obtain ⟨s, hs⟩ := n₁.gcd_dvd_left n₂
-  let ζ := (algebraMap F₁ K ζ₁) ^ s
-  have hζ : IsPrimitiveRoot ζ d := hζ₁.pow (NeZero.pos n₁) (by rwa [mul_comm])
-  have : IsCyclotomicExtension {d} ℚ ℚ⟮ζ⟯ := hζ.intermediateField_adjoin_isCyclotomicExtension ℚ
-  rw [isCyclotomicExtension_singleton_iff_eq_adjoin d ℚ K _ hζ, eq_comm]
-  rw [eq_iff_finrank_eq_of_le]
-  · have : IsGalois ℚ F₁ := h₁.isGalois
-    have := isCyclotomicExtension_lcm_sup ℚ K n₁ n₂ F₁ F₂
-    have : Module.finrank ℚ ↑(F₁ ⊔ F₂) ≠ 0 := Module.finrank_pos.ne'
-    rw [← mul_right_inj' this, finrank_sup_mul_finrank_inf_eq,
-      IsCyclotomicExtension.Rat.finrank n₁ F₁,
-      IsCyclotomicExtension.Rat.finrank n₂ F₂,
-        IsCyclotomicExtension.Rat.finrank (n₁.lcm n₂) ↑(F₁ ⊔ F₂),
-      IsCyclotomicExtension.Rat.finrank d ℚ⟮ζ⟯, Nat.totient_lcm_mul_totient_gcd]
-  · obtain ⟨ζ₂, hζ₂⟩ := h₂.1 rfl (NeZero.ne n₂)
-    replace hζ₂ := hζ₂.map_of_injective (FaithfulSMul.algebraMap_injective F₂ K)
-    rw [(isCyclotomicExtension_singleton_iff_eq_adjoin n₁ ℚ K _ hζ₁).mp h₁,
-      (isCyclotomicExtension_singleton_iff_eq_adjoin n₂ ℚ K _ hζ₂).mp h₂, adjoin_simple_le_iff,
-        mem_inf]
-    constructor
-    · exact pow_mem (mem_adjoin_simple_self ℚ _) s
-    · obtain ⟨t, _,
-      ht⟩ := hζ₂.eq_pow_of_pow_eq_one <| (hζ.pow_eq_one_iff_dvd n₂).mpr (n₁.gcd_dvd_right n₂)
-      rw [← ht]
-      exact pow_mem (mem_adjoin_simple_self ℚ _) t
-
-/-- `restrictHom` is `AlgEquiv.restrictNormal`. -/
-theorem IsGaloisGroup.restrictHom_eq_restrictNormal (K E L : Type*) [Field K] [Field E] [Field L]
-    [Algebra K E] [Algebra K L] [Algebra E L] [IsScalarTower K E L] [FiniteDimensional K L]
-    [FiniteDimensional K E] [IsGalois K L] [IsGalois K E] (σ : Gal(L/K)) :
-    IsGaloisGroup.restrictHom Gal(L/K) Gal(E/K) K E L σ = σ.restrictNormal E := by
-  ext x
-  apply (algebraMap E L).injective
-  rw [← AlgEquiv.smul_def, IsGaloisGroup.algebraMap_restrictHom_smul, AlgEquiv.smul_def,
-    AlgEquiv.restrictNormal_commutes]
-
-section restrictHom_eq
-
-variable (G G' A B C A' B' C' : Type*) [Group G] [Group G'] [Finite G] [Finite G']
-  [CommRing A] [CommRing B] [CommRing C] [IsDomain C] [Algebra A B] [Algebra A C] [Algebra B C]
-  [IsScalarTower A B C] [FaithfulSMul B C]
-  [MulSemiringAction G C] [IsGaloisGroup G A C] [MulSemiringAction G' B] [IsGaloisGroup G' A B]
-  [CommRing A'] [CommRing B'] [CommRing C'] [IsDomain C'] [Algebra A' B'] [Algebra A' C']
-  [Algebra B' C'] [IsScalarTower A' B' C'] [FaithfulSMul B' C']
-  [MulSemiringAction G C'] [IsGaloisGroup G A' C'] [MulSemiringAction G' B']
-  [IsGaloisGroup G' A' B']
-  [Algebra B B'] [Algebra C C'] [Algebra B C'] [IsScalarTower B B' C'] [IsScalarTower B C C']
-  [FaithfulSMul B B'] [SMulDistribClass G C C'] [SMulDistribClass G' B B']
-
-/-- `restrictHom` does not depend on the tower `C/B/A` used to define it, as long as the
-actions of `G` and `G'` are compatible with the maps `B → B'` and `C → C'`. -/
-theorem IsGaloisGroup.restrictHom_eq_restrictHom :
-    IsGaloisGroup.restrictHom G G' A B C = IsGaloisGroup.restrictHom G G' A' B' C' := by
-  ext g
-  have : FaithfulSMul G' B := IsGaloisGroup.faithful A
-  refine eq_of_smul_eq_smul (α := B) fun x ↦ ?_
-  apply FaithfulSMul.algebraMap_injective B B'
-  apply FaithfulSMul.algebraMap_injective B' C'
-  rw [← IsScalarTower.algebraMap_apply B B' C', IsScalarTower.algebraMap_apply B C C',
-    IsGaloisGroup.algebraMap_restrictHom_smul, algebraMap.smul',
-    ← IsScalarTower.algebraMap_apply B C C', algebraMap.smul',
-    IsGaloisGroup.algebraMap_restrictHom_smul, ← IsScalarTower.algebraMap_apply B B' C']
-
-end restrictHom_eq
-
-theorem IsPrimitiveRoot.isIntegral' {n : ℕ} {K L : Type*} [CommRing K] [CommRing L] [Algebra K L]
-    {μ : L} (h : IsPrimitiveRoot μ n) (hpos : 0 < n) :
-    IsIntegral K μ :=
-  IsIntegral.tower_top (h.isIntegral hpos)
-
-open IsCyclotomicExtension.Rat in
-theorem IsCyclotomicExtension.Rat.map_galEquivZMod_symm_apply {E F : Type*} [Field E] [Field F]
-    [NumberField E] [NumberField F] {n : ℕ} [NeZero n] [hE : IsCyclotomicExtension {n} ℚ E]
-    [hF : IsCyclotomicExtension {n} ℚ F] (f : E →+* F) (a : (ZMod n)ˣ) (x : E) :
-    f ((galEquivZMod n E).symm a x) = (galEquivZMod n F).symm a (f x) := by
-  have hζ := IsCyclotomicExtension.zeta_spec n ℚ E
-  have hζp := IsCyclotomicExtension.zeta_pow n ℚ E
-  suffices f.toRatAlgHom.comp ((galEquivZMod n E).symm a) =
-    ((galEquivZMod n F).symm a).toAlgHom.comp f.toRatAlgHom from AlgHom.congr_fun this x
-  refine AlgHom.ext_of_adjoin_eq_top (IsCyclotomicExtension.adjoin_primitive_root_eq_top hζ) ?_
-  simp only [Set.eqOn_singleton, AlgHom.coe_comp, AlgEquiv.coe_toAlgHom, RingHom.toRatAlgHom_apply,
-    Function.comp_apply]
-  rw [galEquivZMod_apply_of_pow_eq n _ _ hζp,
-    galEquivZMod_apply_of_pow_eq n _ _ (by rw [← map_pow, hζp, map_one]), map_pow,
-    MulEquiv.apply_symm_apply, MulEquiv.apply_symm_apply]
-
-@[simp]
-theorem IsFractionRing.map_algebraMap {A B K L : Type*} [CommRing A] [CommRing B] [IsDomain B]
-    [CommRing K] [Algebra A K] [IsFractionRing A K] [CommRing L] [Algebra B L] [IsFractionRing B L]
-    {j : A →+* B} (hj : Function.Injective j) (x : A) :
-    IsFractionRing.map hj (algebraMap A K x) = algebraMap B L (j x) := by simp [map]
-
-open IsCyclotomicExtension.Rat in
-theorem IsCyclotomicExtension.Rat.map_galEquivZMod_symm_smul {E F : Type*} [Field E] [Field F]
-    [NumberField E] [NumberField F] {n : ℕ} [NeZero n]
-    [hE : IsCyclotomicExtension {n} ℚ E] [hF : IsCyclotomicExtension {n} ℚ F]
-    {f : 𝓞 E →+* 𝓞 F} (hf : Function.Injective f) (a : (ZMod n)ˣ) (x : 𝓞 E) :
-    f ((galEquivZMod n E).symm a • x) = (galEquivZMod n F).symm a • (f x) := by
-  apply FaithfulSMul.algebraMap_injective (𝓞 F) F
-  rw [← IsFractionRing.map_algebraMap (K := E) hf]
-  have := map_galEquivZMod_symm_apply (F := F) (IsFractionRing.map hf) a (algebraMap (𝓞 E) E x)
-  rwa [IsFractionRing.map_algebraMap] at this
 
 theorem Nat.digits_base_pow_sub_one {b : ℕ} (hb : 1 < b) (l : ℕ) :
     b.digits (b ^ l - 1) = List.replicate l (b - 1) := by
@@ -327,13 +201,6 @@ theorem Nat.ofDigits_eq_sum (b : ℕ) (L : List ℕ) :
   simp [List.mapIdx_eq_zipIdx_map, ← Fin.sum_univ_fun_getElem,
     ← Fin.sum_congr' _ List.length_zipIdx.symm]
 
-/- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-TODO, CHANGE BACK WHEN UPSTREAMING to `Mathlib/Data/Nat/Digits/Lemmas.lean`: there `digitsAppend`
-is visible, and the intended proof of `Nat.ofDigits_digitsAppend` is
-  `rw [digitsAppend, ofDigits_append_replicate_zero, ofDigits_digits]`.
-The proof below via `mapIdx` is only a workaround, because `digitsAppend` does not expose its body
-here (it replaces the stub `Nat.digitsAppend_def`, whose `sorry` leaked into the axioms).
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -/
 theorem Nat.ofDigits_digitsAppend (b l n : ℕ) : ofDigits b (digitsAppend b l n) = n := by
   rw [ofDigits_eq_sum_mapIdx, mapIdx_digitsAppend_sum_eq]
 
@@ -418,6 +285,129 @@ theorem Nat.sub_one_mul_sum_mul_pow_mod_eq {b l x : ℕ} (hb : 1 < b) (hx : x < 
     _ = (b ^ l - 1) * (b.digits x).sum := by
       rw [digitsAppend_sum_eq_digits_sum, mul_assoc, geom_sum_mul_of_one_le hb.le, hl, mul_comm]
 
+end Arithmetic
+
+section FieldTheory
+
+theorem smul_eq_galRestrict_apply (A : Type*) {K L B : Type*} [CommRing A] [Field K] [Field L]
+    [CommRing B] [Algebra A K] [IsFractionRing A K] [Algebra B L] [IsFractionRing B L]
+    [Algebra A B] [Algebra K L] [Algebra A L] [IsScalarTower A K L] [IsScalarTower A B L]
+    [IsIntegralClosure B A L] [Algebra.IsAlgebraic K L] [MulSemiringAction Gal(L/K) B]
+    [SMulDistribClass Gal(L/K) B L] (σ : Gal(L/K)) (x : B) :
+    σ • x = galRestrict A K L B σ x := by
+  apply FaithfulSMul.algebraMap_injective B L
+  rw [algebraMap.smul', AlgEquiv.smul_def, algebraMap_galRestrict_apply]
+
+@[simp]
+theorem IsFractionRing.map_algebraMap {A B K L : Type*} [CommRing A] [CommRing B] [IsDomain B]
+    [CommRing K] [Algebra A K] [IsFractionRing A K] [CommRing L] [Algebra B L] [IsFractionRing B L]
+    {j : A →+* B} (hj : Function.Injective j) (x : A) :
+    IsFractionRing.map hj (algebraMap A K x) = algebraMap B L (j x) := by simp [map]
+
+theorem IntermediateField.linearDisjoint_iff_linearDisjoint_fieldRange {F E : Type*} [Field F]
+    [Field E] [Algebra F E] (A : IntermediateField F E) (L : Type*) [Field L] [Algebra F L]
+    [Algebra L E] [IsScalarTower F L E] :
+    A.LinearDisjoint L ↔ A.LinearDisjoint (IsScalarTower.toAlgHom F L E).fieldRange := by
+  rw [linearDisjoint_iff', AlgHom.fieldRange_toSubalgebra]
+
+open Module in
+lemma IntermediateField.finrank_sup_eq_of_inf_eq_bot {F E : Type*} [Field F] [Field E] [Algebra F E]
+    (K L : IntermediateField F E) [IsGalois F K] [FiniteDimensional F K] [FiniteDimensional F L]
+    [Algebra K ↑(K ⊔ L)] [IsScalarTower F K ↑(K ⊔ L)] (hinf : K ⊓ L = ⊥) :
+    finrank K ↑(K ⊔ L) = finrank F L := by
+  rw [← mul_right_inj', ← (LinearDisjoint.of_inf_eq_bot hinf).finrank_sup, finrank_mul_finrank]
+  exact finrank_pos.ne'
+
+set_option maxHeartbeats 500000 in
+-- The proof goes through several `extendScalars` and `inclusion` algebra structures.
+set_option synthInstance.maxHeartbeats 100000 in
+set_option backward.isDefEq.respectTransparency false in
+open Module in
+theorem IntermediateField.finrank_sup_mul_finrank_inf_eq {k L : Type*} [Field k] [Field L] [Algebra
+  k L]
+    (E F : IntermediateField k L) [FiniteDimensional k E] [FiniteDimensional k F] [IsGalois k E] :
+    finrank k ↑(E ⊔ F) * finrank k ↑(E ⊓ F) = finrank k E * finrank k F := by
+  let : Algebra E ↑(E ⊔ F) := (inclusion le_sup_left).toRingHom.toAlgebra
+  have : FiniteDimensional k ↑(E ⊓ F) := FiniteDimensional.of_injective
+    (IntermediateField.inclusion inf_le_left).toLinearMap
+    (RingHom.injective _)
+  suffices h : finrank E ↑(E ⊔ F) = finrank ↑(E ⊓ F) F by
+    rwa [← finrank_mul_finrank k E ↑(E ⊔ F), ← finrank_mul_finrank k ↑(E ⊓ F) F, mul_assoc,
+      mul_right_inj' finrank_pos.ne', mul_comm, mul_right_inj' finrank_pos.ne']
+  let : Algebra ↑(E ⊓ F) ↑(E ⊔ F) := (inclusion inf_le_sup).toRingHom.toAlgebra
+  have : IsScalarTower ↑(E ⊓ F) E ↑(E ⊔ F) := IsScalarTower.of_algebraMap_eq' rfl
+  have : FiniteDimensional ↑(E ⊓ F) E := FiniteDimensional.right k _ _
+  have : FiniteDimensional ↑(E ⊓ F) F := FiniteDimensional.right k _ _
+  have : finrank ↑(E ⊓ F) E ≠ 0 := finrank_pos.ne'
+  rw [← mul_right_inj' this, finrank_mul_finrank]
+  let E' : IntermediateField ↑(E ⊓ F) L := E.extendScalars (F := E ⊓ F) inf_le_left
+  let F' : IntermediateField ↑(E ⊓ F) L := F.extendScalars (F := E ⊓ F) inf_le_right
+  let : Algebra E' ↑(E' ⊔ F') := (inclusion le_sup_left).toRingHom.toAlgebra
+  let e' : E ≃ₐ[↑(E ⊓ F)] E' := AlgEquiv.refl
+  let f' : F ≃ₐ[↑(E ⊓ F)] F' := AlgEquiv.refl
+  let h : ↑(E' ⊔ F') ≃ₗ[↑(E ⊓ F)] ((E ⊔ F).extendScalars (F := E ⊓ F) inf_le_sup) :=
+    LinearEquiv.ofEq ↑(E' ⊔ F').toSubalgebra.toSubmodule
+      ((E ⊔ F).extendScalars (F := E ⊓ F) inf_le_sup).toSubalgebra.toSubmodule
+        (by simpa using (extendScalars_sup (F := E ⊓ F) inf_le_left inf_le_right))
+  have : IsGalois ↑(E ⊓ F) E' := by
+    have : IsGalois ↑(E ⊓ F) E := IsGalois.tower_top_of_isGalois k _ _
+    exact IsGalois.of_algEquiv e'
+  have : FiniteDimensional ↑(E ⊓ F) E' := Module.Finite.equiv e'.toLinearEquiv
+  have : FiniteDimensional ↑(E ⊓ F) F' := Module.Finite.equiv f'.toLinearEquiv
+  calc finrank ↑(E ⊓ F) ↑(E ⊔ F)
+      = finrank ↑(E ⊓ F) ↑(E' ⊔ F') := ?_
+    _ = finrank ↑(E ⊓ F) E' * finrank E' ↑(E' ⊔ F') := by rw [finrank_mul_finrank]
+    _ = finrank ↑(E ⊓ F) E * finrank E' ↑(E' ⊔ F') := by rw [e'.toLinearEquiv.finrank_eq]
+    _ = finrank ↑(E ⊓ F) E * finrank ↑(E ⊓ F) F' := by
+        rw [← finrank_sup_eq_of_inf_eq_bot E' F']
+        ext; simp [E', F', mem_bot]
+    _ = finrank ↑(E ⊓ F) E * finrank ↑(E ⊓ F) F := by rw [f'.toLinearEquiv.finrank_eq]
+  · rw [LinearEquiv.finrank_eq (M := ↑(E ⊔ F)) (N := ↑(E' ⊔ F'))]
+    exact (LinearEquiv.refl ↑(E ⊓ F) ↑(E ⊔ F)).trans h.symm
+
+/-- `restrictHom` is `AlgEquiv.restrictNormal`. -/
+theorem IsGaloisGroup.restrictHom_eq_restrictNormal (K E L : Type*) [Field K] [Field E] [Field L]
+    [Algebra K E] [Algebra K L] [Algebra E L] [IsScalarTower K E L] [FiniteDimensional K L]
+    [FiniteDimensional K E] [IsGalois K L] [IsGalois K E] (σ : Gal(L/K)) :
+    IsGaloisGroup.restrictHom Gal(L/K) Gal(E/K) K E L σ = σ.restrictNormal E := by
+  ext x
+  apply (algebraMap E L).injective
+  rw [← AlgEquiv.smul_def, IsGaloisGroup.algebraMap_restrictHom_smul, AlgEquiv.smul_def,
+    AlgEquiv.restrictNormal_commutes]
+
+section restrictHom_eq
+
+variable (G G' A B C A' B' C' : Type*) [Group G] [Group G'] [Finite G] [Finite G']
+  [CommRing A] [CommRing B] [CommRing C] [IsDomain C] [Algebra A B] [Algebra A C] [Algebra B C]
+  [IsScalarTower A B C] [FaithfulSMul B C]
+  [MulSemiringAction G C] [IsGaloisGroup G A C] [MulSemiringAction G' B] [IsGaloisGroup G' A B]
+  [CommRing A'] [CommRing B'] [CommRing C'] [IsDomain C'] [Algebra A' B'] [Algebra A' C']
+  [Algebra B' C'] [IsScalarTower A' B' C'] [FaithfulSMul B' C']
+  [MulSemiringAction G C'] [IsGaloisGroup G A' C'] [MulSemiringAction G' B']
+  [IsGaloisGroup G' A' B']
+  [Algebra B B'] [Algebra C C'] [Algebra B C'] [IsScalarTower B B' C'] [IsScalarTower B C C']
+  [FaithfulSMul B B'] [SMulDistribClass G C C'] [SMulDistribClass G' B B']
+
+/-- `restrictHom` does not depend on the tower `C/B/A` used to define it, as long as the
+actions of `G` and `G'` are compatible with the maps `B → B'` and `C → C'`. -/
+theorem IsGaloisGroup.restrictHom_eq_restrictHom :
+    IsGaloisGroup.restrictHom G G' A B C = IsGaloisGroup.restrictHom G G' A' B' C' := by
+  ext g
+  have : FaithfulSMul G' B := IsGaloisGroup.faithful A
+  refine eq_of_smul_eq_smul (α := B) fun x ↦ ?_
+  apply FaithfulSMul.algebraMap_injective B B'
+  apply FaithfulSMul.algebraMap_injective B' C'
+  rw [← IsScalarTower.algebraMap_apply B B' C', IsScalarTower.algebraMap_apply B C C',
+    IsGaloisGroup.algebraMap_restrictHom_smul, algebraMap.smul',
+    ← IsScalarTower.algebraMap_apply B C C', algebraMap.smul',
+    IsGaloisGroup.algebraMap_restrictHom_smul, ← IsScalarTower.algebraMap_apply B B' C']
+
+end restrictHom_eq
+
+end FieldTheory
+
+section Ideals
+
 namespace Ideal
 
 variable {S : Type*} [CommRing S] [IsDedekindDomain S] [Module.Free ℤ S]
@@ -448,10 +438,6 @@ theorem coprime_absNorm_of_isCoprime_span_singleton {n : ℕ} {I : Ideal S}
 
 end Ideal
 
--- TODO(SKW): convert to the unprimed `Ideal.ramificationIdx` once Mathlib has an unprimed
--- `le_comap_pow_ramificationIdx`. The name is currently taken by a deprecated alias for the primed
--- lemma, and converting here without it would force Dedekind hypotheses on an otherwise
--- `CommRing`-level statement. The call site `Stickelberger.lean` bridges in the meantime.
 theorem Ideal.pow_liesOver_of_le_ramificationIdx {R S : Type*} [CommRing R] [CommRing S]
     [Algebra R S] (p : Ideal R) (P : Ideal S) [P.LiesOver p]
     {i : ℕ} (hi : i + 1 ≤ Ideal.ramificationIdx' p P) :
@@ -487,8 +473,6 @@ theorem Ideal.liesOver_of_absNorm_dvd_prime_pow {R : Type*} [CommRing R] [IsDede
   rw [Ideal.liesOver_iff, ← Nat.prime_eq_prime_of_dvd_pow (Nat.absNorm_under_prime I)
     hp.out this, Int.ideal_span_absNorm_eq_self]
 
--- TODO(SKW): upstream to `Mathlib/RingTheory/Ideal/Over.lean`, at the end of the `primesOver`
--- section.
 namespace Ideal
 
 variable {R : Type*} (A : Type*) (B : Type*) [CommSemiring R] [CommSemiring A] [CommSemiring B]
@@ -511,110 +495,11 @@ theorem coe_equivPrimesOverPrimesOver_symm_apply (x : Σ P : p.primesOver A, P.1
 
 end Ideal
 
+end Ideals
+
+section ClassGroupAction
+
 namespace FractionalIdeal
-
-/- Old action, replaced by `extendedMulDistribMulAction` below.
-section General
-
-variable {R : Type*} [CommRing R] {S : Submonoid R} {P : Type*} [CommRing P] [Algebra R P]
-  {G : Type*} [Group G] [MulSemiringAction G R] [MulSemiringAction G P] [SMulDistribClass G R P]
-
-/-- The image of a submodule `N ⊆ P` under the ring automorphism induced by `g`. -/
-@[expose] def _root_.Submodule.smulSubmodule (g : G) (N : Submodule R P) : Submodule R P where
-  carrier := (g • · : P → P) '' N
-  add_mem' := by rintro _ _ ⟨a, ha, rfl⟩ ⟨b, hb, rfl⟩; exact ⟨a + b, N.add_mem ha hb,
-    smul_add g a b⟩
-  zero_mem' := ⟨0, N.zero_mem, smul_zero g⟩
-  smul_mem' c y hy := by
-    obtain ⟨x, hx, rfl⟩ := hy
-    refine ⟨(g⁻¹ • c) • x, N.smul_mem _ hx, ?_⟩
-    change g • ((g⁻¹ • c) • x) = c • (g • x)
-    rw [smul_distrib_smul, smul_inv_smul]
-
-theorem _root_.Submodule.mem_smulSubmodule {g : G} {N : Submodule R P} {y : P} :
-    y ∈ Submodule.smulSubmodule g N ↔ ∃ x ∈ N, g • x = y := Set.mem_image _ _ _
-
-variable (hS : ∀ (g : G) {s : R}, s ∈ S → g • s ∈ S)
-
-include hS
-
--- TODO(SKW): Mathlib has no action of a group on fractional ideals by ring automorphisms, but
--- two things come close. `Ideal.pointwiseMulSemiringAction` (`Mathlib/RingTheory/Ideal/Pointwise`)
--- is the same construction for ideals (`g • I := I.map (MulSemiringAction.toRingHom _ _ g)`, a
--- `protected def` made an instance in the `Pointwise` scope). `FractionalIdeal.extended`
--- (`Mathlib/RingTheory/FractionalIdeal/Extended`) extends a fractional ideal along a ring
--- homomorphism `f` with `hf : M ≤ N.comap f`; taking `f = MulSemiringAction.toRingHom G R g`, `hf`
--- is exactly `hS g`, so `smulFractional hS g I` should be `I.extended P (hS g)` (the span changes
--- nothing as `g` is bijective), and `extended_one`, `extended_mul`, `extended_extended` would give
--- `smul_one`, `smul_mul`, `mul_smul`. It needs `[IsLocalization S P]`, which holds for
--- `P = FractionRing R` as used for the class group. Untested; to decide before upstreaming, and
--- the names of `smulFractional` and its lemmas are left as they are until then.
-/-- The image of a fractional ideal under the ring automorphism induced by `g`. -/
-@[expose] def smulFractional (g : G) (I : FractionalIdeal S P) : FractionalIdeal S P :=
-  ⟨Submodule.smulSubmodule g (I : Submodule R P), by
-    obtain ⟨a, ha, H⟩ := I.isFractional
-    refine ⟨g • a, hS g ha, ?_⟩
-    rintro _ ⟨x, hx, rfl⟩
-    obtain ⟨r, hr⟩ := H x hx
-    exact ⟨g • r, by rw [← smul_distrib_smul, ← hr, algebraMap.smul']⟩⟩
-
-theorem coe_smulFractional (g : G) (I : FractionalIdeal S P) :
-    (↑(smulFractional hS g I) : Submodule R P) = Submodule.smulSubmodule g (I : Submodule R P) :=
-  rfl
-
-theorem mem_smulFractional {g : G} {I : FractionalIdeal S P} {y : P} :
-    y ∈ smulFractional hS g I ↔ ∃ x ∈ I, g • x = y := Submodule.mem_smulSubmodule
-
-theorem smulFractional_one (I : FractionalIdeal S P) : smulFractional hS 1 I = I :=
-  coeToSubmodule_injective <| Submodule.ext fun y => by
-    simp [coe_smulFractional, Submodule.mem_smulSubmodule]
-
-theorem smulFractional_mul (g h : G) (I : FractionalIdeal S P) :
-    smulFractional hS (g * h) I
-      = smulFractional hS g (smulFractional hS h I) :=
-  coeToSubmodule_injective <| Submodule.ext fun y => by
-    simp only [coe_smulFractional, Submodule.mem_smulSubmodule]
-    constructor
-    · rintro ⟨x, hx, rfl⟩; exact ⟨h • x, ⟨x, hx, rfl⟩, (mul_smul g h x).symm⟩
-    · rintro ⟨_, ⟨x, hx, rfl⟩, rfl⟩; exact ⟨x, hx, mul_smul g h x⟩
-
-theorem smulFractional_smul_one (g : G) : smulFractional hS g (1 : FractionalIdeal S P) = 1 :=
-  coeToSubmodule_injective <| Submodule.ext fun y => by
-    simp only [coe_smulFractional, coe_one, Submodule.mem_smulSubmodule, Submodule.mem_one]
-    constructor
-    · rintro ⟨_, ⟨r, rfl⟩, rfl⟩; exact ⟨g • r, algebraMap.smul' g r P⟩
-    · rintro ⟨r, rfl⟩
-      exact ⟨algebraMap R P (g⁻¹ • r), ⟨g⁻¹ • r, rfl⟩, by rw [← algebraMap.smul', smul_inv_smul]⟩
-
-theorem smulFractional_smul_mul (g : G) (I J : FractionalIdeal S P) :
-    smulFractional hS g (I * J)
-      = smulFractional hS g I * smulFractional hS g J :=
-  coeToSubmodule_injective <| by
-    simp only [coe_smulFractional, coe_mul]
-    refine le_antisymm ?_ (Submodule.mul_le.mpr ?_)
-    · intro y hy
-      rw [Submodule.mem_smulSubmodule] at hy
-      obtain ⟨w, hw, rfl⟩ := hy
-      refine Submodule.mul_induction_on hw ?_ ?_
-      · intro a ha b hb
-        rw [smul_mul']
-        exact Submodule.mul_mem_mul (Submodule.mem_smulSubmodule.mpr ⟨a, ha, rfl⟩)
-          (Submodule.mem_smulSubmodule.mpr ⟨b, hb, rfl⟩)
-      · intro x y hx hy; rw [smul_add]; exact Submodule.add_mem _ hx hy
-    · rintro _ ⟨a, ha, rfl⟩ _ ⟨b, hb, rfl⟩
-      exact Submodule.mem_smulSubmodule.mpr ⟨a * b, Submodule.mul_mem_mul ha hb, smul_mul' g a b⟩
-
-/-- The `G`-action on `FractionalIdeal S P` induced by compatible actions on `R` and `P`. -/
-@[reducible, expose]
-def mulDistribMulAction : MulDistribMulAction G (FractionalIdeal S P) where
-  smul := smulFractional hS
-  one_smul := smulFractional_one hS
-  mul_smul := smulFractional_mul hS
-  smul_one := smulFractional_smul_one hS
-  smul_mul := smulFractional_smul_mul hS
-
-end General
--/
 
 noncomputable section ExtendedAction
 
@@ -624,7 +509,8 @@ variable {R : Type*} [CommRing R] {S : Submonoid R} (P : Type*) [CommRing P] [Al
 theorem extended_id (I : FractionalIdeal S P) :
     I.extended P (f := RingHom.id R)
       (fun _ h ↦ Submonoid.mem_comap.mpr h : S ≤ S.comap (RingHom.id R)) = I := by
-  simp only [← coeToSubmodule_inj, coe_extended_eq_span, IsLocalization.map_id, Set.image_id']
+  simp only [← coeToSubmodule_inj, coeToSubmodule_extended_eq_span, IsLocalization.map_id,
+    Set.image_id']
   exact Submodule.span_eq _
 
 theorem canonicalEquiv_apply (P' : Type*) [CommRing P'] [Algebra R P'] [IsLocalization S P']
@@ -636,7 +522,7 @@ theorem canonicalEquiv_eq_extended (P' : Type*) [CommRing P'] [Algebra R P'] [Is
     (I : FractionalIdeal S P) :
     canonicalEquiv S P P' I = I.extended P'
       (fun _ h ↦ Submonoid.mem_comap.mpr h : S ≤ S.comap (RingHom.id R)) := by
-  rw [canonicalEquiv_apply, ← coeToSubmodule_inj, coe_map, coe_extended_eq_span,
+  rw [canonicalEquiv_apply, ← coeToSubmodule_inj, coe_map, coeToSubmodule_extended_eq_span,
     ← Submodule.span_eq (Submodule.map _ _)]
   rfl
 
@@ -789,101 +675,350 @@ noncomputable instance : MulDistribMulAction G (ClassGroup R) where
   smul_one g := map_one (mapAut g)
   smul_mul g c d := map_mul (mapAut g) c d
 
--- The `MulDistribMulAction` reuses the `SMul` instance above (no parallel `SMul` instance /
--- diamond).
-example (g : G) (c : ClassGroup R) : g • c = mapAut g c := by
-  with_reducible_and_instances rfl
-
 end ClassGroup
 
-namespace FiniteField
+end ClassGroupAction
 
-open Finset
+section Cyclotomic
 
-variable (K : Type*) [Field K] [Fintype K]
+instance {n : ℕ} [NeZero n] {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {n} ℚ K] :
+    HasEnoughRootsOfUnity (𝓞 K) n :=
+  ⟨⟨_, (IsCyclotomicExtension.zeta_spec n ℚ K).toInteger_isPrimitiveRoot⟩, inferInstance⟩
 
-local notation "q" => Fintype.card K
+theorem NumberField.isUnit_iff_natAbs_norm {K : Type*} [Field K] [NumberField K] {x :
+  RingOfIntegers K} :
+    IsUnit x ↔ (Algebra.norm ℤ x).natAbs = 1 := by
+  rw [isUnit_iff_norm, ← Rat.natCast_injective.eq_iff, RingOfIntegers.coe_norm,
+    Nat.cast_natAbs, Nat.cast_one, ← Algebra.coe_norm_int, Int.cast_abs]
 
-/-- The sum of `x⁻¹ * x ^ (i + 1)` as `x` ranges over a finite field of cardinality `q` is equal
-to `-1` if `q - 1 ∣ i`, and to `0` otherwise. -/
-theorem sum_inv_mul_pow_succ (i : ℕ) :
-    ∑ x : K, x⁻¹ * x ^ (i + 1) = if q - 1 ∣ i then -1 else 0 := by
-  classical
-  rw [← sum_sdiff ({0} : Finset K).subset_univ, sum_singleton, inv_zero, zero_mul, add_zero,
-    sum_congr rfl (g := (· ^ i)), sum_sdiff_zero, sum_pow_units K i]
-  grind
+theorem IsPrimitiveRoot.isIntegral' {n : ℕ} {K L : Type*} [CommRing K] [CommRing L] [Algebra K L]
+    {μ : L} (h : IsPrimitiveRoot μ n) (hpos : 0 < n) :
+    IsIntegral K μ :=
+  IsIntegral.tower_top (h.isIntegral hpos)
 
-end FiniteField
+open NumberField in
+theorem IsCyclotomicExtension.Rat.isCoprime_discr_of_coprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂]
+    (K₁ K₂ : Type*) [Field K₁] [Field K₂] [NumberField K₁] [NumberField K₂]
+    [IsCyclotomicExtension {n₁} ℚ K₁] [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
+    IsCoprime (NumberField.discr K₁) (NumberField.discr K₂) := by
+  rw [Int.isCoprime_iff_nat_coprime, natAbs_discr  n₁ K₁, natAbs_discr  n₂ K₂]
+  refine Nat.Coprime.coprime_div_left ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd _)
+  refine Nat.Coprime.coprime_div_right ?_ (Nat.prod_primeFactors_pow_totient_ediv_dvd _)
+  exact Nat.Coprime.pow_left _ (Nat.Coprime.pow_right _ h)
 
--- From `SKW.Prereqs.AlgebraMisc`.
+theorem IsCyclotomicExtension.Rat.linearDisjoint_of_coprime (n₁ n₂ : ℕ) [NeZero n₁] [NeZero n₂]
+    {E : Type*} [Field E] [NumberField E] (K₁ : IntermediateField ℚ E) [NumberField K₁] (K₂ : Type*)
+    [Field K₂] [NumberField K₂] [Algebra K₂ E] [IsCyclotomicExtension {n₁} ℚ K₁]
+    [IsCyclotomicExtension {n₂} ℚ K₂] (h : n₁.Coprime n₂) :
+    K₁.LinearDisjoint K₂ := by
+  have : IsCyclotomicExtension {n₂} ℚ (IsScalarTower.toAlgHom ℚ K₂ E).fieldRange :=
+    .equiv _ ℚ K₂ (IsScalarTower.toAlgHom ℚ K₂ E).equivFieldRange
+  have : IsGalois ℚ K₁ := IsCyclotomicExtension.isGalois {n₁} ℚ K₁
+  rw [IntermediateField.linearDisjoint_iff_linearDisjoint_fieldRange]
+  exact NumberField.linearDisjoint_of_isGalois_isCoprime_discr E _ _ <|
+    isCoprime_discr_of_coprime n₁ n₂ K₁ _ h
+
+open IntermediateField in
+set_option backward.isDefEq.respectTransparency false in
+theorem IsCyclotomicExtension.Rat.gcd_inf {K : Type*} [Field K] [NumberField K]
+    (n₁ n₂ : ℕ) (F₁ F₂ : IntermediateField ℚ K) [h₁ : IsCyclotomicExtension {n₁} ℚ F₁]
+    [h₂ : IsCyclotomicExtension {n₂} ℚ F₂] [NeZero n₁] [NeZero n₂] :
+    IsCyclotomicExtension {n₁.gcd n₂} ℚ ↑(F₁ ⊓ F₂) := by
+  let d := n₁.gcd n₂
+  have : NeZero d := ⟨Nat.gcd_ne_zero_left (NeZero.ne _)⟩
+  have : NeZero (n₁.lcm n₂) := ⟨Nat.lcm_ne_zero (NeZero.ne _) (NeZero.ne _)⟩
+  obtain ⟨ζ₁, hζ₁⟩ := h₁.1 rfl (NeZero.ne n₁)
+  replace hζ₁ := hζ₁.map_of_injective (FaithfulSMul.algebraMap_injective F₁ K)
+  obtain ⟨s, hs⟩ := n₁.gcd_dvd_left n₂
+  let ζ := (algebraMap F₁ K ζ₁) ^ s
+  have hζ : IsPrimitiveRoot ζ d := hζ₁.pow (NeZero.pos n₁) (by rwa [mul_comm])
+  have : IsCyclotomicExtension {d} ℚ ℚ⟮ζ⟯ := hζ.intermediateField_adjoin_isCyclotomicExtension ℚ
+  rw [isCyclotomicExtension_singleton_iff_eq_adjoin d ℚ K _ hζ, eq_comm]
+  rw [eq_iff_finrank_eq_of_le]
+  · have : IsGalois ℚ F₁ := h₁.isGalois
+    have := isCyclotomicExtension_lcm_sup ℚ K n₁ n₂ F₁ F₂
+    have : Module.finrank ℚ ↑(F₁ ⊔ F₂) ≠ 0 := Module.finrank_pos.ne'
+    rw [← mul_right_inj' this, finrank_sup_mul_finrank_inf_eq,
+      IsCyclotomicExtension.Rat.finrank n₁ F₁,
+      IsCyclotomicExtension.Rat.finrank n₂ F₂,
+        IsCyclotomicExtension.Rat.finrank (n₁.lcm n₂) ↑(F₁ ⊔ F₂),
+      IsCyclotomicExtension.Rat.finrank d ℚ⟮ζ⟯, Nat.totient_lcm_mul_totient_gcd]
+  · obtain ⟨ζ₂, hζ₂⟩ := h₂.1 rfl (NeZero.ne n₂)
+    replace hζ₂ := hζ₂.map_of_injective (FaithfulSMul.algebraMap_injective F₂ K)
+    rw [(isCyclotomicExtension_singleton_iff_eq_adjoin n₁ ℚ K _ hζ₁).mp h₁,
+      (isCyclotomicExtension_singleton_iff_eq_adjoin n₂ ℚ K _ hζ₂).mp h₂, adjoin_simple_le_iff,
+        mem_inf]
+    constructor
+    · exact pow_mem (mem_adjoin_simple_self ℚ _) s
+    · obtain ⟨t, _,
+      ht⟩ := hζ₂.eq_pow_of_pow_eq_one <| (hζ.pow_eq_one_iff_dvd n₂).mpr (n₁.gcd_dvd_right n₂)
+      rw [← ht]
+      exact pow_mem (mem_adjoin_simple_self ℚ _) t
+
+open IsCyclotomicExtension.Rat in
+theorem IsCyclotomicExtension.Rat.map_galEquivZMod_symm_apply {E F : Type*} [Field E] [Field F]
+    [NumberField E] [NumberField F] {n : ℕ} [NeZero n] [hE : IsCyclotomicExtension {n} ℚ E]
+    [hF : IsCyclotomicExtension {n} ℚ F] (f : E →+* F) (a : (ZMod n)ˣ) (x : E) :
+    f ((galEquivZMod n E).symm a x) = (galEquivZMod n F).symm a (f x) := by
+  have hζ := IsCyclotomicExtension.zeta_spec n ℚ E
+  have hζp := IsCyclotomicExtension.zeta_pow n ℚ E
+  suffices f.toRatAlgHom.comp ((galEquivZMod n E).symm a) =
+    ((galEquivZMod n F).symm a).toAlgHom.comp f.toRatAlgHom from AlgHom.congr_fun this x
+  refine AlgHom.ext_of_adjoin_eq_top (IsCyclotomicExtension.adjoin_primitive_root_eq_top hζ) ?_
+  simp only [Set.eqOn_singleton, AlgHom.coe_comp, AlgEquiv.coe_toAlgHom, RingHom.toRatAlgHom_apply,
+    Function.comp_apply]
+  rw [galEquivZMod_apply_of_pow_eq n _ _ hζp,
+    galEquivZMod_apply_of_pow_eq n _ _ (by rw [← map_pow, hζp, map_one]), map_pow,
+    MulEquiv.apply_symm_apply, MulEquiv.apply_symm_apply]
+
+open IsCyclotomicExtension.Rat in
+theorem IsCyclotomicExtension.Rat.map_galEquivZMod_symm_smul {E F : Type*} [Field E] [Field F]
+    [NumberField E] [NumberField F] {n : ℕ} [NeZero n]
+    [hE : IsCyclotomicExtension {n} ℚ E] [hF : IsCyclotomicExtension {n} ℚ F]
+    {f : 𝓞 E →+* 𝓞 F} (hf : Function.Injective f) (a : (ZMod n)ˣ) (x : 𝓞 E) :
+    f ((galEquivZMod n E).symm a • x) = (galEquivZMod n F).symm a • (f x) := by
+  apply FaithfulSMul.algebraMap_injective (𝓞 F) F
+  rw [← IsFractionRing.map_algebraMap (K := E) hf]
+  have := map_galEquivZMod_symm_apply (F := F) (IsFractionRing.map hf) a (algebraMap (𝓞 E) E x)
+  rwa [IsFractionRing.map_algebraMap] at this
+
+end Cyclotomic
+
+section Stickelberger
+
+noncomputable section
+
+local instance {p f : ℕ} [hp : Fact p.Prime] [NeZero f] : NeZero (p ^ f - 1) :=
+  ⟨Nat.sub_ne_zero_of_lt (Nat.one_lt_pow (NeZero.ne f) hp.out.one_lt)⟩
+
+local instance {p f : ℕ} [hp : Fact p.Prime] [NeZero f] : Fact ((p ^ f - 1).Coprime p) := ⟨by
+  rw [← Nat.coprime_pow_right_iff (NeZero.pos f), Nat.coprime_self_sub_left NeZero.one_le]
+  exact Nat.gcd_one_left _⟩
+
+namespace Stickelberger
+
+open Ideal NumberField IntermediateField IsDedekindDomain
+
+variable {p : ℕ} (n : ℕ)
+
+local notation3 "𝒑" => span {(p : ℤ)}
+
+variable {L : Type*} [Field L] [NumberField L] {K F : IntermediateField ℚ L}
+
+variable (P : Ideal (𝓞 K)) (𝓟 : Ideal (𝓞 L)) [P.HasTeichmullerLift n]
+
+variable {ζ : 𝓞 F} (hζ : IsPrimitiveRoot ζ p)
+
+attribute [local instance] ZMod.algebra
+
+attribute [local instance] Ideal.Quotient.field
+
+variable {P 𝓟} in
+theorem cast_trace_eq_algebraMap_trace [P.LiesOver 𝒑] [CharP (𝓞 K ⧸ P) p]
+    [Algebra (ℤ ⧸ 𝒑) (𝓞 L ⧸ 𝓟 ^ 2)] (x : 𝓞 K ⧸ P) :
+    (Algebra.trace (ZMod p) (𝓞 K ⧸ P) x).cast =
+      algebraMap _ (𝓞 L ⧸ 𝓟 ^ 2) (Algebra.trace (ℤ ⧸ 𝒑) (𝓞 K ⧸ P) x) := by
+  rw [← ZMod.cast_trace_eq_trace (Int.quotientSpanNatEquivZMod p), ZMod.map_cast]
+
+section Teichmuller
+
+variable {n P} [NeZero n] [IsCyclotomicExtension {n} ℚ K]
+
+protected theorem teichmuller_ne_one (hn : n ≠ 1) :
+    MulChar.teichmuller P n ≠ 1 :=
+  MulChar.teichmuller_ne_one (IsCyclotomicExtension.zeta_spec n ℚ K).toInteger_isPrimitiveRoot hn
+
+theorem ringHomComp_teichmuller_zpow_ne_one {a : ℤ}
+    (ha : ¬ (n : ℤ) ∣ a) :
+    (MulChar.teichmuller P n ^ a).ringHomComp (algebraMap (𝓞 K) (𝓞 L)) ≠ 1 := by
+  rw [MulChar.ringHomComp_ne_one_iff]
+  · rwa [ne_eq, MulChar.teichmuller_zpow_eq_one_iff]
+    exact (IsCyclotomicExtension.zeta_spec n ℚ K).toInteger_isPrimitiveRoot
+  · exact RingOfIntegers.algebraMap.injective K L
+
+end Teichmuller
+
 section
 
-@[to_additive (attr := simp)]
-theorem MulEquiv.ofBijective_symm_apply_apply {M N F : Type*} [Mul M] [Mul N] [FunLike F M N]
-    [MulHomClass F M N] (f : F) (hf : Function.Bijective f) (a : M) :
-    (ofBijective f hf).symm (f a) = a := (symm_apply_eq (ofBijective f hf)).mpr rfl
+variable [hp : Fact p.Prime] [IsCyclotomicExtension {p} ℚ F]
+    [P.LiesOver (span {(p : ℤ)})]
 
--- TODO(SKW): upstream, next to `multiplicity_map_eq`.
-/-- The multiplicity is invariant under a group acting by multiplicative automorphisms. -/
-theorem multiplicity_smul {G α : Type*} [Group G] [Monoid α] [MulDistribMulAction G α] (g : G)
-    {a b : α} : multiplicity (g • a) (g • b) = multiplicity a b :=
-  multiplicity_map_eq (MulDistribMulAction.toMulEquiv α g)
-
--- TODO(SKW): upstream, next to `Finset.emultiplicity_prod`.
-/-- The multiplicity of a prime in a finite product is the sum of the multiplicities. -/
-theorem Finset.multiplicity_prod {α β : Type*} [CommMonoidWithZero α] [IsCancelMulZero α]
-    {p : α} (hp : Prime p) (s : Finset β) (f : β → α) (hfin : FiniteMultiplicity p (∏ x ∈ s, f x)) :
-    multiplicity p (∏ x ∈ s, f x) = ∑ x ∈ s, multiplicity p (f x) := by
-  classical
-  induction s using Finset.induction with
-  | empty => simp
-  | insert a s has ih =>
-    rw [Finset.prod_insert has] at hfin
-    rw [Finset.prod_insert has, Finset.sum_insert has, multiplicity_mul hp hfin,
-      ih hfin.mul_right]
+include hζ in
+theorem zeta_sub_one_mem [𝓟.IsPrime] [𝓟.LiesOver 𝒑] : algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∈ 𝓟 := by
+  rw [← map_one (f := algebraMap (𝓞 F) (𝓞 L)), ← map_sub, ← mem_comap,
+    ← Ideal.under_def, IsCyclotomicExtension.Rat.eq_span_zeta_sub_one_of_liesOver' p F
+      (IsPrimitiveRoot.coe_submonoidClass_iff.mpr hζ) (under (𝓞 F) 𝓟)]
+  exact Submodule.mem_span_singleton_self _
 
 end
 
--- From `SKW.Prereqs.GroupRingAction`.
+theorem not_dvd_pow_self_sub_one (p f : ℕ) [hp : Fact (p.Prime)] (hf : f ≠ 0) :
+    ¬ p ∣ p ^ f - 1 := by
+  have : NeZero f := ⟨hf⟩
+  rw [Nat.dvd_sub_iff_right NeZero.one_le (p.div_pow_of_pos f _), Nat.dvd_one]
+  · exact hp.out.ne_one
+  · by_contra! h
+    aesop
+
+/-- A prime of `𝓞 L` above `p` has ramification index `p - 1` over `p`. -/
+theorem ramificationIdx_eq_sub_one (f : ℕ) [hp : Fact p.Prime] [NeZero f]
+    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] (𝓠 : Ideal (𝓞 L)) [𝓠.IsPrime] [𝓠.LiesOver 𝒑] :
+    𝓠.ramificationIdx ℤ = p - 1 := by
+  simpa using @IsCyclotomicExtension.Rat.ramificationIdx_eq (p * (p ^ f - 1)) (p ^ f - 1) p 0 hp L
+    _ _ 𝓠 _ _ _ (by ring) (not_dvd_pow_self_sub_one p f (NeZero.ne f))
+
+/-- Version of `ramificationIdx_eq_sub_one` over a prime `𝔮` of `𝓞 k` above `p` instead of over
+`p`. -/
+theorem ramificationIdx_eq_sub_one' {f m d : ℕ} [hp : Fact p.Prime] [NeZero f] [NeZero m]
+    [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L] {k : IntermediateField ℚ L}
+    [IsCyclotomicExtension {m} ℚ k] (hmd : p ^ f - 1 = m * d) (𝔮 : Ideal (𝓞 k)) [𝔮.IsMaximal]
+    [𝔮.LiesOver 𝒑] {𝓠 : Ideal (𝓞 L)} [𝓠.IsPrime] [𝓠.LiesOver 𝔮] :
+    𝓠.ramificationIdx (𝓞 k) = p - 1 := by
+  have : 𝓠.LiesOver 𝒑 := LiesOver.trans 𝓠 𝔮 𝒑
+  have hm : ¬ p ∣ m := fun h ↦ not_dvd_pow_self_sub_one p f (NeZero.ne f) (h.trans ⟨d, hmd⟩)
+  have h𝓠 : 𝓠.ramificationIdx ℤ = p - 1 := ramificationIdx_eq_sub_one f 𝓠
+  have tower := ramificationIdx_tower (R := ℤ) 𝔮 𝓠
+  rw [h𝓠,
+    IsCyclotomicExtension.Rat.ramificationIdx_eq_of_not_dvd p k 𝔮 hm, one_mul] at tower
+  exact tower.symm
+
+/-- A prime of `𝓞 L` above `p` is unramified over the prime of `𝓞 F` below it. -/
+theorem ramificationIdx_under_eq_one (p f : ℕ) [hp : Fact p.Prime] [NeZero f]
+    [IsCyclotomicExtension {p} ℚ F] [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
+    (𝓠 : Ideal (𝓞 L)) [𝓠.IsPrime] [𝓠.LiesOver (span {(p : ℤ)})] :
+    𝓠.ramificationIdx (𝓞 F) = 1 := by
+  have h𝓠 : 𝓠.ramificationIdx ℤ = p - 1 := ramificationIdx_eq_sub_one f 𝓠
+  have tower := ramificationIdx_tower (R := ℤ) (under (𝓞 F) 𝓠) 𝓠
+  rw [h𝓠,
+    IsCyclotomicExtension.Rat.ramificationIdx_eq_of_prime p F _] at tower
+  exact (Nat.mul_eq_left (Nat.sub_ne_zero_of_lt hp.out.one_lt)).mp tower.symm
+
 section
 
-namespace MonoidAlgebra
-variable {G M : Type*} [Monoid G]
+variable [hp : Fact p.Prime] (f : ℕ) [NeZero f] [IsCyclotomicExtension {p} ℚ F]
+  [P.LiesOver (span {(p : ℤ)})] [𝓟.IsMaximal] [𝓟.LiesOver P]
 
-section CommMonoid
-variable [CommMonoid M] [MulDistribMulAction G M]
+theorem three_le_pow [hp' : Fact (Odd p)] : 3 ≤ p ^ f := by
+  refine le_trans (Nat.le_pow (NeZero.pos f)) ?_
+  exact (Nat.pow_le_pow_iff_left (NeZero.ne f)).mpr <| (Nat.Prime.odd_iff hp.out).mp hp'.out
 
-/-- The action of `ℕ[G]` on a commutative monoid `M` on which `G` acts by monoid homomorphisms:
-`m ^ ∑ nᵍ g = ∏ (g • m) ^ nᵍ`. -/
-instance : Pow M (MonoidAlgebra ℕ G) where
-  pow m θ := θ.coeff.prod fun g n ↦ (g • m) ^ n
+variable {f P 𝓟 hζ}
 
-theorem pow_def (m : M) (θ : MonoidAlgebra ℕ G) :
-    m ^ θ = θ.coeff.prod fun g n ↦ (g • m) ^ n := rfl
+variable [IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L]
 
-@[simp]
-theorem pow_zero (m : M) : m ^ (0 : MonoidAlgebra ℕ G) = 1 := by
-  simp [pow_def]
-
-@[simp]
-theorem pow_single (m : M) (g : G) (n : ℕ) : m ^ single g n = (g • m) ^ n := by
-  simp [pow_def]
-
-theorem pow_add (m : M) (θ θ' : MonoidAlgebra ℕ G) : m ^ (θ + θ') = m ^ θ * m ^ θ' := by
-  simp_rw [pow_def, coeff_add]
-  exact Finsupp.prod_add_index' (fun _ ↦ _root_.pow_zero _) fun _ ↦ _root_.pow_add _
-
-theorem pow_sum {ι : Type*} (m : M) (s : Finset ι) (θ : ι → MonoidAlgebra ℕ G) :
-    m ^ (∑ i ∈ s, θ i) = ∏ i ∈ s, m ^ θ i := by
-  classical
-  induction s using Finset.induction_on with
-  | empty => simp
-  | insert i s hi ih => rw [Finset.sum_insert hi, Finset.prod_insert hi, pow_add, ih]
-
-@[simp]
-theorem pow_one (m : M) : m ^ (1 : MonoidAlgebra ℕ G) = m := by
-  simp [one_def]
-end CommMonoid
-end MonoidAlgebra
+variable (f P hζ) in
+include f P hζ in
+/-- `ζ - 1` generates the prime of `𝓞 F` below `𝓟`, which is unramified in `L`. -/
+theorem zeta_sub_one_notMem_sq : algebraMap (𝓞 F) (𝓞 L) ζ - 1 ∉ 𝓟 ^ 2 := by
+  have : 𝓟.LiesOver 𝒑 := LiesOver.trans 𝓟 P 𝒑
+  have hspan : under (𝓞 F) 𝓟 = span {ζ - 1} :=
+    IsCyclotomicExtension.Rat.eq_span_zeta_sub_one_of_liesOver' p F
+      (IsPrimitiveRoot.coe_submonoidClass_iff.mpr hζ) (under (𝓞 F) 𝓟)
+  have h : Ideal.map (algebraMap (𝓞 F) (𝓞 L)) (span {ζ - 1}) ≠ ⊥ := by
+    apply map_ne_bot_of_ne_bot
+    simpa [sub_eq_zero] using hζ.ne_one hp.out.one_lt
+  rw [← map_one (f := algebraMap (𝓞 F) (𝓞 L)), ← map_sub, ← dvd_span_singleton,
+    ← Set.image_singleton, ← map_span, FiniteMultiplicity.pow_dvd_iff_le_multiplicity
+    (Ideal.finiteMultiplicity IsPrime.ne_top' h), ← hspan,
+    ← IsDedekindDomain.ramificationIdx_eq_multiplicity (under (𝓞 F) 𝓟) 𝓟 (hspan ▸ h),
+    ramificationIdx_under_eq_one p f]
+  exact Nat.not_succ_le_self 1
 
 end
+
+section
+
+variable {n} {m d : ℕ} [NeZero n] [NeZero (m * p)]
+
+open IsCyclotomicExtension
+
+variable (p F) in
+theorem modEq_one_of_apply_eq_pow (hmd : n = m * d) (E : IntermediateField ℚ L)
+    [IsCyclotomicExtension {m * p} ℚ E] (η : L) (hη : IsPrimitiveRoot η n)
+    (τ : Gal(L/E)) (a : ℕ) (hτ : τ η = η ^ a) :
+    a ≡ 1 [MOD m] := by
+  let ν := algebraMap E L (zeta (m * p) ℚ E ^ p)
+  have hν : IsPrimitiveRoot ν m := by
+    refine IsPrimitiveRoot.map_of_injective ?_ (FaithfulSMul.algebraMap_injective E L)
+    exact (zeta_spec (m * p) ℚ E).pow (NeZero.pos _) (by rw [mul_comm])
+  obtain ⟨k, _, hk⟩ := hη.eq_pow_of_pow_eq_one (by rw [hmd, pow_mul, hν.pow_eq_one, one_pow])
+  have := congr_arg τ hk
+  rw [map_pow, hτ, AlgEquiv.commutes, pow_right_comm, hk] at this
+  rwa [hν.eq_orderOf, ← (hν.isOfFinOrder (by lia)).pow_eq_pow_iff_modEq, pow_one]
+
+end
+
+section
+
+open scoped Pointwise
+
+open IsCyclotomicExtension.Rat
+
+variable {m : ℕ} {k : IntermediateField ℚ L} (𝔭 : Ideal (𝓞 k))
+
+section
+
+variable (m) [IsCyclotomicExtension {m} ℚ k]
+
+include m in
+theorem primesOver_mem_orbit [𝔭.IsPrime] [𝔭.LiesOver 𝒑] (𝔮 : 𝒑.primesOver (𝓞 k)) :
+    (𝔮 : Ideal (𝓞 k)) ∈ MulAction.orbit Gal(k/ℚ) 𝔭 := by
+  have := IsCyclotomicExtension.isGalois {m} ℚ k
+  rw [Algebra.IsInvariant.orbit_eq_primesOver ℤ _ _ 𝒑 𝔭]
+  exact 𝔮.2
+
+end
+
+variable {𝓟 𝔭}
+
+theorem restrictNormal_smul_eq [IsGalois ℚ k] [IsGalois ℚ L] [h𝓟 : 𝓟.LiesOver 𝔭]
+    {𝔮 : 𝒑.primesOver (𝓞 k)} {𝓠 : (𝔮 : Ideal (𝓞 k)).primesOver (𝓞 L)} {τ : Gal(L/F)}
+    (hτ : τ • 𝓟 = 𝓠) :
+    (τ.restrictScalars ℚ).restrictNormal k • 𝔭 = 𝔮 := by
+  rw [← IsGaloisGroup.restrictHom_eq_restrictNormal,
+    ← IsGaloisGroup.restrictHom_eq_restrictHom Gal(L/ℚ) Gal(k/ℚ) ℤ (𝓞 k) (𝓞 L) ℚ k L,
+    (liesOver_iff _ _).mp h𝓟, IsGaloisGroup.restrictHom_smul_under, (liesOver_iff _ _).mp 𝓠.2.2,
+    ← hτ]
+  rfl
+
+variable [hp : Fact (Nat.Prime p)] [IsCyclotomicExtension {p} ℚ F] [𝓟.IsMaximal]
+
+variable (p) in
+/-- There is a single prime of `𝓞 F` above `p`, so any prime of `𝓞 L` above `p` lies over the prime
+of `𝓞 F` below `𝓟`. -/
+theorem liesOver_under_of_liesOver [𝓟.LiesOver 𝒑] {𝓠 : Ideal (𝓞 L)} [𝓠.IsPrime]
+    [𝓠.LiesOver 𝒑] : 𝓠.LiesOver (under (𝓞 F) 𝓟) := by
+  obtain ⟨Q, hQ⟩ := Set.ncard_eq_one.mp (ncard_primesOver_of_prime p F)
+  have h₁ : under (𝓞 F) 𝓟 ∈ primesOver 𝒑 (𝓞 F) := ⟨inferInstance, inferInstance⟩
+  have h₂ : under (𝓞 F) 𝓠 ∈ primesOver 𝒑 (𝓞 F) := ⟨inferInstance, inferInstance⟩
+  rw [hQ] at h₁ h₂
+  exact (liesOver_iff _ _).mpr (h₁.trans h₂.symm)
+
+end
+
+section
+
+variable [hp : Fact (p.Prime)]
+
+attribute [local instance] Ideal.Quotient.field in
+/-- In `K = ℚ(μ_(p ^ f - 1))`, a prime `P` above `p` has residue degree `f`, since `p` has order `f`
+modulo `p ^ f - 1`. So `(𝓞 K ⧸ P)ˣ` has `p ^ f - 1` elements, and the `(p ^ f - 1)`-th roots of
+unity of `𝓞 K` reduce bijectively onto it: the Teichmüller character of `P` is defined. -/
+theorem hasTeichmullerLift {f : ℕ} [NeZero f]
+    {K : Type*} [Field K] [NumberField K] [IsCyclotomicExtension {p ^ f - 1} ℚ K]
+    (P : Ideal (𝓞 K)) [P.IsMaximal] [P.LiesOver 𝒑] :
+    P.HasTeichmullerLift (p ^ f - 1) := by
+  refine .of_card_of_isPrime (p ^ f - 1) ?_
+  rw [Nat.card_units, tsub_left_inj Nat.card_pos NeZero.one_le, ← absNorm_eq_natCard,
+    ← absNorm_pow_inertiaDeg 𝒑, absNorm_eq_natCard, Int.card_ideal_quot,
+    IsCyclotomicExtension.Rat.inertiaDeg_eq_of_not_dvd (m := p ^ f - 1) p K P,
+    ZMod.orderOf_pow_sub_one _ _ hp.out.one_lt]
+  exact (Nat.Prime.coprime_iff_not_dvd hp.out).mp (Fact.out : (p ^ f - 1).Coprime p).symm
+
+end
+
+end Stickelberger
+
+end
+
+end Stickelberger

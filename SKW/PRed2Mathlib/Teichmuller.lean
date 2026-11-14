@@ -2,7 +2,10 @@ module
 
 public import Mathlib.RingTheory.Ideal.Quotient.Defs
 public import Mathlib.RingTheory.RootsOfUnity.Basic
-public import SKW.Prereqs.Stickelberger
+public import Mathlib.FieldTheory.Finite.Basic
+public import Mathlib.GroupTheory.Nilpotent
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
+public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 
 set_option linter.style.header false
 
@@ -35,6 +38,11 @@ redirected to the Mathlib versions. The Mathlib names differ:
 - Mathlib adds `Ideal.HasTeichmullerLift.equiv`, `MulChar.teichmuller_mk_coe`,
   `MulChar.teichmuller_apply_coe_pow_eq_one` and `MulChar.mk_teichmuller_apply_coe`.
 -/
+
+@[to_additive (attr := simp)]
+theorem MulEquiv.ofBijective_symm_apply_apply {M N F : Type*} [Mul M] [Mul N] [FunLike F M N]
+    [MulHomClass F M N] (f : F) (hf : Function.Bijective f) (a : M) :
+    (ofBijective f hf).symm (f a) = a := (symm_apply_eq (ofBijective f hf)).mpr rfl
 
 section MapQuot
 
