@@ -1190,12 +1190,12 @@ theorem isPrincipal_prod_smul_pow_of_coprime (k : Type*) [Field k] [NumberField 
   have : NumberField L := {
       to_finiteDimensional := adjoin.finiteDimensional <| hξ.isIntegral' (NeZero.pos _) }
   have : IsCyclotomicExtension {p * (p ^ f - 1)} ℚ L :=
-      hξ.intermediateField_adjoin_isCyclotomicExtension' ℚ
+      hξ.intermediateField_adjoin_isCyclotomicExtension ℚ
   let η := (zeta (p * (p ^ f - 1)) ℚ L) ^ (p * d)
   have hη : IsPrimitiveRoot η m :=
     (zeta_spec (p * (p ^ f - 1)) ℚ L).pow (NeZero.pos _) <| by rw [hmd, mul_comm m, mul_assoc]
   let k₀ := ℚ⟮η⟯
-  have : IsCyclotomicExtension {m} ℚ k₀ := hη.intermediateField_adjoin_isCyclotomicExtension' ℚ
+  have : IsCyclotomicExtension {m} ℚ k₀ := hη.intermediateField_adjoin_isCyclotomicExtension ℚ
   let e : (𝓞 k₀) ≃+* (𝓞 k) :=
     RingOfIntegers.mapRingEquiv <| (IsCyclotomicExtension.algEquiv {m} ℚ k₀ k).toRingEquiv
   let 𝔭₀ := Ideal.comap e 𝔭

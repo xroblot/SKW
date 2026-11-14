@@ -3,7 +3,6 @@ module
 public import Mathlib.GroupTheory.Nilpotent
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
-public import SKW.PRed2Mathlib.CyclotomicAdjoin
 public import SKW.PRed2Mathlib.FiniteFieldSum
 
 set_option linter.style.header false

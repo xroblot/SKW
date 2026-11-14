@@ -969,7 +969,7 @@ theorem kronecker_weber (K : Type*) [Field K] [NumberField K] [IsAbelianGalois �
       exact IsCyclotomicExtension.isCyclotomicExtension_zero_iff.mpr (botEquiv ℚ ℂ).symm.surjective
     · have : NeZero n := ⟨hn⟩
       rw [dite_eq_right hn]
-      exact (Complex.isPrimitiveRoot_exp n hn).intermediateField_adjoin_isCyclotomicExtension' ℚ
+      exact (Complex.isPrimitiveRoot_exp n hn).intermediateField_adjoin_isCyclotomicExtension ℚ
   have {n : ℕ} : NumberField (Qζ n) := IsCyclotomicExtension.numberField {n} ℚ _
   have {n : ℕ} : IsAbelianGalois ℚ (Qζ n) := IsCyclotomicExtension.isAbelianGalois {n} ℚ _
   let φ : K →+* ℂ := Classical.choice (inferInstance : Nonempty _)
