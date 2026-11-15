@@ -26,6 +26,7 @@ jobs:
         uses: leanprover/lean-action@f807b338d95de7813c5c50d018f1c23c9b93b4ec # v1.2.0
 
       - name: Build documentation and blueprint
-        uses: leanprover-community/docgen-action@main
+        # Fork pinning doc-gen4#435 (fix for doc-gen4#434); back to upstream once it is merged.
+        uses: xroblot/docgen-action@87ceebb56ce434452c7eddd8c228234a59966b8c # pin-docgen-435
         with:
           blueprint: true
