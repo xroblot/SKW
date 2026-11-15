@@ -2,6 +2,7 @@ import SKW.Basic
 import SKW.PRed2Mathlib.Subfield
 import SKW.PRed2Mathlib.Teichmuller
 import SKW.PRed2Mathlib.FiniteFieldSum
+import SKW.PRed2Mathlib.LinearDisjoint
 import SKW.PRed2Mathlib.CyclotomicField
 import SKW.Prereqs.KroneckerWeber
 import SKW.Stickelberger.Stickelberger
