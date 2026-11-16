@@ -1,4 +1,5 @@
 import SKW.Basic
+import SKW.PRed2Mathlib.ArithmeticFunction
 import SKW.PRed2Mathlib.Subfield
 import SKW.PRed2Mathlib.Teichmuller
 import SKW.PRed2Mathlib.FiniteFieldSum

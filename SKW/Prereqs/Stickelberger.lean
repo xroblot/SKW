@@ -7,6 +7,7 @@ public import Mathlib.NumberTheory.NumberField.Cyclotomic.Galois
 public import Mathlib.NumberTheory.NumberField.Cyclotomic.Ideal
 public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import SKW.PRed2Mathlib.CyclotomicField
+public import SKW.PRed2Mathlib.ArithmeticFunction
 public import SKW.PRed2Mathlib.FiniteFieldSum
 public import SKW.PRed2Mathlib.LinearDisjoint
 public import SKW.PRed2Mathlib.Teichmuller
@@ -145,28 +146,6 @@ end FiniteField
 end ZModFiniteField
 
 section Arithmetic
-
-/-- Euler's totient function as an arithmetic function with values in `ℤ`. -/
-@[expose] def ArithmeticFunction.totient : ArithmeticFunction ℤ where
-  toFun n := Nat.totient n
-  map_zero' := by simp
-
-@[simp]
-theorem ArithmeticFunction.totient_apply (n : ℕ) :
-    totient n = Nat.totient n := rfl
-
-open Nat in
-theorem ArithmeticFunction.isMultiplicative_totient :
-    IsMultiplicative totient :=
-  IsMultiplicative.iff_ne_zero.mpr ⟨by simp, fun _ _ h ↦ by simp [Nat.totient_mul h]⟩
-
-theorem Nat.totient_lcm_mul_totient_gcd (m n : ℕ) :
-    totient (lcm m n) * totient (gcd m n) = totient m * totient n := by
-  have :=  ArithmeticFunction.IsMultiplicative.lcm_apply_mul_gcd_apply
-    ArithmeticFunction.isMultiplicative_totient (x := m) (y := n)
-  rwa [ArithmeticFunction.totient_apply, ArithmeticFunction.totient_apply,
-    ArithmeticFunction.totient_apply, ArithmeticFunction.totient_apply, ← Nat.cast_mul,
-    ← Nat.cast_mul, Nat.cast_inj] at this
 
 theorem Nat.digits_base_pow_sub_one {b : ℕ} (hb : 1 < b) (l : ℕ) :
     b.digits (b ^ l - 1) = List.replicate l (b - 1) := by
