@@ -794,7 +794,7 @@ theorem FractionalIdeal.count_coe_eq_multiplicity (J : Ideal R) :
     count K v J = multiplicity v.asIdeal J := by
   obtain rfl | hJ := eq_or_ne J 0
   · simp [FractionalIdeal.count_zero]
-  rw [count_coe K v hJ, Ideal.count_associates_factors_eq hJ v.isPrime v.ne_bot,
+  rw [count_coeIdeal K v hJ, Ideal.count_associates_factors_eq hJ v.isPrime v.ne_bot,
     count_normalizedFactors_eq_multiplicity hJ]
 
 /-- The `v`-adic valuation of `I * J⁻¹`, for nonzero ideals `I` and `J`, is the difference of the
@@ -871,8 +871,8 @@ theorem FractionalIdeal.ringEquivOfRingEquiv_eq_extended [IsDomain R] (f : R ≃
     ringEquivOfRingEquiv K L f I =
       I.extended L (nonZeroDivisors_le_comap_nonZeroDivisors_of_injective (f : R →+* S)
         fun _ _ h ↦ f.injective h) := by
-  rw [← coeToSubmodule_inj, coe_extended_eq_span, ringEquivOfRingEquiv_apply, coe_mk,
-    ← Submodule.span_eq (Submodule.map _ _), Submodule.map_coe]
+  rw [← coeToSubmodule_inj, coeToSubmodule_extended_eq_span, ringEquivOfRingEquiv_apply,
+    coeToSubmodule_mk, ← Submodule.span_eq (Submodule.map _ _), Submodule.map_coe]
   rfl
 
 theorem FractionalIdeal.ringEquivOfRingEquiv_eq_map_num_mul_inv [IsDomain R] (f : R ≃+* S)
@@ -894,7 +894,7 @@ theorem FractionalIdeal.count_ringEquivOfRingEquiv [IsDedekindDomain R] (f : R �
     ← count_eq_multiplicity_num_sub _ _ hI]
   · rw [coeIdeal_ne_zero, ne_eq, Ideal.mapEquiv_eq_bot_iff]
     exact num_eq_zero_iff.not.mpr hI
-  · simp [- spanSingleton_inv]
+  · simp
 
 theorem FractionalIdeal.smul_eq_ringEquivOfRingEquiv [IsDedekindDomain R] {G : Type*} [Group G]
     [MulSemiringAction G R] (g : G) (I : FractionalIdeal R⁰ K) :
