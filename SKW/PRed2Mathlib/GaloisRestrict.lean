@@ -1,7 +1,6 @@
 module
 
 public import Mathlib.FieldTheory.Galois.IsGaloisGroup
-public import Mathlib.RingTheory.IntegralClosure.IntegralRestrict
 
 set_option linter.style.header false
 
@@ -20,15 +19,6 @@ Mathlib versions.
 -/
 
 @[expose] public section
-
-theorem smul_eq_galRestrict_apply (A : Type*) {K L B : Type*} [CommRing A] [Field K] [Field L]
-    [CommRing B] [Algebra A K] [IsFractionRing A K] [Algebra B L] [IsFractionRing B L]
-    [Algebra A B] [Algebra K L] [Algebra A L] [IsScalarTower A K L] [IsScalarTower A B L]
-    [IsIntegralClosure B A L] [Algebra.IsAlgebraic K L] [MulSemiringAction Gal(L/K) B]
-    [SMulDistribClass Gal(L/K) B L] (σ : Gal(L/K)) (x : B) :
-    σ • x = galRestrict A K L B σ x := by
-  apply FaithfulSMul.algebraMap_injective B L
-  rw [algebraMap.smul', AlgEquiv.smul_def, algebraMap_galRestrict_apply]
 
 /-- `restrictHom` is `AlgEquiv.restrictNormal`. -/
 theorem IsGaloisGroup.restrictHom_eq_restrictNormal (K E L : Type*) [Field K] [Field E] [Field L]

@@ -316,8 +316,9 @@ theorem smul_traceChar_apply_eq_mulShift [CharP (𝓞 K ⧸ P) p] (τ : Gal(L/K)
     (hτ : τ • algebraMap (𝓞 F) (𝓞 L) ζ = algebraMap (𝓞 F) (𝓞 L) ζ ^ e) (x : 𝓞 K ⧸ P) :
     τ • (algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ) x =
       ((algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ)).mulShift e x := by
-  rw [AddChar.compAddChar_traceChar_algebraMap, smul_eq_galRestrict_apply (𝓞 K),
-    AddChar.map_traceChar_apply_eq_mulShift _ (m := e) (by rwa [← smul_eq_galRestrict_apply])]
+  rw [AddChar.compAddChar_traceChar_algebraMap, ← MulSemiringAction.toAlgEquiv_apply (𝓞 K),
+    AddChar.map_traceChar_apply_eq_mulShift _ (m := e)
+      (by rwa [MulSemiringAction.toAlgEquiv_apply])]
 
 variable {n P hζ}
 
@@ -326,7 +327,7 @@ theorem smul_teichmuller_zpow_apply_eq_self (σ : Gal(L/K)) (a : ℤ) (x : 𝓞 
       (MulChar.teichmuller P n ^ (-a)).ringHomComp (algebraMap (𝓞 K) (𝓞 L)) x := by
   rw [MulChar.ringHomComp_apply]
   apply RingOfIntegers.coe_injective
-  simp [algebraMap.smul', ← IsScalarTower.algebraMap_apply]
+  simp [← IsScalarTower.algebraMap_apply]
 
 theorem smul_gaussSum_eq_mul_gaussSum [CharP (𝓞 K ⧸ P) p] [NeZero P] (τ : Gal(L/K))
     (e : (ZMod p)ˣ)
@@ -349,7 +350,7 @@ variable {p} in
 theorem smul_traceChar_apply_eq_self [CharP (𝓞 K ⧸ P) p] (σ : Gal(L/F)) (x : 𝓞 K ⧸ P) :
     σ • (algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ) x =
       (algebraMap (𝓞 F) (𝓞 L)).compAddChar (AddChar.traceChar (𝓞 K ⧸ P) hζ) x := by
-  rw [AddChar.compAddChar_traceChar_algebraMap, smul_eq_galRestrict_apply (𝓞 F),
+  rw [AddChar.compAddChar_traceChar_algebraMap, ← MulSemiringAction.toAlgEquiv_apply (𝓞 F),
     AddChar.map_traceChar_apply_eq_mulShift _ (m := 1), Nat.cast_one, AddChar.mulShift_one]
   rw [AlgEquiv.commutes, pow_one]
 
@@ -392,9 +393,9 @@ theorem smul_teichmuller_zpow_apply_eq_mul_restrictGalEquivZMod (σ : Gal(L/F)) 
         (algebraMap (𝓞 K) (𝓞 L)) x := by
   let η : 𝓞 K := (IsCyclotomicExtension.zeta_spec n ℚ K).toInteger
   have hη := (IsCyclotomicExtension.zeta_spec n ℚ K).toInteger_isPrimitiveRoot
-  rw [smul_eq_galRestrict_apply (𝓞 F), MulChar.map_ringHomComp_teichmuller_zpow_apply _ _
+  rw [← MulSemiringAction.toAlgEquiv_apply (𝓞 F), MulChar.map_ringHomComp_teichmuller_zpow_apply _ _
     (restrictGalEquivZMod p n K F σ).val.val hη, neg_mul]
-  rw [← smul_eq_galRestrict_apply]
+  rw [MulSemiringAction.toAlgEquiv_apply]
   apply RingOfIntegers.coe_injective
   rw [algebraMap.smul', map_pow, ← IsScalarTower.algebraMap_apply, AlgEquiv.smul_def,
     IsScalarTower.algebraMap_apply (𝓞 K) K L]

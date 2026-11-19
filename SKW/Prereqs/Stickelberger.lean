@@ -11,6 +11,7 @@ public import SKW.PRed2Mathlib.ArithmeticFunction
 public import SKW.PRed2Mathlib.FiniteFieldSum
 public import SKW.PRed2Mathlib.GaloisRestrict
 public import SKW.PRed2Mathlib.LinearDisjoint
+public import SKW.PRed2Mathlib.RingOfIntegers
 public import SKW.PRed2Mathlib.Teichmuller
 
 set_option linter.style.header false
