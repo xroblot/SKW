@@ -81,13 +81,13 @@ Mathlib.
 
 ## Acknowledgements
 
-Parts of this formalization were written with [Claude Code](https://claude.com/claude-code)
-as an assistant. Beyond searching Mathlib for existing results, drafting and shortening
-proofs, carrying out mechanical refactorings (renamings, moving material to its proper
-file, following the Mathlib naming conventions) and keeping the blueprint in step with the
-Lean code, Claude also took part in the mathematics: finding the right form for several
-statements, proposing the proof of some intermediate steps, and spotting where an argument
-could be simplified or made more general.
+[Claude Code](https://claude.com/claude-code) was used as an assistant for this project.
+Beyond searching Mathlib for existing results, drafting and shortening proofs, carrying out
+mechanical refactorings (renamings, moving material to its proper file, following the
+Mathlib naming conventions) and keeping the blueprint in step with the Lean code, Claude
+also took part in the mathematics: finding the right form for several statements, proposing
+the mathematical proof of some intermediate steps, and spotting where an argument could be
+simplified or made more general.
 
 This project relies on [Mathlib](https://github.com/leanprover-community/mathlib4), the
 Lean community's mathematical library, and on the
