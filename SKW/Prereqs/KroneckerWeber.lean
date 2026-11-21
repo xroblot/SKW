@@ -8,6 +8,7 @@ public import Mathlib.RingTheory.Frobenius
 public import Mathlib.RingTheory.RootsOfUnity.AlgebraicallyClosed
 public import Mathlib.RingTheory.ZMod.UnitsCyclic
 public import SKW.PRed2Mathlib.CyclotomicField
+public import SKW.PRed2Mathlib.KroneckerWeber
 public import SKW.PRed2Mathlib.Subfield
 public import SKW.Prereqs.OtherPR
 public import SKW.Prereqs.Stickelberger
@@ -139,29 +140,6 @@ end
 -- From `SKW.Prereqs.LinearAlgebra`.
 section
 open Module
-
-theorem LinearMap.apply_eq_det_smul_of_finrank_eq_one {R : Type*} [CommRing R]
-    [StrongRankCondition R] {M : Type*} [AddCommGroup M] [Module R M] [Module.Free R M]
-    (d1 : Module.finrank R M = 1) (u : M →ₗ[R] M) (x : M) :
-    u x = u.det • x := by
-  obtain ⟨c, rfl, _⟩ := LinearMap.existsUnique_eq_smul_id_of_finrank_eq_one d1 u
-  simp [LinearMap.det_smul, d1, pow_one]
-
-theorem LinearEquiv.smul_id_of_finrank_eq_one_symm_apply {R : Type*} [CommRing R]
-    [StrongRankCondition R] {M : Type*} [AddCommGroup M] [Module R M] [Module.Free R M]
-    (d1 : Module.finrank R M = 1) (u : M →ₗ[R] M) :
-    (smul_id_of_finrank_eq_one d1).symm u = u.det := by
-  have : u = u.det • LinearMap.id := by
-    ext x
-    exact (LinearMap.apply_eq_det_smul_of_finrank_eq_one d1 u x)
-  nth_rewrite 1 [this]
-  rw [← smul_id_of_finrank_eq_one_apply d1, symm_apply_apply]
-
-theorem LinearMap.det_eq_one_iff_eq_id {R : Type*} [CommRing R] [StrongRankCondition R] {M : Type*}
-    [AddCommGroup M] [Module R M] [Module.Free R M] (d1 : Module.finrank R M = 1) (u : M →ₗ[R] M) :
-    u.det = 1 ↔ u = id := by
-  rw [← LinearEquiv.smul_id_of_finrank_eq_one_symm_apply d1, LinearEquiv.symm_apply_eq,
-    LinearEquiv.smul_id_of_finrank_eq_one_apply, one_smul]
 
 theorem finrank_eq_of_equiv_equiv {R R' M M₁ : Type*} [Semiring R] [AddCommMonoid M]
     [Module R M] [Semiring R'] [AddCommMonoid M₁] [Module R' M₁] (i : R → R') (j : M ≃+ M₁)

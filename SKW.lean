@@ -7,6 +7,7 @@ import SKW.PRed2Mathlib.LinearDisjoint
 import SKW.PRed2Mathlib.GaloisRestrict
 import SKW.PRed2Mathlib.RingOfIntegers
 import SKW.PRed2Mathlib.CyclotomicField
+import SKW.PRed2Mathlib.KroneckerWeber
 import SKW.Prereqs.KroneckerWeber
 import SKW.Stickelberger.Stickelberger
 import SKW.KroneckerWeber.KroneckerWeber
