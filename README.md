@@ -1,8 +1,9 @@
 # SKW
 
-A formalization in Lean 4 / Mathlib of the Stickelberger theorem and the Kronecker-Weber
-theorem. **Both theorems are now formalized**, modulo a handful of statements that are
-waiting on Mathlib pull requests (see [Status](#status) below).
+A (mostly) human formalization in Lean 4 / Mathlib of the Stickelberger theorem and the
+Kronecker-Weber theorem.\
+**Both theorems are now formalized**, modulo a handful of statements that are waiting on
+Mathlib pull requests (see [Status](#status) below).
 
 ## Links
 
