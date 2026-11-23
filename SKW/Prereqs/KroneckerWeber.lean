@@ -180,31 +180,6 @@ variable {K L : Type*} [Field K] [Field L]
 def mapIntAlgEquiv (e : K ≃+* L) : (𝓞 K) ≃ₐ[ℤ] (𝓞 L) := (mapRingEquiv e).toIntAlgEquiv
 end NumberField.RingOfIntegers
 
-namespace NumberField
-open InfinitePlace
-variable {K : Type*} [Field K] [Algebra ℚ K] [IsGalois ℚ K]
-
-theorem InfinitePlace.isReal_of_isGalois {w : InfinitePlace K} (hw : w.IsReal)
-    (w' : InfinitePlace K) :
-    w'.IsReal := by
-  obtain ⟨σ, rfl⟩ : ∃ σ, σ • w = w' := exists_smul_eq_of_comap_eq (k := ℚ) (Subsingleton.elim _ _)
-  exact isReal_smul_iff.mpr hw
-
-theorem isTotallyComplex_iff_exists_isComplex [Nonempty (InfinitePlace K)] :
-    IsTotallyComplex K ↔ ∃ w : InfinitePlace K, w.IsComplex := by
-  refine ⟨fun h ↦ ⟨Classical.arbitrary _, h.isComplex _⟩, fun ⟨w, hw⟩ ↦ ⟨fun w' ↦ ?_⟩⟩
-  exact not_isReal_iff_isComplex.mp fun h ↦ not_isReal_iff_isComplex.mpr hw (isReal_of_isGalois h w)
-
-theorem isTotallyComplex_iff_not_isTotallyReal [Nonempty (InfinitePlace K)] :
-    IsTotallyComplex K ↔ ¬ IsTotallyReal K := by
-  simp_rw [isTotallyComplex_iff_exists_isComplex, isTotallyReal_iff, not_forall,
-    not_isReal_iff_isComplex]
-
-theorem isTotallyReal_iff_not_isTotallyComplex [Nonempty (InfinitePlace K)] :
-    IsTotallyReal K ↔ ¬ IsTotallyComplex K := by
-  rw [isTotallyComplex_iff_not_isTotallyReal, not_not]
-end NumberField
-
 end
 
 -- From `SKW.Prereqs.Torsion`.
