@@ -83,7 +83,7 @@ Mathlib.
 ## Acknowledgements
 
 [Claude Code](https://claude.com/claude-code) was used as an assistant for this project.
-Beyond searching Mathlib for existing results, drafting and shortening proofs, carrying out
+Beyond searching Mathlib for existing results, carrying out
 mechanical refactorings (renamings, moving material to its proper file, following the
 Mathlib naming conventions) and keeping the blueprint in step with the Lean code, Claude
 also took part in the mathematics: finding the right form for several statements, proposing
